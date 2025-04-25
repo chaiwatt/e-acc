@@ -32,6 +32,31 @@
 </style>
 
 @php
+if (!function_exists('formatRangeWithSpecialChars')) {
+    function formatRangeWithSpecialChars($range) {
+        $result = '';
+        $chars = mb_str_split($range, 1, 'UTF-8'); // แยก string เป็นตัวอักษร UTF-8
+
+        foreach ($chars as $char) {
+            // รายการอักขระพิเศษทางวิทยาศาสตร์/คณิตศาสตร์ (เพิ่มได้ตามต้องการ)
+            $scientificChars = ['Ω', 'π', 'Σ', 'β', 'α', 'γ', 'µ', '±', '∞', 'θ', 'δ','ξ', 'φ', 'χ', 'ψ', 'ω', 'ε','Δ','√', '∮', '∫', '∂', '∇', '∑', '∏', '∆','λ', 'ω', 'σ','ρ','℃','℉','Ξ'];
+            
+            // ตรวจสอบว่าตัวอักษรนี้เป็นอักขระพิเศษทางวิทยาศาสตร์หรือไม่
+            if (in_array($char, $scientificChars)) {
+                // ห่ออักขระพิเศษด้วย <span>
+                $result .= '<span style="font-family: DejaVuSans; font-size: 14px;">' . htmlspecialchars($char, ENT_QUOTES, 'UTF-8') . '</span>';
+            } else {
+                // ตัวอักษรปกติ ไม่ต้องห่อ
+                $result .= htmlspecialchars($char, ENT_QUOTES, 'UTF-8');
+            }
+        }
+
+        return $result;
+    }
+}
+@endphp
+
+@php
     // กำหนด key ของ labType จาก index (เช่น $index = 0 -> pl_2_1_info)
     $key = 'pl_2_' . ($index + 1) . '_info';
 
@@ -181,10 +206,12 @@
                                         <tr class="parameter-one">
                                             <td style="vertical-align: top;"></td>
                                             <td style="vertical-align: top; padding-left: 20px; text-align: center;">
-                                                {{ $rangeDisplay }}
+                                                {{-- {{ $rangeDisplay }} --}}
+                                                {!! formatRangeWithSpecialChars($rangeDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top; text-align: center;">
-                                                {!! $uncertaintyDisplay !!}
+                                                {{-- {!! $uncertaintyDisplay !!} --}}
+                                                {!! formatRangeWithSpecialChars($uncertaintyDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top;"></td>
                                         </tr>
@@ -255,10 +282,12 @@
                                         <tr class="parameter-one">
                                             <td style="vertical-align: top;"></td>
                                             <td style="vertical-align: top; padding-left: 20px; text-align: center;">
-                                                {{ $rangeDisplay }}
+                                                {{-- {{ $rangeDisplay }} --}}
+                                                {!! formatRangeWithSpecialChars($rangeDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top; text-align: center;">
-                                                {!! $uncertaintyDisplay !!}
+                                                {{-- {!! $uncertaintyDisplay !!} --}}
+                                                {!! formatRangeWithSpecialChars($uncertaintyDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top;"></td>
                                         </tr>
@@ -331,10 +360,10 @@
                                         <tr class="parameter-one">
                                             <td style="vertical-align: top;"></td>
                                             <td style="vertical-align: top; padding-left: 20px; text-align: center;">
-                                                {{ $rangeDisplay }}
+                                                {!! formatRangeWithSpecialChars($rangeDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top; text-align: center;">
-                                                {!! $uncertaintyDisplay !!}
+                                                {!! formatRangeWithSpecialChars($uncertaintyDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top;"></td>
                                         </tr>

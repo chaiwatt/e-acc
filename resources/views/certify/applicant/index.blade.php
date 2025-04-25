@@ -90,7 +90,7 @@
             <div class="col-sm-12">
                 <div class="white-box">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                    <h3 class="box-title pull-left">ยื่นคำขอรับใบรับรองระบบงาน</h3>
+                    <h3 class="box-title pull-left">ยื่นคำขอรับใบรับรองระบบงานห้องปฏิบัติการ</h3>
 
                     <div class="pull-right">
 
