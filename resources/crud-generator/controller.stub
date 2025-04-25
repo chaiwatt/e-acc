@@ -1,0 +1,194 @@
+<?php
+
+namespace DummyNamespace;
+
+use DummyRootNamespaceHttp\Requests;
+use DummyRootNamespaceHttp\Controllers\Controller;
+
+use DummyRootNamespace{{modelNamespace}}{{modelName}};
+use Illuminate\Http\Request;
+
+class DummyClass extends Controller
+{
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\View\View
+     */
+
+    public function index(Request $request)
+    {
+        $model = str_slug('{{crudName}}','-');
+        if(auth()->user()->can('view-'.$model)) {
+            $keyword = $request->get('search');
+            $perPage = {{pagination}};
+
+            if (!empty($keyword)) {
+                ${{crudName}} = {{modelName}}::{{whereSnippet}}paginate($perPage);
+            } else {
+                ${{crudName}} = {{modelName}}::sortable()->with('user_created')
+                                                         ->with('user_updated')
+                                                         ->paginate($perPage);
+            }
+
+            return view('{{viewPath}}{{viewName}}.index', compact('{{crudName}}'));
+        }
+        return response(view('403'), 403);
+
+    }
+
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @return \Illuminate\View\View
+     */
+    public function create()
+    {
+        $model = str_slug('{{crudName}}','-');
+        if(auth()->user()->can('add-'.$model)) {
+            return view('{{viewPath}}{{viewName}}.create');
+        }
+        return response(view('403'), 403);
+
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     *
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function store(Request $request)
+    {
+        $model = str_slug('{{crudName}}','-');
+        if(auth()->user()->can('add-'.$model)) {
+            {{validationRules}}
+            $request->request->add(['created_by' => auth()->user()->getKey()]); //user create
+            $requestData = $request->all();
+            {{fileSnippet}}
+            {{modelName}}::create($requestData);
+            return redirect('{{routeGroup}}{{viewName}}')->with('flash_message', 'เพิ่ม {{modelName}} เรียบร้อยแล้ว');
+        }
+        return response(view('403'), 403);
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     *
+     * @return \Illuminate\View\View
+     */
+    public function show($id)
+    {
+        $model = str_slug('{{crudName}}','-');
+        if(auth()->user()->can('view-'.$model)) {
+            ${{crudNameSingular}} = {{modelName}}::findOrFail($id);
+            return view('{{viewPath}}{{viewName}}.show', compact('{{crudNameSingular}}'));
+        }
+        return response(view('403'), 403);
+    }
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int  $id
+     *
+     * @return \Illuminate\View\View
+     */
+    public function edit($id)
+    {
+        $model = str_slug('{{crudName}}','-');
+        if(auth()->user()->can('edit-'.$model)) {
+            ${{crudNameSingular}} = {{modelName}}::findOrFail($id);
+            return view('{{viewPath}}{{viewName}}.edit', compact('{{crudNameSingular}}'));
+        }
+        return response(view('403'), 403);
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param  int  $id
+     *
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function update(Request $request, $id)
+    {
+        $model = str_slug('{{crudName}}','-');
+        if(auth()->user()->can('edit-'.$model)) {
+            {{validationRules}}
+            $request->request->add(['updated_by' => auth()->user()->getKey()]); //user update
+            $requestData = $request->all();
+            {{fileSnippet}}
+            ${{crudNameSingular}} = {{modelName}}::findOrFail($id);
+            ${{crudNameSingular}}->update($requestData);
+
+            return redirect('{{routeGroup}}{{viewName}}')->with('flash_message', 'แก้ไข {{modelName}} เรียบร้อยแล้ว!');
+        }
+        return response(view('403'), 403);
+
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     *
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function destroy($id, Request $request)
+    {
+        $model = str_slug('{{crudName}}','-');
+        if(auth()->user()->can('delete-'.$model)) {
+
+          $requestData = $request->all();
+
+          if(array_key_exists('cb', $requestData)){
+            $ids = $requestData['cb'];
+            $db = new {{modelName}};
+            {{modelName}}::whereIn($db->getKeyName(), $ids)->delete();
+          }else{
+            {{modelName}}::destroy($id);
+          }
+
+          return redirect('{{routeGroup}}{{viewName}}')->with('flash_message', 'ลบข้อมูลเรียบร้อยแล้ว!');
+        }
+        return response(view('403'), 403);
+
+    }
+
+
+    /*
+      **** Update State ****
+    */
+    public function update_state(Request $request){
+
+      $model = str_slug('{{crudName}}','-');
+      if(auth()->user()->can('edit-'.$model)) {
+
+        $requestData = $request->all();
+
+        if(array_key_exists('cb', $requestData)){
+          $ids = $requestData['cb'];
+          $db = new {{modelName}};
+          {{modelName}}::whereIn($db->getKeyName(), $ids)->update(['state' => $requestData['state']]);
+        }
+
+        return redirect('{{routeGroup}}{{viewName}}')->with('flash_message', 'แก้ไขข้อมูลเรียบร้อยแล้ว!');
+      }
+
+      return response(view('403'), 403);
+
+    }
+
+}

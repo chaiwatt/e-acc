@@ -1,0 +1,27 @@
+{
+    "menus": [
+        {   "_comment": "เพิ่มเติมขอบข่าย",
+            "section": "Modules",
+            "items": [
+                {
+                    "title": "lab-scope-request",
+                    "display" : "ขอบข่าย LAB",
+                    "icon": "mdi mdi-test-tube",
+                    "url": "\/certify\/scope-request\/lab-scope-request"
+                },
+                {
+                    "title": "ib-scope-request",
+                    "display" : "ขอบข่าย IB",
+                    "icon": "mdi mdi-palette-advanced",
+                    "url": "\/certify\/scope-request\/ib-scope-request"
+                },
+                {
+                    "title": "cb-scope-request",
+                    "display" : "ขอบข่าย CB",
+                    "icon": "mdi mdi-odnoklassniki",
+                    "url": "\/certify\/scope-request\/cb-scope-request"
+                }
+            ]
+        }
+    ]
+}

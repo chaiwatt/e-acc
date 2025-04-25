@@ -1,0 +1,54 @@
+{
+    "menus": [
+        {
+            "section": "Modules",
+            "items": [
+                {
+                    "title": "ReportProduct",
+                    "icon": "glyphicon-globe",
+                    "url": "\/resurv\/report_product"
+                },
+                {
+                    "title": "provinces",
+                    "icon": "glyphicon-globe",
+                    "url": "\/admin\/basic\/provinces"
+                },
+                {
+                    "title": "inform_quality_control",
+                    "icon": "glyphicon-camera",
+                    "url": "\/esurv\/inform_quality_control"
+                },
+                {
+                    "title": "EsurvApplicant20ter",
+                    "icon": "glyphicon-bell",
+                    "url": "\/esurv\/esurv-applicant20ter"
+                },
+                {
+                    "title": "Applicant20Bis",
+                    "icon": "glyphicon-compressed",
+                    "url": "\/esurv\/applicant20-bis"
+                },
+                {
+                    "title": "Applicant21Biss",
+                    "icon": "glyphicon-glass",
+                    "url": "\/esurv\/applicant21-biss"
+                },
+                {
+                    "title": "ApplicantIBs",
+                    "icon": "glyphicon-bell",
+                    "url": "\/certify\/applicant-i-bs"
+                },
+                {
+                    "title": "ExpertGroups",
+                    "icon": "glyphicon-align-justify",
+                    "url": "\/admin\/basic\/expert-groups"
+                },
+                {
+                    "title": "Experts",
+                    "icon": "glyphicon-tower",
+                    "url": "\/experts"
+                }
+            ]
+        }
+    ]
+}

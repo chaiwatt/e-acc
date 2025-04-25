@@ -1,0 +1,2 @@
+<label>{!! Form::radio('%%itemName%%', '1', true, ['class'=>'check', 'data-radio'=>'iradio_square-green']) !!} เปิด</label>
+<label>{!! Form::radio('%%itemName%%', '0', false, ['class'=>'check', 'data-radio'=>'iradio_square-red']) !!} ปิด</label>

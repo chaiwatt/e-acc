@@ -1,0 +1,53 @@
+<?php
+
+namespace DummyNamespace;
+
+use Illuminate\Database\Eloquent\Model;
+use Kyslik\ColumnSortable\Sortable;
+use App\User;
+{{useSoftDeletes}}
+class DummyClass extends Model
+{
+    use Sortable;
+    {{softDeletes}}/**
+     * The database table used by the model.
+     *
+     * @var string
+     */
+    protected $table = '{{table}}';
+
+    {{primaryKey}}
+
+    /**
+     * Attributes that should be mass-assignable.
+     *
+     * @var array
+     */
+    protected $fillable = {{fillable}};
+
+    /*
+      Sorting
+    */
+    public $sortable = {{fillable}};
+
+    {{relationships}}
+
+    /*
+      User Relation
+    */
+    public function user_created(){
+      return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function user_updated(){
+      return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function getCreatedNameAttribute() {
+  		return $this->user_created->trader_operater_name;
+  	}
+
+    public function getUpdatedNameAttribute() {
+  		return @$this->user_updated->trader_operater_name;
+  	}
+}

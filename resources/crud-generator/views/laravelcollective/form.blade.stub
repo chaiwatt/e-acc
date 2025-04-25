@@ -1,0 +1,24 @@
+@push('css')
+    <link href="{{asset('plugins/components/icheck/skins/all.css')}}" rel="stylesheet" type="text/css" />
+@endpush
+
+%%formFieldsHtml%%
+
+<div class="form-group">
+    <div class="col-md-offset-4 col-md-4">
+
+        <button class="btn btn-primary" type="submit">
+          <i class="fa fa-paper-plane"></i> บันทึก
+        </button>
+        @can('view-'.str_slug('%%modelName%%'))
+            <a class="btn btn-default" href="{{url('/%%routeGroup%%%%viewName%%')}}">
+                <i class="fa fa-rotate-left"></i> ยกเลิก
+            </a>
+        @endcan
+    </div>
+</div>
+
+@push('js')
+  <script src="{{ asset('plugins/components/icheck/icheck.min.js') }}"></script>
+  <script src="{{ asset('plugins/components/icheck/icheck.init.js') }}"></script>
+@endpush

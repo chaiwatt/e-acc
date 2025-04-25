@@ -1,0 +1,110 @@
+{
+    "menus": [
+        {   "_comment": "ตรวจติดตามออนไลน์",
+            "section": "Modules",
+            "items": [
+                {
+                    "title": "inform_volume",
+                    "display" : "แจ้งปริมาณการผลิต",
+                    "icon": "mdi mdi-cart-plus",
+                    "url": "\/esurv\/inform_volume"
+                },
+                {
+                    "title": "inform_change",
+                    "display" : "แจ้งการเปลี่ยนแปลง",
+                    "icon": "mdi mdi-wrap",
+                    "url": "\/esurv\/inform_change"
+                },
+                {
+                    "title": "inform_quality_control",
+                    "display" : "แจ้งผลการประเมิน QC",
+                    "icon": "mdi mdi-checkbox-marked-circle-outline",
+                    "url": "\/esurv\/inform_quality_control"
+                },
+                {
+                    "title": "inform_inspection",
+                    "display" : "แจ้งผลการทดสอบ",
+                    "icon": "mdi mdi-checkbox-marked-outline",
+                    "url": "\/esurv\/inform_inspection"
+                },
+                {
+                    "title": "inform_calibrate",
+                    "display" : "แจ้งผลการสอบเทียบ",
+                    "icon": "mdi mdi-speedometer",
+                    "url": "\/esurv\/inform_calibrate"
+                },
+                {
+                    "title": "other",
+                    "display" : "แจ้งข้อมูลอื่นๆ",
+                    "icon": "mdi mdi-comment-question-outline",
+                    "url": "\/esurv\/other"
+                },
+                {
+                    "title": "tisi_license_notification",
+                    "display" : "แจ้งข้อมูลใบอนุญาต",
+                    "icon": "mdi mdi-alert-circle",
+                    "url": "\/esurv\/tisi_license_notification"
+                },
+                {
+                    "title": "applicant_20ter",
+                    "display" : "ยื่นทำเพื่อส่งออก",
+                    "icon": "mdi mdi-ray-start-arrow",
+                    "url": "\/esurv\/applicant_20ter"
+                },
+                {
+                    "title": "applicant_20bis",
+                    "display" : "ยื่นทำเพื่อใช้ในประเทศ",
+                    "icon": "mdi mdi-ray-start-end",
+                    "url": "\/esurv\/applicant_20bis"
+                },
+                {
+                    "title": "volume_20ter",
+                    "display" : "แจ้งปริมาณทำเพื่อส่งออก",
+                    "icon": "mdi mdi-keyboard-tab",
+                    "url": "\/esurv\/volume_20ter"
+                },
+                {
+                    "title": "volume_20bis",
+                    "display" : "แจ้งปริมาณทำเพื่อใช้ในประเทศ",
+                    "icon": "mdi mdi-dots-horizontal",
+                    "url": "\/esurv\/volume_20bis"
+                },
+                  {
+                    "title": "applicant_21ter",
+                    "display" : "ยื่นทำเพื่อส่งออก 21ตรี",
+                    "icon": "mdi mdi-ray-start-arrow",
+                    "url": "\/esurv\/applicant_21ter"
+                },
+                {
+                    "title": "applicant_21bis",
+                    "display" : "ยื่นทำเพื่อใช้ในประเทศ 21ทวิ",
+                    "icon": "mdi mdi-ray-start-end",
+                    "url": "\/esurv\/applicant_21bis"
+                },{
+                    "title": "applicant-21own",
+                    "display" : "ยื่นการนำเข้าผลิตภัณฑ์",
+                    "icon": "mdi mdi-ray-start-end",
+                    "url": "\/esurv\/applicant_21own"
+                },
+                {
+                    "title": "volume_21ter",
+                    "display" : "แจ้งปริมาณทำเพื่อส่งออก 21ตรี",
+                    "icon": "mdi mdi-keyboard-tab",
+                    "url": "\/esurv\/volume_21ter"
+                },
+                {
+                    "title": "volume_21bis",
+                    "display" : "แจ้งปริมาณทำเพื่อใช้ในประเทศ 21ทวิ",
+                    "icon": "mdi mdi-dots-horizontal",
+                    "url": "\/esurv\/volume_21bis"
+                },
+                {
+                    "title": "volume_21own",
+                    "display": "แจ้งปริมาณทำเพื่อใช้เอง 21",
+                    "icon": "mdi mdi-wave",
+                    "url": "\/esurv\/volume_21own"
+                }
+            ]
+        }
+    ]
+}

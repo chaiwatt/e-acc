@@ -1,0 +1,44 @@
+{
+    "menus": [
+        {   "_comment": "ใบรับรองระบบงาน",
+            "section": "Modules",
+            "items": [
+                {
+                    "title": "applicant",
+                    "display" : "ใบรับรองระบบงาน (Lab)",
+                    "icon": "mdi mdi-test-tube",
+                    "url": "\/certify\/applicant"
+                },
+                {
+                    "title": "applicantibs",
+                    "display" : "ใบรับรองระบบงาน (IB)",
+                    "icon": "mdi mdi-palette-advanced",
+                    "url": "\/certify\/applicant-ib"
+                },
+                {
+                    "title": "applicantcbs",
+                    "display" : "ใบรับรองระบบงาน (CB)",
+                    "icon": "mdi mdi-odnoklassniki",
+                    "url": "\/certify\/applicant-cb"
+                },{
+                    "title": "tracking-lab",
+                    "display" : "ตรวจติดตามใบรับรอง (LAB)",
+                    "icon": "mdi mdi-test-tube",
+                    "url": "\/certify\/tracking-labs"
+                },
+                {
+                    "title": "tracking-ib",
+                    "display" : "ตรวจติดตามใบรับรอง (IB)",
+                    "icon": "mdi mdi-palette-advanced",
+                    "url": "\/certify\/tracking-ib"
+                },
+                {
+                    "title": "tracking-cb",
+                    "display" : "ตรวจติดตามใบรับรอง (CB)",
+                    "icon": "mdi mdi-odnoklassniki",
+                    "url": "\/certify\/tracking-cb"
+                }
+            ]
+        }
+    ]
+}

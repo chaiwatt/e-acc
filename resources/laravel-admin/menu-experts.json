@@ -1,0 +1,21 @@
+{
+    "menus": [
+        {   "_comment": "ทะเบียนผู้เชี่ยวชาญ",
+            "section": "Modules",
+            "items": [
+                {
+                    "title": "experts",
+                    "display" : "ขึ้นทะเบียน",
+                    "icon": "mdi mdi-plus",
+                    "url": "\/experts"
+                },
+                {
+                    "title": "acc-auditors",
+                    "display" : "ผู้ตรวจประเมิน",
+                    "icon": "mdi mdi-human-child",
+                    "url": "\/gta-auditors"
+                }
+            ]
+        }
+    ]
+}

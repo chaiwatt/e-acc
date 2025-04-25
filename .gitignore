@@ -1,0 +1,15 @@
+# Ignore everything by default
+/*
+# Allow specific directories and files
+!/app/
+!/config/
+!/database/
+!/resources/
+!/routes/
+!.gitignore
+!composer.json
+!composer.lock
+!README.md
+# Ignore database/database_start and its contents
+database/database_start/
+
