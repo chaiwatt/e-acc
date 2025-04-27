@@ -15,7 +15,7 @@
 
            
             <a class="btn btn-warning pull-right" id="show_add_address_demo" style="margin-right:5px" onclick="return false">
-                <i class="icon-plus"></i> เพิ่มสาขา(Demo)
+                <i class="icon-plus"></i> เพิ่มสาขา(ตัวอย่าง)
             </a>
         </div>
     </div>      
