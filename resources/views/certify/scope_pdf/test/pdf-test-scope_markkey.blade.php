@@ -5,19 +5,32 @@
         border-collapse: collapse;
         font-size: 22px !important;
         margin-bottom: 20px;
-        border: none !important;
+        /* border: 1px solid black !important;  */
+        table-layout: fixed; /* บังคับให้คอลัมน์มีความกว้างตามที่กำหนด */
     }
     th, td {
-        border: none !important;
+        /* border: 1px solid black !important;  */
         padding: 5px;
         vertical-align: top;
         font-size: 22px !important;
         text-align: left !important;
+        word-wrap: break-word; /* ให้ข้อความตัดคำและขึ้นบรรทัดใหม่เมื่อยาวเกิน */
+    }
+    /* กำหนดความกว้างสำหรับแต่ละคอลัมน์ */
+    td:nth-child(1) {
+        width: 31.33%; /* คอลัมน์ 1 */
+    }
+    td:nth-child(2) {
+        width: 35.33%; /* คอลัมน์ 2 */
+    }
+    td:nth-child(3) {
+        width: 33.33%; /* คอลัมน์ 3 */
     }
     th {
         background-color: #007bff;
         color: white;
         text-align: center;
+        /* border: 1px solid black !important;  */
     }
     h5 {
         font-size: 22px !important;
@@ -32,62 +45,32 @@
     // กำหนด key ของ labType จาก index (เช่น $index = 0 -> pl_2_1_info)
     $key = 'pl_2_' . ($index + 1) . '_info';
 
-    // ตัวแปรสำหรับนับ markKey (จำนวนแถว)
-    $markKey = 0;
-
-    // เก็บข้อมูลที่เพิ่ม markKey แล้ว
-    $labTypeWithMarkKey = [];
-
     // ตรวจสอบว่า $labType เป็น array และมีข้อมูล
     if (is_array($labType) && count($labType) > 0) {
-        // จัดกลุ่มตาม test_main_branch โดยรักษาลำดับดั้งเดิม
+        // จัดกลุ่มตาม test_main_branch
         $groupedByMainBranch = [];
-        $mainBranchOrder = [];
-        $categoryOrder = [];
-
         foreach ($labType as $index => $item) {
             $mainBranchKey = $item['test_main_branch']['id'] ?? 'unknown';
-            $mainBranchText = $item['test_main_branch']['text'] ?? '-';
             if (!isset($groupedByMainBranch[$mainBranchKey])) {
                 $groupedByMainBranch[$mainBranchKey] = [
-                    'mainBranch' => $mainBranchText,
-                    'categories' => [],
-                    'order' => count($mainBranchOrder)
+                    'mainBranch' => $item['test_main_branch']['text'] ?? '-',
+                    'categories' => []
                 ];
-                $mainBranchOrder[] = $mainBranchKey;
             }
-
             $categoryKey = $item['test_category']['id'] ?? 'unknown';
-            $categoryText = $item['test_category']['text'] ?? '-';
             if (!isset($groupedByMainBranch[$mainBranchKey]['categories'][$categoryKey])) {
                 $groupedByMainBranch[$mainBranchKey]['categories'][$categoryKey] = [
-                    'category' => $categoryText,
-                    'items' => [],
-                    'order' => count($categoryOrder)
+                    'category' => $item['test_category']['text'] ?? '-',
+                    'items' => []
                 ];
-                $categoryOrder[] = $categoryKey;
             }
-
             $itemWithIndex = $item;
             $itemWithIndex['originalIndex'] = $index;
             $groupedByMainBranch[$mainBranchKey]['categories'][$categoryKey]['items'][] = $itemWithIndex;
         }
-
-        // เรียง groupedByMainBranch ตามลำดับดั้งเดิม
-        uasort($groupedByMainBranch, function($a, $b) {
-            return $a['order'] <=> $b['order'];
-        });
-
-        // เรียง categories ตามลำดับดั้งเดิม
-        foreach ($groupedByMainBranch as $mainBranchKey => $mainBranchGroup) {
-            uasort($groupedByMainBranch[$mainBranchKey]['categories'], function($a, $b) {
-                return $a['order'] <=> $b['order'];
-            });
-        }
     }
 @endphp
 
-<!-- สร้างตาราง -->
 <table class="table table-bordered align-middle" id="test_scope_table_{{ $key }}">
     <tbody>
         @if(!empty($groupedByMainBranch))
@@ -111,34 +94,29 @@
                             if (!empty($item['test_param_detail'])) {
                                 $rowspan++;
                             }
-
-                            // เพิ่ม markKey ให้กับ item
-                            $item['markKey'] = $markKey;
-                            $labTypeWithMarkKey[] = $item;
-
-                            // เพิ่ม markKey ตามจำนวนแถว
-                            $markKey += $rowspan;
                         @endphp
                         <tr class="category-row">
                             @if($firstItem)
                                 <td rowspan="{{ $rowspan }}" style="vertical-align: top;">  {{ $categoryGroup['category'] }}</td>
+                            @else
+                                <td style="vertical-align: top;"></td> <!-- เพิ่ม td ว่างเพื่อรักษาตำแหน่งคอลัมน์ -->
                             @endif
-                            <td style="vertical-align: top;">
-                                {{ $item['test_parameter']['text'] ?? '-' }}
-                                **markKey:{{ $item['markKey'] }}**
-                            </td>
+                            <td style="vertical-align: top;padding-left:10px">{{ $item['test_parameter']['text'] ?? '-' }}</td>
                             @if($firstItem)
-                                <td rowspan="{{ $rowspan }}" style="vertical-align: top;">{{ $item['test_standard'] ?? '-' }}</td>
+                                <td rowspan="{{ $rowspan }}" style="vertical-align: top;padding-left:10px">{{ $item['test_standard'] ?? '-' }}</td>
                             @endif
                         </tr>
                         @if(!empty($item['test_condition_description']))
                             <tr>
-                                <td style="vertical-align: top;">{{ $item['test_condition_description'] }}</td>
+                                <td style="vertical-align: to;padding-left:20px;">{{ $item['test_condition_description'] }}</td>
                             </tr>
                         @endif
                         @if(!empty($item['test_param_detail']))
                             <tr>
-                                <td style="vertical-align: top;">{!! nl2br($item['test_param_detail']) !!}</td>
+                                @if(!$firstItem)
+                                    <td style="vertical-align: top;"></td> <!-- เพิ่ม td ว่างเพื่อรักษาตำแหน่งคอลัมน์ -->
+                                @endif
+                                <td style="vertical-align: top;padding-left:25px;">{!! nl2br($item['test_param_detail']) !!}</td>
                             </tr>
                         @endif
                         @php

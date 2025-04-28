@@ -873,6 +873,7 @@
                             return {
                                 cal_main_branch_id: item.cal_main_branch?.id || null,
                                 cal_main_branch_text: item.cal_main_branch?.text || '',
+                                cal_main_branch_text_en: item.cal_main_branch?.text_en || '',
                                 cal_instrumentgroup_id: item.cal_instrumentgroup?.id || null,
                                 cal_instrumentgroup_text: item.cal_instrumentgroup?.text || '',
                                 cal_instrument_id: item.cal_instrument?.id || null,
@@ -889,10 +890,13 @@
                             return {
                                 test_main_branch_id: item.test_main_branch?.id || null,
                                 test_main_branch_text: item.test_main_branch?.text || '',
+                                test_main_branch_text_en: item.test_main_branch?.text_en || '',
                                 test_category_id: item.test_category?.id || null,
                                 test_category_text: item.test_category?.text || '',
+                                test_category_text_en: item.test_category?.text_en || '',
                                 test_parameter_id: item.test_parameter?.id || null,
                                 test_parameter_text: item.test_parameter?.text || '',
+                                test_parameter_text_en: item.test_parameter?.text_en || '',
                                 test_condition_description: item.test_condition_description || '',
                                 test_param_detail: item.test_param_detail || '',
                                 test_standard: item.test_standard || ''

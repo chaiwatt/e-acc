@@ -5,19 +5,32 @@
         border-collapse: collapse;
         font-size: 22px !important;
         margin-bottom: 20px;
-        border: none !important;
+        /* border: 1px solid black !important;  */
+        table-layout: fixed; /* บังคับให้คอลัมน์มีความกว้างตามที่กำหนด */
     }
     th, td {
-        border: none !important;
+        /* border: 1px solid black !important;  */
         padding: 5px;
         vertical-align: top;
         font-size: 22px !important;
         text-align: left !important;
+        word-wrap: break-word; /* ให้ข้อความตัดคำและขึ้นบรรทัดใหม่เมื่อยาวเกิน */
+    }
+    /* กำหนดความกว้างสำหรับแต่ละคอลัมน์ */
+    td:nth-child(1) {
+        width: 33.33%; /* คอลัมน์ 1 */
+    }
+    td:nth-child(2) {
+        width: 33.33%; /* คอลัมน์ 2 */
+    }
+    td:nth-child(3) {
+        width: 33.33%; /* คอลัมน์ 3 */
     }
     th {
         background-color: #007bff;
         color: white;
         text-align: center;
+        /* border: 1px solid black !important;  */
     }
     h5 {
         font-size: 22px !important;
@@ -37,10 +50,13 @@
         // จัดกลุ่มตาม test_main_branch
         $groupedByMainBranch = [];
         foreach ($labType as $index => $item) {
+            // dd($item);
             $mainBranchKey = $item['test_main_branch']['id'] ?? 'unknown';
             if (!isset($groupedByMainBranch[$mainBranchKey])) {
                 $groupedByMainBranch[$mainBranchKey] = [
-                    'mainBranch' => $item['test_main_branch']['text'] ?? '-',
+                    'mainBranch' => isset($item['test_main_branch']['text_en']) 
+                        ? 'สาขา' . ($item['test_main_branch']['text'] ?? '') . '<br>' . ($item['test_main_branch']['text_en'] ?? '') 
+                        : 'สาขา' . ($item['test_main_branch']['text'] ?? '-'),
                     'categories' => []
                 ];
             }
@@ -58,13 +74,12 @@
     }
 @endphp
 
-<!-- สร้างตาราง -->
 <table class="table table-bordered align-middle" id="test_scope_table_{{ $key }}">
     <tbody>
         @if(!empty($groupedByMainBranch))
             @foreach($groupedByMainBranch as $mainBranchGroup)
                 <tr>
-                    <td style="vertical-align: top;"><strong>{{ $mainBranchGroup['mainBranch'] }}</strong></td>
+                    <td style="vertical-align: top;">{!! $mainBranchGroup['mainBranch'] !!}</td>
                     <td style="vertical-align: top;"></td>
                     <td style="vertical-align: top;"></td>
                 </tr>
@@ -86,20 +101,25 @@
                         <tr class="category-row">
                             @if($firstItem)
                                 <td rowspan="{{ $rowspan }}" style="vertical-align: top;">  {{ $categoryGroup['category'] }}</td>
+                            @else
+                                <td style="vertical-align: top;"></td> <!-- เพิ่ม td ว่างเพื่อรักษาตำแหน่งคอลัมน์ -->
                             @endif
-                            <td style="vertical-align: top;">{{ $item['test_parameter']['text'] ?? '-' }}</td>
+                            <td style="vertical-align: top;padding-left:10px">{{ $item['test_parameter']['text'] ?? '-' }}</td>
                             @if($firstItem)
-                                <td rowspan="{{ $rowspan }}" style="vertical-align: top;">{{ $item['test_standard'] ?? '-' }}</td>
+                                <td rowspan="{{ $rowspan }}" style="vertical-align: top;padding-left:20px">{{ $item['test_standard'] ?? '-' }}</td>
                             @endif
                         </tr>
                         @if(!empty($item['test_condition_description']))
                             <tr>
-                                <td style="vertical-align: top;">{{ $item['test_condition_description'] }}</td>
+                                <td style="vertical-align: to;padding-left:20px;">{{ $item['test_condition_description'] }}</td>
                             </tr>
                         @endif
                         @if(!empty($item['test_param_detail']))
                             <tr>
-                                <td style="vertical-align: top;">{!! nl2br($item['test_param_detail']) !!}</td>
+                                @if(!$firstItem)
+                                    <td style="vertical-align: top;"></td> <!-- เพิ่ม td ว่างเพื่อรักษาตำแหน่งคอลัมน์ -->
+                                @endif
+                                <td style="vertical-align: top;padding-left:25px;">{!! nl2br($item['test_param_detail']) !!}</td>
                             </tr>
                         @endif
                         @php

@@ -8703,7 +8703,7 @@ class MyTestController extends Controller
 
      public function generateScopePDF()
      {
-      $certilab = CertiLab::find(2084);
+      $certilab = CertiLab::find(2085);
     
 
       // dd($certilab);
@@ -9189,16 +9189,5 @@ class MyTestController extends Controller
     // $pdfService = new CreateCbScopeBcmsPdf($certiCb);
     // $pdfContent = $pdfService->generatePdf();
   }
-
-
-  public function testDb()
-  {
-    $appCertiLab = CertiLab::first();
-    dd($appCertiLab);
-  }
-
-
-  
-
 
 }

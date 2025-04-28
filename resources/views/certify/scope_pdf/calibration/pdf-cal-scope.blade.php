@@ -5,19 +5,35 @@
         border-collapse: collapse;
         font-size: 22px !important;
         margin-bottom: 20px;
-        border: none !important;
+        /* border: 1px solid black !important;  */
+        table-layout: fixed; /* บังคับให้คอลัมน์มีความกว้างตามที่กำหนด */
     }
     th, td {
-        border: none !important;
+        /* border: 1px solid black !important;  */
         padding: 5px;
         vertical-align: top;
         font-size: 22px !important;
         text-align: left !important;
+        word-wrap: break-word; /* ให้ข้อความตัดคำและขึ้นบรรทัดใหม่เมื่อยาวเกิน */
+    }
+    /* กำหนดความกว้างสำหรับแต่ละคอลัมน์ */
+    td:nth-child(1) {
+        width: 14%; /* คอลัมน์ 1 */
+    }
+    td:nth-child(2) {
+        width: 24%; /* คอลัมน์ 2 */
+    }
+    td:nth-child(3) {
+        width: 26.6%; /* คอลัมน์ 3 */
+    }
+    td:nth-child(4) {
+        width: 26.6%; /* คอลัมน์ 4 */
     }
     th {
         background-color: #007bff;
         color: white;
         text-align: center;
+        /* border: 1px solid black !important; */
     }
     h5 {
         font-size: 22px !important;
@@ -65,10 +81,13 @@ if (!function_exists('formatRangeWithSpecialChars')) {
         // จัดกลุ่มตาม cal_main_branch
         $groupedByMainBranch = [];
         foreach ($labType as $index => $item) {
+            // dd($item);
             $mainBranchKey = $item['cal_main_branch']['id'] ?? 'unknown';
             if (!isset($groupedByMainBranch[$mainBranchKey])) {
                 $groupedByMainBranch[$mainBranchKey] = [
-                    'mainBranch' => $item['cal_main_branch']['text'] ?? '-',
+                    'mainBranch' => isset($item['cal_main_branch']['text_en']) 
+                        ? 'สาขา' . ($item['cal_main_branch']['text'] ?? '') . '<br>' . ($item['cal_main_branch']['text_en'] ?? '') 
+                        : 'สาขา' . ($item['cal_main_branch']['text'] ?? '-'),
                     'instrumentGroups' => []
                 ];
             }
@@ -85,15 +104,19 @@ if (!function_exists('formatRangeWithSpecialChars')) {
         }
     }
 @endphp
-
-<!-- สร้างตาราง -->
 <table class="table table-bordered align-middle" id="cal_scope_table_{{ $key }}">
-
     <tbody>
         @foreach($groupedByMainBranch as $mainBranchGroup)
-            @php
-                $isFirstInstrumentGroup = true;
-            @endphp
+            <!-- แถวแรกสำหรับ mainBranch -->
+            <tr>
+                <td style="vertical-align: top;">
+                    {!! $mainBranchGroup['mainBranch'] !!}
+                </td>
+                <td style="vertical-align: top;"></td>
+                <td style="vertical-align: top;"></td>
+                <td style="vertical-align: top;"></td>
+            </tr>
+
             @foreach($mainBranchGroup['instrumentGroups'] as $mainGroup)
                 @php
                     // ตรวจสอบว่าไม่มี parameterOne และ parameterTwo
@@ -111,9 +134,7 @@ if (!function_exists('formatRangeWithSpecialChars')) {
                         : '';
                 @endphp
                 <tr>
-                    <td style="vertical-align: top;">
-                        {{ $isFirstInstrumentGroup ? $mainBranchGroup['mainBranch'] : '' }}
-                    </td>
+                    <td style="vertical-align: top;"></td>
                     <td style="vertical-align: top;">
                         {{ $mainGroup['instrumentGroup'] }}
                     </td>
@@ -123,8 +144,6 @@ if (!function_exists('formatRangeWithSpecialChars')) {
                     </td>
                 </tr>
                 @php
-                    $isFirstInstrumentGroup = false;
-
                     // จัดกลุ่มตาม cal_instrument และ cal_parameter_one
                     $groupedData = [];
                     foreach ($mainGroup['items'] as $index => $item) {
@@ -206,11 +225,9 @@ if (!function_exists('formatRangeWithSpecialChars')) {
                                         <tr class="parameter-one">
                                             <td style="vertical-align: top;"></td>
                                             <td style="vertical-align: top; padding-left: 20px; text-align: center;">
-                                                {{-- {{ $rangeDisplay }} --}}
                                                 {!! formatRangeWithSpecialChars($rangeDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top; text-align: center;">
-                                                {{-- {!! $uncertaintyDisplay !!} --}}
                                                 {!! formatRangeWithSpecialChars($uncertaintyDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top;"></td>
@@ -282,11 +299,9 @@ if (!function_exists('formatRangeWithSpecialChars')) {
                                         <tr class="parameter-one">
                                             <td style="vertical-align: top;"></td>
                                             <td style="vertical-align: top; padding-left: 20px; text-align: center;">
-                                                {{-- {{ $rangeDisplay }} --}}
                                                 {!! formatRangeWithSpecialChars($rangeDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top; text-align: center;">
-                                                {{-- {!! $uncertaintyDisplay !!} --}}
                                                 {!! formatRangeWithSpecialChars($uncertaintyDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top;"></td>

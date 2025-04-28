@@ -76,25 +76,25 @@
     <table width="100%" style="border: 0.3px solid #000; border-collapse: collapse;margin-top:3px" cellspacing="0" cellpadding="5">
         <thead>
             <tr>
-                <td class="text-center" style="border: 0.3px solid #000;width:33.33%;font-size: 22px;padding-left:3px;padding-right:3px">
+                <td class="text-center" style="border: 0.3px solid #000;width:30.1%;font-size: 22px;padding-left:3px;padding-right:3px">
                     สาขาการทดสอบ<br><span style="font-size: 14px;">(Field of Testing)</span>
                 </td>
-                <td class="text-center" style="border: 0.3px solid #000;width:33.33%;font-size: 22px;">
+                <td class="text-center" style="border: 0.3px solid #000;width:36.8%;font-size: 22px;">
                     รายการทดสอบ<br><span style="font-size: 14px;">(Parameter)</span>
                 </td>
-                <td class="text-center" style="border: 0.3px solid #000;width:33.33%;font-size: 22px;">
+                <td class="text-center" style="border: 0.3px solid #000;width:31.33%;font-size: 22px;">
                     วิธีการสอบเทียบ<br><span style="font-size: 14px;">(Test Method)</span>
                 </td>
             </tr>
         </thead>
         <tbody>
             <tr>
-                <td style="border: 0.3px solid #000;width:33.33%;font-size: 22px;">
+                <td style="border: 0.3px solid #000;width:30.1%;font-size: 22px;">
                     <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
                     <br><br><br><br><br><br><br><br><br><br><br>
                 </td>
-                <td style="border: 0.3px solid #000;width:33.33%;font-size: 22px;"></td>
-                <td style="border: 0.3px solid #000;width:33.33%;font-size: 22px;"></td>
+                <td style="border: 0.3px solid #000;width:36.8%;font-size: 22px;"></td>
+                <td style="border: 0.3px solid #000;width:31.33%;font-size: 22px;"></td>
                 
             </tr>
         </tbody>

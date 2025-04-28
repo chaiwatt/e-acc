@@ -1030,13 +1030,6 @@ class ApplicantController extends Controller
                         }
                     }
                     
-                    // if(!empty($request->select_certified_temp)){
-                    //     dd('ok');
-                    //     $this->copyExistFiles($certilab,$request->select_certified_temp);
-
-                    // }
-                   
-                    //ไฟล์แนบ
 
                     if ( isset($requestData['repeater-section4'] ) ){
                         $this->SaveFileSection($request, 'repeater-section4', 'attachs_sec4', 4 , $certilab );

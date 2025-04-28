@@ -18,7 +18,7 @@
     
         <div class="info" style="margin-top: 7px">
             <div class="inline-block w-20 p-0 float-left">ชื่อห้องปฏิบัติการ <br> <span>(Laboratoy Name)</span> </div>
-            <div class="inline-block w-78 float-left">{{$company->app_certi_lab->lab_name}} <br> <span>({{$company->app_certi_lab->lab_name_en}})</span></div>
+            <div class="inline-block w-78 float-left">{{$certiLab->lab_name}} <br> <span>({{$certiLab->lab_name_en}})</span></div>
         </div>
     
         <div class="info">
@@ -42,40 +42,16 @@
             <div class="inline-block w-20 float-left" style="margin-top:7px">สถานภาพห้องปฏิบัติการ<br> <span>(Laboratory status)</span></div>
             <div class="inline-block w-78">
                 <div class="inline-block w-17 float-left">
-                    @if ($company->id == 1)
-                        <!-- ตรวจสอบว่า uniqueKeys มี "pl_2_1_main" หรือไม่ -->
-                        <input type="checkbox" {{ in_array("pl_2_1_main", $pdfData->uniqueKeys) ? 'checked="checked"' : '' }}>ถาวร<br> <span>(Permanent)</span>
-                    @else
-                        <!-- ตรวจสอบว่า uniqueKeys มี "pl_2_1_branch" หรือไม่ -->
-                        <input type="checkbox" {{ in_array("pl_2_1_branch", $pdfData->uniqueKeys) ? 'checked="checked"' : '' }}>ถาวร<br> <span>(Permanent)</span>
-                    @endif
+                    <input type="checkbox" {{ $key == 'pl_2_1_info' ? 'checked="checked"' : '' }}>ถาวร<br> <span>(Permanent)</span>
                 </div>
                 <div class="inline-block w-20 float-left">
-                    @if ($company->id == 1)
-                        <!-- ตรวจสอบว่า uniqueKeys มี "pl_2_1_main" หรือไม่ -->
-                        <input type="checkbox" {{ in_array("pl_2_2_main", $pdfData->uniqueKeys) ? 'checked="checked"' : '' }}>นอกสถานที่<br> <span>(Site)</span>
-                    @else
-                        <!-- ตรวจสอบว่า uniqueKeys มี "pl_2_1_branch" หรือไม่ -->
-                        <input type="checkbox" {{ in_array("pl_2_2_branch", $pdfData->uniqueKeys) ? 'checked="checked"' : '' }}>นอกสถานที่<br> <span>(Site)</span>
-                    @endif
+                    <input type="checkbox" {{ $key == 'pl_2_2_info' ? 'checked="checked"' : '' }}>นอกสถานที่<br> <span>(Site)</span>
                 </div>
                 <div class="inline-block w-20 float-left">
-                    @if ($company->id == 1)
-                        <!-- ตรวจสอบว่า uniqueKeys มี "pl_2_1_main" หรือไม่ -->
-                        <input type="checkbox" {{ in_array("pl_2_3_main", $pdfData->uniqueKeys) ? 'checked="checked"' : '' }}>ชั่วคราว<br> <span>(Temporary)</span>
-                    @else
-                        <!-- ตรวจสอบว่า uniqueKeys มี "pl_2_1_branch" หรือไม่ -->
-                        <input type="checkbox" {{ in_array("pl_2_3_branch", $pdfData->uniqueKeys) ? 'checked="checked"' : '' }}>ชั่วคราว<br> <span>(Temporary)</span>
-                    @endif
+                    <input type="checkbox" {{ $key == 'pl_2_3_info' ? 'checked="checked"' : '' }}>ชั่วคราว<br> <span>(Temporary)</span>
                 </div>
                 <div class="inline-block w-20 float-left">
-                    @if ($company->id == 1)
-                        <!-- ตรวจสอบว่า uniqueKeys มี "pl_2_1_main" หรือไม่ -->
-                        <input type="checkbox" {{ in_array("pl_2_4_main", $pdfData->uniqueKeys) ? 'checked="checked"' : '' }}>เคลื่อนที่<br> <span>(Mobile)</span>
-                    @else
-                        <!-- ตรวจสอบว่า uniqueKeys มี "pl_2_1_branch" หรือไม่ -->
-                        <input type="checkbox" {{ in_array("pl_2_4_branch", $pdfData->uniqueKeys) ? 'checked="checked"' : '' }}>เคลื่อนที่<br> <span>(Mobile)</span>
-                    @endif
+                    <input type="checkbox" {{ $key == 'pl_2_2_info' ? 'checked="checked"' : '' }}>เคลื่อนที่<br> <span>(Mobile)</span>
                 </div>
                 <div class="inline-block w-17 float-left">
                     <input type="checkbox" {{ $pdfData->siteType == "multi" ? 'checked="checked"' : '' }} >หลายสถานที่<br> <span>(Multisite)</span>

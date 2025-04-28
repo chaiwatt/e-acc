@@ -21,6 +21,7 @@
         "phpoffice/phpspreadsheet": "^1.8",
         "phpoffice/phpword": "^0.17.0",
         "simplesoftwareio/simple-qrcode": "2.0.0",
+        "smalot/pdfparser": "2.11",
         "spatie/laravel-activitylog": "^2.5",
         "spatie/laravel-permission": "^2.12",
         "yajra/laravel-datatables-oracle": "^6.0"
