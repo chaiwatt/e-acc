@@ -5,8 +5,9 @@ use HP;
 use stdClass;
 use Mpdf\Mpdf;
 use Carbon\Carbon;
-use App\CertificateExport;
+use App\AttachFile;
 
+use App\CertificateExport;
 use Smalot\PdfParser\Parser;
 use Mpdf\Config\FontVariables;
 use Mpdf\Config\ConfigVariables;
@@ -19,6 +20,7 @@ use App\Models\Certify\Applicant\Report;
 use App\Models\Bcertify\CalibrationBranch;
 use App\Models\Certify\Applicant\CertiLab;
 use App\Models\Certify\ApplicantCB\CertiCb;
+use App\Models\Certificate\TrackingInspection;
 use App\Models\Certify\ApplicantCB\CertiCBReport;
 use App\Models\Certificate\CbScopeIsicTransaction;
 use App\Models\Certify\Applicant\CertiLabAttachAll;
@@ -249,6 +251,63 @@ class CreateCbScopeIsicPdf
             $certi_cb_attach_more->token                = str_random(16);
             $certi_cb_attach_more->save();
         }
+
+
+            $tracking = $app_certi_cb->tracking;
+        if($tracking !== null)
+        {
+            $inspection = TrackingInspection::where('tracking_id',$tracking->id)  
+                    ->where('reference_refno',$tracking->reference_refno)
+                    ->first();
+            if($inspection !== null){
+                    $certiCbFileAll = CertiCBAttachAll::where('app_certi_cb_id',$app_certi_cb->id)
+                        ->where('table_name',$tb->getTable())
+                        ->where('file_section',1)
+                        ->latest() // เรียงจาก created_at จากมากไปน้อย
+                        ->first();
+            
+                    $filePath = 'files/applicants/check_files_cb/' . $certiCbFileAll->file ;
+            
+                    $localFilePath = HP::downloadFileFromTisiCloud($filePath);
+
+                    // dd($app_certi_cb ,$certiCbFileAll,$filePath,$localFilePath);
+
+                    $check = AttachFile::where('systems','Center')
+                            ->where('ref_id',$inspection->id)
+                            ->where('ref_table',(new TrackingInspection)->getTable())
+                            ->where('section','file_scope')
+                            ->first();
+                    if($check != null)
+                    {
+                        $check->delete();
+                    }
+
+                    $tax_number = (!empty(auth()->user()->reg_13ID) ?  str_replace("-","", auth()->user()->reg_13ID )  : '0000000000000');
+            
+                    $uploadedFile = new \Illuminate\Http\UploadedFile(
+                        $localFilePath,      // Path ของไฟล์
+                        basename($localFilePath), // ชื่อไฟล์
+                        mime_content_type($localFilePath), // MIME type
+                        null,               // ขนาดไฟล์ (null ถ้าไม่ทราบ)
+                        true                // เป็นไฟล์ที่ valid แล้ว
+                    );
+                                
+                    $attach_path = "files/trackingcb";
+                    // ใช้ไฟล์ที่จำลองในการอัปโหลด
+                    HP::singleFileUploadRefno(
+                        $uploadedFile,
+                        $attach_path.'/'.$inspection->reference_refno,
+                        ( $tax_number),
+                        (auth()->user()->FullName ?? null),
+                        'Center',
+                        (  (new TrackingInspection)->getTable() ),
+                        $inspection->id,
+                        'file_scope',
+                        null
+                    );
+            }        
+        }
+
 
 
     }

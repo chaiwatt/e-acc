@@ -9181,13 +9181,43 @@ class MyTestController extends Controller
 
     // dd($cbScopeIsicTransactions);
 
-    $certiCb = CertiIb::find(133);
+    $certiCb = CertiIb::find(146);
     $pdfService = new CreateIbScopePdf($certiCb);
     $pdfContent = $pdfService->generatePdf();
 
     // $certiCb = CertiCb::find(228);
     // $pdfService = new CreateCbScopeBcmsPdf($certiCb);
     // $pdfContent = $pdfService->generatePdf();
+  }
+
+  
+  public function certiCbMapReq()
+  {
+    $certiCb = CertiCb::find(253);
+    // $app_certi_cbs = CertiCb::with([
+    //       'app_certi_cb_export' => function($q){
+    //           $q->whereIn('status',['0','1','2','3','4']);
+    //       }
+    //   ])
+    //   ->where('created_by', $certiCb->created_by)
+    //   ->whereNotIn('status', ['0','4'])
+    //   ->where('type_standard', $certiCb->type_standard)
+    //   ->where('petitioner_id', $certiCb->petitioner_id)
+    //   ->where('trust_mark_id', $certiCb->trust_mark_id)
+    //   ->get();
+    // dd($app_certi_cbs);
+        $app_certi_cbs = CertiCb::whereHas('certiCBExport', function($q){
+          $q->whereIn('status', ['0','1','2','3','4']);
+      })
+      ->where('created_by', $certiCb->created_by)
+      ->whereNotIn('status', ['0','4'])
+      ->where('type_standard', $certiCb->type_standard)
+      ->where('petitioner_id', $certiCb->petitioner_id)
+      ->where('trust_mark_id', $certiCb->trust_mark_id)
+      ->get();
+
+      dd($app_certi_cbs);
+
   }
 
 }

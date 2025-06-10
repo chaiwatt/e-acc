@@ -26,8 +26,25 @@
             </div>
         @endif
 
+        <div class="form-group {{ $errors->has('type_unit') ? 'has-error' : ''}}">
+            {!! HTML::decode(Form::label('type_unit', 'หน่วยตรวจประเภท'.':'.'<br/><span class="  font_size">(Type examination unit)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
+            <label class="col-md-1  label-height" >
+                {!! Form::radio('type_unit', '1', !empty( $certi_ib->type_unit ) && $certi_ib->type_unit == '1' ?true:( !isset($certi_ib->id)?true:false ), ['class'=>'check checkLab', 'data-radio'=>'iradio_square-green']) !!}
+                &nbsp;A
+            </label>
+            <label class="col-md-1  label-height" >
+                {!! Form::radio('type_unit', '2', !empty( $certi_ib->type_unit ) && $certi_ib->type_unit == '1' ?true:false, ['class'=>'check checkLab', 'data-radio'=>'iradio_square-green']) !!}
+                 &nbsp;B
+            </label>
+            <label class="col-md-1  label-height" >
+                {!! Form::radio('type_unit', '3', !empty( $certi_ib->type_unit ) && $certi_ib->type_unit == '1' ?true:false, ['class'=>'check checkLab', 'data-radio'=>'iradio_square-green']) !!}
+                 &nbsp;C
+            </label>
+           {!! $errors->first('type_unit', '<p class="help-block">:message</p>') !!}
+        </div>
+        {{-- {{$certifieds->count()}} --}}
         @if( isset($certi_ib->id) && !empty($certi_ib->standard_change) )
-
+        
             <div class="form-group {{ $errors->has('standard_change') ? 'has-error' : ''}}">
                 {!! HTML::decode(Form::label('ib_name', 'วัตถุประสงค์ในการยื่นคำขอ'.':'.'<br/><span class=" font_size">(Apply to NSC for)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
                 <label  class="col-md-2 label-height">
@@ -56,76 +73,124 @@
         @else
             <div class="form-group {{ $errors->has('standard_change') ? 'has-error' : ''}}">
                 {!! HTML::decode(Form::label('ib_name', 'วัตถุประสงค์ในการยื่นคำขอ'.':'.'<br/><span class=" font_size">(Apply to NSC for)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <label  class="col-md-2 label-height" >
-                    {!! Form::radio('standard_change', '1', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change1']) !!}
-                    &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(initial assessment)</span>
-                </label>
-                <label  class="col-md-2 label-height">
-                    {!! Form::radio('standard_change', '2', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change2']) !!}
-                    &nbsp;ต่ออายุใบรับรอง <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(renewal)</span>
-                </label>
-                <label  class="col-md-2 label-height">
-                    {!! Form::radio('standard_change', '3', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change3']) !!}
-                    &nbsp;ขยายขอบข่าย <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(extending accreditation)</span>
-                </label>
-                <label  class="col-md-3 label-height">
-                    {!! Form::radio('standard_change', '4', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change4']) !!}
-                    &nbsp;การเปลี่ยนแปลงมาตรฐาน <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(standard change)</span>
-                </label>
+
+                @if ($certifieds->count() == 0)
+                    <label  class="col-md-2 label-height" >
+                        {!! Form::radio('standard_change', '1', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change1']) !!}
+                        &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span class="font_size">(initial assessment)</span>
+                    </label>
+                    <label  class="col-md-2 label-height" >
+                        {!! Form::radio('standard_change', '6', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change6']) !!}
+                        &nbsp;โอนใบรับรอง <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span class="font_size">(transfer accreditation)</span>
+                    </label>
+
+                @endif
+
+                @if ($certifieds->count() > 0)
+                    <label  class="col-md-2 label-height" >
+                        {!! Form::radio('standard_change', '1', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change1']) !!}
+                        &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span class="font_size">(initial assessment)</span>
+                    </label>
+                    <label  class="col-md-2 label-height">
+                        {!! Form::radio('standard_change', '2', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change2']) !!}
+                        &nbsp;ต่ออายุใบรับรอง <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span class="font_size">(renewal)</span>
+                    </label>
+                    <label  class="col-md-2 label-height">
+                        {!! Form::radio('standard_change', '3', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change3']) !!}
+                        &nbsp;ขยายขอบข่าย <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span class="font_size">(extending accreditation)</span>
+                    </label>
+                    <label  class="col-md-3 label-height">
+                        {!! Form::radio('standard_change', '4', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change4']) !!}
+                        &nbsp;การเปลี่ยนแปลงมาตรฐาน <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span class="font_size">(standard change)</span>
+                    </label>
+                @endif
+
                 {!! $errors->first('standard_change', '<p class="help-block">:message</p>') !!}
             </div>
+            
 
+            @if ($certifieds->count() > 0)
+                <div class="form-group {{ $errors->has('standard_change') ? 'has-error' : ''}}">
+                    <label for="" class="col-md-3 control-label label-height"></label>
+                
+                    <label  class="col-md-2 label-height" >
+                        {!! Form::radio('standard_change', '5', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change5']) !!}
+                        &nbsp;ย้ายสถานที่ <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span class="font_size">(Relocation)</span>
+                    </label>
+                    <label  class="col-md-2 label-height">
+                        {!! Form::radio('standard_change', '6', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change6']) !!}
+                        &nbsp;โอนใบรับรอง <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <span class="font_size">(transfer accreditation)</span>
+                    </label>
+                
+
+                    {!! $errors->first('standard_change', '<p class="help-block">:message</p>') !!}
+                </div>
+            @endif
+        
         @endif
 
-        <div id="box_ref_application_no" >
-            <div class="form-group {{ $errors->has('ref_application_no') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('ref_application_no', 'อ้างอิงเลขที่คำขอ'.':'.'<br/><span class=" font_size">(Application No.)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
+
+        <div id="box_ref_application_no">
+            <div class="form-group">
+                <label for="ref_application_no" class="col-md-3 control-label label-height">
+                    ใบรับรองเลขที่:<br/>
+                    <span class="font_size">(Certificate No.)</span>
+                </label>
                 <div class="col-md-4">
-                    {!! Form::text('ref_application_no', null, ['class' => 'form-control', 'id' => 'ref_application_no']) !!}
-                    {!! $errors->first('ref_application_no', '<p class="help-block">:message</p>') !!}
+                    <select name="select_certified" id="select_certified" class="form-control" readonly>
+                    </select>
+                    @if ($errors->has('select_certified'))
+                        <p class="help-block">{{ $errors->first('select_certified') }}</p>
+                    @endif
                 </div>
             </div>
-            <div class="form-group {{ $errors->has('certificate_exports_id') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('certificate_exports_id', 'ใบรับรองเลขที่'.':'.'<br/><span class="  font_size">(Certificate No)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
+
+            <div class="form-group {{ $errors->has('ref_application_no') ? 'has-error' : '' }}">
+                <label for="ref_application_no" class="col-md-3 control-label label-height">
+                    อ้างอิงเลขที่คำขอ:<br/>
+                    <span class="font_size">(Application No.)</span>
+                </label>
                 <div class="col-md-4">
-                    {!! Form::text('certificate_exports_id', null, ['class' => 'form-control', 'id' => 'certificate_exports_id']) !!}
-                    {!! $errors->first('certificate_exports_id', '<p class="help-block">:message</p>') !!}
+                    <input type="text" name="ref_application_no" id="ref_application_no" class="form-control" value="{{ old('ref_application_no') }}">
+                    @if ($errors->has('ref_application_no'))
+                        <p class="help-block">{{ $errors->first('ref_application_no') }}</p>
+                    @endif
                 </div>
             </div>
-            <div class="form-group {{ $errors->has('accereditation_no') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('accereditation_no', '<span class="text-danger">*</span> หมายเลขการรับรองที่'.':'.'<br/><span class="  font_size">(Accreditation No. Calibration)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
+            {{-- <div class="form-group {{ $errors->has('certificate_exports_id') ? 'has-error' : '' }}">
+                <label for="certificate_exports_id" class="col-md-3 control-label label-height">
+                    ใบรับรองเลขที่:<br/>
+                    <span class="font_size">(Certificate No)</span>
+                </label>
                 <div class="col-md-4">
-                    {!! Form::text('accereditation_no', null, ['class' => 'form-control', 'id' => 'accereditation_no']) !!}
-                    {!! $errors->first('accereditation_no', '<p class="help-block">:message</p>') !!}
+                    <input type="text" name="certificate_exports_id" id="certificate_exports_id" class="form-control" value="{{ old('certificate_exports_id') }}">
+                    @if ($errors->has('certificate_exports_id'))
+                        <p class="help-block">{{ $errors->first('certificate_exports_id') }}</p>
+                    @endif
+                </div>
+            </div> --}}
+            <div class="form-group {{ $errors->has('accereditation_no') ? 'has-error' : '' }}">
+                <label for="accereditation_no" class="col-md-3 control-label label-height">
+                    <span class="text-danger">*</span> หมายเลขการรับรองที่:<br/>
+                    <span class="font_size">(Accreditation No. Calibration)</span>
+                </label>
+                <div class="col-md-4">
+                    <input type="text" name="accereditation_no" id="accereditation_no" class="form-control" value="{{ old('accereditation_no') }}">
+                    @if ($errors->has('accereditation_no'))
+                        <p class="help-block">{{ $errors->first('accereditation_no') }}</p>
+                    @endif
                 </div>
             </div>
         </div>
 
-        {{-- @if (!is_null($certificate_exports))
-
-            @if (count($certificate_no)==1)
-                <div class="form-group div_certificate_exports_id{{ $errors->has('certificate_exports_id') ? 'has-error' : ''}}">
-                    {!! HTML::decode(Form::label('certificate_exports_id', '<span class="text-danger">*</span> ใบรับรองเลขที่'.':'.'<br/><span class="  font_size">(Certificate No)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                    <div class="col-md-4" >
-                        {!! Form::select('certificate_exports_id', $certificate_exports, !empty($certi_ib->certificate_exports_id)?$certi_ib->certificate_exports_id:$certificate_no[0]->id, ['class' => 'form-control','id'=>'certificate_exports_id','required' => true,'placeholder' =>'- ใบรับรองเลขที่ -', 'readonly' =>true ] ) !!}
-                        {!! $errors->first('certificate_exports_id', '<p class="help-block">:message</p>') !!}
-                    </div>
-                </div>
-            @elseif (count($certificate_no) > 1)
-                <div class="form-group div_certificate_exports_id{{ $errors->has('certificate_exports_id') ? 'has-error' : ''}}">
-                    {!! HTML::decode(Form::label('certificate_exports_id', '<span class="text-danger">*</span> ใบรับรองเลขที่'.':'.'<br/><span class="  font_size">(Certificate No)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                    <div class="col-md-4" >
-                        {!! Form::select('certificate_exports_id', $certificate_exports, !empty($certi_ib->certificate_exports_id)?$certi_ib->certificate_exports_id:null, ['class' => 'form-control','id'=>'certificate_exports_id','required' => true,'placeholder' =>'- ใบรับรองเลขที่ -' ] ) !!}
-                        {!! $errors->first('certificate_exports_id', '<p class="help-block">:message</p>') !!}
-                    </div>
-                </div>
-            @endif
-
-        @endif --}}
 
         <div class="form-group {{ $errors->has('branch_type') ? 'has-error' : ''}}">
             {!! HTML::decode(Form::label('branch_type', '<span class="text-danger">*</span> ประเภทสาขา'.':'.'<br/><span class=" font_size">(Branch Type)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
@@ -138,22 +203,7 @@
             </div>
         </div>
 
-        <div class="form-group {{ $errors->has('type_unit') ? 'has-error' : ''}}">
-            {!! HTML::decode(Form::label('type_unit', 'หน่วยตรวจประเภท'.':'.'<br/><span class="  font_size">(Type examination unit)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-            <label class="col-md-1  label-height" >
-                {!! Form::radio('type_unit', '1', !empty( $certi_ib->type_unit ) && $certi_ib->type_unit == '1' ?true:( !isset($certi_ib->id)?true:false ), ['class'=>'check checkLab', 'data-radio'=>'iradio_square-green']) !!}
-                &nbsp;A
-            </label>
-            <label class="col-md-1  label-height" >
-                {!! Form::radio('type_unit', '2', !empty( $certi_ib->type_unit ) && $certi_ib->type_unit == '1' ?true:false, ['class'=>'check checkLab', 'data-radio'=>'iradio_square-green']) !!}
-                 &nbsp;B
-            </label>
-            <label class="col-md-1  label-height" >
-                {!! Form::radio('type_unit', '3', !empty( $certi_ib->type_unit ) && $certi_ib->type_unit == '1' ?true:false, ['class'=>'check checkLab', 'data-radio'=>'iradio_square-green']) !!}
-                 &nbsp;C
-            </label>
-           {!! $errors->first('type_unit', '<p class="help-block">:message</p>') !!}
-        </div>
+
 
         <div class="form-group {{ $errors->has('name_unit') ? 'has-error' : ''}}">
             {!! HTML::decode(Form::label('name_unit', '<span class="text-danger">*</span> หน่วยตรวจสอบ (TH)'.':'.'<br/><span class=" font_size">(Examination room name)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
@@ -179,6 +229,49 @@
             </div>
         </div>
     </div>
+
+    
+    <div id="transfer-wrapper" style="display: none;">
+        <div class="form-group">
+            <div class="col-md-3 control-label label-height">
+                <h3>ข้อมูลผู้โอน </h3>
+            </div>
+            <div class="col-md-7 label-height" style="margin-top:10px">
+                <button id="check_transferee" type="button" class="btn btn-sm btn-info">ตรวจสอบ</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="id_number" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> ใบรับรองเลขที่:<br/>
+                <span class="font_size">(Transferer Certificate Number)</span>
+            </label>
+            <div class="col-md-7">
+                <input type="text" name="transferee_certificate_number" id="transferee_certificate_number" class="form-control" maxlength="13">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="id_number" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> เลข 13 หลักผู้โอน:<br/>
+                <span class="font_size">(Transferer 13-digit ID)</span>
+            </label>
+            <div class="col-md-7">
+                <input type="text" name="transferer_id_number" id="transferer_id_number" class="form-control" maxlength="13">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="transferee_name" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> ชื่อผู้โอน:<br/>
+                <span class="font_size">(Transferer Name)</span>
+            </label>
+            <div class="col-md-7">
+                <input type="text" name="transferee_name" id="transferee_name" class="form-control" readonly>
+            </div>
+        </div>
+ 
+        
+    </div>
+
     <hr>
 
     <div class="row">
@@ -492,6 +585,15 @@
 @push('js')
     <script>
         const app_ib_id = '{{ @$app_certi_ib->id }}';
+        var certifieds;
+        var certi_ib;
+
+        certifieds = @json($certifieds->mapWithKeys(function($certified) {
+                return [$certified->id => $certified->certificate];
+            }) ?? []);
+            certi_ib = @json($certi_ib ?? []);
+            
+            console.log(certifieds);
 
         $(document).ready(function () {
 
@@ -659,16 +761,111 @@
 
         function box_ref_application_no(){
             let standard_change = $('input[name="standard_change"]:checked').val();
-            if(standard_change >= 2){
+            let typeStandard = $('#type_standard').val();
+            let typeUnit = $('input[name="type_unit"]:checked').val();
+            // if(standard_change >= 2){
+            if(standard_change >= 2 && standard_change < 6){
+
+                $.get("{{ url('/certify/certi_ib/get-certificate-belong') }}", { 
+                    typeStandard: typeStandard,
+                    typeUnit: typeUnit
+                    }).done(function( data ) {
+                       
+                        if (data.certificateExports.length > 0) {
+                            // ล้างเนื้อหาใน select เดิมก่อน (ถ้ามี)
+                            $('#select_certified').empty();
+                            // Loop ข้อมูลจาก data.certificateExports เพื่อสร้าง option
+                            data.certificateExports.forEach(function(cert) {
+                                $('#select_certified').append(
+                                    $('<option>', {
+                                        value: cert.id,
+                                        text: cert.certificate
+                                    })
+                                );
+                            });
+
+                            // เพิ่ม readonly attribute ให้กับ select
+                            $('#select_certified').attr('readonly', 'readonly');
+                            $('#select_certified option:first').val();
+                            $('#select_certified').trigger('change');
+                            } else {
+                                // กรณีไม่มีข้อมูล
+                                console.log("No certificate exports found.");
+                            } 
+                    });
+
+
                 $('#box_ref_application_no').show();
                 $('#box_ref_application_no').find('input').prop('disabled', false);
                 $('#accereditation_no').prop('required', true);
-            }else{
+                $('#transfer-wrapper').hide(); 
+            }else if(standard_change == 1){
                 $('#box_ref_application_no').hide();
                 $('#box_ref_application_no').find('input').prop('disabled', true);
                 $('#accereditation_no').prop('required', false);
+                console.log("ขอครั้งแรก")
+                isIbTypeAndStandardBelong();
+                $('#transfer-wrapper').hide(); 
+            }else if(standard_change == 6){
+
+                $('#box_ref_application_no').hide();
+                $('#box_ref_application_no').find('input').prop('disabled', true);
+                $('#accereditation_no').prop('required', false);
+                $('#transfer-wrapper').show(); 
+
+            }else{
+                $('#transfer-wrapper').hide(); 
             }
         }
+
+
+// ตรวจสอบเมื่อ type_unit เปลี่ยนแปลง
+    $("input[name=type_unit]").on("ifChanged", function() {
+        // ตรวจสอบว่า input[name=standard_change] มีการ checked หรือไม่
+        if ($('input[name=standard_change]:checked').length > 0) {
+            let typeStandard = $('#type_standard').val();
+            let typeUnit = $('input[name="type_unit"]:checked').val();
+            console.log(typeStandard,typeUnit)
+
+            $.get("{{ url('/certify/certi_ib/is-ib-type-and-standard-belong') }}", { 
+                typeStandard: typeStandard,
+                typeUnit: typeUnit
+                }).done(function( data ) {
+                    console.log(data);
+                    if (data.certiIbs.length != 0)
+                    {
+                        // let typeUnitLabel = $('input[name="type_unit"]:checked').closest('label').text().trim();
+                        alert('ไม่สามารถ "ยื่นขอครั้งแรก" สำหรับเลขมาตรฐาน "'+$('#type_standard option:selected').text().trim()+'" และหน่วยตรวจ  "'+$('input[name="type_unit"]:checked').closest('label').text().trim()+'" เนื่องจากมีใบรับรองแล้วในระบบแล้ว');
+                        $("input[name=standard_change]").iCheck('uncheck');
+                        $("input[name=type_unit]").iCheck('uncheck');
+                    }
+                    
+                });
+        } 
+    }); 
+
+        function isIbTypeAndStandardBelong(){
+
+            let typeStandard = $('#type_standard').val();
+            let typeUnit = $('input[name="type_unit"]:checked').val();
+            console.log(typeStandard,typeUnit)
+
+            $.get("{{ url('/certify/certi_ib/is-ib-type-and-standard-belong') }}", { 
+                typeStandard: typeStandard,
+                typeUnit: typeUnit
+                }).done(function( data ) {
+                    console.log(data);
+                    if (data.certiIbs.length != 0)
+                    {
+                        // let typeUnitLabel = $('input[name="type_unit"]:checked').closest('label').text().trim();
+                        alert('ไม่สามารถ "ยื่นขอครั้งแรก" สำหรับเลขมาตรฐาน "'+$('#type_standard option:selected').text().trim()+'" และหน่วยตรวจ  "'+$('input[name="type_unit"]:checked').closest('label').text().trim()+'" เนื่องจากมีใบรับรองแล้วในระบบแล้ว');
+                        $("input[name=standard_change]").iCheck('uncheck');
+                        $("input[name=type_unit]").iCheck('uncheck');
+                    }
+                    
+                });
+        }
+
 
         function get_app_no_and_certificate_exports_no(){
             let std_id = $('#type_standard').val();
@@ -686,6 +883,237 @@
                 });
             }
         }
+
+        function getLastElementAsArray(fileSection) {
+            try {
+                // ตรวจสอบว่า fileSection เป็น Array และไม่ว่าง
+                if (!Array.isArray(fileSection)) {
+                    throw new Error("file_sectionn4s ต้องเป็น Array");
+                }
+                if (fileSection.length === 0) {
+                    return [];
+                }
+
+                // ดึง element สุดท้ายและส่งคืนเป็น Array
+                const lastElement = fileSection[fileSection.length - 1];
+                return [lastElement];
+            } catch (error) {
+                console.error(`Error: ${error.message}`);
+                return [];
+            }
+        }
+
+        // ตัวอย่างการใช้งาน
+        const result = {
+            file_sectionn4s: [
+                { name: "file1.txt", lastModified: 1697059200000 }, // 2023-10-12
+                { name: "file2.txt", lastModified: 1697145600000 }, // 2023-10-13
+                { name: "file3.txt", lastModified: 1697232000000 }  // 2023-10-14
+            ]
+        }; 
+
+        $(document).on('change', '#select_certified', function() {
+            var certified_id = $(this).val();
+            const _token = $('input[name="_token"]').val();
+            console.log(certified_id)
+            if (certified_id === '' || certified_id === undefined) {
+                return;
+            }
+
+            $.ajax({
+                url: "/certify/certi_ib/api/get_certificated",
+                method: "POST",
+                data: {
+                    certified_id: certified_id,
+                    _token: _token
+                },
+                success: function(result) {
+                    // attach_path = result.attach_path;
+                    // console.log(result);
+
+                    attach_path = result.attach_path;
+
+                    ibScopeTransactions = result.ibScopeTransactions
+                    renderInitialTable()
+
+                    certi_ib = result.certiIb
+                    
+                    var dis_title = result.address.original.dis_title;
+                    var dis_title_en = result.address.original.dis_title_en;
+                    var pro_id = result.address.original.pro_id;
+                    var sub_title = result.address.original.sub_title;
+                    var sub_title_en = result.address.original.sub_title_en;
+                    var zip_code = result.address.original.zip_code;
+                    var labTestRequest = result.labTestRequest;
+                    var certificateExport = result.certificateExport;
+
+                    console.log('result',result);
+
+                    $('#province_id').val(pro_id).trigger('change');
+                    $('#address_district').val(dis_title);
+                    $('#sub_district').val(sub_title);
+                    $('#postcode').val(zip_code);
+                    
+                    $('#ib_province_eng').val(pro_id).trigger('change');
+                    $('#ib_address_no_eng').val(result.certiIb.address);
+                    $('#ib_moo_eng').val(result.certiIb.allay);
+                    $('#ib_amphur_eng').val(dis_title_en);
+                    $('#ib_district_eng').val(sub_title_en);
+                    $('#ib_postcode_eng').val(zip_code);
+
+                    
+                    $('#name_unit').val(certi_ib.name_unit);
+                    $('#name_en_unit').val(certi_ib.name_en_unit);
+                    $('#name_short_unit').val(certi_ib.name_short_unit);
+                    
+                    
+
+                    $('#accereditation_no').val(certificateExport.accereditatio_no);
+                    
+
+                    renderFiles(result.file_sectionn1s, '#repeater_section1_wrapper', '1');
+                    $('.attachs_sec1').removeAttr('required');
+
+                    renderFiles(result.file_sectionn2s, '#repeater_section2_wrapper', '2');
+                    $('.attachs_sec2').removeAttr('required');
+
+                    const lastElementArray = getLastElementAsArray(result.file_sectionn3s);
+
+                    renderFiles(lastElementArray, '#repeater_section3_wrapper', '3');
+                    $('.attachs_sec3').removeAttr('required');
+
+                    
+                    renderFiles(result.file_sectionn4s, '#repeater_section4_wrapper', '4');
+                    $('.attachs_sec4').removeAttr('required');
+
+                    renderFiles(result.file_sectionn5s, '#repeater_section5_wrapper', '5');
+                    $('.attachs_sec5').removeAttr('required');
+        
+
+                    renderFiles(result.file_sectionn6s, '#repeater_section6_wrapper', '6');
+                    $('.attachs_sec6').removeAttr('required');
+
+                    
+                    renderFiles(result.file_sectionn7s, '#repeater_section7_wrapper', '7');
+                    $('.attachs_sec7').removeAttr('required');
+        
+                }
+            });
+        });
+
+        function getLastElementAsArray(fileSection) {
+    try {
+        // ตรวจสอบว่า fileSection เป็น Array และไม่ว่าง
+        if (!Array.isArray(fileSection)) {
+            throw new Error("file_sectionn4s ต้องเป็น Array");
+        }
+        if (fileSection.length === 0) {
+            return [];
+        }
+
+        // ดึง element สุดท้ายและส่งคืนเป็น Array
+        const lastElement = fileSection[fileSection.length - 1];
+        return [lastElement];
+    } catch (error) {
+        console.error(`Error: ${error.message}`);
+        return [];
+    }
+}
+        
+
+        function renderFiles(files, wrapperSelector, section) {
+            var wrapper = $(wrapperSelector);
+            wrapper.empty(); // ล้างข้อมูลเก่าออก
+            if (files.length > 0) {
+                files.forEach(function(file) {
+                    var fileItem = `
+                        <div class="form-group">
+                            <div class="col-md-4 text-light"></div>
+                            <div class="col-md-6">
+                                <a href="${baseUrl}certify/check/file_ib_client/${file.file}/${file.file_client_name}" target="_blank" class="view-attach btn btn-info btn-sm">
+                                    <i class="fa fa-eye mr-2"></i> ${file.file_client_name}
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    wrapper.append(fileItem);
+                });
+            }
+
+            // Add default file input for uploading new files
+            var newFileInput = `
+                <div class="form-group box_remove_file" data-repeater-item>
+                    <div class="col-md-4 text-light"></div>
+                    <div class="col-md-6">
+                        <div class="fileinput fileinput-new input-group " data-provides="fileinput">
+                            <div class="form-control" data-trigger="fileinput">
+                                <i class="glyphicon glyphicon-file fileinput-exists"></i>
+                                <span class="fileinput-filename"></span>
+                            </div>
+                            <span class="input-group-addon btn btn-default btn-file">
+                                <span class="fileinput-new">เลือกไฟล์</span>
+                                <span class="fileinput-exists">เปลี่ยน</span>
+                                <input type="file" name="repeater-section${section}[0][attachs_sec${section}]" class="attachs_sec${section} check_max_size_file" required>
+                            </span> 
+                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
+                        </div>
+                        <p class="help-block"></p>
+                    </div>
+            
+                </div>
+            `;
+            wrapper.append(newFileInput);
+        }
+    
+        
+    $(document).on('click', '#check_transferee', function(e) {
+        e.preventDefault();
+        let transferee_certificate_number = $('#transferee_certificate_number').val();
+        let transferer_id_number = $('#transferer_id_number').val();
+
+        const _token            = $('input[name="_token"]').val();
+
+        let pattern = /^\d{2}L:IB\d{4}$/;
+
+        if (!pattern.test(transferee_certificate_number)) {
+            alert("รูปแบบใบรับรองไม่ถูกต้อง");
+            return;
+        } 
+
+        // ลบอักขระพิเศษทั้งหมดให้เหลือแต่ตัวเลข
+        transferer_id_number = transferer_id_number.replace(/\D/g, ''); // \D หมายถึงตัวอักษรที่ไม่ใช่ตัวเลข
+
+        // ตรวจสอบให้เป็นเลข 13 หลัก
+        if (transferer_id_number.length !== 13) {
+            alert("กรุณากรอกเลข 13 หลัก");
+            return;
+        }
+
+        $.ajax({
+                url:"{{route('certi_ib.check_ib_transferee')}}",
+                method:"POST",
+                data:{
+                    transferer_id_number:transferer_id_number,
+                    transferee_certificate_number:transferee_certificate_number,
+                    _token:_token
+                },
+                success:function (result){
+                    console.log(result);
+                    if(result.user == null)
+                    {
+                        alert('ไม่พบข้อมูลผู้รับโอน โปรดตรวจสอบว่าได้เลือก "ตามมาตรฐานเลข" และ "วัตถุประสงค์ในการยื่นคำขอ" และ "เลขที่ใบรับรอง" และ "เลข 13 หลักของผู้โอน" ตรงกับใบรับรองที่ต้องการรับโอน');
+                    }else
+                    {
+                        alert('ต้องการโอนใบรับรองจาก' + result.user.name );
+                        $('#transferee_name').val( result.user.name);
+                        // $('#lab_name').val( result.certiLab.lab_name);
+                        // $('#lab_name_en').val( result.certiLab.lab_name_en);
+                        // $('#lab_name_short').val( result.certiLab.lab_name_short);
+                    }
+                    
+                }
+            });
+    });
 
     </script>
 @endpush

@@ -407,6 +407,8 @@
                                                     {!! HP::FileExtension($applicant->certificate_exports_to->attachs)  ?? '' !!}
                                                 </a>
                                             @endif
+
+                                            
                                         </td>
                                     </tr>
                                     @php $count ++ @endphp

@@ -19,11 +19,15 @@
               $auditors_btn = 'btn-danger';
           }
       @endphp
+      @if($certi->fullyApprovedAuditorNoCancels->count() > 0) 
+
             <a class="btn  btn-sm  form-group {{  $auditors_btn  }}" 
                  href="{{url('certify/tracking-cb/tracking-auditor/'.base64_encode($certi->id))}}" style="width:300px;">
                   เห็นชอบการแต่งตั้งคณะผู้ตรวจประเมิน
            </a>
-
+        @else
+            <span class="text-warning">อยู่ระหว่างดำเนินการ...</span>
+        @endif
            <br>
            @if(count($certi->tracking_payin_one_many) > 0 )
            @php 

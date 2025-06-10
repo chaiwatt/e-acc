@@ -97,12 +97,25 @@
     }  
 @endphp
 
-@if ($certi_cb == null || empty($certi_cb->doc_review_reject))
+{{-- @if ($certi_cb == null || empty($certi_cb->doc_review_reject))
     @include ('certify.applicant_cb.froms.scope-modal.cb_scope_isic_isic')
     @include ('certify.applicant_cb.froms.scope-modal.cb_scope_bcms')
 
     @include ('certify.applicant_cb/froms.form_infomation')
     @include ('certify.applicant_cb/froms.form_request')
+@endif --}}
+
+
+@if ($certi_cb->tracking == null)
+        @if ($certi_cb == null || empty($certi_cb->doc_review_reject))
+               @include ('certify.applicant_cb.froms.scope-modal.cb_scope_isic_isic')
+                @include ('certify.applicant_cb.froms.scope-modal.cb_scope_bcms')
+
+                @include ('certify.applicant_cb/froms.form_infomation')
+                @include ('certify.applicant_cb/froms.form_request')
+        @endif
+
+
 @endif
 
 

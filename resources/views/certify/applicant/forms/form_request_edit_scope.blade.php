@@ -4,7 +4,7 @@
 
 {{-- work on Certify\ApplicantController --}}
 
-<fieldset class="white-box" style="display: none;">
+<fieldset class="white-box" hidden>
     <div class="clearfix"></div>
     <legend><h4>1. ข้อมูลขอรับบริการ</h4></legend>
 
@@ -12,8 +12,6 @@
 
     @php
         $Formula_Arr = App\Models\Bcertify\Formula::where('applicant_type',3)->orderbyRaw('CONVERT(title USING tis620)')->pluck('title','id');
-
-        // $province = DB::table('province')->select('*')->get();
 
         $province = DB::table('province')->select('PROVINCE_ID','PROVINCE_NAME', 'PROVINCE_NAME_EN')->orderbyRaw('CONVERT(PROVINCE_NAME USING tis620)')->get();
 
@@ -166,7 +164,7 @@
 <script>
     var select = document.querySelector('.custom-select');
     var selected = document.querySelector('.select-selected');
-   
+    // var items = document.querySelector('.select-items');
     var selectedItems = [];
 
     // selected.addEventListener('click', function() {
@@ -181,6 +179,7 @@
             }
         });
     }
+
 
     var items = document.querySelector('.select-items');
 
@@ -270,21 +269,63 @@
 {{-- {{$urlType}} --}}
 
     @if (count($formulas)==1)
-        <div class="form-group {{ $errors->has('according_formula') ? 'has-error' : ''}}">
+        {{-- <div class="form-group {{ $errors->has('according_formula') ? 'has-error' : ''}}">
             {!! HTML::decode(Form::label('according_formula', '<span class="text-danger">*</span> ตามมาตรฐานเลข'.':'.'<br/><span class="  font_size">(According to TIS)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
             <div class="col-md-4" >
                 {!! Form::select('according_formula',$Formula_Arr, !empty( $certi_lab->standard_id )?$certi_lab->standard_id:$formulas[0]->id, ['class' => 'form-control', 'id'=>'according_formula','readonly' => 'readonly','required' => true]) !!}
                 {!! $errors->first('according_formula', '<p class="help-block">:message</p>') !!}
             </div>
+        </div> --}}
+
+        <div class="form-group {{ $errors->has('according_formula') ? 'has-error' : '' }}">
+            <label for="according_formula" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> ตามมาตรฐานเลข:<br/>
+                <span class="font_size">(According to TIS)</span>
+            </label>
+            <div class="col-md-4">
+                <select name="according_formula" id="according_formula" class="form-control" readonly required>
+                    @foreach($Formula_Arr as $key => $value)
+                        <option value="{{ $key }}" 
+                            {{ (!empty($certi_lab->standard_id) && $certi_lab->standard_id == $key) || (empty($certi_lab->standard_id) && $formulas[0]->id == $key) ? 'selected' : '' }}>
+                            {{ $value }}
+                        </option>
+                    @endforeach
+                </select>
+                @if($errors->has('according_formula'))
+                    <p class="help-block">{{ $errors->first('according_formula') }}</p>
+                @endif
+            </div>
         </div>
+        
     @else
-        <div class="form-group {{ $errors->has('according_formula') ? 'has-error' : ''}}">
+        {{-- <div class="form-group {{ $errors->has('according_formula') ? 'has-error' : ''}}">
             {!! HTML::decode(Form::label('according_formula', '<span class="text-danger">*</span> ตามมาตรฐานเลข'.':'.'<br/><span class="  font_size">(According to TIS)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
             <div class="col-md-4" >
                 {!! Form::select('according_formula',$Formula_Arr, !empty( $certi_lab->standard_id )?$certi_lab->standard_id:null, ['class' => 'form-control', 'id'=>'according_formula','required' => true, 'placeholder' =>'- เลือกตามมาตรฐานเลข -']) !!}
                 {!! $errors->first('according_formula', '<p class="help-block">:message</p>') !!}
             </div>
+        </div> --}}
+        <div class="form-group {{ $errors->has('according_formula') ? 'has-error' : '' }}">
+            <label for="according_formula" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> ตามมาตรฐานเลข:<br/>
+                <span class="font_size">(According to TIS)</span>
+            </label>
+            <div class="col-md-4">
+                <select name="according_formula" id="according_formula" class="form-control" required>
+                    <option value="" disabled selected>- เลือกตามมาตรฐานเลข -</option>
+                    @foreach($Formula_Arr as $key => $value)
+                        <option value="{{ $key }}" 
+                            {{ (!empty($certi_lab->standard_id) && $certi_lab->standard_id == $key) ? 'selected' : '' }}>
+                            {{ $value }}
+                        </option>
+                    @endforeach
+                </select>
+                @if($errors->has('according_formula'))
+                    <p class="help-block">{{ $errors->first('according_formula') }}</p>
+                @endif
+            </div>
         </div>
+        
     @endif
 
     
@@ -335,48 +376,32 @@
         </div>
         
     @else
-        {{-- <div class="form-group {{ $errors->has('purpose') ? 'has-error' : ''}}">
-            {!! HTML::decode(Form::label('lab_name', 'วัตถุประสงค์ในการยื่นคำขอ'.':'.'<br/><span class=" font_size">(Apply to NSC for)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-            <label  class="col-md-2 label-height" >
-                {!! Form::radio('purpose', '1', true, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'purpose1']) !!}
-                &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <span class="font_size">(initial assessment)</span>
-            </label>
 
-            @if ($certifieds->count() > 0)
-                <label  class="col-md-2 label-height">
-                    {!! Form::radio('purpose', '2', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'purpose2']) !!}
-                    &nbsp;ต่ออายุใบรับรอง<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(renewal)</span>
-                </label>
-                <label  class="col-md-2 label-height">
-                    {!! Form::radio('purpose', '3', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'purpose3']) !!}
-                    &nbsp;ขยายขอบข่าย <br> &nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(extending accreditation)</span>
-                </label>
-                <label  class="col-md-3 label-height">
-                    {!! Form::radio('purpose', '4', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'purpose4']) !!}
-                    &nbsp;การเปลี่ยนแปลงมาตรฐาน <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(standard change)</span>
-                </label>
-            @endif
-
-            {!! $errors->first('purpose', '<p class="help-block">:message</p>') !!}
-        </div> --}}
 
         <div class="form-group {{ $errors->has('purpose') ? 'has-error' : '' }}">
             <label for="lab_name" class="col-md-3 control-label label-height">
                 วัตถุประสงค์ในการยื่นคำขอ:<br/>
                 <span class="font_size">(Apply to NSC for)</span>
             </label>
-        
+            @if ($certifieds->count() == 0)
             <label class="col-md-2 label-height">
-                <input type="radio" name="purpose" value="1" class="check" data-radio="iradio_square-green" id="purpose1" checked>
-                &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="radio" name="purpose" value="1" class="check" data-radio="iradio_square-green" id="purpose1" >
+                &nbsp;ยื่นขอครั้งแรก<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <span class="font_size">(initial assessment)</span>
             </label>
+            <label class="col-md-2 label-height">
+                <input type="radio" name="purpose" value="6" class="check" data-radio="iradio_square-green" id="purpose6">
+                &nbsp;โอนใบรับรอง <br> &nbsp;&nbsp;&nbsp;
+                <span class="font_size">(transfer accreditation)</span>
+            </label>
+            @endif
         
             @if ($certifieds->count() > 0)
+            <label class="col-md-2 label-height">
+                <input type="radio" name="purpose" value="1" class="check" data-radio="iradio_square-green" id="purpose1" >
+                &nbsp;ยื่นขอครั้งแรก<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="font_size">(initial assessment)</span>
+            </label>
                 <label class="col-md-2 label-height">
                     <input type="radio" name="purpose" value="2" class="check" data-radio="iradio_square-green" id="purpose2">
                     &nbsp;ต่ออายุใบรับรอง<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -416,6 +441,7 @@
                     <span class="font_size">(transfer accreditation)</span>
                 </label>
             @endif
+
         
             @if ($errors->has('purpose'))
                 <p class="help-block">{{ $errors->first('purpose') }}</p>
@@ -427,86 +453,24 @@
     @endif
     
     <div id="box_ref_application_no" style="display: none;">
-
-            {{-- @if ($certifieds->count() > 0)
-            <div class="form-group {{ $errors->has('according_formula') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('according_formula', '<span class="text-danger">*</span> ตามมาตรฐานเลข'.':'.'<br/><span class="  font_size">(According to TIS)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <div class="col-md-4" >
-                    {!! Form::select('according_formula',$Formula_Arr, !empty( $certi_lab->standard_id )?$certi_lab->standard_id:$formulas[0]->id, ['class' => 'form-control', 'id'=>'certified','readonly' => 'readonly']) !!}
-                    {!! $errors->first('according_formula', '<p class="help-block">:message</p>') !!}
-                </div>
-            </div>
-            @endif --}}
-{{-- 
-            @if ($certifieds->count() > 0)
-            <div class="form-group {{ $errors->has('certified') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('certified', '<span class="text-danger">*</span> ตามมาตรฐานเลข'.':'.'<br/><span class="font_size">(According to TIS)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <div class="col-md-4">
-                    {!! Form::select('certified', $certifieds->pluck('certificate_no', 'id')->toArray(), null, ['class' => 'form-control', 'id' => 'certified', 'readonly' => 'readonly']) !!}
-                    {!! $errors->first('certified', '<p class="help-block">:message</p>') !!}
-                </div>
-            </div>
-        @endif --}}
-
-        {{-- @if ($certifieds->count() > 0)
-        <div class="form-group {{ $errors->has('certified') ? 'has-error' : ''}}">
-            <label class="col-md-3 control-label label-height">
-                <span class="text-danger">*</span> ใบรับรองเลขที่:<br />
-                <span class="font_size">(According to TIS)</span>
-            </label>
-            <div class="col-md-4">
-                <select name="select_certified" id="select_certified" class="form-control" readonly="readonly">
-                    <option value="{{null}}">- เลือกใบรับรอง -</option>
-                    @foreach($certifieds as $certified)
-                        <option value="{{$certified->id}}" 
-
-                            
-                            >{{ $certified->certificate_no }}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('certified'))
-                    <p class="help-block">{{ $errors->first('certified') }}</p>
-                @endif
-            </div>
-        </div>
-        @endif --}}
-
-        {{-- @if ($certifieds->count() > 0)
-            <div class="form-group {{ $errors->has('select_certified') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('select_certified', '<span class="text-danger">*</span> ใบรับรองเลขที่:'.'<br/><span class="font_size">(According to TIS)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <div class="col-md-4">
-                    {!! Form::select('select_certified', $certifieds->pluck('certificate_no', 'id'), 'aaa', ['class' => 'form-control', 'id' => 'select_certified', 'readonly' => 'readonly', 'required' => true]) !!}
-                    {!! $errors->first('select_certified', '<p class="help-block">:message</p>') !!}
-                </div>
-            </div>
-        @endif --}}
-{{-- 
-        <div class="form-group{{ $errors->has('select_certified_temp') ? 'has-error' : ''}}">
-            {!! HTML::decode(Form::label('select_certified_temp', '<span class="text-danger">*</span> select_certified_temp'.':'.'<br/><span class=" font_size">(Name laboratory)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
-            <div class="col-md-7">
-                {!! Form::text('select_certified_temp', null, ['class' => 'form-control']) !!}
-                {!! $errors->first('select_certified_temp', '<p class="help-block">:message</p>') !!}
-            </div>
-        </div> --}}
-
         <input type="text" id="select_certified_temp" name="select_certified_temp" value="{{ isset($labRequestType) ? $labRequestType->certificate_id : '' }}" hidden >
-
-         @if ($certifieds->count() > 0)
-            <div class="form-group {{ $errors->has('select_certified') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('select_certified', '<span class="text-danger">*</span> ใบรับรองเลขที่:'.'<br/><span class="font_size">(According to TIS)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
+        @if ($certifieds->count() > 0)
+            <div class="form-group {{ $errors->has('select_certified') ? 'has-error' : '' }}">
+                <label for="select_certified" class="col-md-3 control-label label-height">
+                    <span class="text-danger">*</span> ใบรับรองเลขที่:
+                    <br>
+                    <span class="font_size">(According to TIS)</span>
+                </label>
                 <div class="col-md-4">
-                    {!! Form::select('select_certified', $certifieds->pluck('certificate_no', 'id'), '111', ['class' => 'form-control', 'id' => 'select_certified', 'readonly' => 'readonly']) !!}
-                    {!! $errors->first('select_certified', '<p class="help-block">:message</p>') !!}
+                    <select name="select_certified" id="select_certified" class="form-control" readonly>
+                    </select>
+                    @if ($errors->has('select_certified'))
+                        <p class="help-block">{{ $errors->first('select_certified') }}</p>
+                    @endif
                 </div>
             </div>
-        @endif 
+        @endif
 
-
-
-
-        
-{{-- !empty( $certi_lab->standard_id )?$certi_lab->standard_id:$formulas[0]->id --}}
-        
 
         <div class="form-group {{ $errors->has('ref_application_no') ? 'has-error' : ''}}">
             {!! HTML::decode(Form::label('ref_application_no', 'อ้างอิงเลขที่คำขอ'.':'.'<br/><span class=" font_size">(Application No.)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
@@ -531,63 +495,6 @@
         </div>
     </div>
 
-    {{-- @if( count($app_check) > 0 && count($certificate_exports) == 0)
-        @php 
-            $app_first = $app_check->first();
-        @endphp
-        <div class="form-group {{ $errors->has('ref_application_no') ? 'has-error' : ''}}">
-            {!! HTML::decode(Form::label('ref_application_no', 'เลขที่คำขอ'.':'.'<br/><span class=" font_size">(Application No.)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
-            <div class="col-md-4">
-                {!! Form::text('ref_application_no', !empty( $app_first )?$app_first->app_no:null, ['class' => 'form-control','required' => true, 'readonly' => true]) !!}
-                {!! $errors->first('ref_application_no', '<p class="help-block">:message</p>') !!}
-            </div>
-        </div>
-    @endif
-    @if (count($certificate_exports) > 0)
-          
-    @if (count($certificate_no)==1)
-        <div class="form-group div_certificate_exports_id{{ $errors->has('certificate_exports_id') ? 'has-error' : ''}}">
-            {!! HTML::decode(Form::label('certificate_exports_id', '<span class="text-danger">*</span> ใบรับรองเลขที่'.':'.'<br/><span class="  font_size">(Certificate No)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-            <div class="col-md-4" >
-                {!! Form::select('certificate_exports_id', 
-                   $certificate_exports,
-                 !empty($certi_lab->certificate_exports_id)?$certi_lab->certificate_exports_id: $certificate_no[0]->id,
-                  ['class' => 'form-control',
-                   'id'=>'certificate_exports_id',
-                    'required' => true,
-                    'placeholder' =>'- ใบรับรองเลขที่ -'
-                    ]) !!}
-                {!! $errors->first('certificate_exports_id', '<p class="help-block">:message</p>') !!}
-            </div>
-        </div>
-    @elseif (count($certificate_no) > 0)
-        <div class="form-group div_certificate_exports_id{{ $errors->has('certificate_exports_id') ? 'has-error' : ''}}">
-            {!! HTML::decode(Form::label('certificate_exports_id', '<span class="text-danger">*</span> ใบรับรองเลขที่'.':'.'<br/><span class="  font_size">(Certificate No)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-            <div class="col-md-4" >
-                {!! Form::select('certificate_exports_id',
-                 $certificate_exports,
-                 !empty($certi_lab->certificate_exports_id)?$certi_lab->certificate_exports_id:null,
-                 ['class' => 'form-control',
-                 'id'=>'certificate_exports_id',
-                 'required' => true,
-                  'placeholder' =>'- ใบรับรองเลขที่ -']) !!}
-                {!! $errors->first('certificate_exports_id', '<p class="help-block">:message</p>') !!}
-            </div>
-        </div>
-    @endif
-
-    @if (count($certificate_no) > 0)
-        <div class="form-group div_certificate_exports_id{{ $errors->has('ref_application_no') ? 'has-error' : ''}}">
-            {!! HTML::decode(Form::label('ref_application_no', 'เลขที่คำขอ'.':'.'<br/><span class=" font_size">(Application No.)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
-            <div class="col-md-4">
-                {!! Form::text('ref_application_no', null, ['class' => 'form-control','required' => true, 'readonly' => true]) !!}
-                {!! $errors->first('ref_application_no', '<p class="help-block">:message</p>') !!}
-            </div>
-        </div>
-    @endif   
-@endif --}}
-
-
     <div hidden class="form-group {{ $errors->has('branch_type') ? 'has-error' : ''}}" >
         {!! HTML::decode(Form::label('branch_type', '<span class="text-danger">*</span> ประเภทสาขา'.':'.'<br/><span class=" font_size">(Branch Type)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
         <div class="col-md-4" >
@@ -601,7 +508,7 @@
             </div>
         </div>
     </div>
-{{-- {{$certi_lab->lab_name}} --}}
+
     <div class="form-group{{ $errors->has('lab_name') ? 'has-error' : ''}}">
         {!! HTML::decode(Form::label('lab_name', '<span class="text-danger">*</span> ชื่อห้องปฏิบัติการ (TH)'.':'.'<br/><span class=" font_size">(Name laboratory)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
         <div class="col-md-7">
@@ -626,7 +533,56 @@
         </div>
     </div>
 
+
+    <div id="transfer-wrapper" style="display: none;">
+        <div class="form-group">
+            <div class="col-md-3 control-label label-height">
+                <h3>ข้อมูลผู้โอน </h3>
+            </div>
+            <div class="col-md-7 label-height" style="margin-top:10px">
+                <button id="check_transferee" type="button" class="btn btn-sm btn-info">ตรวจสอบ</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="id_number" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> ใบรับรองเลขที่:<br/>
+                <span class="font_size">(Transferer Certificate Number)</span>
+            </label>
+            <div class="col-md-7">
+                <input type="text" name="transferee_certificate_number" id="transferee_certificate_number" class="form-control" maxlength="13">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="id_number" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> เลข 13 หลักผู้โอน:<br/>
+                <span class="font_size">(Transferer 13-digit ID)</span>
+            </label>
+            <div class="col-md-7">
+                <input type="text" name="transferer_id_number" id="transferer_id_number" class="form-control" maxlength="13">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="transferee_name" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> ชื่อผู้โอน:<br/>
+                <span class="font_size">(Transferer Name)</span>
+            </label>
+            <div class="col-md-7">
+                <input type="text" name="transferee_name" id="transferee_name" class="form-control" readonly>
+            </div>
+        </div>
+
+        
+
+
+        
+        
+    </div>
+
+
     <hr>
+
+
 
     <div class="form-group {{ $errors->has('use_address_office') ? 'has-error' : ''}}">
         {!! HTML::decode(Form::label('use_address_office', 'ที่อยู่ห้องปฏิบัติการ'.':'.'<br/><span class=" font_size">(Address laboratory)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
@@ -855,20 +811,21 @@
     </div>
 
     <div class="row">
+        {{-- <img src="{{asset('uploads/files/applicants/check_files/67cad128662a1_20250307_175744.png')}}" style="width: 150px" alt=""> --}}
         <div class="col-md-6">
             <div class="form-group {{ $errors->has('lab_latitude') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('lab_latitude', '<span class="text-danger">*</span> พิกัดที่ตั้ง (ละติจูด)'.':'.'<br/><span class=" font_size">(latitude)</span>',['class' => 'col-md-5 control-label label-height'])) !!}
+                {!! HTML::decode(Form::label('lab_latitude', ' พิกัดที่ตั้ง (ละติจูด)'.':'.'<br/><span class=" font_size">(latitude)</span>',['class' => 'col-md-5 control-label label-height'])) !!}
                 <div class="col-md-7">
-                    <input type="text" name="lab_latitude" id="lab_latitude" class="form-control input_address" value="{!! !empty($certi_lab->lab_latitude)?$certi_lab->lab_latitude: null !!}" required>
+                    <input type="text" name="lab_latitude" id="lab_latitude" class="form-control input_address" value="{!! !empty($certi_lab->lab_latitude)?$certi_lab->lab_latitude: null !!}" >
                     {!! $errors->first('lab_latitude', '<p class="help-block">:message</p>') !!}
                 </div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="form-group {{ $errors->has('lab_longitude') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('lab_longitude', '<span class="text-danger">*</span> พิกัดที่ตั้ง (ลองจิจูด)'.':'.'<br/><span class=" font_size">(longitude)</span>',['class' => 'col-md-5 control-label label-height'])) !!}
+                {!! HTML::decode(Form::label('lab_longitude', ' พิกัดที่ตั้ง (ลองจิจูด)'.':'.'<br/><span class=" font_size">(longitude)</span>',['class' => 'col-md-5 control-label label-height'])) !!}
                 <div class="col-md-7">
-                    <input type="text" name="lab_longitude" id="lab_longitude" class="form-control input_address" value="{!! !empty($certi_lab->lab_longitude)?$certi_lab->lab_longitude: null !!}" required>
+                    <input type="text" name="lab_longitude" id="lab_longitude" class="form-control input_address" value="{!! !empty($certi_lab->lab_longitude)?$certi_lab->lab_longitude: null !!}" >
                     {!! $errors->first('lab_longitude', '<p class="help-block">:message</p>') !!}
                 </div>
             </div>
@@ -930,7 +887,7 @@
             <div class="form-group {{ $errors->has('address_tel') ? 'has-error' : ''}}">
                 {!! HTML::decode(Form::label('address_tel', '<span class="text-danger">*</span> Email'.':'.'<br/><span class=" font_size">(E-mail)</span>',['class' => 'col-md-5 control-label label-height'])) !!}
                 <div class="col-md-7">
-                    <input type="email"  value="{!! !empty($certi_lab->email)?$certi_lab->email: null !!}"  name="address_email" id="address_email" class="form-control" required placeholder="Email@gmail.com">
+                    <input type="email"  value="{!! !empty($certi_lab->email)?$certi_lab->email: null !!}"  name="address_email" id="address_email" class="form-control" required placeholder="Email@gmail.com" readonly>
                     {!! $errors->first('address_email', '<p class="help-block">:message</p>') !!}
                 </div>
             </div>
@@ -995,7 +952,7 @@
 
 
 
-<fieldset class="white-box" style="display: none;">
+<fieldset class="white-box" hidden>
     <legend><h4>2. ข้อมูลทั่วไป (General information)</h4></legend>
 
     @php
@@ -1162,7 +1119,7 @@
 
 </div>
 
-<fieldset class="white-box" style="display: none;">
+<fieldset class="white-box" hidden>
     <legend><h4>3. ระบบบริหารงานของห้องปฏิบัติการ (Management System of Laboratory)</h4></legend>
     <div class="row">
         <div class="m-l-15 form-group">
@@ -1200,13 +1157,12 @@
         labCalScopeTransactions = @json($labCalScopeTransactions ?? []);
         branchLabAdresses = @json($branchLabAdresses ?? []);
 
-        console.log(branchLabAdresses);
-        console.log(labCalScopeTransactions);
+        // console.log(branchLabAdresses);
+        // console.log(labCalScopeTransactions);
 
         certifieds = @json($certifieds->mapWithKeys(function($certified) {
             return [$certified->id => $certified->certificate_no];
         }) ?? []);
-
    
         //เมื่อกรอกภาษาอังกฤษ
         $('.input_address_eng').keyup(function(event) {
@@ -1218,10 +1174,7 @@
         });
 
         // change   สาขาที่ขอรับการรับรอง
-        $("input[name=lab_ability]").on("ifChanged",function(){
-            status_show_lab_ability();
-            // certificate_exports();
-        });
+
         status_show_lab_ability();
         // certificate_exports();
 
@@ -1335,6 +1288,7 @@
                     dataType: 'json',
                     delay: 250,
                     data: function (params) {
+                        // console.log("Requesting URL:", "{{ url('/funtions/search-addreess') }}"); // ตรวจ)
                         return {
                             searchTerm: params // search term
                         };
@@ -1348,7 +1302,7 @@
                 },
                 placeholder: 'คำค้นหา',
                 minimumInputLength: 1,
-            });
+        });
 
             $("#authorized_address_seach").on('change', function () {
 
@@ -1376,11 +1330,18 @@
                 });
             });
 
-        // change   สาขาที่ขอรับการรับรอง
-        $("input[name=purpose], input[name=lab_ability]").on("ifChanged",function(){
-            // console.log('check วัตถุประสงค์ในการยื่นคำขอ');
+
+
+        $("input[name=purpose]").on("ifChanged",function(){
             box_ref_application_no();
-            // get_app_no_and_certificate_exports_no();
+        });
+
+
+
+
+        $("input[name=lab_ability]").on("ifChanged",function(){
+            status_show_lab_ability();
+            // certificate_exports();
         });
             
         // change   สาขาที่ขอรับการรับรอง
@@ -1465,7 +1426,7 @@
                 method:"POST",
                 data:{select:select,_token:_token},
                 success:function (result){
-                    console.log('aha');
+                    // console.log('aha');
                     $('#viewForm90').fadeIn();
                     $('#viewForm91').hide();
 
@@ -1714,14 +1675,58 @@
 
     function box_ref_application_no(){
         let purpose = $('input[name="purpose"]:checked').val();
+  
         
         if(purpose !== undefined){
-            if(purpose >= 2){
+            if(purpose >= 2 && purpose < 6){
+
+                let std_id = $('#according_formula').val();
+                let lab_type = $('input[name="lab_ability"]:checked').val();
+
+
+                if(lab_type == 'calibrate'){
+                    lab_type = 4;
+                }else if(lab_type == 'test')
+                {
+                    lab_type = 3;
+                }
+
+                
+                $.get("{{ url('/certify/applicant/get-certificate-belong') }}", { 
+                        std_id: std_id,
+                        lab_type: lab_type
+                    }).done(function( data ) {
+                       console.log('fk',data)
+                        if (data.certificateExports.length > 0) {
+                            // ล้างเนื้อหาใน select เดิมก่อน (ถ้ามี)
+                            $('#select_certified').empty();
+                            // Loop ข้อมูลจาก data.certificateExports เพื่อสร้าง option
+                            data.certificateExports.forEach(function(cert) {
+                                $('#select_certified').append(
+                                    $('<option>', {
+                                        value: cert.id,
+                                        text: cert.certificate_no
+                                    })
+                                );
+                            });
+
+                            // เพิ่ม readonly attribute ให้กับ select
+                            $('#select_certified').attr('readonly', 'readonly');
+                            $('#select_certified option:first').val();
+                            $('#select_certified').trigger('change');
+                            } else {
+                                // กรณีไม่มีข้อมูล
+                                console.log("No certificate exports found.");
+                            }
+ 
+                    });
+                
                 $('#box_ref_application_no').show();
                 $('#box_ref_application_no').find('input').prop('disabled', false);
                 $('#accereditation_no').prop('required', true);
                 
-            }else{
+                
+            }else if(purpose == 1){
                 $('#box_ref_application_no').hide();
                 $('#box_ref_application_no').find('input').prop('disabled', true);
                 $('#accereditation_no').prop('required', false);
@@ -1729,11 +1734,76 @@
                     resetFields();
                 }
                 resetCertifiedSelect();
+
+                console.log('check is request and stard exist in certificate export')
+                isLabTypeAndStandardBelong();
                 
             }
+
+            if (purpose == 6) {
+
+                $('#box_ref_application_no').hide();
+                $('#box_ref_application_no').find('input').prop('disabled', true);
+                $('#accereditation_no').prop('required', false);
+                // if(currentMethod === 'create'){
+                    resetFields();
+                // }
+                resetCertifiedSelect();
+
+                $('#transfer-wrapper').show();  // ซ่อน div ที่มี id เป็น transfer-wrapper
+            } else {
+                $('#transfer-wrapper').hide();  // แสดง div ที่มี id เป็น transfer-wrapper
+            }
+
+
         }
         
     }
+
+    function isLabTypeAndStandardBelong(){
+        let std_id = $('#according_formula').val();
+        let lab_type = $('input[name="lab_ability"]:checked').val();
+        // let purpose = $('input[name="purpose"]:checked').val();
+        let selectedText = $('input[name="lab_ability"]:checked')
+                .closest('label') // หา parent <label>
+                .contents() // ดึง child nodes ทั้งหมด (รวม Text Node และ Elements)
+                .filter(function() {
+                    return this.nodeType === 3; // เลือกเฉพาะ Text Node
+                })
+                .text() // ดึงข้อความจาก Text Node
+                .replace(/\s+/g, ' ') // ลบช่องว่างเกินและแทนที่ด้วย 1 ช่องว่าง
+                .trim(); // ตัดช่องว่างหน้า/หลัง
+
+        if(lab_type == 'calibrate'){
+            lab_type = 4;
+        }else if(lab_type == 'test')
+        {
+            lab_type = 3;
+        }
+        console.log(lab_type)
+        console.log(std_id)
+
+        $.get("{{ url('/certify/applicant/is-lab-type-and-standard-belong') }}", { 
+                std_id: std_id,
+                lab_type: lab_type
+            }).done(function( data ) {
+                console.log(data);
+                if (data.certiLabs.length != 0)
+                {
+                    alert('ไม่สามารถ "ยื่นขอครั้งแรก" สำหรับเลขมาตรฐาน "'+$('#according_formula option:selected').text().trim()+'" และความสามารถห้องปฏิบัติการ "'+selectedText+'" เนื่องจากมีใบรับรองแล้วในระบบแล้ว');
+                    $("input[name=purpose]").iCheck('uncheck');
+                }
+                
+            });
+
+        
+    }
+
+    // เมื่อ radio ของ lab_ability เปลี่ยนค่า
+    $("input[name=lab_ability]").on("ifChanged", function(event) {
+        // Uncheck radio ทั้งหมดในกลุ่ม purpose
+        $("input[name=purpose]").iCheck('uncheck');
+    });
 
     function get_app_no_and_certificate_exports_no(){
         let std_id = $('#according_formula').val();
@@ -1746,6 +1816,7 @@
                 std_id: std_id,
                 lab_type: lab_type
             }).done(function( data ) {
+                console.log(data);
                 if(data.status){
                     $('#ref_application_no').val(data.app_no);
                     $('#certificate_exports_id').val(data.certificate_exports_no);
@@ -1754,6 +1825,64 @@
         }
     }
 
+    $(document).on('click', '#check_transferee', function(e) {
+        e.preventDefault();
+        let transferee_certificate_number = $('#transferee_certificate_number').val();
+        let transferer_id_number = $('#transferer_id_number').val();
+        let std_id = $('#according_formula').val();
+        let lab_type = $('input[name="lab_ability"]:checked').val();
+        const _token            = $('input[name="_token"]').val();
+
+        if(lab_type == 'calibrate'){
+            lab_type = 4;
+        }else if(lab_type == 'test')
+        {
+            lab_type = 3;
+        }
+
+        let pattern = /^\d{2}-LB\d{4}$/; // ตรวจสอบว่าเป็นตัวเลข 2 หลัก ตามด้วย "-LB" และตัวเลข 4 หลัก
+
+        if (!pattern.test(transferee_certificate_number)) {
+            alert("รูปแบบใบรับรองไม่ถูกต้อง");
+            return;
+        } 
+
+        // ลบอักขระพิเศษทั้งหมดให้เหลือแต่ตัวเลข
+        transferer_id_number = transferer_id_number.replace(/\D/g, ''); // \D หมายถึงตัวอักษรที่ไม่ใช่ตัวเลข
+
+        // ตรวจสอบให้เป็นเลข 13 หลัก
+        if (transferer_id_number.length !== 13) {
+            alert("กรุณากรอกเลข 13 หลัก");
+            return;
+        }
+
+        $.ajax({
+                url:"{{route('check_lab_transferee')}}",
+                method:"POST",
+                data:{
+                    transferer_id_number:transferer_id_number,
+                    transferee_certificate_number:transferee_certificate_number,
+                    std_id:std_id,
+                    lab_type:lab_type,
+                    _token:_token
+                },
+                success:function (result){
+                    console.log(result);
+                    if(result.user == null)
+                    {
+                        alert('ไม่พบข้อมูลผู้รับโอน โปรดตรวจสอบว่าได้เลือก "ตามมาตรฐานเลข" และ "วัตถุประสงค์ในการยื่นคำขอ" และ "เลขที่ใบรับรอง" และ "เลข 13 หลักของผู้โอน" ตรงกับใบรับรองที่ต้องการรับโอน');
+                    }else
+                    {
+                        alert('ต้องการโอนใบรับรองจาก' + result.user.name );
+                        $('#transferee_name').val( result.user.name);
+                        // $('#lab_name').val( result.certiLab.lab_name);
+                        // $('#lab_name_en').val( result.certiLab.lab_name_en);
+                        // $('#lab_name_short').val( result.certiLab.lab_name_short);
+                    }
+                    
+                }
+            });
+    });
 
 </script>
 @endpush

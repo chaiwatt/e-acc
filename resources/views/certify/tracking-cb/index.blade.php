@@ -96,14 +96,134 @@
                                                       @php
                                                         $status  =  !empty($item->tracking_status->title)? $item->tracking_status->title:'N/A';
                                                       @endphp
-                                                      @if($item->status_id == 3)
-                                                      <button style="border: none" data-toggle="modal"
-                                                               data-target="#TakeAction{{$loop->iteration}}"   >
-                                                               <i class="mdi mdi-magnify"></i>    {!! $status !!}
-                                                      </button>
-                                                      @include ('certify.tracking-cb.modal.modalstatus3',['id'=> $loop->iteration,
-                                                                                                          'certi' => $item
-                                                                                                      ])
+
+                                                      @if ($item->status_id == 2)
+                                                      
+                                                       @if ($item->trackingDocReviewAuditor != null)
+                                                       
+                                                               @if ($item->trackingDocReviewAuditor->status == 0)
+                                                                   <button type="button" style="border: none" data-tracking_id="{{ $item->id }}"  id="show_tracking_doc_review_auditor" >
+                                                                      <i class="mdi mdi-magnify"></i>เห็นชอบการแต่งตั้งคณะผู้ตรวจประเมินเอกสาร (ID:{{$item->status_id }})
+                                                                  </button>
+
+                                                                     <div class="modal fade text-left" id="tracking_doc_review_auditor_modal" tabindex="-1" role="dialog" >
+                                                                        <div class="modal-dialog " style="width:900px !important">
+                                                                            <div class="modal-content">
+                                                                                <div class="modal-header">
+                                                                                    <h4 class="modal-title" id="exampleModalLabel1"> เห็นชอบการแต่งตั้งคณะผู้ตรวจเอกสาร
+                                                                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                                                    </h4>
+                                                                                </div>
+                                                                                <div class="modal-body"> 
+                                                                    
+                                                                                    <table  class="table color-bordered-table primary-bordered-table" id="tracking_doc_review_auditor_wrapper">
+                                                                                        <thead>
+                                                                                                <tr>
+                                                                                                    <th width="10%" >ลำดับ</th>
+                                                                                                    <th width="45%">ชื่อผู้ตรวจประเมิน</th>
+                                                                                                    <th width="45%">หน่วยงาน</th>
+                                                                                                </tr>
+                                                                                        </thead>
+                                                                                        <tbody>
+                                                                                
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                    
+                                                                                    <div class="form-group">
+                                                                                        <input type="hidden" value="{{$item->id}}" id="tracking_id">
+                                                                                        <div class="col-md-3">
+                                                                                            <input type="radio" name="agree" value="1" id="agree" checked>
+                                                                                            <label for="agree" class="control-label">เห็นชอบ</label>
+                                                                                        </div>
+                                                                                        <div class="col-md-6">
+                                                                                            <input type="radio" name="agree" value="2" id="not_agree">
+                                                                                            <label for="not_agree" class="control-label">ไม่เห็นชอบ</label>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    
+                                                                                    <div class="form-group" style="margin-top: 25px">
+                                                                                        <div class="row">
+                                                                                            <div class="col-sm-12" id="text-area-wrapper" style="display: none;">
+                                                                                                <label> หมายเหตุ : </label>
+                                                                                                <textarea class="form-control" name="remark_map" id="remark" rows="4" ></textarea>
+                                                                                            </div>
+                                                                                            <div class="col-sm-12" >
+                                                                                                <button type="button" data-tracking_id="{{$item->id}}" class="btn btn-info waves-effect waves-light " style="margin-top:15px; float:right" id="agree_doc_review_team">
+                                                                                                    บันทึก
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </div>
+                                                                    
+                                                                    
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                @elseif($item->trackingDocReviewAuditor->status == 1 )
+
+                                                                    @if ($item->doc_review_reject == 1)
+                                                                              <button style="border: none" data-toggle="modal"  data-target="#TakeAction{{$loop->iteration}}" data-id="{{ $item->token }}"  >
+                                                                            <i class="mdi mdi-magnify"></i>แก้ไขเอกสาร  (ID:{{$item->status_id }})
+                                                                        </button>
+
+                                                                        <div class="modal fade text-left" id="TakeAction{{$loop->iteration}}" tabindex="-1" role="dialog" aria-labelledby="addBrand">
+                                                                            <div class="modal-dialog " role="document">
+                                                                                <div class="modal-content">
+                                                                                    <div class="modal-header">
+                                                                                        <h4 class="modal-title" id="exampleModalLabel1"> แก้ไขเอกสาร
+                                                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                                                                        </h4>
+                                                                                    </div>
+                                                                                    <div class="modal-body"> 
+                                                                                        @php 
+                                                                                            $auditors_btn =  '';
+                                                                                            if($item->CertiAuditorsStatus == "statusInfo"){
+                                                                                                $auditors_btn = 'btn-info';
+                                                                                            }elseif($item->CertiAuditorsStatus == "statusSuccess"){
+                                                                                                $auditors_btn =  'btn-success';
+                                                                                            }else{
+                                                                                                $auditors_btn = 'btn-danger';
+                                                                                            }
+                                                                                        @endphp
+                                                                                        
+                                                                                        <div class="form-group">
+                                                                                            <label for="">{{$item->doc_review_reject_message}}</label>
+                                                                                        </div>
+                                                                                        
+                                                                                        <div class="form-group" style="margin-top: 25px">
+                                                                                            <div class="row">
+                                                                                                <div class="col-sm-12" >
+                                                                                                    <a href="{{ url('/certify/applicant-cb/' . $item->certificate_export_to->CertiCbTo->token. '/edit') }}"  title="Edit ApplicantIB" class="btn btn-primary">
+                                                                                                        <i class="fa fa-pencil-square-o" aria-hidden="true"> </i> แก้ไขเอกสาร
+                                                                                                    </a>
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
+
+
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    @endif
+                                                                  
+
+                                                                  @elseif($item->trackingDocReviewAuditor->status == 2 )
+                                                                    ไม่เห็นชอบการแต่งตั้งคณะผู้ตรวจประเมินเอกสาร
+                                                   
+                                                                @endif
+                                                              @else
+                                                                  {!! $status !!} (ID:{{$item->status_id }})
+                                                          @endif
+                                                      @elseif($item->status_id == 3)
+                                                        <button style="border: none" data-toggle="modal"
+                                                                data-target="#TakeAction{{$loop->iteration}}"   >
+                                                                <i class="mdi mdi-magnify"></i>    {!! $status !!}
+                                                        </button>
+                                                        @include ('certify.tracking-cb.modal.modalstatus3',['id'=> $loop->iteration,
+                                                                                                            'certi' => $item
+                                                                                                        ])
                                                       @elseif($item->status_id == 5  && !Is_null($item->tracking_inspection_to))  
                                                             <button style="border: none" data-toggle="modal"
                                                                   data-target="#inspection{{$loop->iteration}}"   >
@@ -113,7 +233,24 @@
                                                               @include ('certify.tracking-cb.modal.modalstatus5',['id'=> $loop->iteration,
                                                                                                                       'certi' => $item,
                                                                                                                       'inspection'=> $item->tracking_inspection_to
-                                                                                                                   ])          
+                                                                                                                   ])   
+                                                                                                                   
+                                                     @elseif($item->status_id == 7 && $item->ability_confirm == null)  
+
+                                                           <button style="border: none" data-toggle="modal"
+                                                                  data-target="#report{{$loop->iteration}}"   >
+                                                                  <i class="mdi mdi-magnify"></i>  ยืนยันความสามารถ
+                                                            </button>     
+                                                          
+                                                            @php
+                                                                $certificate= $item->certificate_export_to;
+                                                                $applicant= $item->certificate_export_to->CertiCbTo;
+                                                                // dd($applicant);
+                                                                $id= $loop->iteration;
+                                                                $tracking = $item;
+                                                            @endphp
+                                                            
+                                                             @include ('certify.tracking-cb.modal.modalstatus_ability_confirm')                                                              
                                                       {{-- @elseif($item->status_id == 7 && !Is_null($item->tracking_report_to))                                                                  
                                                              <button style="border: none" data-toggle="modal"
                                                                   data-target="#report{{$loop->iteration}}"   >
@@ -293,5 +430,98 @@
                        }
                    })
            }
+
+
+
+    $('input[name="agree"]').change(function() {
+        if ($('#not_agree').is(':checked')) {
+                    $('#text-area-wrapper').show(); // แสดงทันที
+                } else {
+                    $('#text-area-wrapper').hide(); // ซ่อนทันที
+                    $("#remark").val("");
+                }
+    });
+
+    $('#agree_doc_review_team').click(function(){
+        
+        // const _token = $('input[name="_token"]').val();
+        var _token = $('meta[name="csrf-token"]').attr('content');
+        let trackingId = $(this).data('tracking_id');
+        
+        // ดึงค่าของ radio ที่ถูกเลือก
+        let agreeValue = $("input[name='agree']:checked").val();
+
+        // ดึงค่าของ textarea
+        let remarkText = $("#remark").val();
+
+
+        $.ajax({
+        url: "{{route('tracking.update_cb_doc_review_team')}}",
+        // url: "/certify/applicant/api/test_parameter",
+        method: "POST",
+        data: {
+            trackingId: trackingId,
+            agreeValue: agreeValue,
+            remarkText: remarkText,
+            _token: _token
+        },
+        success: function(result) {
+            location.reload();
+
+        }
+        });
+   
+    });
+
+    $('#show_tracking_doc_review_auditor').click(function(){
+        
+        // let _token = $('input[name="_token"]').val();
+        var _token = $('meta[name="csrf-token"]').attr('content');
+        let trackingId = $(this).data('tracking_id');
+
+        // console.log(_token,trackingId);
+
+        // return;
+
+        $.ajax({
+            url: "{{route('tracking.get_cb_doc_review_auditor')}}",
+            method: "POST",
+            data: {
+                trackingId: trackingId,
+                _token: _token
+            },
+            success: function(result) {
+                console.log(result);
+                // location.reload();
+                let auditors = result.trackingDocReviewAuditors;
+                let tbody = $('#tracking_doc_review_auditor_wrapper tbody');
+                tbody.empty(); // Clear existing rows
+
+                let count = 1; // Initialize row counter
+                auditors.forEach(function(auditor) {
+                    auditor.temp_users.forEach(function(user, index) {
+                        let department = auditor.temp_departments[index] !== 'ไม่มีรายละเอียดหน่วยงานโปรดแก้ไข' 
+                            ? auditor.temp_departments[index] 
+                            : '';
+
+                        let row = `
+                            <tr>
+                                <td>${count}</td>
+                                <td>${user}</td>
+                                <td>${department}</td>
+                            </tr>
+                        `;
+                        tbody.append(row);
+                        count++;
+                    });
+                });
+                $('#tracking_doc_review_auditor_modal').modal('show');
+
+            }
+        });
+
+   
+    });
+
    </script>
 @endpush

@@ -320,6 +320,7 @@ class ApplicantController extends Controller
             }
         }
     
+        // dd($certiLabs);
        
 
         $certifieds = CertificateExport::whereIn('request_number',$certiLabs->get()->pluck('app_no')->toArray())->get();
@@ -553,7 +554,6 @@ class ApplicantController extends Controller
         $requestLab['hq_fax']                  = !empty($request->head_fax)?$request->head_fax:null;
 
         // โอนใบรับรอง
-        // dd('ok',$request->transferer_id_number,$request->transferee_certificate_number);
         if(!empty($request->transferer_id_number) && !empty($request->transferee_certificate_number))
         {
           
@@ -578,7 +578,6 @@ class ApplicantController extends Controller
                     }
                 }
             }
-
 
         }
 
@@ -1134,282 +1133,60 @@ class ApplicantController extends Controller
                     }
    
 
-                    // if($certilab->lab_type == 4){
-                    //     $labCalRequest = new LabCalRequest();
+                    if($certilab->lab_type == 4){
+                        $labCalRequest = new LabCalRequest();
 
-                    //     $labCalRequest->app_certi_lab_id = $certilab->id;
-                    //     $labCalRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
-                    //     $labCalRequest->no = $mainLabInfo['address_number_add'] ?? '';
-                    //     $labCalRequest->moo = $mainLabInfo['address_moo_add'] ?? '';
-                    //     $labCalRequest->province_id = $mainLabInfo['address_city_add'] ?? '';
-                    //     $labCalRequest->province_name = $mainLabInfo['address_city_text_add'] ?? '';
-                    //     $labCalRequest->amphur_id = $mainLabInfo['amphur_id_add'] ?? '';
-                    //     $labCalRequest->amphur_name = $mainLabInfo['address_district_add'] ?? '';
-                    //     $labCalRequest->tambol_id = $mainLabInfo['tambol_id_add'] ?? '';
-                    //     $labCalRequest->tambol_name = $mainLabInfo['sub_district_add'] ?? '';
-                    //     $labCalRequest->postal_code = $mainLabInfo['postcode_add'] ?? '';
-                    //     $labCalRequest->soi = $mainLabInfo['address_soi_add'] ?? '';
-                    //     $labCalRequest->street = $mainLabInfo['address_street_add'] ?? '';
-                    //     $labCalRequest->no_eng = $mainLabInfo['lab_address_no_eng_add'] ?? '';
-                    //     $labCalRequest->moo_eng = $mainLabInfo['lab_moo_eng_add'] ?? '';
-                    //     $labCalRequest->soi_eng = $mainLabInfo['lab_soi_eng_add'] ?? '';
-                    //     $labCalRequest->street_eng = $mainLabInfo['lab_street_eng_add'] ?? '';
-                    //     $labCalRequest->province_name_eng = $mainLabInfo['lab_province_text_eng_add'] ?? '';
-                    //     $labCalRequest->amphur_name_eng = $mainLabInfo['lab_amphur_eng_add'] ?? '';
-                    //     $labCalRequest->tambol_name_eng = $mainLabInfo['lab_district_eng_add'] ?? '';
+                        $labCalRequest->app_certi_lab_id = $certilab->id;
+                        $labCalRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
+                        $labCalRequest->no = $mainLabInfo['address_number_add'] ?? '';
+                        $labCalRequest->moo = $mainLabInfo['address_moo_add'] ?? '';
+                        $labCalRequest->province_id = $mainLabInfo['address_city_add'] ?? '';
+                        $labCalRequest->province_name = $mainLabInfo['address_city_text_add'] ?? '';
+                        $labCalRequest->amphur_id = $mainLabInfo['amphur_id_add'] ?? '';
+                        $labCalRequest->amphur_name = $mainLabInfo['address_district_add'] ?? '';
+                        $labCalRequest->tambol_id = $mainLabInfo['tambol_id_add'] ?? '';
+                        $labCalRequest->tambol_name = $mainLabInfo['sub_district_add'] ?? '';
+                        $labCalRequest->postal_code = $mainLabInfo['postcode_add'] ?? '';
+                        $labCalRequest->soi = $mainLabInfo['address_soi_add'] ?? '';
+                        $labCalRequest->street = $mainLabInfo['address_street_add'] ?? '';
+                        $labCalRequest->no_eng = $mainLabInfo['lab_address_no_eng_add'] ?? '';
+                        $labCalRequest->moo_eng = $mainLabInfo['lab_moo_eng_add'] ?? '';
+                        $labCalRequest->soi_eng = $mainLabInfo['lab_soi_eng_add'] ?? '';
+                        $labCalRequest->street_eng = $mainLabInfo['lab_street_eng_add'] ?? '';
+                        $labCalRequest->province_name_eng = $mainLabInfo['lab_province_text_eng_add'] ?? '';
+                        $labCalRequest->amphur_name_eng = $mainLabInfo['lab_amphur_eng_add'] ?? '';
+                        $labCalRequest->tambol_name_eng = $mainLabInfo['lab_district_eng_add'] ?? '';
 
-                    //     $labCalRequest->save();
-
-                        
-                    //     $labTypes = $mainLabInfo['lab_types'];
-                    //     foreach ($labTypes as $key => $labTypeValues) {
-                    //         if (is_array($labTypeValues)) {
-                    //             foreach ($labTypeValues as $labType) {
-                    //                 $transaction = new LabCalTransaction();
-                    //                 $transaction->lab_cal_request_id = $labCalRequest->id; // ใช้ ID จาก CertiLab
-                    //                 $transaction->key = $key;
-                    //                 $transaction->index = $labType['index'] ?? null;
-                    //                 $transaction->category = $labType['category'] ?? null;
-                    //                 $transaction->category_th = $labType['category_th'] ?? null;
-                    //                 $transaction->instrument = $labType['instrument'] ?? null;
-                    //                 $transaction->instrument_text = $labType['instrument_text'] ?? '';
-                    //                 $transaction->instrument_two = $labType['instrument_two'] ?? null;
-                    //                 $transaction->instrument_two_text = $labType['instrument_two_text'] ?? '';
-                    //                 $transaction->description = $labType['description'] ?? '';
-                    //                 $transaction->standard = $labType['standard'] ?? '';
-                    //                 $transaction->code = $labType['code'] ?? '';
-
-                    //                 $transaction->save();
-
-                    //                 // เพิ่มข้อมูล Measurement และ Ranges
-                    //                 if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                    //                     foreach ($labType['measurements'] as $measurementData) {
-                    //                         $measurement = new LabCalMeasurement();
-                    //                         $measurement->lab_cal_transaction_id = $transaction->id;
-                    //                         $measurement->name = $measurementData['name'] ?? '';
-                    //                         $measurement->type = $measurementData['type'] ?? null;
-                    //                         $measurement->save();
-
-                    //                         if (isset($measurementData['ranges']) && is_array($measurementData['ranges'])) {
-                    //                             foreach ($measurementData['ranges'] as $rangeData) {
-                    //                                 $range = new LabCalMeasurementRange();
-                    //                                 $range->lab_cal_measurement_id = $measurement->id;
-                    //                                 $range->description = $rangeData['description'] ?? '';
-                    //                                 $range->range = $rangeData['range'] ?? '';
-                    //                                 $range->uncertainty = $rangeData['uncertainty'] ?? '';
-                    //                                 $range->save();
-                    //                             }
-                    //                         }
-                    //                     }
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-
-                    //     // Loop through each item in labAddresses
-                    //     foreach ($labAddresses as $labAddress) {
-                    //         $labCalRequest = new LabCalRequest();
-                    //         // กำหนดค่าให้กับฟิลด์
-                    //         $labCalRequest->app_certi_lab_id = $certilab->id;
-                    //         $labCalRequest->type = 2; 
-                    //         $labCalRequest->no = $labAddress['address_number_add_modal'] ?? '';
-                    //         $labCalRequest->moo = $labAddress['village_no_add_modal'] ?? '';
-                    //         $labCalRequest->province_id = $labAddress['address_city_add_modal'] ?? '';
-                    //         $labCalRequest->province_name = $labAddress['address_city_text_add_modal'] ?? '';
-                    //         $labCalRequest->amphur_id = $labAddress['address_district_add_modal_id'] ?? '';
-                    //         $labCalRequest->amphur_name = $labAddress['sub_district_add_modal'] ?? '';
-                    //         $labCalRequest->tambol_id = $labAddress['sub_district_add_modal_id'] ?? '';
-                    //         $labCalRequest->tambol_name = $labAddress['sub_district_add_modal'] ?? '';
-                    //         $labCalRequest->postal_code = $labAddress['postcode_add_modal'] ?? '';
-                    //         $labCalRequest->soi = $labAddress['address_soi_add_modal'] ?? '';
-                    //         $labCalRequest->street = $labAddress['address_street_add_modal'] ?? '';
-                    //         $labCalRequest->no_eng = $labAddress['lab_address_no_eng_add_modal'] ?? '';
-                    //         $labCalRequest->moo_eng = $labAddress['lab_moo_eng_add_modal'] ?? '';
-                    //         $labCalRequest->soi_eng = $labAddress['lab_soi_eng_add_modal'] ?? '';
-                    //         $labCalRequest->street_eng = $labAddress['lab_street_eng_add_modal'] ?? '';
-                    //         $labCalRequest->province_name_eng = $labAddress['lab_province_text_eng_add_modal'] ?? '';
-                    //         $labCalRequest->amphur_name_eng = $labAddress['lab_amphur_eng_add_modal'] ?? '';
-                    //         $labCalRequest->tambol_name_eng = $labAddress['lab_district_eng_add_modal'] ?? '';
-        
-                    //         // บันทึกข้อมูล
-                    //         $labCalRequest->save();
-                            
-                                            
-                    //         $labTypes = $labAddress['lab_types'];
-                    //         foreach ($labTypes as $key => $labTypeValues) {
-                    //             if (is_array($labTypeValues)) {
-                    //                 foreach ($labTypeValues as $labType) {
-                    //                     // สร้าง LabCalMainTransaction
-                    //                     $transaction = new LabCalTransaction();
-                    //                     $transaction->lab_cal_request_id = $labCalRequest->id; // ใช้ ID จาก CertiLab
-                    //                     $transaction->key = $key;
-                    //                     $transaction->index = $labType['index'] ?? null;
-                    //                     $transaction->category = $labType['category'] ?? null;
-                    //                     $transaction->category_th = $labType['category_th'] ?? null;
-                    //                     $transaction->instrument = $labType['instrument'] ?? null;
-                    //                     $transaction->instrument_text = $labType['instrument_text'] ?? '';
-                    //                     $transaction->instrument_two = $labType['instrument_two'] ?? null;
-                    //                     $transaction->instrument_two_text = $labType['instrument_two_text'] ?? '';
-                    //                     $transaction->description = $labType['description'] ?? '';
-                    //                     $transaction->standard = $labType['standard'] ?? '';
-                    //                     $transaction->code = $labType['code'] ?? '';
-
-                    //                     $transaction->save();
-
-                    //                     // เพิ่มข้อมูล Measurement และ Ranges
-                    //                     if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                    //                         foreach ($labType['measurements'] as $measurementData) {
-                    //                             $measurement = new LabCalMeasurement();
-                    //                             $measurement->lab_cal_transaction_id = $transaction->id;
-                    //                             $measurement->name = $measurementData['name'] ?? '';
-                    //                             $measurement->type = $measurementData['type'] ?? null;
-                    //                             $measurement->save();
-
-                    //                             if (isset($measurementData['ranges']) && is_array($measurementData['ranges'])) {
-                    //                                 foreach ($measurementData['ranges'] as $rangeData) {
-                    //                                     $range = new LabCalMeasurementRange();
-                    //                                     $range->lab_cal_measurement_id = $measurement->id;
-                    //                                     $range->description = $rangeData['description'] ?? '';
-                    //                                     $range->range = $rangeData['range'] ?? '';
-                    //                                     $range->uncertainty = $rangeData['uncertainty'] ?? '';
-                    //                                     $range->save();
-                    //                                 }
-                    //                             }
-                    //                         }
-                    //                     }
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-                     
-                    // }else if($certilab->lab_type == 3){
-                    //     $labTestRequest = new LabTestRequest();
-
-                    //     $labTestRequest->app_certi_lab_id = $certilab->id;
-                    //     $labTestRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
-                    //     $labTestRequest->no = $labMainAddress['address_number_add'] ?? '';
-                    //     $labTestRequest->moo = $labMainAddress['address_moo_add'] ?? '';
-                    //     $labTestRequest->province_id = $labMainAddress['address_city_add'] ?? '';
-                    //     $labTestRequest->province_name = $labMainAddress['address_city_text_add'] ?? '';
-                    //     $labTestRequest->amphur_id = $labMainAddress['amphur_id_add'] ?? '';
-                    //     $labTestRequest->amphur_name = $labMainAddress['address_district_add'] ?? '';
-                    //     $labTestRequest->tambol_id = $labMainAddress['tambol_id_add'] ?? '';
-                    //     $labTestRequest->tambol_name = $labMainAddress['sub_district_add'] ?? '';
-                    //     $labTestRequest->postal_code = $labMainAddress['postcode_add'] ?? '';
-                    //     $labTestRequest->soi = $labMainAddress['address_soi_add'] ?? '';
-                    //     $labTestRequest->street = $labMainAddress['address_street_add'] ?? '';
-                    //     $labTestRequest->no_eng = $labMainAddress['lab_address_no_eng_add'] ?? '';
-                    //     $labTestRequest->moo_eng = $labMainAddress['lab_moo_eng_add'] ?? '';
-                    //     $labTestRequest->soi_eng = $labMainAddress['lab_soi_eng_add'] ?? '';
-                    //     $labTestRequest->street_eng = $labMainAddress['lab_street_eng_add'] ?? '';
-                    //     $labTestRequest->province_name_eng = $labMainAddress['lab_province_text_eng_add'] ?? '';
-                    //     $labTestRequest->amphur_name_eng = $labMainAddress['lab_amphur_eng_add'] ?? '';
-                    //     $labTestRequest->tambol_name_eng = $labMainAddress['lab_district_eng_add'] ?? '';
-
-                    //     $labTestRequest->save();
-
-                    //     $labTypes = $labMainAddress['lab_types'];
-                    //     foreach ($labTypes as $key => $labTypeValues) {
-                    //         if (is_array($labTypeValues)) {
-                    //             foreach ($labTypeValues as $labType) {
-                    //                 $transaction = new LabTestTransaction();
-                    //                 $transaction->lab_test_request_id = $labTestRequest->id; // ใช้ ID จาก CertiLab
-                    //                 $transaction->key = $key;
-                    //                 $transaction->index = $labType['index'] ?? null;
-                    //                 $transaction->category = $labType['category'] ?? null;
-                    //                 $transaction->category_th = $labType['category_th'] ?? null;
-                    //                 $transaction->test_field = $labType['test_field'] ?? null;
-                    //                 $transaction->test_field_eng = $labType['test_field_eng'] ?? '';
-                    //                 $transaction->description = $labType['description'] ?? '';
-                    //                 $transaction->standard = $labType['standard'] ?? '';
-                    //                 $transaction->code = $labType['code'] ?? '';
-                    //                 $transaction->save();
-
-                    //                 // เพิ่มข้อมูล Measurement และ Ranges
-                    //                 if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                    //                     foreach ($labType['measurements'] as $measurementData) {
-                    //                         $measurement = new LabTestMeasurement();
-                    //                         $measurement->lab_test_transaction_id = $transaction->id;
-                    //                         $measurement->name = $measurementData['name'] ?? '';
-                    //                         $measurement->name_eng = $measurementData['name_eng'] ?? '';
-                    //                         $measurement->type = $measurementData['type'] ?? '';
-                    //                         $measurement->detail = $measurementData['detail'] ?? '';
-                    //                         $measurement->description = $measurementData['description'] ?? '';
-                    //                         $measurement->save();
-                    //                     }
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-
-                    //     // Loop through each item in labAddresses
-                    //     foreach ($labAddresses as $labAddress) {
-                    //         $labTestRequest = new LabTestRequest();
-                    //         // กำหนดค่าให้กับฟิลด์
-                    //         $labTestRequest->app_certi_lab_id = $certilab->id;
-                    //         $labTestRequest->type = 2; 
-                    //         $labTestRequest->no = $labAddress['address_number_add_modal'] ?? '';
-                    //         $labTestRequest->moo = $labAddress['village_no_add_modal'] ?? '';
-                    //         $labTestRequest->province_id = $labAddress['address_city_add_modal'] ?? '';
-                    //         $labTestRequest->province_name = $labAddress['address_city_text_add_modal'] ?? '';
-                    //         $labTestRequest->amphur_id = $labAddress['address_district_add_modal_id'] ?? '';
-                    //         $labTestRequest->amphur_name = $labAddress['sub_district_add_modal'] ?? '';
-                    //         $labTestRequest->tambol_id = $labAddress['sub_district_add_modal_id'] ?? '';
-                    //         $labTestRequest->tambol_name = $labAddress['sub_district_add_modal'] ?? '';
-                    //         $labTestRequest->postal_code = $labAddress['postcode_add_modal'] ?? '';
-                    //         $labTestRequest->soi = $labAddress['address_soi_add_modal'] ?? '';
-                    //         $labTestRequest->street = $labAddress['address_street_add_modal'] ?? '';
-                    //         $labTestRequest->no_eng = $labAddress['lab_address_no_eng_add_modal'] ?? '';
-                    //         $labTestRequest->moo_eng = $labAddress['lab_moo_eng_add_modal'] ?? '';
-                    //         $labTestRequest->soi_eng = $labAddress['lab_soi_eng_add_modal'] ?? '';
-                    //         $labTestRequest->street_eng = $labAddress['lab_street_eng_add_modal'] ?? '';
-                    //         $labTestRequest->province_name_eng = $labAddress['lab_province_text_eng_add_modal'] ?? '';
-                    //         $labTestRequest->amphur_name_eng = $labAddress['lab_amphur_eng_add_modal'] ?? '';
-                    //         $labTestRequest->tambol_name_eng = $labAddress['lab_district_eng_add_modal'] ?? '';
-        
-                    //         // บันทึกข้อมูล
-                    //         $labTestRequest->save();
-                            
-                                            
-                    //         $labTypes = $labAddress['lab_types'];
-                    //         foreach ($labTypes as $key => $labTypeValues) {
-                    //             if (is_array($labTypeValues)) {
-                    //                 foreach ($labTypeValues as $labType) {
-                    //                     $transaction = new LabTestTransaction();
-                    //                     $transaction->lab_test_request_id = $labTestRequest->id; // ใช้ ID จาก CertiLab
-                    //                     $transaction->key = $key;
-                    //                     $transaction->index = $labType['index'] ?? null;
-                    //                     $transaction->category = $labType['category'] ?? null;
-                    //                     $transaction->category_th = $labType['category_th'] ?? null;
-                    //                     $transaction->test_field = $labType['test_field'] ?? null;
-                    //                     $transaction->test_field_eng = $labType['test_field_eng'] ?? '';
-                    //                     $transaction->description = $labType['description'] ?? '';
-                    //                     $transaction->standard = $labType['standard'] ?? '';
-                    //                     $transaction->code = $labType['code'] ?? '';
-                    //                     $transaction->save();
-    
-                    //                     // เพิ่มข้อมูล Measurement และ Ranges
-                    //                     if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                    //                         foreach ($labType['measurements'] as $measurementData) {
-                    //                             $measurement = new LabTestMeasurement();
-                    //                             $measurement->lab_test_transaction_id = $transaction->id;
-                    //                             $measurement->name = $measurementData['name'] ?? '';
-                    //                             $measurement->name_eng = $measurementData['name_eng'] ?? '';
-                    //                             $measurement->type = $measurementData['type'] ?? '';
-                    //                             $measurement->detail = $measurementData['detail'] ?? '';
-                    //                             $measurement->description = $measurementData['description'] ?? '';
-                    //                             $measurement->save();
-                    //                         }
-                    //                     }
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
+                        $labCalRequest->save();
+                    }
+                    else if($certilab->lab_type == 3)
+                    {
+                            $labTestRequest = new LabTestRequest();
+                            $labTestRequest->app_certi_lab_id = $certilab->id;
+                            $labTestRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
+                            $labTestRequest->no = $labMainAddress['address_number_add'] ?? '';
+                            $labTestRequest->moo = $labMainAddress['address_moo_add'] ?? '';
+                            $labTestRequest->province_id = $labMainAddress['address_city_add'] ?? '';
+                            $labTestRequest->province_name = $labMainAddress['address_city_text_add'] ?? '';
+                            $labTestRequest->amphur_id = $labMainAddress['amphur_id_add'] ?? '';
+                            $labTestRequest->amphur_name = $labMainAddress['address_district_add'] ?? '';
+                            $labTestRequest->tambol_id = $labMainAddress['tambol_id_add'] ?? '';
+                            $labTestRequest->tambol_name = $labMainAddress['sub_district_add'] ?? '';
+                            $labTestRequest->postal_code = $labMainAddress['postcode_add'] ?? '';
+                            $labTestRequest->soi = $labMainAddress['address_soi_add'] ?? '';
+                            $labTestRequest->street = $labMainAddress['address_street_add'] ?? '';
+                            $labTestRequest->no_eng = $labMainAddress['lab_address_no_eng_add'] ?? '';
+                            $labTestRequest->moo_eng = $labMainAddress['lab_moo_eng_add'] ?? '';
+                            $labTestRequest->soi_eng = $labMainAddress['lab_soi_eng_add'] ?? '';
+                            $labTestRequest->street_eng = $labMainAddress['lab_street_eng_add'] ?? '';
+                            $labTestRequest->province_name_eng = $labMainAddress['lab_province_text_eng_add'] ?? '';
+                            $labTestRequest->amphur_name_eng = $labMainAddress['lab_amphur_eng_add'] ?? '';
+                            $labTestRequest->tambol_name_eng = $labMainAddress['lab_district_eng_add'] ?? '';
+                            $labTestRequest->save();
+                    }
 
 
-                    // }
-
-
+      
                     $pdfService = new CreateLabScopePdf($certilab);
                     $pdfContent = $pdfService->generatePdf();
 
@@ -2015,287 +1792,6 @@ class ApplicantController extends Controller
                     }
    
 
-                    // if($certi_lab->lab_type == 4){
-                    //     // สอบเทียบ
-                    //     LabCalRequest::where('app_certi_lab_id', $certi_lab->id)->delete();
-                    //     $labCalRequest = new LabCalRequest();
-
-                    //     $labCalRequest->app_certi_lab_id = $certi_lab->id;
-                    //     $labCalRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
-                    //     $labCalRequest->no = $labMainAddress['address_number_add'] ?? '';
-                    //     $labCalRequest->moo = $labMainAddress['address_moo_add'] ?? '';
-                    //     $labCalRequest->province_id = $labMainAddress['address_city_add'] ?? '';
-                    //     $labCalRequest->province_name = $labMainAddress['address_city_text_add'] ?? '';
-                    //     $labCalRequest->amphur_id = $labMainAddress['amphur_id_add'] ?? '';
-                    //     $labCalRequest->amphur_name = $labMainAddress['address_district_add'] ?? '';
-                    //     $labCalRequest->tambol_id = $labMainAddress['tambol_id_add'] ?? '';
-                    //     $labCalRequest->tambol_name = $labMainAddress['sub_district_add'] ?? '';
-                    //     $labCalRequest->postal_code = $labMainAddress['postcode_add'] ?? '';
-                    //     $labCalRequest->soi = $labMainAddress['address_soi_add'] ?? '';
-                    //     $labCalRequest->street = $labMainAddress['address_street_add'] ?? '';
-                    //     $labCalRequest->no_eng = $labMainAddress['lab_address_no_eng_add'] ?? '';
-                    //     $labCalRequest->moo_eng = $labMainAddress['lab_moo_eng_add'] ?? '';
-                    //     $labCalRequest->soi_eng = $labMainAddress['lab_soi_eng_add'] ?? '';
-                    //     $labCalRequest->street_eng = $labMainAddress['lab_street_eng_add'] ?? '';
-                    //     $labCalRequest->province_name_eng = $labMainAddress['lab_province_text_eng_add'] ?? '';
-                    //     $labCalRequest->amphur_name_eng = $labMainAddress['lab_amphur_eng_add'] ?? '';
-                    //     $labCalRequest->tambol_name_eng = $labMainAddress['lab_district_eng_add'] ?? '';
-
-                    //     // บันทึกข้อมูล
-                    //     $labCalRequest->save();
-
-                        
-                    //     $labTypes = $labMainAddress['lab_types'];
-                    //     foreach ($labTypes as $key => $labTypeValues) {
-                    //         if (is_array($labTypeValues)) {
-                    //             foreach ($labTypeValues as $labType) {
-                    //                 $transaction = new LabCalTransaction();
-                    //                 $transaction->lab_cal_request_id = $labCalRequest->id; // ใช้ ID จาก CertiLab
-                    //                 $transaction->key = $key;
-                    //                 $transaction->index = $labType['index'] ?? null;
-                    //                 $transaction->category = $labType['category'] ?? null;
-                    //                 $transaction->category_th = $labType['category_th'] ?? null;
-                    //                 $transaction->instrument = $labType['instrument'] ?? null;
-                    //                 $transaction->instrument_text = $labType['instrument_text'] ?? '';
-                    //                 $transaction->instrument_two = $labType['instrument_two'] ?? null;
-                    //                 $transaction->instrument_two_text = $labType['instrument_two_text'] ?? '';
-                    //                 $transaction->description = $labType['description'] ?? '';
-                    //                 $transaction->standard = $labType['standard'] ?? '';
-                    //                 $transaction->code = $labType['code'] ?? '';
-
-                    //                 $transaction->save();
-
-                    //                 // เพิ่มข้อมูล Measurement และ Ranges
-                    //                 if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                    //                     foreach ($labType['measurements'] as $measurementData) {
-                    //                         $measurement = new LabCalMeasurement();
-                    //                         $measurement->lab_cal_transaction_id = $transaction->id;
-                    //                         $measurement->name = $measurementData['name'] ?? '';
-                    //                         $measurement->type = $measurementData['type'] ?? null;
-                    //                         $measurement->save();
-
-                    //                         if (isset($measurementData['ranges']) && is_array($measurementData['ranges'])) {
-                    //                             foreach ($measurementData['ranges'] as $rangeData) {
-                    //                                 $range = new LabCalMeasurementRange();
-                    //                                 $range->lab_cal_measurement_id = $measurement->id;
-                    //                                 $range->description = $rangeData['description'] ?? '';
-                    //                                 $range->range = $rangeData['range'] ?? '';
-                    //                                 $range->uncertainty = $rangeData['uncertainty'] ?? '';
-                    //                                 $range->save();
-                    //                             }
-                    //                         }
-                    //                     }
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-
-                    //     // Loop through each item in labAddresses
-                    //     foreach ($labAddresses as $labAddress) {
-                    //         $labCalRequest = new LabCalRequest();
-                    //         // กำหนดค่าให้กับฟิลด์
-                    //         $labCalRequest->app_certi_lab_id = $certi_lab->id;
-                    //         $labCalRequest->type = 2; 
-                    //         $labCalRequest->no = $labAddress['address_number_add_modal'] ?? '';
-                    //         $labCalRequest->moo = $labAddress['village_no_add_modal'] ?? '';
-                    //         $labCalRequest->province_id = $labAddress['address_city_add_modal'] ?? '';
-                    //         $labCalRequest->province_name = $labAddress['address_city_text_add_modal'] ?? '';
-                    //         $labCalRequest->amphur_id = $labAddress['address_district_add_modal_id'] ?? '';
-                    //         $labCalRequest->amphur_name = $labAddress['sub_district_add_modal'] ?? '';
-                    //         $labCalRequest->tambol_id = $labAddress['sub_district_add_modal_id'] ?? '';
-                    //         $labCalRequest->tambol_name = $labAddress['sub_district_add_modal'] ?? '';
-                    //         $labCalRequest->postal_code = $labAddress['postcode_add_modal'] ?? '';
-                    //         $labCalRequest->soi = $labAddress['address_soi_add_modal'] ?? '';
-                    //         $labCalRequest->street = $labAddress['address_street_add_modal'] ?? '';
-                    //         $labCalRequest->no_eng = $labAddress['lab_address_no_eng_add_modal'] ?? '';
-                    //         $labCalRequest->moo_eng = $labAddress['lab_moo_eng_add_modal'] ?? '';
-                    //         $labCalRequest->soi_eng = $labAddress['lab_soi_eng_add_modal'] ?? '';
-                    //         $labCalRequest->street_eng = $labAddress['lab_street_eng_add_modal'] ?? '';
-                    //         $labCalRequest->province_name_eng = $labAddress['lab_province_text_eng_add_modal'] ?? '';
-                    //         $labCalRequest->amphur_name_eng = $labAddress['lab_amphur_eng_add_modal'] ?? '';
-                    //         $labCalRequest->tambol_name_eng = $labAddress['lab_district_eng_add_modal'] ?? '';
-        
-                    //         // บันทึกข้อมูล
-                    //         $labCalRequest->save();
-                            
-                                            
-                    //         $labTypes = $labAddress['lab_types'];
-                    //         foreach ($labTypes as $key => $labTypeValues) {
-                    //             if (is_array($labTypeValues)) {
-                    //                 foreach ($labTypeValues as $labType) {
-                    //                     // สร้าง LabCalMainTransaction
-                    //                     $transaction = new LabCalTransaction();
-                    //                     $transaction->lab_cal_request_id = $labCalRequest->id; // ใช้ ID จาก CertiLab
-                    //                     $transaction->key = $key;
-                    //                     $transaction->index = $labType['index'] ?? null;
-                    //                     $transaction->category = $labType['category'] ?? null;
-                    //                     $transaction->category_th = $labType['category_th'] ?? null;
-                    //                     $transaction->instrument = $labType['instrument'] ?? null;
-                    //                     $transaction->instrument_text = $labType['instrument_text'] ?? '';
-                    //                     $transaction->instrument_two = $labType['instrument_two'] ?? null;
-                    //                     $transaction->instrument_two_text = $labType['instrument_two_text'] ?? '';
-                    //                     $transaction->description = $labType['description'] ?? '';
-                    //                     $transaction->standard = $labType['standard'] ?? '';
-                    //                     $transaction->code = $labType['code'] ?? '';
-
-                    //                     $transaction->save();
-
-                    //                     // เพิ่มข้อมูล Measurement และ Ranges
-                    //                     if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                    //                         foreach ($labType['measurements'] as $measurementData) {
-                    //                             $measurement = new LabCalMeasurement();
-                    //                             $measurement->lab_cal_transaction_id = $transaction->id;
-                    //                             $measurement->name = $measurementData['name'] ?? '';
-                    //                             $measurement->type = $measurementData['type'] ?? null;
-                    //                             $measurement->save();
-
-                    //                             if (isset($measurementData['ranges']) && is_array($measurementData['ranges'])) {
-                    //                                 foreach ($measurementData['ranges'] as $rangeData) {
-                    //                                     $range = new LabCalMeasurementRange();
-                    //                                     $range->lab_cal_measurement_id = $measurement->id;
-                    //                                     $range->description = $rangeData['description'] ?? '';
-                    //                                     $range->range = $rangeData['range'] ?? '';
-                    //                                     $range->uncertainty = $rangeData['uncertainty'] ?? '';
-                    //                                     $range->save();
-                    //                                 }
-                    //                             }
-                    //                         }
-                    //                     }
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-                     
-                    // }else if($certi_lab->lab_type == 3){
-                    //     // ทดสอบ
-                    //     LabTestRequest::where('app_certi_lab_id', $certi_lab->id)->delete();
-                    //     $labTestRequest = new LabTestRequest();
-
-                    //     $labTestRequest->app_certi_lab_id = $certi_lab->id;
-                    //     $labTestRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
-                    //     $labTestRequest->no = $labMainAddress['address_number_add'] ?? '';
-                    //     $labTestRequest->moo = $labMainAddress['address_moo_add'] ?? '';
-                    //     $labTestRequest->province_id = $labMainAddress['address_city_add'] ?? '';
-                    //     $labTestRequest->province_name = $labMainAddress['address_city_text_add'] ?? '';
-                    //     $labTestRequest->amphur_id = $labMainAddress['amphur_id_add'] ?? '';
-                    //     $labTestRequest->amphur_name = $labMainAddress['address_district_add'] ?? '';
-                    //     $labTestRequest->tambol_id = $labMainAddress['tambol_id_add'] ?? '';
-                    //     $labTestRequest->tambol_name = $labMainAddress['sub_district_add'] ?? '';
-                    //     $labTestRequest->postal_code = $labMainAddress['postcode_add'] ?? '';
-                    //     $labTestRequest->soi = $labMainAddress['address_soi_add'] ?? '';
-                    //     $labTestRequest->street = $labMainAddress['address_street_add'] ?? '';
-                    //     $labTestRequest->no_eng = $labMainAddress['lab_address_no_eng_add'] ?? '';
-                    //     $labTestRequest->moo_eng = $labMainAddress['lab_moo_eng_add'] ?? '';
-                    //     $labTestRequest->soi_eng = $labMainAddress['lab_soi_eng_add'] ?? '';
-                    //     $labTestRequest->street_eng = $labMainAddress['lab_street_eng_add'] ?? '';
-                    //     $labTestRequest->province_name_eng = $labMainAddress['lab_province_text_eng_add'] ?? '';
-                    //     $labTestRequest->amphur_name_eng = $labMainAddress['lab_amphur_eng_add'] ?? '';
-                    //     $labTestRequest->tambol_name_eng = $labMainAddress['lab_district_eng_add'] ?? '';
-
-                    //     // บันทึกข้อมูล
-                    //     $labTestRequest->save();
-
-                    //     $labTypes = $labMainAddress['lab_types'];
-                    //     foreach ($labTypes as $key => $labTypeValues) {
-                    //         if (is_array($labTypeValues)) {
-                    //             foreach ($labTypeValues as $labType) {
-                    //                 $transaction = new LabTestTransaction();
-                    //                 $transaction->lab_test_request_id = $labTestRequest->id; // ใช้ ID จาก CertiLab
-                    //                 $transaction->key = $key;
-                    //                 $transaction->index = $labType['index'] ?? null;
-                    //                 $transaction->category = $labType['category'] ?? null;
-                    //                 $transaction->category_th = $labType['category_th'] ?? null;
-                    //                 $transaction->test_field = $labType['test_field'] ?? null;
-                    //                 $transaction->test_field_eng = $labType['test_field_eng'] ?? '';
-                    //                 $transaction->description = $labType['description'] ?? '';
-                    //                 $transaction->standard = $labType['standard'] ?? '';
-                    //                 $transaction->code = $labType['code'] ?? '';
-                    //                 $transaction->save();
-
-                    //                 // เพิ่มข้อมูล Measurement และ Ranges
-                    //                 if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                    //                     foreach ($labType['measurements'] as $measurementData) {
-                    //                         $measurement = new LabTestMeasurement();
-                    //                         $measurement->lab_test_transaction_id = $transaction->id;
-                    //                         $measurement->name = $measurementData['name'] ?? '';
-                    //                         $measurement->name_eng = $measurementData['name_eng'] ?? '';
-                    //                         $measurement->type = $measurementData['type'] ?? '';
-                    //                         $measurement->detail = $measurementData['detail'] ?? '';
-                    //                         $measurement->description = $measurementData['description'] ?? '';
-                    //                         $measurement->save();
-                    //                     }
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-
-                    //     // Loop through each item in labAddresses
-                    //     foreach ($labAddresses as $labAddress) {
-                    //         $labTestRequest = new LabTestRequest();
-                    //         // กำหนดค่าให้กับฟิลด์
-                    //         $labTestRequest->app_certi_lab_id = $certi_lab->id;
-                    //         $labTestRequest->type = 2; 
-                    //         $labTestRequest->no = $labAddress['address_number_add_modal'] ?? '';
-                    //         $labTestRequest->moo = $labAddress['village_no_add_modal'] ?? '';
-                    //         $labTestRequest->province_id = $labAddress['address_city_add_modal'] ?? '';
-                    //         $labTestRequest->province_name = $labAddress['address_city_text_add_modal'] ?? '';
-                    //         $labTestRequest->amphur_id = $labAddress['address_district_add_modal_id'] ?? '';
-                    //         $labTestRequest->amphur_name = $labAddress['sub_district_add_modal'] ?? '';
-                    //         $labTestRequest->tambol_id = $labAddress['sub_district_add_modal_id'] ?? '';
-                    //         $labTestRequest->tambol_name = $labAddress['sub_district_add_modal'] ?? '';
-                    //         $labTestRequest->postal_code = $labAddress['postcode_add_modal'] ?? '';
-                    //         $labTestRequest->soi = $labAddress['address_soi_add_modal'] ?? '';
-                    //         $labTestRequest->street = $labAddress['address_street_add_modal'] ?? '';
-                    //         $labTestRequest->no_eng = $labAddress['lab_address_no_eng_add_modal'] ?? '';
-                    //         $labTestRequest->moo_eng = $labAddress['lab_moo_eng_add_modal'] ?? '';
-                    //         $labTestRequest->soi_eng = $labAddress['lab_soi_eng_add_modal'] ?? '';
-                    //         $labTestRequest->street_eng = $labAddress['lab_street_eng_add_modal'] ?? '';
-                    //         $labTestRequest->province_name_eng = $labAddress['lab_province_text_eng_add_modal'] ?? '';
-                    //         $labTestRequest->amphur_name_eng = $labAddress['lab_amphur_eng_add_modal'] ?? '';
-                    //         $labTestRequest->tambol_name_eng = $labAddress['lab_district_eng_add_modal'] ?? '';
-        
-                    //         // บันทึกข้อมูล
-                    //         $labTestRequest->save();
-                            
-                                            
-                    //         $labTypes = $labAddress['lab_types'];
-                    //         foreach ($labTypes as $key => $labTypeValues) {
-                    //             if (is_array($labTypeValues)) {
-                    //                 foreach ($labTypeValues as $labType) {
-                    //                     $transaction = new LabTestTransaction();
-                    //                     $transaction->lab_test_request_id = $labTestRequest->id; // ใช้ ID จาก CertiLab
-                    //                     $transaction->key = $key;
-                    //                     $transaction->index = $labType['index'] ?? null;
-                    //                     $transaction->category = $labType['category'] ?? null;
-                    //                     $transaction->category_th = $labType['category_th'] ?? null;
-                    //                     $transaction->test_field = $labType['test_field'] ?? null;
-                    //                     $transaction->test_field_eng = $labType['test_field_eng'] ?? '';
-                    //                     $transaction->description = $labType['description'] ?? '';
-                    //                     $transaction->standard = $labType['standard'] ?? '';
-                    //                     $transaction->code = $labType['code'] ?? '';
-                    //                     $transaction->save();
-    
-                    //                     // เพิ่มข้อมูล Measurement และ Ranges
-                    //                     if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                    //                         foreach ($labType['measurements'] as $measurementData) {
-                    //                             $measurement = new LabTestMeasurement();
-                    //                             $measurement->lab_test_transaction_id = $transaction->id;
-                    //                             $measurement->name = $measurementData['name'] ?? '';
-                    //                             $measurement->name_eng = $measurementData['name_eng'] ?? '';
-                    //                             $measurement->type = $measurementData['type'] ?? '';
-                    //                             $measurement->detail = $measurementData['detail'] ?? '';
-                    //                             $measurement->description = $measurementData['description'] ?? '';
-                    //                             $measurement->save();
-                    //                         }
-                    //                     }
-                    //                 }
-                    //             }
-                    //         }
-                    //     }
-                    // }
-
-                    // $pdfService = new CreateLabScopePdf($certi_lab);
-                    // $pdfContent = $pdfService->generatePdf();
 
                         $babCalScopeUsageStatus = new LabCalScopeUsageStatus();
                         $babCalScopeUsageStatus->app_certi_lab_id = $certi_lab->id;
@@ -2366,9 +1862,186 @@ class ApplicantController extends Controller
 
     }
 
+    // public function editScope($token)
+    // {
+    //     // dd('ok');
+    //     $model = str_slug('applicant','-');
+    //     $data_session     =    HP::CheckSession();
+    //     if(!empty($data_session)){
+    //         if(HP::CheckPermission('edit-'.$model)){
+
+    //             $certi_lab = CertiLab::where('token',$token)->first();
+
+    //             // add certi lab info
+    //             $certi_lab_info =  CertiLabInfo::where('app_certi_lab_id',$certi_lab->id)->first();
+    //             if(is_null($certi_lab_info)){
+    //                 $certi_lab_info = new CertiLabInfo;
+    //             }
+    //         // add certi lab place
+    //             $certi_lab_place =  CertiLabPlace::where('app_certi_lab_id',$certi_lab->id)->first();
+    //             if(is_null($certi_lab_place)){
+    //                 $certi_lab_place = new CertiLabPlace;
+    //             }
+    //             $branchs = DB::table('bcertify_test_branches')->select('*')->where('state',1)->pluck('title','id');
+    //             $calibration_branchs = DB::table('bcertify_calibration_branches')->select('*')->where('state',1)->pluck('title','id');
+    //             $province = DB::table('province')->select('*')->get();
+
+    //             $attaches = DB::table('bcertify_config_attach_forms')->select('*')->where('form',1)->get();
+    //             $certi_lab_attach_more = CertiLabAttachMore::where('app_certi_lab_id',$certi_lab->id)->get();
+    //             $certi_lab_attach_all5 = CertiLabAttachAll::where('app_certi_lab_id', $certi_lab->id)
+    //                                                     ->where('file_section', '5')
+    //                                                     ->get();
+    //             $certi_lab_attach_all61 = CertiLabAttachAll::where('app_certi_lab_id', $certi_lab->id)
+    //                                                     ->where('file_section', '61')
+    //                                                     ->get();
+    //             $certi_lab_attach_all62 = CertiLabAttachAll::where('app_certi_lab_id', $certi_lab->id)
+    //                                                     ->where('file_section', '62')
+    //                                                     ->get();
+    //             $certi_lab_attach_all71 = CertiLabAttachAll::where('app_certi_lab_id', $certi_lab->id)
+    //                                                     ->where('file_section', '71')
+    //                                                     ->get();
+    //             $certi_lab_attach_all72 = CertiLabAttachAll::where('app_certi_lab_id', $certi_lab->id)
+    //                                                     ->where('file_section', '72')
+    //                                                     ->get();
+    //             $certi_lab_attach_all8 = CertiLabAttachAll::where('app_certi_lab_id', $certi_lab->id)
+    //                                                     ->where('file_section', '8')
+    //                                                     ->get();
+    //             $certi_lab_attach_all9 = CertiLabAttachAll::where('app_certi_lab_id', $certi_lab->id)
+    //                                                     ->where('file_section', '9')
+    //                                                     ->get();
+    //             $certi_lab_check_box = CertiLabCheckBox::where('app_certi_lab_id',$certi_lab->id)->first();
+    //             if(is_null($certi_lab_check_box)){
+    //                 $certi_lab_check_box = new CertiLabCheckBox;
+    //             }
+    //             $certi_lab_check_box_image = !is_null($certi_lab_check_box) ? CertiLabCheckBoxImage::where('app_certi_lab_check_box_id', $certi_lab_check_box->id)->get() : null;
+    //             $CertiLabDeleteFile = CertiLabDeleteFile::where('app_certi_lab_id', $certi_lab->id) ->get();
+
+    //             // $follow_up = FollowUp::where('trader_autonumber',Auth::user()->getKey())->first() ;
+    //             $user_tis = $data_session;
+    //             $Province =  Province::where('PROVINCE_NAME', 'LIKE', '%'.$user_tis->province.'%')->first();
+    //             $contact_province =  Province::where('PROVINCE_NAME', 'LIKE', '%'.str_replace(" ","",$data_session->contact_province).'%')->first();
+
+    //             $user_tis->PROVINCE_ID          =    $Province->PROVINCE_ID ?? '';
+    //             $user_tis->contact_province_id  =    $contact_province->PROVINCE_ID ?? '';
+
+    //             $app_certi_labs = DB::table('app_certi_labs')->where('lab_type',$certi_lab->lab_type)->where('tax_id',$data_session->tax_number)->select('id');
+    //             $certificate_exports = DB::table('certificate_exports')->whereIn('certificate_for',$app_certi_labs)->where('status',3)->pluck('request_number','id');
+    //             $certificate_no = DB::table('certificate_exports')->select('id')->whereIn('certificate_for',$app_certi_labs)->where('status',3)->get();
+
+    //             $labCalScopeUsageStatus = LabCalScopeUsageStatus::where('app_certi_lab_id', $certi_lab->id)
+    //                                     ->where('status', 2)
+    //                                     ->first();
+
+
+                                    
+    //             $labCalScopeTransactions = $labCalScopeUsageStatus ? 
+    //                 $labCalScopeUsageStatus->transactions()->with([
+    //                     'calibrationBranch',
+    //                     'calibrationBranchInstrumentGroup',
+    //                     'calibrationBranchInstrument',
+    //                     'calibrationBranchParam1',
+    //                     'calibrationBranchParam2'
+    //                 ])->get() : [];
+                
+    //             if (is_null($labCalScopeTransactions)) {
+    //                 $labCalScopeTransactions = [];
+    //             }
+
+
+    //             $branchLabAdresses = BranchLabAdress::where('app_certi_lab_id', $certi_lab->id)->with([
+    //                                                 'certiLab', 
+    //                                                 'province', 
+    //                                                 'amphur', 
+    //                                                 'district'
+    //                                             ])->get();
+
+            
+    //             $Query = CertiLab::with(['certificate_exports_to' => function($q){
+    //                 $q->where('status', 4);
+    //             }]);
+    //             $certifieds = collect() ;
+    //             if(!is_null($data_session->agent_id)){  // ตัวแทน
+    //                 $certiLabs = $Query->where('agent_id',  $data_session->agent_id ) ;
+    //             }else{
+    //                 if($data_session->branch_type == 1){  // สำนักงานใหญ่
+    //                     $certiLabs = $Query->where('tax_id',  $data_session->tax_number ) ;
+    //                 }else{   // ผู้บันทึก
+    //                     $certiLabs = $Query->where('created_by',   auth()->user()->getKey()) ;
+    //                 }
+    //             }
+
+    //             $certifieds = CertificateExport::whereIn('request_number',$certiLabs->get()->pluck('app_no')->toArray())->get();
+                
+    //             $labRequestType = LabRequestType::where('app_certi_lab_id',$certi_lab->id)->first();
+
+    //             $labCalScopeTransactionGroups = LabCalScopeUsageStatus::where('app_certi_lab_id', $certi_lab->id)
+    //             ->where('status', 1)
+    //             ->select('group', 'created_at') // เลือกฟิลด์ที่ต้องการ
+    //             ->get()
+    //             ->unique('group') // ทำให้ค่า group ไม่ซ้ำกัน
+    //             ->values(); // รีเซ็ต index ของ Collection
+
+
+    //             // $labCalRequest = LabCalRequest::where('app_certi_lab_id',$certi_lab->id)->first();
+    //             // $labTestRequest = LabTestRequest::where('app_certi_lab_id',$certi_lab->id)->first();
+
+    //             $labTestRequest = LabTestRequest::with([
+    //                 'certiLab', 
+    //                 'labTestTransactions.labTestMeasurements'
+    //             ])
+    //             ->where('app_certi_lab_id', $certi_lab->id)
+    //             ->get();
+
+    //             $labCalRequest = LabCalRequest::with([
+    //                 'certiLab', 
+    //                 'labCalTransactions.labCalMeasurements.labCalMeasurementRanges'
+    //             ])
+    //             ->where('app_certi_lab_id', $certi_lab->id)
+    //             ->get();
+
+    //             // dd($labCalRequest);
+    //             return view('certify.applicant.edit-scope',[
+    //                     'certi_lab'=>$certi_lab,
+    //                     'attaches' => $attaches,
+    //                     // 'certi_information' => $certi_information,
+    //                     'certi_lab_info'=> $certi_lab_info,
+    //                     'certi_lab_place'=>$certi_lab_place,
+    //                     'branchs' =>$branchs,
+    //                     'calibration_branchs'=> $calibration_branchs,
+    //                     'certi_lab_attach_more'=> $certi_lab_attach_more,
+    //                     'certi_lab_attach_all5' => $certi_lab_attach_all5,
+    //                     'certi_lab_attach_all61' => $certi_lab_attach_all61,
+    //                     'certi_lab_attach_all62' => $certi_lab_attach_all62,
+    //                     'certi_lab_attach_all71' => $certi_lab_attach_all71,
+    //                     'certi_lab_attach_all72' => $certi_lab_attach_all72,
+    //                     'certi_lab_attach_all8' => $certi_lab_attach_all8,
+    //                     'certi_lab_attach_all9' => $certi_lab_attach_all9,
+    //                     'certi_lab_check_box_image'=> $certi_lab_check_box_image,
+    //                     'CertiLabDeleteFile'=> $CertiLabDeleteFile,
+                        
+    //                     'user_tis' => $user_tis,
+    //                     'certificate_exports' => $certificate_exports,
+    //                     'certificate_no' => $certificate_no,
+    //                     'labCalScopeTransactions' => $labCalScopeTransactions,
+    //                     'branchLabAdresses' => $branchLabAdresses,
+    //                     'certifieds' => $certifieds,
+    //                     'labRequestType' => $labRequestType,
+    //                     'labCalScopeTransactionGroups' => $labCalScopeTransactionGroups,
+    //                     'labCalRequest' => $labCalRequest,
+    //                     'labTestRequest' => $labTestRequest
+    //                     ]);
+    //         }
+    //         abort(403);
+
+    //         }else{
+    //             return  redirect(HP::DomainTisiSso());
+    //         }
+    // }
+
+
     public function editScope($token)
     {
-        // dd('ok');
+       
         $model = str_slug('applicant','-');
         $data_session     =    HP::CheckSession();
         if(!empty($data_session)){
@@ -2503,8 +2176,14 @@ class ApplicantController extends Controller
                 ->where('app_certi_lab_id', $certi_lab->id)
                 ->get();
 
-                // dd($labCalRequest);
-                return view('certify.applicant.edit-scope',[
+                $mainLabScopeTransaction = LabScopeTransaction::where('app_certi_lab_id', $certi_lab->id)
+                                    ->where('lab_type','main')
+                                    ->first();
+                $branchLabScopeTransactions = LabScopeTransaction::where('app_certi_lab_id', $certi_lab->id)
+                                    ->where('lab_type','branch')
+                                    ->get();
+
+                return view('certify.applicant.edit_scope',[
                         'certi_lab'=>$certi_lab,
                         'attaches' => $attaches,
                         // 'certi_information' => $certi_information,
@@ -2532,7 +2211,9 @@ class ApplicantController extends Controller
                         'labRequestType' => $labRequestType,
                         'labCalScopeTransactionGroups' => $labCalScopeTransactionGroups,
                         'labCalRequest' => $labCalRequest,
-                        'labTestRequest' => $labTestRequest
+                        'labTestRequest' => $labTestRequest,
+                        'mainLabScopeTransaction' => $mainLabScopeTransaction,
+                        'branchLabScopeTransactions' => $branchLabScopeTransactions,
                         ]);
             }
             abort(403);
@@ -2542,12 +2223,13 @@ class ApplicantController extends Controller
             }
     }
 
-
     public function updateScope(Request $request, $token)
     {
+       
+          $mainLabInfo = json_decode($request->input('main_lab_info'), true);
+        $branchLabInfos = json_decode($request->input('branch_lab_infos'), true) ?? [];
 
-        $labAddresses = json_decode($request->input('lab_addresses'), true);
-        $labMainAddress = json_decode($request->input('lab_main_address'), true);
+        //  dd($mainLabInfo);
      
         $model = str_slug('applicant','-');
         $data_session     =    HP::CheckSession();
@@ -2558,6 +2240,9 @@ class ApplicantController extends Controller
 
                 try {
 
+                    CertiLab::where('token',$token)->update([
+                        'require_scope_update' => null
+                    ]);
                     $certi_lab = CertiLab::where('token',$token)->first();
 
                     if (!is_null($certi_lab)){
@@ -2566,221 +2251,69 @@ class ApplicantController extends Controller
                             return redirect('certify/applicant');
                         }
 
-                        if($certi_lab->lab_type == 4){
-                            // สอบเทียบ
-                            LabCalRequest::where('app_certi_lab_id', $certi_lab->id)->delete();
-                            $labCalRequest = new LabCalRequest();
 
-                            $labCalRequest->app_certi_lab_id = $certi_lab->id;
-                            $labCalRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
-                            $labCalRequest->no = $labMainAddress['address_number_add'] ?? '';
-                            $labCalRequest->moo = $labMainAddress['address_moo_add'] ?? '';
-                            $labCalRequest->province_id = $labMainAddress['address_city_add'] ?? '';
-                            $labCalRequest->province_name = $labMainAddress['address_city_text_add'] ?? '';
-                            $labCalRequest->amphur_id = $labMainAddress['amphur_id_add'] ?? '';
-                            $labCalRequest->amphur_name = $labMainAddress['address_district_add'] ?? '';
-                            $labCalRequest->tambol_id = $labMainAddress['tambol_id_add'] ?? '';
-                            $labCalRequest->tambol_name = $labMainAddress['sub_district_add'] ?? '';
-                            $labCalRequest->postal_code = $labMainAddress['postcode_add'] ?? '';
-                            $labCalRequest->soi = $labMainAddress['address_soi_add'] ?? '';
-                            $labCalRequest->street = $labMainAddress['address_street_add'] ?? '';
-                            $labCalRequest->no_eng = $labMainAddress['lab_address_no_eng_add'] ?? '';
-                            $labCalRequest->moo_eng = $labMainAddress['lab_moo_eng_add'] ?? '';
-                            $labCalRequest->soi_eng = $labMainAddress['lab_soi_eng_add'] ?? '';
-                            $labCalRequest->street_eng = $labMainAddress['lab_street_eng_add'] ?? '';
-                            $labCalRequest->province_name_eng = $labMainAddress['lab_province_text_eng_add'] ?? '';
-                            $labCalRequest->amphur_name_eng = $labMainAddress['lab_amphur_eng_add'] ?? '';
-                            $labCalRequest->tambol_name_eng = $labMainAddress['lab_district_eng_add'] ?? '';
 
-                            // บันทึกข้อมูล
-                            $labCalRequest->save();
+                    $request_type = "";
+                    if($certi_lab->lab_type == 3){
+                        $request_type = "test";
+                    }else if($certi_lab->lab_type == 4){
+                        $request_type = "cal";
+                    }
 
-                            
-                            $labTypes = $labMainAddress['lab_types'];
-                            foreach ($labTypes as $key => $labTypeValues) {
-                                if (is_array($labTypeValues)) {
-                                    foreach ($labTypeValues as $labType) {
-                                        $transaction = new LabCalTransaction();
-                                        $transaction->lab_cal_request_id = $labCalRequest->id; // ใช้ ID จาก CertiLab
-                                        $transaction->key = $key;
-                                        $transaction->index = $labType['index'] ?? null;
-                                        $transaction->category = $labType['category'] ?? null;
-                                        $transaction->category_th = $labType['category_th'] ?? null;
-                                        $transaction->instrument = $labType['instrument'] ?? null;
-                                        $transaction->instrument_text = $labType['instrument_text'] ?? '';
-                                        $transaction->instrument_two = $labType['instrument_two'] ?? null;
-                                        $transaction->instrument_two_text = $labType['instrument_two_text'] ?? '';
-                                        $transaction->description = $labType['description'] ?? '';
-                                        $transaction->standard = $labType['standard'] ?? '';
-                                        $transaction->code = $labType['code'] ?? '';
+                    LabScopeTransaction::where('app_certi_lab_id', $certi_lab->id)->delete();
 
-                                        $transaction->save();
+                    $labScopeTransaction = new LabScopeTransaction();
+                    $labScopeTransaction->app_certi_lab_id = $certi_lab->id;
+                    $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'main';
+                    $labScopeTransaction->request_type = $request_type;
+                    $labScopeTransaction->address_number = $mainLabInfo['address_number_add'] ?? '';
+                    $labScopeTransaction->village_no = $mainLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
+                    $labScopeTransaction->address_city = $mainLabInfo['address_city_add'] ?? '';
+                    $labScopeTransaction->address_city_text = $mainLabInfo['address_city_text_add'] ?? '';
+                    $labScopeTransaction->address_district = $mainLabInfo['address_district_add'] ?? '';
+                    $labScopeTransaction->sub_district = $mainLabInfo['sub_district_add'] ?? '';
+                    $labScopeTransaction->postcode = $mainLabInfo['postcode_add'] ?? '';
+                    $labScopeTransaction->address_soi = $mainLabInfo['address_soi_add'] ?? '';
+                    $labScopeTransaction->address_street = $mainLabInfo['address_street_add'] ?? '';
+                    $labScopeTransaction->labress_no_eng = $mainLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
+                    $labScopeTransaction->lab_moo_eng = $mainLabInfo['lab_moo_eng_add'] ?? '';
+                    $labScopeTransaction->lab_soi_eng = $mainLabInfo['lab_soi_eng_add'] ?? '';
+                    $labScopeTransaction->lab_street_eng = $mainLabInfo['lab_street_eng_add'] ?? '';
+                    $labScopeTransaction->lab_province_text_eng = $mainLabInfo['lab_province_text_eng_add'] ?? '';
+                    $labScopeTransaction->lab_amphur_eng = $mainLabInfo['lab_amphur_eng_add'] ?? '';
+                    $labScopeTransaction->lab_district_eng = $mainLabInfo['lab_district_eng_add'] ?? '';
+                    $labScopeTransaction->lab_types = json_encode($mainLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
 
-                                        // เพิ่มข้อมูล Measurement และ Ranges
-                                        if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                                            foreach ($labType['measurements'] as $measurementData) {
-                                                $measurement = new LabCalMeasurement();
-                                                $measurement->lab_cal_transaction_id = $transaction->id;
-                                                $measurement->name = $measurementData['name'] ?? '';
-                                                $measurement->type = $measurementData['type'] ?? null;
-                                                $measurement->save();
+                    $labScopeTransaction->save();
 
-                                                if (isset($measurementData['ranges']) && is_array($measurementData['ranges'])) {
-                                                    foreach ($measurementData['ranges'] as $rangeData) {
-                                                        $range = new LabCalMeasurementRange();
-                                                        $range->lab_cal_measurement_id = $measurement->id;
-                                                        $range->description = $rangeData['description'] ?? '';
-                                                        $range->range = $rangeData['range'] ?? '';
-                                                        $range->uncertainty = $rangeData['uncertainty'] ?? '';
-                                                        $range->save();
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                    foreach ($branchLabInfos as $branchId => $branchLabInfo) {
+                        $labScopeTransaction = new LabScopeTransaction();
+                        $labScopeTransaction->app_certi_lab_id = $certi_lab->id;
+                        $labScopeTransaction->request_type = $request_type;
+                        $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'branch';;
+                        $labScopeTransaction->branch_id = $branchId;
+                        $labScopeTransaction->address_number = $branchLabInfo['address_number_add'] ?? '';
+                        $labScopeTransaction->village_no = $branchLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
+                        $labScopeTransaction->address_city = $branchLabInfo['address_city_add'] ?? '';
+                        $labScopeTransaction->address_city_text = $branchLabInfo['address_city_text_add'] ?? '';
+                        $labScopeTransaction->address_district = $branchLabInfo['address_district_add'] ?? '';
+                        $labScopeTransaction->sub_district = $branchLabInfo['sub_district_add'] ?? '';
+                        $labScopeTransaction->postcode = $branchLabInfo['postcode_add'] ?? '';
+                        $labScopeTransaction->address_soi = $branchLabInfo['address_soi_add'] ?? '';
+                        $labScopeTransaction->address_street = $branchLabInfo['address_street_add'] ?? '';
+                        $labScopeTransaction->lab_address_no_eng = $branchLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
+                        $labScopeTransaction->lab_moo_eng = $branchLabInfo['lab_moo_eng_add'] ?? '';
+                        $labScopeTransaction->lab_soi_eng = $branchLabInfo['lab_soi_eng_add'] ?? '';
+                        $labScopeTransaction->lab_street_eng = $branchLabInfo['lab_street_eng_add'] ?? '';
+                        $labScopeTransaction->lab_province_text_eng = $branchLabInfo['lab_province_text_eng_add'] ?? '';
+                        $labScopeTransaction->lab_amphur_eng = $branchLabInfo['lab_amphur_eng_add'] ?? '';
+                        $labScopeTransaction->lab_district_eng = $branchLabInfo['lab_district_eng_add'] ?? '';
+                        $labScopeTransaction->lab_types = json_encode($branchLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
+    
+                        $labScopeTransaction->save();
+                    }
 
-                            // Loop through each item in labAddresses
-                            foreach ($labAddresses as $labAddress) {
-                                $labCalRequest = new LabCalRequest();
-                                // กำหนดค่าให้กับฟิลด์
-                                $labCalRequest->app_certi_lab_id = $certi_lab->id;
-                                $labCalRequest->type = 2; 
-                                $labCalRequest->no = $labAddress['address_number_add_modal'] ?? '';
-                                $labCalRequest->moo = $labAddress['village_no_add_modal'] ?? '';
-                                $labCalRequest->province_id = $labAddress['address_city_add_modal'] ?? '';
-                                $labCalRequest->province_name = $labAddress['address_city_text_add_modal'] ?? '';
-                                $labCalRequest->amphur_id = $labAddress['address_district_add_modal_id'] ?? '';
-                                $labCalRequest->amphur_name = $labAddress['sub_district_add_modal'] ?? '';
-                                $labCalRequest->tambol_id = $labAddress['sub_district_add_modal_id'] ?? '';
-                                $labCalRequest->tambol_name = $labAddress['sub_district_add_modal'] ?? '';
-                                $labCalRequest->postal_code = $labAddress['postcode_add_modal'] ?? '';
-                                $labCalRequest->soi = $labAddress['address_soi_add_modal'] ?? '';
-                                $labCalRequest->street = $labAddress['address_street_add_modal'] ?? '';
-                                $labCalRequest->no_eng = $labAddress['lab_address_no_eng_add_modal'] ?? '';
-                                $labCalRequest->moo_eng = $labAddress['lab_moo_eng_add_modal'] ?? '';
-                                $labCalRequest->soi_eng = $labAddress['lab_soi_eng_add_modal'] ?? '';
-                                $labCalRequest->street_eng = $labAddress['lab_street_eng_add_modal'] ?? '';
-                                $labCalRequest->province_name_eng = $labAddress['lab_province_text_eng_add_modal'] ?? '';
-                                $labCalRequest->amphur_name_eng = $labAddress['lab_amphur_eng_add_modal'] ?? '';
-                                $labCalRequest->tambol_name_eng = $labAddress['lab_district_eng_add_modal'] ?? '';
-            
-                                // บันทึกข้อมูล
-                                $labCalRequest->save();
-                                
-                                                
-                                $labTypes = $labAddress['lab_types'];
-                                foreach ($labTypes as $key => $labTypeValues) {
-                                    if (is_array($labTypeValues)) {
-                                        foreach ($labTypeValues as $labType) {
-                                            // สร้าง LabCalMainTransaction
-                                            $transaction = new LabCalTransaction();
-                                            $transaction->lab_cal_request_id = $labCalRequest->id; // ใช้ ID จาก CertiLab
-                                            $transaction->key = $key;
-                                            $transaction->index = $labType['index'] ?? null;
-                                            $transaction->category = $labType['category'] ?? null;
-                                            $transaction->category_th = $labType['category_th'] ?? null;
-                                            $transaction->instrument = $labType['instrument'] ?? null;
-                                            $transaction->instrument_text = $labType['instrument_text'] ?? '';
-                                            $transaction->instrument_two = $labType['instrument_two'] ?? null;
-                                            $transaction->instrument_two_text = $labType['instrument_two_text'] ?? '';
-                                            $transaction->description = $labType['description'] ?? '';
-                                            $transaction->standard = $labType['standard'] ?? '';
-                                            $transaction->code = $labType['code'] ?? '';
-
-                                            $transaction->save();
-
-                                            // เพิ่มข้อมูล Measurement และ Ranges
-                                            if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                                                foreach ($labType['measurements'] as $measurementData) {
-                                                    $measurement = new LabCalMeasurement();
-                                                    $measurement->lab_cal_transaction_id = $transaction->id;
-                                                    $measurement->name = $measurementData['name'] ?? '';
-                                                    $measurement->type = $measurementData['type'] ?? null;
-                                                    $measurement->save();
-
-                                                    if (isset($measurementData['ranges']) && is_array($measurementData['ranges'])) {
-                                                        foreach ($measurementData['ranges'] as $rangeData) {
-                                                            $range = new LabCalMeasurementRange();
-                                                            $range->lab_cal_measurement_id = $measurement->id;
-                                                            $range->description = $rangeData['description'] ?? '';
-                                                            $range->range = $rangeData['range'] ?? '';
-                                                            $range->uncertainty = $rangeData['uncertainty'] ?? '';
-                                                            $range->save();
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        
-                        }else if($certi_lab->lab_type == 3){
-                            // ทดสอบ
-                            LabTestRequest::where('app_certi_lab_id', $certi_lab->id)->delete();
-                            $labTestRequest = new LabTestRequest();
-
-                            $labTestRequest->app_certi_lab_id = $certi_lab->id;
-                            $labTestRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
-                            $labTestRequest->no = $labMainAddress['address_number_add'] ?? '';
-                            $labTestRequest->moo = $labMainAddress['address_moo_add'] ?? '';
-                            $labTestRequest->province_id = $labMainAddress['address_city_add'] ?? '';
-                            $labTestRequest->province_name = $labMainAddress['address_city_text_add'] ?? '';
-                            $labTestRequest->amphur_id = $labMainAddress['amphur_id_add'] ?? '';
-                            $labTestRequest->amphur_name = $labMainAddress['address_district_add'] ?? '';
-                            $labTestRequest->tambol_id = $labMainAddress['tambol_id_add'] ?? '';
-                            $labTestRequest->tambol_name = $labMainAddress['sub_district_add'] ?? '';
-                            $labTestRequest->postal_code = $labMainAddress['postcode_add'] ?? '';
-                            $labTestRequest->soi = $labMainAddress['address_soi_add'] ?? '';
-                            $labTestRequest->street = $labMainAddress['address_street_add'] ?? '';
-                            $labTestRequest->no_eng = $labMainAddress['lab_address_no_eng_add'] ?? '';
-                            $labTestRequest->moo_eng = $labMainAddress['lab_moo_eng_add'] ?? '';
-                            $labTestRequest->soi_eng = $labMainAddress['lab_soi_eng_add'] ?? '';
-                            $labTestRequest->street_eng = $labMainAddress['lab_street_eng_add'] ?? '';
-                            $labTestRequest->province_name_eng = $labMainAddress['lab_province_text_eng_add'] ?? '';
-                            $labTestRequest->amphur_name_eng = $labMainAddress['lab_amphur_eng_add'] ?? '';
-                            $labTestRequest->tambol_name_eng = $labMainAddress['lab_district_eng_add'] ?? '';
-
-                            // บันทึกข้อมูล
-                            $labTestRequest->save();
-
-                            $labTypes = $labMainAddress['lab_types'];
-                            foreach ($labTypes as $key => $labTypeValues) {
-                                if (is_array($labTypeValues)) {
-                                    foreach ($labTypeValues as $labType) {
-                                        $transaction = new LabTestTransaction();
-                                        $transaction->lab_test_request_id = $labTestRequest->id; // ใช้ ID จาก CertiLab
-                                        $transaction->key = $key;
-                                        $transaction->index = $labType['index'] ?? null;
-                                        $transaction->category = $labType['category'] ?? null;
-                                        $transaction->category_th = $labType['category_th'] ?? null;
-                                        $transaction->test_field = $labType['test_field'] ?? null;
-                                        $transaction->test_field_eng = $labType['test_field_eng'] ?? '';
-                                        $transaction->description = $labType['description'] ?? '';
-                                        $transaction->standard = $labType['standard'] ?? '';
-                                        $transaction->code = $labType['code'] ?? '';
-                                        $transaction->save();
-
-                                        // เพิ่มข้อมูล Measurement และ Ranges
-                                        if (isset($labType['measurements']) && is_array($labType['measurements'])) {
-                                            foreach ($labType['measurements'] as $measurementData) {
-                                                $measurement = new LabTestMeasurement();
-                                                $measurement->lab_test_transaction_id = $transaction->id;
-                                                $measurement->name = $measurementData['name'] ?? '';
-                                                $measurement->name_eng = $measurementData['name_eng'] ?? '';
-                                                $measurement->type = $measurementData['type'] ?? '';
-                                                $measurement->detail = $measurementData['detail'] ?? '';
-                                                $measurement->description = $measurementData['description'] ?? '';
-                                                $measurement->save();
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-
-                        }
+                    // dd(LabScopeTransaction::where('app_certi_lab_id', $certi_lab->id)->first());
 
                         $pdfService = new CreateLabScopePdf($certi_lab);
                         $pdfContent = $pdfService->generatePdf();
@@ -2838,25 +2371,6 @@ class ApplicantController extends Controller
                         }
                     }
 
-                    //อัพเดท CertiLabsFileAll ต้องอนุมัติก่อนจึงจะเพิ่มเข้า CertiLabFileAll ได้
-
-                    // $certiLabsFileAlls = CertiLabFileAll::where('app_certi_lab_id',$app->id)->get();
-
-                    // if($certiLabsFileAlls->count() !=0)
-                    // {
-                    //     $json = $this->copyScopeLabFromAttachement($app);
-                    //     $copiedScopes = json_decode($json, true);
-                    //     CertiLabFileAll::where('app_certi_lab_id',$app->id)->update([
-                    //         'state' => 0
-                    //     ]);
-                    //     $certiLabFileAll = new CertiLabFileAll();
-                    //     $certiLabFileAll->app_certi_lab_id = $app->id;
-                    //     $certiLabFileAll->app_no = $app->app_no;
-                    //     $certiLabFileAll->attach_pdf = $copiedScopes[0]['attachs'];
-                    //     $certiLabFileAll->attach_client_name = $copiedScopes[0]['file_client_name'];
-                    //     $certiLabFileAll->state = 1;
-                    //     $certiLabFileAll->save();
-                    // }
 
                     //ตรวจสอบใน tracking attach file ถ้ามีก็ให้อัพเดทไฟล์ด้วย
                     $trackingInspectionId = $this->getAttachedFileFromRequest($app->app_no);
@@ -3217,7 +2731,6 @@ class ApplicantController extends Controller
 
         $certilab = CertiLab::find($request->id);
 
-       
         if($certilab->purpose_type == 6)
         {
             if($certilab->transferer_export_id != null){
@@ -3420,49 +2933,6 @@ class ApplicantController extends Controller
         if($certilab->purpose_type == 6)
         {
             if($certilab->transferer_export_id != null){
-
-            //     $data_app =  [
-            //         'url'           =>  $url.'/certify/send-certificates/create',
-            //         'certilab'=>  $certilab,
-            //         'email_cc'=>  (count($certilab->DataEmailDirectorLABCC) > 0 ) ? $certilab->DataEmailDirectorLABCC : 'lab1@tisi.mail.go.th'
-            //    ];
-
-
-            //     if(count($certilab->DataEmailDirectorLABCC) > 0){
-            //         $email_cc =  implode(',', $certilab->DataEmailDirectorLABCC);
-            //     }else{
-            //         $email_cc =  'lab1@tisi.mail.go.th';
-            //     }
-
-            //     $log_email =  HP::getInsertCertifyLogEmail( $certilab->app_no,
-            //                                             $certilab->id,
-            //                                             (new CertiLab)->getTable(),
-            //                                             $certilab->id,
-            //                                             (new CertiLab)->getTable(),
-            //                                             1,
-            //                                             'นำส่งใบรับรองระบบงาน (โอนใบรับรอง)',
-            //                                             view('mail.lab.send_transfer_certificate', $data_app),
-            //                                             $certilab->created_by,
-            //                                             $certilab->agent_id,
-            //                                             null,
-            //                                             $certilab->email,
-            //                                             implode(',',(array)$certilab->DataEmailDirectorLAB),
-            //                                             $email_cc,
-            //                                             null,
-            //                                             null
-            //                                             );
-
-            //         $examinerEmails = $certilab->EmailStaff;
-
-            //         // if(count($examinerEmails)==0)
-            //         // {
-            //         //     $examinerEmails = auth()->user()->reg_email;
-            //         // }
-                                                                            
-            //         //  dd($examinerEmails)                                   ;
-            //         $html = new SendTransferCertificate($data_app);
-            //         $mail =  Mail::to($examinerEmails)->send($html);
-
 
                     $config = HP::getConfig();
                     $url  =   !empty($config->url_center) ? $config->url_center : url('');
@@ -4216,6 +3686,14 @@ class ApplicantController extends Controller
             ])
             ->where('app_certi_lab_id', $certiLab->id)
             ->get();
+
+            $mainLabScopeTransaction = LabScopeTransaction::where('app_certi_lab_id', $certiLab->id)
+            ->where('lab_type','main')
+            ->first();
+            $branchLabScopeTransactions = LabScopeTransaction::where('app_certi_lab_id', $certiLab->id)
+            ->where('lab_type','branch')
+            ->get();
+
         return response()->json([
             'attach_path' => $this->attach_path,
             'certiLab' => $certiLab,
@@ -4235,6 +3713,8 @@ class ApplicantController extends Controller
             'certiLabInfo' => $certiLabInfo,
             'labTestRequest' => $labTestRequest,
             'labCalRequest' => $labCalRequest,
+            'mainLabScopeTransaction' => $mainLabScopeTransaction,
+            'branchLabScopeTransactions' => $branchLabScopeTransactions
         ]);
     }
 
@@ -4267,10 +3747,8 @@ class ApplicantController extends Controller
         ->where('lab_type',$labType)
         ->pluck('id')->toArray();
 
-       
         $certificateExports = CertificateExport::whereIn('certificate_for',$appCertiLabIds)->get();
-        // dd($certificateExports);
-        // $certiLabExportMapreqs = CertiLabExportMapreq::whereIn('app_certi_lab_id',$appCertiLabIds)->pluck('app_certi_lab_id')->toArray();
+
         return response()->json([
             'certificateExports' => $certificateExports
        ]);
@@ -4279,6 +3757,7 @@ class ApplicantController extends Controller
     public function  checkTransferee(Request $request)
     {
 
+        // dd($request->all());
         $user = null;
        
         $transfererIdNumber = $request->input('transferer_id_number');
@@ -4314,7 +3793,7 @@ class ApplicantController extends Controller
     public function isLabTypeAndStandardBelong(Request $request)
     {
         $user = auth()->user();
-        // dd($user->tax_number) ;
+
         $standardId = $request->input('std_id');
         $labType = $request->input('lab_type');
 
@@ -4327,11 +3806,6 @@ class ApplicantController extends Controller
                   ->where('standard_id',$standardId)
                   ->get();
     
-        
-        // if($certiLabs->count() != 0)
-        // {
-        //   dd('ความสามารถห้องปฏิบัติการ'.$labType.' และตามมาตรฐานเลข '.$standardId.' ได้รับการรับรองแล้ว');
-        // }
 
        
        return response()->json([

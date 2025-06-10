@@ -14,7 +14,7 @@ class CbReportTwoInfo extends Model
     protected $fillable = [
         'cb_assessment_id',
         'eval_riteria_text',
-        'history',
+        'background_history',
         'insp_proc',
         'evaluation_key_point',
         'observation',

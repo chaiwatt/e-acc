@@ -3,10 +3,11 @@
 namespace App\Models\Certificate;
 
 use App\User;
-use Illuminate\Database\Eloquent\Model;
-use Kyslik\ColumnSortable\Sortable;
 use App\AttachFile;
 use App\CertificateExport;
+use Kyslik\ColumnSortable\Sortable;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Certificate\TrackingLabReportOne;
 use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantIB\CertiIBExport;
 
@@ -198,4 +199,8 @@ class TrackingAssessment extends Model
 
 
 
+    public function trackingLabReportOne()
+    {
+        return $this->hasOne(TrackingLabReportOne::class, 'tracking_assessment_id','id');
+    }
 }

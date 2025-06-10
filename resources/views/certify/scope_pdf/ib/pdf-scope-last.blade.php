@@ -39,20 +39,17 @@
     </tr>
 
     @php
-        // จัดกลุ่มตาม ib_main_category_scope_text
         $groupedTransactions = $ibScopeTransactions->groupBy(function ($item) {
             return $item->ibMainCategoryScope ? $item->ibMainCategoryScope->name : '';
         });
 
-        // แปลงเป็นโครงสร้างเหมือน groupedArray
         $groupedArray = $groupedTransactions->map(function ($transactions, $mainCategoryText) {
-            // จัดกลุ่มย่อยตาม ib_sub_category_scope_text
             $subGrouped = $transactions->groupBy(function ($item) {
                 return $item->ibSubCategoryScope ? $item->ibSubCategoryScope->name : '';
             });
 
             $subCategories = $subGrouped->map(function ($transactions, $subCategoryText) {
-                // จัดกลุ่มตาม ib_scope_topic_text
+
                 $topicGrouped = $transactions->groupBy(function ($item) {
                     return $item->ibScopeTopic ? $item->ibScopeTopic->name : '';
                 });
@@ -84,7 +81,7 @@
             $mainCategoryTextResult = TextHelper::callLonganTokenizePost($group['mainCategoryText']);
             $mainCategoryTextResult = str_replace('!', '<span style="visibility: hidden;">!</span>', $mainCategoryTextResult);
         @endphp
-        {{-- ;word-spacing: -0.2em;font-size:22px" --}}
+
         <tr style="border-bottom: none !important;">
             <td style="vertical-align: top; border-bottom: none !important;">
                 <span style="word-spacing: -0.2em; font-size: 22px">{!! $mainCategoryTextResult !!}</span>
@@ -117,7 +114,7 @@
                 </td>
                 <td style="vertical-align: top;width:35%; border-top: none !important;">
                     <span>
-                        {{-- <table style="border: none; !important;"> --}}
+
                         <table style="border: none !important; width: 100% !important;padding-top:-10px">
                             @foreach ($subCategory['scopeTopics'] as $topic)
                                 <tr style="border: none !important;">
@@ -165,7 +162,6 @@
                         $standardTextResult = str_replace('!', '<span style="visibility: hidden;">!</span>', $standardTextResult);
                     @endphp
                     <span style="word-spacing: -0.2em;font-size:22px">{!! $standardTextResult !!}</span>
-                    <!-- ถ้าต้องการปุ่มลบ ต้องใช้ JavaScript หรือ form -->
                     <span style="font-size: 0.01px">*{{$key}}*</span>
                 </td>
             </tr>
@@ -179,11 +175,6 @@
         <td>
             <div >
 
-                {{-- @php
-                    $tmpIssueDate = \Carbon\Carbon::now()->format('Y/m/d');
-                    $issuedDate = HP::formatDateThaiFull($tmpIssueDate);
-                    $issuedDateEn  = HP::BEDate($tmpIssueDate);
-                @endphp --}}
 
                 @php
                     // $issuedDate = "";

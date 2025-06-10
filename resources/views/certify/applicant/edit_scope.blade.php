@@ -64,25 +64,12 @@
                         'files' => true
                     ]) !!}
 
-                        {{-- @include ('certify.applicant.form_edit.form84')
-                        @include ('certify.applicant.form_edit.form85')
-                        <hr>
-                        @include ('certify.applicant.form_edit.form86')
-                        @include ('certify.applicant.form_edit.form87')
-                        @include ('certify.applicant.form_edit.form88')
-                        @include ('certify.applicant.form_edit.form89')
-                        @include ('certify.applicant.form_edit.form90')
-                        @include ('certify.applicant.form_edit.form91')
-
-                        @include ('certify.applicant.form_edit.form92')
-                        @include ('certify.applicant.form_edit.form93')
-                        @include ('certify.applicant.form_edit.form94')
-                        @include ('certify.applicant.form_edit.form95')
-                        @include ('certify.applicant.form_edit.form96') --}}
 
                         
                         @include ('certify.applicant.form-edit-scope',
                         ['scope_edit' => true])
+
+                        {{-- @include ('certify.applicant.form') --}}
 
                         <center>
                             <div class="col-md-12 text-center">

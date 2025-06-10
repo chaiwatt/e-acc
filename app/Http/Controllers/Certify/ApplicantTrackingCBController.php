@@ -2,34 +2,35 @@
 
 namespace App\Http\Controllers\Certify;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use DB;
+use HP;
 
+use stdClass;
 use App\AttachFile;
-use App\Models\Certify\ApplicantCB\CertiCb; 
-use App\Models\Certify\ApplicantCB\CertiCBExport; 
+use Illuminate\Http\Request;
+use App\Mail\Tracking\ReportMail;
+use App\Mail\Tracking\AuditorsMail;
+use App\Mail\Tracking\PayInTwoMail;
+use App\Http\Controllers\Controller;
+use App\Mail\Tracking\PayInOneMail; 
 use App\Models\Certificate\Tracking;
+use Illuminate\Support\Facades\Mail; 
+use App\Mail\Tracking\EvaluationMail; 
+use App\Mail\Tracking\InspectiontMail;
+use App\Mail\Tracking\SaveAssessmentMail;
+use App\Mail\Tracking\ConFirmAuditorsMail;
+use App\Models\Certificate\TrackingReport;
+use App\Models\Certificate\TrackingReview;
 use App\Models\Certificate\TrackingAuditors;
 use App\Models\Certificate\TrackingHistory; 
 use App\Models\Certificate\TrackingPayInOne;
+use App\Models\Certificate\TrackingPayInTwo;
+use App\Models\Certify\ApplicantCB\CertiCb; 
+use App\Models\Certificate\TrackingInspection;
 use App\Models\Certificate\TrackingAssessment; 
 use App\Models\Certificate\TrackingAssessmentBug;
-use App\Models\Certificate\TrackingInspection;
-use App\Models\Certificate\TrackingReport;
-use App\Models\Certificate\TrackingReview;
-use App\Models\Certificate\TrackingPayInTwo;
-use HP;
-use DB;
-use stdClass;
-use Illuminate\Support\Facades\Mail; 
-use App\Mail\Tracking\PayInOneMail; 
-use App\Mail\Tracking\SaveAssessmentMail;
-use App\Mail\Tracking\EvaluationMail; 
-use App\Mail\Tracking\InspectiontMail;
-use App\Mail\Tracking\ReportMail;
-use App\Mail\Tracking\PayInTwoMail;
-use App\Mail\Tracking\AuditorsMail;
-use App\Mail\Tracking\ConFirmAuditorsMail;
+use App\Models\Certify\ApplicantCB\CertiCBExport; 
+use App\Models\Certificate\TrackingDocReviewAuditor;
 
 class ApplicantTrackingCBController extends Controller
 {
@@ -939,6 +940,53 @@ public function update_payin2(Request $request, $id)
 //            return redirect('certify/tracking-cb')->with('message_error', 'เกิดข้อผิดพลาดกรุณาบันทึกใหม่');
 // }  
 }
+
+
+   public function getTrackingDocReviewAuditor(Request $request)
+   {
+    //    dd($request->trackingId);
+       $trackingDocReviewAuditor = TrackingDocReviewAuditor::where('tracking_id',$request->trackingId)->first();
+       return response()->json([
+           'trackingDocReviewAuditors' => json_decode($trackingDocReviewAuditor->auditors, true),
+       ]);
+   }
+
+       public function updateDocReviewTeam(Request $request)
+   {
+    //    dd($request->all());
+    // dd($request->trackingId);
+       $trackingId = $request->trackingId;
+       $trackingDocReviewAuditor = TrackingDocReviewAuditor::where('tracking_id', $trackingId)->first();
+       $trackingDocReviewAuditor->update([
+           'status' => $request->agreeValue,
+           'remark_text' => $request->remarkText,
+       ]);
+       
+   }
+
+   public function confirmBug(Request $request)
+{
+// dd($request->all());
+  $trackingAssessment = TrackingAssessment::find($request->assessment_id)->update([
+      'accept_fault' => 1
+  ]);
+  return response()->json($trackingAssessment);
+}
+
+public function abilityConfirm(Request $request)
+{
+
+    $tracking = Tracking::find($request->tracking_id)->update([
+        'ability_confirm' => 1
+    ]);
+//   dd($request->all());
+// //   $assessment =   TrackingAssessment::findOrFail($id);
+//   $notice = TrackingAssessment::find($request->notice_id)->update([
+//       'accept_fault' => 1
+//   ]);
+  return response()->json($tracking);
+}
+
 
 
 }

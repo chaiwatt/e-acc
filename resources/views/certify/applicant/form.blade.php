@@ -235,9 +235,9 @@
          transformedMainLabTypes = transformLabTypes(mainLabScopeTransaction.lab_types);
          transformedBranchLabTypesArray = branchLabScopeTransactions.map(branch => transformLabTypes(branch.lab_types));
 
-
+        // alert('dddd');
         // ตรวจสอบความยาวของ labTestRequest
-        console.log('Lab Test Request Length:', labTestRequest.length);
+        // console.log('Lab Test Request Length 777777:', labTestRequest.length);
 
         // หาก labTestRequest ว่าง หรือไม่มีค่า ใช้ labCalRequest แทน
         if (labTestRequest.length > 0) {
@@ -282,7 +282,7 @@
             mainLabScopeTransaction = @json($mainLabScopeTransaction ?? []);
             branchLabScopeTransactions = @json($branchLabScopeTransactions ?? []);
 
-            // console.log('mainLabScopeTransaction',mainLabScopeTransaction);
+            console.log('mainLabScopeTransaction ===> ',mainLabScopeTransaction);
 
             // alert('111');
             $('.mydatepicker_th').datepicker({

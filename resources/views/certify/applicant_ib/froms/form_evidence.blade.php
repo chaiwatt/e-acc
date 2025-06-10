@@ -138,7 +138,7 @@
     <legend><h4><span class="text-danger">*</span> 2. คู่มือคุณภาพและขั้นตอนการดำเนินงานของหน่วยงานตรวจสอบที่สอดคล้องตามข้อกำหนดมาตรฐานเลขที่ มอก.17020 (Inspection body implementations which are conformed with TIS 17020)</h4></legend>
 
     <div class="row repeater-form-file">
-        <div class="col-md-12 box_section1" data-repeater-list="repeater-section1" >
+        <div class="col-md-12 box_section1" data-repeater-list="repeater-section1" id="repeater_section1_wrapper">
 
             @php
                 $section1_required = 'required';
@@ -204,7 +204,7 @@
 <fieldset class="white-box">
     <legend><h4>3. รายชื่อคุณวุฒิประสบการณ์และขอบข่ายความรับผิดชอบของเจ้าหน้าที่ (List of relevant personnel providing name, qualification, experience and responsibility)</h4></legend>
     <div class="row repeater-form-file">
-        <div class="col-md-12 box_section2" data-repeater-list="repeater-section2" >
+        <div class="col-md-12 box_section2" data-repeater-list="repeater-section2" id="repeater_section2_wrapper">
 
             @if ( isset( $certi_ib->id ) && count( App\Models\Certify\ApplicantIB\CertiIBAttachAll::where('app_certi_ib_id', $certi_ib->id )->where('file_section', '2')->get() ) > 0 )
 
@@ -213,15 +213,19 @@
                 @endphp
         
                 @foreach ( $file_sectionn2 as $section2 )
-                    <div class="form-group">
+                  @if (!empty($section2->file))
+                      <div class="form-group">
                         <div class="col-md-4 text-light"></div>
                         <div class="col-md-6">
+                            {{-- {{$section2->file}} --}}
                             <a href="{!! HP::getFileStorage($attach_path.$section2->file) !!}" target="_blank" class="view-attach btn btn-info btn-sm"> {!! HP::FileExtension($section2->file_client_name)  ?? '' !!}</a>
                             <a href="{{url('certify/applicant-ib/delete/file_app_certi_ib_attach_all').'/'.$section2->id.'/'.$certi_ib->token}}" class="btn btn-danger btn-xs box_remove_file" onclick="return confirm('ต้องการลบไฟล์นี้ใช่หรือไม่ ?')">
                                 <i class="fa fa-remove"></i>
                             </a>
                         </div>
                     </div>
+                  @endif
+
                 @endforeach
                 
             @endif
@@ -264,104 +268,52 @@
 
 </fieldset>
 
-@if ($certi_ib == null || empty($certi_ib->doc_review_reject))
-<fieldset class="white-box">
-    <legend>
-        <h4>
-            <span class="text-danger">*</span> 4. ขอบข่ายที่ยื่นขอรับการรับรอง (Scope of Accreditation Sought)
-            {{-- <span class="text-danger">ไฟล์แนบ Word</span><span class="text-danger" style="font-size: 13px;"> (doc,docx)</span> --}}
-        </h4>
-    </legend>
-    <div class="row repeater-form-file">
-        <div class="col-md-12 box_section3" data-repeater-list="repeater-section3" >
+@if ($certi_ib->tracking == null)
+    @if ($certi_ib == null || empty($certi_ib->doc_review_reject))
+        <fieldset class="white-box">
+            <legend>
+                <h4>
+                    <span class="text-danger">*</span> 4. ขอบข่ายที่ยื่นขอรับการรับรอง (Scope of Accreditation Sought)
+                </h4>
+            </legend>
+            <div class="row repeater-form-file">
+                <div class="col-md-12 box_section3" data-repeater-list="repeater-section3" id="repeater_section3_wrapper">
 
-            {{-- @php
-                $section3_required = 'required';
-            @endphp
 
-            @if ( isset( $certi_ib->id ) && count( App\Models\Certify\ApplicantIB\CertiIBAttachAll::where('app_certi_ib_id', $certi_ib->id )->where('file_section', '3')->get() ) > 0 )
-
-                @php
-                    $section3_required = '';
-                    $file_sectionn3 = App\Models\Certify\ApplicantIB\CertiIBAttachAll::where('app_certi_ib_id', $certi_ib->id )->where('file_section', '3')->get();
-                @endphp
-        
-                @foreach ( $file_sectionn3 as $section3 )
-                    <div class="form-group">
-                        <div class="col-md-4 text-light"></div>
-                        <div class="col-md-6">
-                            <a href="{!! HP::getFileStorage($attach_path.$section3->file) !!}" target="_blank" class="view-attach btn btn-info btn-sm"> {!! HP::FileExtension($section3->file_client_name)  ?? '' !!}</a>
-                            <a href="{{url('certify/applicant-ib/delete/file_app_certi_ib_attach_all').'/'.$section3->id.'/'.$certi_ib->token}}" class="btn btn-danger btn-xs box_remove_file" onclick="return confirm('ต้องการลบไฟล์นี้ใช่หรือไม่ ?')">
-                                <i class="fa fa-remove"></i>
-                            </a>
-                        </div>
+                    <div class="col-md-12">
+                        <table class="table" style="border: none; background-color: inherit;">
+                            <tr>
+                                <th>หมวดหมู่ / สาขาการตรวจ </th>
+                                <th>ขั้นตอนและช่วงการตรวจ </th>
+                                <th>ข้อกำหนดที่ใช้ </th>
+                            </tr>
+                            <tbody id="ib_scope_wrapper"></tbody>
+                            
+                        </table>
                     </div>
-                @endforeach
-                
-            @endif --}}
+                </div>
 
-            <div class="col-md-12">
-                <table class="table" style="border: none; background-color: inherit;">
-                    <tr>
-                        <th>หมวดหมู่ / สาขาการตรวจ </th>
-                        <th>ขั้นตอนและช่วงการตรวจ </th>
-                        <th>ข้อกำหนดที่ใช้ </th>
-                    </tr>
-                    <tbody id="ib_scope_wrapper"></tbody>
-                    
-                </table>
+                @if ($methodType != 'show')
+                <div class="row repeater-form-file">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div class="col-md-10"></div>
+                            <div class="col-md-2">
+                                <button type="button" id="btn_add_ib_scope" class="btn btn-success">
+                                    <i class="icon-plus"></i>เพิ่มขอบข่าย
+                                </button>
+                            </div>
+                        </div> 
+                    </div>
+                </div>
+            @endif
             </div>
 
-            {{-- <div class="form-group box_remove_file" data-repeater-item>
-                <div class="col-md-4 text-light"></div>
-                <div class="col-md-6">
-                    <div class="fileinput fileinput-new input-group " data-provides="fileinput">
-                        <div class="form-control" data-trigger="fileinput">
-                            <i class="glyphicon glyphicon-file fileinput-exists"></i>
-                            <span class="fileinput-filename"></span>
-                        </div>
-                        <span class="input-group-addon btn btn-default btn-file">
-                            <span class="fileinput-new">เลือกไฟล์</span>
-                            <span class="fileinput-exists">เปลี่ยน</span>
-                            <input type="file" name="attachs_sec3" class="attachs_sec3 check_max_size_file" {!! $section3_required !!}>
-                        </span> 
-                        <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
-                    </div>
-                    {!! $errors->first('attachs_sec3', '<p class="help-block">:message</p>') !!}
-                </div>
-                <div class="col-md-2">
-                    <button class="btn btn-danger delete-sec3" type="button" data-repeater-delete>
-                        <i class="fa fa-close"></i>
-                    </button>
-                </div>
-            </div> --}}
-        </div>
-        {{-- <div class="col-md-12">
-            <div class="form-group">
-                <div class="col-md-10"></div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-success" data-repeater-create><i class="icon-plus"></i>เพิ่ม</button>
-                </div>
-            </div> 
-        </div> --}}
-        @if ($methodType != 'show')
-        <div class="row repeater-form-file">
-            <div class="col-md-12">
-                <div class="form-group">
-                    <div class="col-md-10"></div>
-                    <div class="col-md-2">
-                        <button type="button" id="btn_add_ib_scope" class="btn btn-success">
-                            <i class="icon-plus"></i>เพิ่มขอบข่าย
-                        </button>
-                    </div>
-                </div> 
-            </div>
-        </div>
+        </fieldset>
     @endif
-    </div>
-
-</fieldset>
 @endif
+
+
 
 
 <fieldset class="white-box">
@@ -377,7 +329,7 @@
                 <div class="col-md-4  text-light">
                     {!! Form::label('attachs_sec4', 'กรุณาแนบไฟล์เครื่องมือ', ['class' => 'col-md-12 label_attach text-light  control-label ']) !!}
                 </div>
-                <div class="col-md-6" data-repeater-list="repeater-section4" >
+                <div class="col-md-6" data-repeater-list="repeater-section4" id="repeater_section4_wrapper" >
                     @php
                         $section4_required = 'required';
                     @endphp
@@ -392,6 +344,7 @@
                         @foreach ( $file_sectionn4 as $section4 )
                             <div class="row form-group">
                                 <div class="col-md-12">
+                                    {{-- {{$attach_path.$section4->file}} --}}
                                     <a href="{!! HP::getFileStorage($attach_path.$section4->file) !!}" target="_blank" class="btn btn-info btn-sm"> {!! HP::FileExtension($section4->file_client_name)  ?? '' !!}</a>
                                     <a href="{{url('certify/applicant-ib/delete/file_app_certi_ib_attach_all').'/'.$section4->id.'/'.$certi_ib->token}}" class="btn btn-danger btn-xs box_remove_file" onclick="return confirm('ต้องการลบไฟล์นี้ใช่หรือไม่ ?')">
                                         <i class="fa fa-remove"></i>
@@ -445,7 +398,7 @@
     </legend>
 
     <div class="row repeater-form-file">
-        <div class="col-md-12 box_section5" data-repeater-list="repeater-section5" >
+        <div class="col-md-12 box_section5" data-repeater-list="repeater-section5" id="repeater_section5_wrapper">
 
             @if ( isset( $certi_ib->id ) && count( App\Models\Certify\ApplicantIB\CertiIBAttachAll::where('app_certi_ib_id', $certi_ib->id )->where('file_section', '5')->get() ) > 0 )
 
@@ -511,7 +464,7 @@
     </legend>
 
     <div class="row repeater-form-file">
-        <div class="col-md-12 box_section6" data-repeater-list="repeater-sectio6" >
+        <div class="col-md-12 box_section6" data-repeater-list="repeater-sectio6" id="repeater_section6_wrapper">
             @if ( isset( $certi_ib->id ) && count( App\Models\Certify\ApplicantIB\CertiIBAttachAll::where('app_certi_ib_id', $certi_ib->id )->where('file_section', '6')->get() ) > 0 )
 
                 @php
@@ -576,7 +529,7 @@
     </legend>
 
     <div class="row repeater-form-file">
-        <div class="col-md-12 box_section8" data-repeater-list="repeater-section8" >
+        <div class="col-md-12 box_section8" data-repeater-list="repeater-section8" id="repeater_section8_wrapper">
             @if ( isset( $certi_ib->id ) && count( App\Models\Certify\ApplicantIB\CertiIBAttachAll::where('app_certi_ib_id', $certi_ib->id )->where('file_section', '8')->get() ) > 0 )
 
                 @php
@@ -630,7 +583,7 @@
     </legend>
 
     <div class="row repeater-form-file">
-        <div class="col-md-12 box_section_other" data-repeater-list="repeater-section7" >
+        <div class="col-md-12 box_section_other" data-repeater-list="repeater-section7" id="repeater_section7_wrapper" >
 
             @if ( isset( $certi_ib->id ) && count( App\Models\Certify\ApplicantIB\CertiIBAttachAll::where('app_certi_ib_id', $certi_ib->id )->where('file_section', '7')->get() ) > 0 )
 
@@ -696,6 +649,8 @@
 let scopeData ={} ;
 
 let transactions = [];
+let ibScopeTransactions 
+ibScopeTransactions = @json($ibScopeTransactions ?? []);
 
 // เมื่อหน้าโหลด ให้เริ่มต้น array ว่าง
 // $(document).ready(function() {
@@ -705,11 +660,10 @@ let transactions = [];
 
     renderInitialTable()
 
-
+    
 
     
     function renderInitialTable() {
-        const ibScopeTransactions = @json($ibScopeTransactions ?? []);
 
         transactions = ibScopeTransactions.map(item => ({
             ib_main_category_scope_id: item.ib_main_category_scope_id,

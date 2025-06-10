@@ -41,7 +41,7 @@ class CertiCBExport extends Model
                             'updated_by',
                             'name_en','name_standard_en','address_en','allay_en','village_no_en','road_en','province_name_en','amphur_name_en','district_name_en','formula_en',
                             'attach_client_name',
-                            'cer_type','certificate_path','certificate_file','certificate_newfile','documentId','signtureid','status_revoke','date_revoke','reason_revoke','user_revoke'
+                            'cer_type','certificate_path','certificate_file','certificate_newfile','documentId','signtureid','status_revoke','date_revoke','reason_revoke','user_revoke','hold_status'
                             ];
 public function CertiCbTo()
  {

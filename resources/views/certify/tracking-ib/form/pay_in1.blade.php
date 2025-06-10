@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left"> แจ้งรายละเอียดค่าบริการในการตรวจประเมิน </h3>
+                    <h3 class="box-title pull-left"> แจ้งรายละเอียดค่าบริการในการติดตามตรวจประเมิน IB </h3>
                     @can('view-'.str_slug('tracking-ib'))
                         <a class="btn btn-success pull-right" href="{{  app('url')->previous() }}">
                             <i class="icon-arrow-left-circle"></i> กลับ

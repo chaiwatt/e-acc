@@ -1,5 +1,9 @@
 
-
+<style>
+    .icheckbox_square-blue {
+    transition: none !important;
+}
+</style>
 
 <fieldset class="white-box">
     <legend><h4>ข้อมูลขอรับบริการ</h4></legend>
@@ -161,63 +165,7 @@
             </div>
         </div>
         
-{{-- 
-        @if( isset($certi_cb->id) && !empty($certi_cb->standard_change) )
 
-            <div class="form-group {{ $errors->has('standard_change') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('cb_name', 'วัตถุประสงค์ในการยื่นคำขอ'.':'.'<br/><span class=" font_size">(Apply to NSC for)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <label  class="col-md-2 label-height">
-                    {!! Form::radio('standard_change', '1', $certi_cb->standard_change == 1 ?true:false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change1']) !!}
-                    &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(initial assessment)</span>
-                </label>
-                <label  class="col-md-2 label-height">
-                    {!! Form::radio('standard_change', '2', $certi_cb->standard_change == 2 ?true:false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change2']) !!}
-                    &nbsp;ต่ออายุใบรับรอง <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(renewal)</span>
-                </label>
-                <label  class="col-md-2 label-height">
-                    {!! Form::radio('standard_change', '3', $certi_cb->standard_change == 3 ?true:false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change3']) !!}
-                    &nbsp;ขยายขอบข่าย <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(extending accreditation)</span>
-                </label>
-                <label  class="col-md-3 label-height">
-                    {!! Form::radio('standard_change', '4', $certi_cb->standard_change == 4 ?true:false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change4']) !!}
-                    &nbsp;การเปลี่ยนแปลงมาตรฐาน <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(standard change)</span>
-                </label>
-                {!! $errors->first('standard_change', '<p class="help-block">:message</p>') !!}
-            </div>
-
-        @else
-            <div class="form-group {{ $errors->has('standard_change') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('cb_name', 'วัตถุประสงค์ในการยื่นคำขอ'.':'.'<br/><span class=" font_size">(Apply to NSC for)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <label  class="col-md-2 label-height" >
-                    {!! Form::radio('standard_change', '1', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change1']) !!}
-                    &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(initial assessment)</span>
-                </label>
-                <label  class="col-md-2 label-height">
-                    {!! Form::radio('standard_change', '2', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change2']) !!}
-                    &nbsp;ต่ออายุใบรับรอง <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(renewal)</span>
-                </label>
-                <label  class="col-md-2 label-height">
-                    {!! Form::radio('standard_change', '3', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change3']) !!}
-                    &nbsp;ขยายขอบข่าย <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(extending accreditation)</span>
-                </label>
-                <label  class="col-md-3 label-height">
-                    {!! Form::radio('standard_change', '4', false, ['class'=>'check', 'data-radio'=>'iradio_square-green','id'=>'standard_change4']) !!}
-                    &nbsp;การเปลี่ยนแปลงมาตรฐาน <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                    <span class="font_size">(standard change)</span>
-                </label>
-                {!! $errors->first('standard_change', '<p class="help-block">:message</p>') !!}
-            </div>
-
-        @endif --}}
-
-        {{-- {{$certi_cb->standard_change}} --}}
 
         @if( isset($certi_cb->id) && !empty($certi_cb->standard_change) )
             @php $selectedStandard = $certi_cb->standard_change; @endphp
@@ -230,14 +178,29 @@
                 วัตถุประสงค์ในการยื่นคำขอ:
                 <br/><span class="font_size">(Apply to NSC for)</span>
             </label>
+            @if ($certifieds->count() == 0)
+                <label class="col-md-2 label-height">
+                    <input type="radio" name="standard_change" value="1" id="standard_change1" class="check" data-radio="iradio_square-green" 
+                        {{ $selectedStandard == 1 ? 'checked' : '' }}>
+                    &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="font_size">(initial assessment)</span>
+                </label>
 
-            <label class="col-md-2 label-height">
-                <input type="radio" name="standard_change" value="1" id="standard_change1" class="check" data-radio="iradio_square-green" 
-                    {{ $selectedStandard == 1 ? 'checked' : '' }}>
-                &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <span class="font_size">(initial assessment)</span>
-            </label>
+                <label class="col-md-2 label-height">
+                    <input type="radio" name="standard_change" value="6" id="standard_change6" class="check" data-radio="iradio_square-green" 
+                        {{ $selectedStandard == 1 ? 'checked' : '' }}>
+                    &nbsp;โอนใบรับรอง <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="font_size">(transfer accreditation)</span>
+                </label>
+            @endif
+
             @if ($certifieds->count() > 0)
+                <label class="col-md-2 label-height">
+                    <input type="radio" name="standard_change" value="1" id="standard_change1" class="check" data-radio="iradio_square-green" 
+                        {{ $selectedStandard == 1 ? 'checked' : '' }}>
+                    &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="font_size">(initial assessment)</span>
+                </label>
                 <label class="col-md-2 label-height">
                     <input type="radio" name="standard_change" value="2" id="standard_change2" class="check" data-radio="iradio_square-green" 
                         {{ $selectedStandard == 2 ? 'checked' : '' }}>
@@ -266,32 +229,42 @@
             @endif
         </div>
 
+        @if ($certifieds->count() > 0)
+        <div class="form-group {{ $errors->has('standard_change') ? 'has-error' : ''}}">
+            <label for="" class="col-md-3 control-label label-height"></label>
+            <label class="col-md-2 label-height">
+                <input type="radio" name="standard_change" value="5" id="standard_change5" class="check" data-radio="iradio_square-green" 
+                    {{ $selectedStandard == 5 ? 'checked' : '' }}>
+                &nbsp;ย้ายสถานที่ <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="font_size">(Relocation)</span>
+            </label>
+            <label class="col-md-2 label-height">
+                <input type="radio" name="standard_change" value="6" id="standard_change6" class="check" data-radio="iradio_square-green" 
+                    {{ $selectedStandard == 6 ? 'checked' : '' }}>
+                &nbsp;โอนใบรับรอง <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <span class="font_size">(transfer accreditation)</span>
+            </label>
+        </div>
+        @endif
 
-        {{-- <div id="box_ref_application_no" >
-            <div class="form-group {{ $errors->has('ref_application_no') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('ref_application_no', 'อ้างอิงเลขที่คำขอ'.':'.'<br/><span class=" font_size">(Application No.)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
-                <div class="col-md-4">
-                    {!! Form::text('ref_application_no', null, ['class' => 'form-control', 'id' => 'ref_application_no']) !!}
-                    {!! $errors->first('ref_application_no', '<p class="help-block">:message</p>') !!}
-                </div>
-            </div>
-            <div class="form-group {{ $errors->has('certificate_exports_id') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('certificate_exports_id', 'ใบรับรองเลขที่'.':'.'<br/><span class="  font_size">(Certificate No)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <div class="col-md-4">
-                    {!! Form::text('certificate_exports_id', null, ['class' => 'form-control', 'id' => 'certificate_exports_id']) !!}
-                    {!! $errors->first('certificate_exports_id', '<p class="help-block">:message</p>') !!}
-                </div>
-            </div>
-            <div class="form-group {{ $errors->has('accereditation_no') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('accereditation_no', '<span class="text-danger">*</span> หมายเลขการรับรองที่'.':'.'<br/><span class="  font_size">(Accreditation No. Calibration)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <div class="col-md-4">
-                    {!! Form::text('accereditation_no', null, ['class' => 'form-control', 'id' => 'accereditation_no']) !!}
-                    {!! $errors->first('accereditation_no', '<p class="help-block">:message</p>') !!}
-                </div>
-            </div>
-        </div> --}}
+
+
+
 
         <div id="box_ref_application_no">
+            <div class="form-group">
+                <label for="ref_application_no" class="col-md-3 control-label label-height">
+                    ใบรับรองเลขที่:<br/>
+                    <span class="font_size">(Certificate No.)</span>
+                </label>
+                <div class="col-md-4">
+                    <select name="select_certified" id="select_certified" class="form-control" readonly>
+                    </select>
+                    @if ($errors->has('select_certified'))
+                        <p class="help-block">{{ $errors->first('select_certified') }}</p>
+                    @endif
+                </div>
+            </div>
             <div class="form-group">
                 <label for="ref_application_no" class="col-md-3 control-label label-height">
                     อ้างอิงเลขที่คำขอ: <br/>
@@ -302,7 +275,7 @@
                     <p class="help-block" id="error_ref_application_no"></p>
                 </div>
             </div>
-            <div class="form-group">
+            {{-- <div class="form-group">
                 <label for="certificate_exports_id" class="col-md-3 control-label label-height">
                     ใบรับรองเลขที่: <br/>
                     <span class="font_size">(Certificate No)</span>
@@ -311,7 +284,7 @@
                     <input type="text" class="form-control" id="certificate_exports_id" name="certificate_exports_id">
                     <p class="help-block" id="error_certificate_exports_id"></p>
                 </div>
-            </div>
+            </div> --}}
             <div class="form-group">
                 <label for="accereditation_no" class="col-md-3 control-label label-height">
                     <span class="text-danger">*</span> หมายเลขการรับรองที่: <br/>
@@ -387,6 +360,51 @@
             </div>
         </div>
 
+    </div>
+
+    <div id="transfer-wrapper" style="display: none;">
+        <div class="form-group">
+            <div class="col-md-3 control-label label-height">
+                <h3>ข้อมูลผู้โอน </h3>
+            </div>
+            <div class="col-md-7 label-height" style="margin-top:10px">
+                <button id="check_transferee" type="button" class="btn btn-sm btn-info">ตรวจสอบ</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="id_number" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> ใบรับรองเลขที่:<br/>
+                <span class="font_size">(Transferer Certificate Number)</span>
+            </label>
+            <div class="col-md-7">
+                <input type="text" name="transferee_certificate_number" id="transferee_certificate_number" class="form-control" maxlength="13">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="id_number" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> เลข 13 หลักผู้โอน:<br/>
+                <span class="font_size">(Transferer 13-digit ID)</span>
+            </label>
+            <div class="col-md-7">
+                <input type="text" name="transferer_id_number" id="transferer_id_number" class="form-control" maxlength="13">
+            </div>
+        </div>
+        
+        <div class="form-group">
+            <label for="transferee_name" class="col-md-3 control-label label-height">
+                <span class="text-danger">*</span> ชื่อผู้โอน:<br/>
+                <span class="font_size">(Transferer Name)</span>
+            </label>
+            <div class="col-md-7">
+                <input type="text" name="transferee_name" id="transferee_name" class="form-control" readonly>
+            </div>
+        </div>
+
+        
+
+
+        
+        
     </div>
 
     <hr>
@@ -690,9 +708,17 @@
 @push('js')
     <script>
         const app_cb_id = '{{ @$certi_cb->id }}';
-
+        var certifieds;
+        var certi_cb;
 
         $(document).ready(function () {
+
+            certifieds = @json($certifieds->mapWithKeys(function($certified) {
+                return [$certified->id => $certified->certificate];
+            }) ?? []);
+            certi_cb = @json($certi_cb ?? []);
+            
+            console.log(certifieds);
 
             //เมื่อกรอกภาษาอังกฤษ
             $('.input_address_eng').keyup(function(event) {
@@ -877,11 +903,52 @@
             });
 
             // change   สาขาที่ขอรับการรับรอง
-            $("input[name=standard_change]").on("ifChanged",function(){
-                box_ref_application_no();
-                get_app_no_and_certificate_exports_no();
+            // $("input[name=standard_change]").on("ifChanged",function(){
+
+            //     var isTypeSelected = $("#type_standard").val() !== "";
+            //     var isPetitionerSelected = $("#petitioner").val() !== "";
+            //     var isTrustMarkSelected = $("#trust_mark").val() !== "";
+
+            //     // ตรวจสอบว่าทั้งสามตัวเลือกมีค่าหรือไม่
+              
+            //     box_ref_application_no();
+            //     get_app_no_and_certificate_exports_no();
+            //         // ทำสิ่งที่ต้องการเมื่อเลือกครบทั้งสาม
+
+              
+            // });
+            // ฟังก์ชันรีเซ็ต UI (ตามที่คุณระบุ)
+            // ฟังก์ชันรีเซ็ต UI (ตามที่คุณระบุ)
+            function resetUI() {
+                $("input[name=standard_change]").iCheck('uncheck');
+            }
+
+            // ตรวจสอบเมื่อพยายามคลิก checkbox
+            $("input[name=standard_change]").on("ifClicked", function(e) {
+                var isTypeSelected = $("#type_standard").val() !== "";
+                var isPetitionerSelected = $("#petitioner").val() !== "";
+                var isTrustMarkSelected = $("#trust_mark").val() !== "";
+
+                if (isTypeSelected && isPetitionerSelected && isTrustMarkSelected) {
+                    console.log("ทั้งสาม select มีค่าเลือกแล้ว");
+                    // อนุญาตให้ check และเรียกฟังก์ชัน
+                    setTimeout(() => {
+                        box_ref_application_no();
+                        get_app_no_and_certificate_exports_no();
+                    }, 0);
+                } else {
+                    console.log("ยังเลือกไม่ครบทั้งสาม select");
+                    alert("โปรดเลือกรายการให้ครบ");
+                    // ป้องกันการ check และ uncheck ทันที
+                    e.preventDefault();
+                    setTimeout(() => {
+                        $(this).iCheck('uncheck');
+                    }, 0);
+                    // ไม่เรียก resetUI() เพื่อหลีกเลี่ยงการ uncheck ซ้ำ
+                }
             });
 
+            
             // change   สาขาที่ขอรับการรับรอง
             $("#type_standard").change(function(){
                 box_ref_application_no();
@@ -954,16 +1021,108 @@
 
         function box_ref_application_no(){
             let standard_change = $('input[name="standard_change"]:checked').val();
-            if(standard_change >= 2){
+            let typeStandard = $('#type_standard').val();
+            let petitioner = $('#petitioner').val();
+            let trustMark = $('#trust_mark').val();
+            // if(standard_change >= 2){
+            if(standard_change >= 2 && standard_change < 6){
+
+                $.get("{{ url('/certify/certi_cb/get-certificate-belong') }}", { 
+                    typeStandard: typeStandard,
+                    petitioner: petitioner,
+                    trustMark: trustMark
+                    }).done(function( data ) {
+                       
+                        if (data.certificateExports.length > 0) {
+                            // ล้างเนื้อหาใน select เดิมก่อน (ถ้ามี)
+                            $('#select_certified').empty();
+                            // Loop ข้อมูลจาก data.certificateExports เพื่อสร้าง option
+                            data.certificateExports.forEach(function(cert) {
+                                $('#select_certified').append(
+                                    $('<option>', {
+                                        value: cert.id,
+                                        text: cert.certificate
+                                    })
+                                );
+                            });
+
+                            // เพิ่ม readonly attribute ให้กับ select
+                            $('#select_certified').attr('readonly', 'readonly');
+                            $('#select_certified option:first').val();
+                            $('#select_certified').trigger('change');
+                            } else {
+                                // กรณีไม่มีข้อมูล
+                                console.log("No certificate exports found.");
+                            } 
+                    });
+
                 $('#box_ref_application_no').show();
                 $('#box_ref_application_no').find('input').prop('disabled', false);
                 $('#accereditation_no').prop('required', true);
-            }else{
+                // 
+                // accereditatio_no
+                $('#transfer-wrapper').hide(); 
+            }else if(standard_change == 1){
                 $('#box_ref_application_no').hide();
                 $('#box_ref_application_no').find('input').prop('disabled', true);
                 $('#accereditation_no').prop('required', false);
+                console.log("ขอครั้งแรก")
+                // console.log(standard_change,petitioner,trustMark)
+                // resetCertifiedSelect();
+                isCbTypeAndStandardBelong();
+                $('#transfer-wrapper').hide(); 
+            }else if(standard_change == 6){
+                $('#box_ref_application_no').hide();
+                $('#box_ref_application_no').find('input').prop('disabled', true);
+                $('#accereditation_no').prop('required', false);
+                // resetCertifiedSelect();
+                $('#transfer-wrapper').show(); 
+            }else
+            {
+                $('#transfer-wrapper').hide(); 
             }
+
         }
+
+        // Function to clear and rebuild select_certified
+        function resetCertifiedSelect() {
+            $('#select_certified').empty();
+            $.each(certifieds, function(id, certificate_no) {
+                $('#select_certified').append('<option value="' + id + '">' + certificate_no + '</option>');
+            });
+            $('#select_certified').trigger('change');
+        }
+
+
+        function isCbTypeAndStandardBelong(){
+
+            let typeStandard = $('#type_standard').val();
+            let petitioner = $('#petitioner').val();
+            let trustMark = $('#trust_mark').val();
+
+            // console.log(typeStandard,petitioner,trustMark)
+
+            $.get("{{ url('/certify/certi_cb/is-cb-type-and-standard-belong') }}", { 
+                typeStandard: typeStandard,
+                petitioner: petitioner,
+                trustMark: trustMark
+                }).done(function( data ) {
+                    console.log(data);
+                    if (data.certiCbs.length != 0)
+                    {
+                        alert('ไม่สามารถ "ยื่นขอครั้งแรก" สำหรับเลขมาตรฐาน "'+$('#type_standard option:selected').text().trim()+'" สาขาการรับรอง "'+$('#petitioner option:selected').text().trim()+'" และมาตรฐานที่ใช้รับรอง "'+$('#trust_mark option:selected').text().trim()+'" เนื่องจากมีใบรับรองแล้วในระบบแล้ว');
+                        $("input[name=standard_change]").iCheck('uncheck');
+                    }
+                    
+                });
+        }
+
+        // เมื่อ radio ของ lab_ability เปลี่ยนค่า
+        $("input[name=lab_ability]").on("ifChanged", function(event) {
+            // Uncheck radio ทั้งหมดในกลุ่ม purpose
+            $("input[name=purpose]").iCheck('uncheck');
+        });
+
 
         function get_app_no_and_certificate_exports_no(){
             // alert('ok');
@@ -983,6 +1142,170 @@
             }
         }
 
+        $(document).on('change', '#select_certified', function() {
+            var certified_id = $(this).val();
+            const _token = $('input[name="_token"]').val();
+            console.log(certified_id)
+            if (certified_id === '' || certified_id === undefined) {
+                return;
+            }
+
+            $.ajax({
+                url: "/certify/certi_cb/api/get_certificated",
+                method: "POST",
+                data: {
+                    certified_id: certified_id,
+                    _token: _token
+                },
+                success: function(result) {
+                    attach_path = result.attach_path;
+
+                    certi_cb = result.certiCb
+                    
+                    var dis_title = result.address.original.dis_title;
+                    var dis_title_en = result.address.original.dis_title_en;
+                    var pro_id = result.address.original.pro_id;
+                    var sub_title = result.address.original.sub_title;
+                    var sub_title_en = result.address.original.sub_title_en;
+                    var zip_code = result.address.original.zip_code;
+                    var labTestRequest = result.labTestRequest;
+                    var certificateExport = result.certificateExport;
+
+                    console.log('result',result);
+
+                    $('#province_id').val(pro_id).trigger('change');
+                    $('#address_district').val(dis_title);
+                    $('#sub_district').val(sub_title);
+                    $('#postcode').val(zip_code);
+                    
+                    $('#cb_province_eng').val(pro_id).trigger('change');
+                    $('#cb_address_no_eng').val(result.certiCb.address);
+                    $('#cb_moo_eng').val(result.certiCb.allay);
+                    $('#cb_amphur_eng').val(dis_title_en);
+                    $('#cb_district_eng').val(sub_title_en);
+                    $('#cb_postcode_eng').val(zip_code);
+
+                    $('#accereditation_no').val(certificateExport.accereditatio_no);
+                             
+                    $('#name_standard').val(certi_cb.name_standard);
+                    $('#name_en_standard').val(certi_cb.name_en_standard);
+                    $('#name_short_standard').val(certi_cb.name_short_standard);
+                    
+
+                    renderFiles(result.file_sectionn1s, '#repeater_section1_wrapper', '1');
+                    $('.attachs_sec1').removeAttr('required');
+
+                    renderFiles(result.file_sectionn2s, '#repeater_section2_wrapper', '2');
+                    $('.attachs_sec2').removeAttr('required');
+
+                    renderFiles(result.file_sectionn4s, '#repeater_section4_wrapper', '4');
+                    $('.attachs_sec4').removeAttr('required');
+
+                    renderFiles(result.file_sectionn5s, '#repeater_section5_wrapper', '5');
+                    $('.attachs_sec5').removeAttr('required');
+        
+                }
+            });
+        });
+
+        function renderFiles(files, wrapperSelector, section) {
+            var wrapper = $(wrapperSelector);
+            wrapper.empty(); // ล้างข้อมูลเก่าออก
+            if (files.length > 0) {
+                files.forEach(function(file) {
+                    const fileName = file.file.split('/').pop();
+                    var fileItem = `
+                        <div class="form-group">
+                            <div class="col-md-4 text-light"></div>
+                            <div class="col-md-6">
+                                <a href="${baseUrl}certify/check/file_cb_client/${file.file}/${file.file_client_name}" target="_blank" class="view-attach btn btn-info btn-sm">
+                                    <i class="fa fa-eye mr-2"></i> ${file.file_client_name}
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                    wrapper.append(fileItem);
+                });
+            }
+
+            // Add default file input for uploading new files
+            var newFileInput = `
+                <div class="form-group box_remove_file" data-repeater-item>
+                    <div class="col-md-4 text-light"></div>
+                    <div class="col-md-6">
+                        <div class="fileinput fileinput-new input-group " data-provides="fileinput">
+                            <div class="form-control" data-trigger="fileinput">
+                                <i class="glyphicon glyphicon-file fileinput-exists"></i>
+                                <span class="fileinput-filename"></span>
+                            </div>
+                            <span class="input-group-addon btn btn-default btn-file">
+                                <span class="fileinput-new">เลือกไฟล์</span>
+                                <span class="fileinput-exists">เปลี่ยน</span>
+                                <input type="file" name="repeater-section${section}[0][attachs_sec${section}]" class="attachs_sec${section} check_max_size_file" required>
+                            </span> 
+                            <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
+                        </div>
+                        <p class="help-block"></p>
+                    </div>
+            
+                </div>
+            `;
+            wrapper.append(newFileInput);
+        }
+
+    $(document).on('click', '#check_transferee', function(e) {
+        e.preventDefault();
+        let transferee_certificate_number = $('#transferee_certificate_number').val();
+        let transferer_id_number = $('#transferer_id_number').val();
+        let typeStandard = $('#type_standard').val();
+        let petitioner = $('#petitioner').val();
+        let trustMark = $('#trust_mark').val();
+        const _token            = $('input[name="_token"]').val();
+
+        let pattern = /^\d{2}L:CB\d{4}$/;
+
+        if (!pattern.test(transferee_certificate_number)) {
+            alert("รูปแบบใบรับรองไม่ถูกต้อง");
+            return;
+        } 
+
+        // ลบอักขระพิเศษทั้งหมดให้เหลือแต่ตัวเลข
+        transferer_id_number = transferer_id_number.replace(/\D/g, ''); // \D หมายถึงตัวอักษรที่ไม่ใช่ตัวเลข
+
+        // ตรวจสอบให้เป็นเลข 13 หลัก
+        if (transferer_id_number.length !== 13) {
+            alert("กรุณากรอกเลข 13 หลัก");
+            return;
+        }
+
+        $.ajax({
+                url:"{{route('certi_cb.check_cb_transferee')}}",
+                method:"POST",
+                data:{
+                    transferer_id_number:transferer_id_number,
+                    transferee_certificate_number:transferee_certificate_number,
+                    typeStandard:typeStandard,
+                    petitioner:petitioner,
+                    trustMark:trustMark,
+                    _token:_token
+                },
+                success:function (result){
+                    console.log(result);
+                    if(result.user == null)
+                    {
+                        alert('ไม่พบข้อมูลผู้รับโอน โปรดตรวจสอบว่าได้เลือก "ตามมาตรฐานเลข" และ "วัตถุประสงค์ในการยื่นคำขอ" และ "เลขที่ใบรับรอง" และ "เลข 13 หลักของผู้โอน" ตรงกับใบรับรองที่ต้องการรับโอน');
+                    }else
+                    {
+                        alert('ต้องการโอนใบรับรองจาก' + result.user.name );
+                        $('#transferee_name').val( result.user.name);
+                        // $('#lab_name').val( result.certiLab.lab_name);
+                        // $('#lab_name_en').val( result.certiLab.lab_name_en);
+                        // $('#lab_name_short').val( result.certiLab.lab_name_short);
+                    }
+                    
+                }
+            });
+    });
 
     </script>
 @endpush

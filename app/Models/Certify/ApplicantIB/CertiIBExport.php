@@ -50,12 +50,18 @@ class CertiIBExport extends Model
                             'name_en','name_unit_en','address_en','allay_en','village_no_en','road_en','province_name_en','amphur_name_en','district_name_en','formula_en',
                             'attach_client_name',
                             'cer_type','certificate_path','certificate_file','certificate_newfile','documentId','signtureid','status_revoke','date_revoke','reason_revoke','user_revoke',
-                            'reference_refno','reference_check','reference_date', 'status_id'
+                            'reference_refno','reference_check','reference_date', 'status_id','hold_status'
                             ];
 public function CertiIBCostTo()
  {
      return $this->belongsTo(CertiIb::class,'app_certi_ib_id');
  }
+
+ public function certiIB()
+ {
+     return $this->belongsTo(CertiIb::class,'app_certi_ib_id');
+ }
+    
       
  public function UserTo()
  {

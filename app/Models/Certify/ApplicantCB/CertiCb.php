@@ -12,6 +12,8 @@ use App\Models\Basic\Province;
 use App\Models\Bcertify\Formula;
 use Illuminate\Support\Facades\DB;
 use Kyslik\ColumnSortable\Sortable;
+use App\Models\Bcertify\PurposeType;
+use App\Models\Certificate\Tracking;
 use App\Models\Sso\User AS SSO_User;
 use App\Models\Certificate\CbTrustMark;
 use Illuminate\Database\Eloquent\Model;
@@ -101,8 +103,15 @@ class CertiCb extends Model
                             'require_scope_update',
                             'scope_view_signer_id',
                             'scope_view_status',
+                            'scope_table',
+                            'transferer_user_id',
+                            'transferer_export_id'
                             ];
-
+                            
+public function purposeType()
+{
+    return $this->belongsTo(PurposeType::class, 'standard_change');
+}  
 
  public function BasicProvince()
  {
@@ -276,6 +285,11 @@ class CertiCb extends Model
 
     // ตารางใบรับรอง
     public function app_certi_cb_export()
+    {
+        return $this->hasOne(CertiCBExport::class, 'app_certi_cb_id');
+    }
+
+    public function certiCBExport()
     {
         return $this->hasOne(CertiCBExport::class, 'app_certi_cb_id');
     }
@@ -623,5 +637,16 @@ class CertiCb extends Model
       {
           return $this->hasOne(CbDocReviewAuditor::class, 'app_certi_cb_id');
       }
+
+    public function getTrackingAttribute()
+    {
+        $certiCBExport = CertiCBExport::where('app_certi_cb_id',$this->id)->first();
+        if($certiCBExport == null)
+        {
+            return null;
+        }else{
+        return Tracking::where('ref_id',$certiCBExport->id)->where('ref_table','app_certi_cb_export')->first();
+        }
+    }
 
 }

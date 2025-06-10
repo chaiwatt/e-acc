@@ -148,9 +148,11 @@
                                         <td class="text-center">{{ $loop->iteration + ( ((request()->query('page') ?? 1) - 1) * $certiIbs->perPage() ) }}</td>
                                         <td>
                                             {{ @$item->app_no }}
+                                            <p style="font-style:italic;font-size:14px" >{{$item->purposeType->name}}</p>
                                         </td>
                                         <td>
                                             {{ array_key_exists($item->type_unit,$type_unit) ? $type_unit[$item->type_unit]  :'-' }}
+                                            
                                         </td>
                                         <td>
                                             {{ $item->AcceptDateShow }}
@@ -159,6 +161,9 @@
                                             {{-- (ID:{{$item->status}}) --}}
                                             @php
                                                 $data_status =$item->TitleStatus->title ?? '-' ;
+                                                 if ($item->require_scope_update == 1){
+                                                    $data_status = "ให้แก้ไขขอบข่าย";
+                                                }
                                             @endphp
                                             @if($item->status == 3) <!-- ขอเอกสารเพิ่มเติม  -->
                                                 <button style="border: none" data-toggle="modal" data-target="#actionThree{{$loop->iteration}}"  >
@@ -286,13 +291,6 @@
                                                     </button>
                                                     @include ('certify.applicant_ib.modal.modalstatus9_1',['id'=> $loop->iteration,'token'=> $item->token,'auditors' => $item->CertiAuditorsMany,'certi' => $item ])
     
-
-                                                    {{-- @if( HP::CheckPermission('edit-'.str_slug('applicantcbs')))
-                                                        <a  type="button" style="border: none"  href="{{ url('/certify/applicant-ib/' . $item->token . '/edit') }}"
-                                                            title="Edit ApplicantCB" class="btn btn-default btn-sm">
-                                                            <i class="mdi mdi-magnify"></i>แก้ไขเอกสาร
-                                                        </a>
-                                                    @endif --}}
                                                 @endif
 
 
@@ -389,6 +387,13 @@
                                         </td>
                                         <td>
                                           
+                                            @if ($item->require_scope_update == 1)
+                                                <a href="{{ url('/certify/applicant-ib/' . $item->token . '/edit_scope') }}"
+                                                    title="Edit ApplicantCB" class="btn btn-primary btn-xs">
+                                                        <i class="fa fa-pencil-square-o" aria-hidden="true"> </i>
+                                                </a>
+                                            @endif
+
                                             @if( HP::CheckPermission('view-'.str_slug('applicantcbs')))
                                                 <a href="{{ url('/certify/applicant-ib/' . $item->token) }}"
                                                   title="View ApplicantCB" class="btn btn-info btn-xs">
@@ -428,11 +433,18 @@
                                                 <a href="{{ url('funtions/get-view').'/'.@$item->app_certi_ib_export->certificate_path.'/'.@$item->app_certi_ib_export->certificate_newfile.'/'.@$item->app_certi_ib_export->certificate_no.'_'.date('Ymd_hms').'.pdf' }}" target="_blank">
                                                     <img src="{{ asset('images/icon-certification.jpg') }}" width="20px" style="margin-top: 4px;">
                                                 </a>
+
                                             @elseif(!empty($item->certificate_exports_to->attachs))
                                                 <a href="{{ url('certify/check/file_ib_client/'.$item->certificate_exports_to->attachs.'/'.( !empty($item->certificate_exports_to->attach_client_name) ? $item->certificate_exports_to->attach_client_name :  basename($item->certificate_exports_to->attachs)  )) }}" target="_blank">
                                                     {!! HP::FileExtension($item->certificate_exports_to->attachs)  ?? '' !!}
                                                 </a>
+                                                
                                             @endif
+
+                                                 {{-- <a href="{{ url('/certify/applicant-ib/' . $item->token . '/edit') }}"
+                                                            title="Edit ApplicantCB" class="btn btn-primary btn-xs">
+                                                                <i class="fa fa-pencil-square-o" aria-hidden="true"> </i> ปุ่มทดสอบ
+                                                        </a> --}}
 
                                         </td>
                                     </tr>

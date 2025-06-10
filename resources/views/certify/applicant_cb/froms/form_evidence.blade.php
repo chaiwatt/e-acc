@@ -10,7 +10,7 @@
     </legend>
 
     <div class="row repeater-form-file">
-        <div class="col-md-12 box_section1" data-repeater-list="repeater-section1" >
+        <div class="col-md-12 box_section1" data-repeater-list="repeater-section1" id="repeater_section1_wrapper">
 
             @php
                 $section1_required = 'required';
@@ -91,7 +91,7 @@
     </legend>
 
     <div class="row repeater-form-file">
-        <div class="col-md-12 box_section2" data-repeater-list="repeater-section2" >
+        <div class="col-md-12 box_section2" data-repeater-list="repeater-section2" id="repeater_section2_wrapper">
 
             @if ( isset( $certi_cb->id ) && count( App\Models\Certify\ApplicantCB\CertiCBAttachAll::where('app_certi_cb_id', $certi_cb->id )->where('file_section', '2')->get() ) > 0 )
 
@@ -157,13 +157,13 @@
     </div>
 </fieldset>
 
-<button type="button" class="btn btn-info" id="button_store_cb_scope_isic_isic">Save Isic scope</button>
+{{-- <button type="button" class="btn btn-info" id="button_store_cb_scope_isic_isic">Save Isic scope</button>
 <button type="button" class="btn btn-info" id="button_load_isic">Load Isic scope</button>
 
 <button type="button" class="btn btn-info" id="button_store_cb_scope_bcms">Save Bcms scope</button>
-<button type="button" class="btn btn-info" id="button_load_bcms">Load Bcms scope</button>
+<button type="button" class="btn btn-info" id="button_load_bcms">Load Bcms scope</button> --}}
 
-
+@if ($certi_cb->tracking == null)
     @if ($certi_cb == null || empty($certi_cb->doc_review_reject))
         <fieldset class="white-box">
             <legend>
@@ -213,6 +213,8 @@
 
         </fieldset>
     @endif
+@endif
+
 
 
     {{-- @endif
@@ -229,7 +231,7 @@
     </legend>
 
     <div class="row repeater-form-file">
-        <div class="col-md-12 box_section5" data-repeater-list="repeater-section5" >
+        <div class="col-md-12 box_section5" data-repeater-list="repeater-section5" id="repeater_section5_wrapper">
             
             @if ( isset( $certi_cb->id ) && count( App\Models\Certify\ApplicantCB\CertiCBAttachAll::where('app_certi_cb_id', $certi_cb->id )->where('file_section', '5')->get() ) > 0 )
 
@@ -292,7 +294,7 @@
     </legend>
 
     <div class="row repeater-form-file">
-        <div class="col-md-12 box_section_other" data-repeater-list="repeater-section4" >
+        <div class="col-md-12 box_section_other" data-repeater-list="repeater-section4" id="repeater_section4_wrapper">
 
             @if ( isset( $certi_cb->id ) && count( App\Models\Certify\ApplicantCB\CertiCBAttachAll::where('app_certi_cb_id', $certi_cb->id )->where('file_section', '4')->get() ) > 0 )
 
@@ -548,7 +550,7 @@
         // 
 
         $('#btn_add_cb_scope_isic_isic').click(function(event) {
-          
+            // alert('ooo');
             var selectedOption = $('#petitioner option:selected'); // หา option ที่ถูกเลือก
             var modelName = selectedOption.data('model'); // ดึงค่า data-model
 
@@ -1182,6 +1184,7 @@
         {
             const _token = $('input[name="_token"]').val();
             cbId = certi_cb.id;
+            // alert(cbId);
             if(cbId == undefined){
                 return;
             }
@@ -1260,6 +1263,7 @@
         {
             const _token = $('input[name="_token"]').val();
             cbId = certi_cb.id;
+            // alert(cbId);
             if(cbId == undefined){
                 return;
             }

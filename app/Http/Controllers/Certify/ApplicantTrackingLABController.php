@@ -6,6 +6,7 @@ use DB;
 use HP;
 
 use stdClass;
+use Carbon\Carbon;
 use App\AttachFile;
 use App\CertificateExport;
 use Illuminate\Http\Request;
@@ -31,6 +32,7 @@ use App\Models\Certificate\TrackingInspection;
 use App\Models\Certificate\TrackingAssessment; 
 use App\Models\Certificate\TrackingAssessmentBug;
 use App\Models\Certify\Applicant\CertLabsFileAll;
+use App\Models\Certify\Applicant\CertiLabExportMapreq;
 
 class ApplicantTrackingLABController extends Controller
 {
@@ -314,7 +316,7 @@ class ApplicantTrackingLABController extends Controller
 
 
   public function update_pay_in1(Request $request, $id){
-        // dd($request->all());
+        dd($request->all());
         $data_session     =    HP::CheckSession();
  
          $tb       = new TrackingPayInOne;
@@ -452,7 +454,7 @@ class ApplicantTrackingLABController extends Controller
 
   public function assessment(Request $request,$id)
   {
-
+// dd($request->all());
       $model = str_slug('view-tracking-lab','-');
       $data_session     =    HP::CheckSession();
       if(!empty($data_session)){
@@ -1137,6 +1139,145 @@ public function confirmNotice(Request $request)
   ]);
   return response()->json($notice);
 }
+
+public function abilityConfirm(Request $request)
+{
+// dd(Tracking::find($request->tracking_id));
+    $tracking = Tracking::find($request->tracking_id)->update([
+        'ability_confirm' => 1
+    ]);
+
+    // $this->updateAttachFile($request->tracking_id);
+//   dd($request->all());
+// //   $assessment =   TrackingAssessment::findOrFail($id);
+//   $notice = TrackingAssessment::find($request->notice_id)->update([
+//       'accept_fault' => 1
+//   ]);
+  return response()->json($tracking);
+}
+
+public function updateAttachFile($id)
+{
+    // dd($id);
+        $tracking = Tracking::find($id);
+        // dd($tracking->status_id,$request->all());
+
+        if($tracking->status_id != 8)
+        {
+            $tracking                   = Tracking::find($id);
+            $tracking->status_id        =  8; // ต่อขอบข่ายเรียบร้อย
+            $tracking->save();
+
+            $tax_number = (!empty(auth()->user()->reg_13ID) ?  str_replace("-","", auth()->user()->reg_13ID )  : '0000000000000');
+
+            $certiLab = CertiLab::where('id',$tracking->certificate_export_to->certificate_for)->first();
+        
+            $certiLabFileAll = CertLabsFileAll::where('app_certi_lab_id',$certiLab->id)->first();
+    
+            $filePath = 'files/applicants/check_files/' . $certiLabFileAll->attach_pdf ;
+            $parts = explode('/', $certiLabFileAll->attach_pdf);
+            $firstPart = $parts[0]; // ได้ค่า "CAL_68_010"
+    
+            // dd($firstPart);
+    
+            $localFilePath = HP::downloadFileFromTisiCloud($filePath);
+    
+            $uploadedFile = new \Illuminate\Http\UploadedFile(
+                $localFilePath,      // Path ของไฟล์
+                basename($localFilePath), // ชื่อไฟล์
+                mime_content_type($localFilePath), // MIME type
+                null,               // ขนาดไฟล์ (null ถ้าไม่ทราบ)
+                true                // เป็นไฟล์ที่ valid แล้ว
+            );
+            
+            $filename = basename($localFilePath);
+    
+            $pdfPath = $firstPart .'/'. $filename;
+
+            HP::singleFileUploadRefno(
+                $uploadedFile,
+                $this->attach_path.'/'.$tracking->reference_refno,
+                ( $tax_number),
+                (auth()->user()->FullName ?? null),
+                'Center',
+                (  (new Tracking)->getTable() ),
+                $tracking->id,
+                'attach_pdf',
+                null
+            );
+
+            $attach_pdf = [];
+            if( !empty($tracking->FileAttachPDFTo->url)){
+                $attach_pdf['url'] =  $tracking->FileAttachPDFTo->url;
+            }
+            if( !empty($tracking->FileAttachPDFTo->new_filename)){
+                $attach_pdf['new_filename'] =  $tracking->FileAttachPDFTo->new_filename;
+            }
+            if( !empty($tracking->FileAttachPDFTo->filename)){
+                $attach_pdf['filename'] =  $tracking->FileAttachPDFTo->filename;
+            }  
+
+            TrackingHistory::create([ 
+                'tracking_id'       => $tracking->id ?? null,
+                'certificate_type'  => 3,
+                 'reference_refno'  => $tracking->reference_refno ?? null,
+                'ref_table'         =>  (new CertificateExport)->getTable() ,
+                'ref_id'            =>  $tracking->ref_id ?? null,
+                'system'            => 12, 
+                'table_name'        => (new Tracking)->getTable() ,
+                'refid'             => $id,
+                'details_one'       =>  null,
+                'details_two'        =>  null,
+                // 'attachs'           => (count($attach_pdf) > 0) ? json_encode($attach_pdf) : null,
+                // 'attachs_file'      =>  (count($attach) > 0) ? json_encode($attach) : null,
+                'created_by'        =>  auth()->user()->runrecno
+            ]);
+
+            if(!empty($tracking->certificate_export_to->certificate_for))
+            { 
+                $certi_lab = CertiLab::where('id',$tracking->certificate_export_to->certificate_for)->first();
+                if(!empty($certi_lab) &&  !is_null($tracking->FileAttachPDFTo)){
+                    $attach_pdf =  $tracking->FileAttachPDFTo;
+                    $attach     =  $tracking->FileAttachFilesTo;
+                    if(!empty($attach_pdf->url)){
+
+                        $app_certi_lab_ids= CertiLabExportMapreq::where('certificate_exports_id',$tracking->certificate_export_to->id)->pluck('app_certi_lab_id')->toArray();
+                        // dd($app_certi_lab_ids,$tracking->certificate_export_to, $attach_pdf,$tracking->certificate_export_to->certificate_for,CertiLab::where('id',$tracking->certificate_export_to->certificate_for)->first(),$tracking->FileAttachPDFTo);
+                        CertLabsFileAll::whereIn('app_certi_lab_id',$app_certi_lab_ids)->update([
+                            'state' => 0
+                        ]);
+
+                        $certlab = CertLabsFileAll::create([
+                                                            'app_certi_lab_id'        =>  $certi_lab->id,
+                                                            // 'attach_pdf'             =>  !empty($attach_pdf->url)?$attach_pdf->url:null,
+                                                            'attach_pdf'             =>  $pdfPath,
+                                                            'attach_pdf_client_name' =>  !empty($attach_pdf->filename)?$attach_pdf->filename:null,  
+                                                            'app_no' =>  $certi_lab->app_no,  
+                                                            'ref_table'        => (new Tracking)->getTable() ,
+                                                            'ref_id'             => $id,
+                                                            // 'attach'                 =>  !empty($attach->url)?$attach->url:null,
+                                                            // 'attach_client_name'     =>  !empty($attach->filename)?$attach->filename:null,  
+                                                            'start_date' => Carbon::now(), // วันที่ปัจจุบัน
+                                                            'end_date'   => Carbon::now()->addYears(2), // วันที่ปัจจุบัน + 2 ปี
+                                                            'state' => 1
+                                                        ]);
+                        // แนบท้าย ที่ใช้งาน 
+                        $certi_lab->update([
+                                            'attach_pdf'             => $certlab->attach_pdf ?? @$certlab->attach_pdf,
+                                            'attach_pdf_client_name' => $certlab->attach_pdf_client_name ?? @$certlab->attach_pdf_client_name
+                                            ]);
+                    }
+
+                }
+            }
+        }
+
+    //     $tracking = Tracking::find($id);
+    //     $certi_lab = CertiLab::findOrFail($tracking->certificate_export_to->certificate_for);
+    //    $certilab_file_all = CertLabsFileAll::where('app_certi_lab_id', $certi_lab->id)->orderby('id','desc')->get();
+    // return view('certificate.labs.tracking-labs.append', compact('tracking', 'certi_lab','certilab_file_all'));  
+} 
+
 
 
 }

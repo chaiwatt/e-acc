@@ -179,14 +179,21 @@
                             @foreach($certiCbs as $item)
                                 <tr>
                                     <td class="text-center">{{ $loop->iteration + ( ((request()->query('page') ?? 1) - 1) * $certiCbs->perPage() ) }}</td>
-                                    <td> {{  @$item->app_no }}</td>
-                                    <td>{{ $item->name ?? null  }}</td>
+                                    <td> {{  @$item->app_no }}
+                                        <p style="font-style:italic;font-size:14px" >{{$item->purposeType->name}}</p>
+                                    </td>
+                                    <td>{{ $item->name ?? null  }}
+                                        
+                                    </td>
                                     <td>{{ !empty($item->FormulaTo->title) ? $item->FormulaTo->title  : null   }}</td>
                                     <td>{{ $item->CertificationBranchName }}</td>
                                     <td>{{ $item->AcceptDateShow }}</td>
                                     <td>
                                         @php
                                             $data_status =$item->TitleStatus->title ?? '-' ;
+                                            if ($item->require_scope_update == 1){
+                                                    $data_status = "ให้แก้ไขขอบข่าย";
+                                                }
                                         @endphp
 
                                         @if($item->status == 3) <!-- ขอเอกสารเพิ่มเติม  -->
@@ -392,7 +399,7 @@
                                     <td>
 
                                         @if ($item->require_scope_update == "1")
-                                            <a href="{{ url('/certify/applicant-cb/' . $item->token . '/edit') }}"  title="Edit ApplicantCB" class="btn btn-primary btn-xs">
+                                            <a href="{{ url('/certify/applicant-cb/' . $item->token . '/edit_scope') }}"  title="Edit ApplicantCB" class="btn btn-primary btn-xs">
                                                 <i class="fa fa-pencil-square-o" aria-hidden="true"> </i>
                                             </a>
                                         @endif
@@ -433,7 +440,11 @@
                                             </a>
                                         @endif
                                      
-                                        @if( !empty($item->app_certi_cb_export->certificate_newfile) && ( ( !empty($item->app_certi_cb_export) && in_array($item->app_certi_cb_export->status, [4]) ) || in_array($item->status, [20]) ) )
+                                        {{-- @php
+                                            dd($item->app_certi_cb_export->certificate_newfile,$item->app_certi_cb_export->status);
+                                        @endphp --}}
+                                        {{-- @if( !empty($item->app_certi_cb_export->certificate_newfile) && ( ( !empty($item->app_certi_cb_export) && in_array($item->app_certi_cb_export->status, [4]) ) || in_array($item->status, [20]) ) ) --}}
+                                        @if( !empty($item->app_certi_cb_export->certificate_newfile) )
                                             <a href="{{ url('funtions/get-view').'/'.@$item->app_certi_cb_export->certificate_path.'/'.@$item->app_certi_cb_export->certificate_newfile.'/'.@$item->app_certi_cb_export->certificate_no.'_'.date('Ymd_hms').'.pdf' }}" target="_blank">
                                                 <img src="{{ asset('images/icon-certification.jpg') }}" width="20px" style="margin-top: 4px;">
                                             </a>

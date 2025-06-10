@@ -142,13 +142,13 @@
 
                                     <td> 
 
-                                        {{ HP::DateThai($offer->created_at) }}
+                                     {{ HP::DateThai($offer->created_at) }}
                                         
                                  </td>
 
                                     <td> 
 
-                                         {{ HP::StateEstandardOffers()[$offer->state] ?? 'ไม่พบข้อมูล' }}
+                                         ID:{{$offer->state}} {{ HP::StateEstandardOffers()[$offer->state] ?? 'ไม่พบข้อมูล' }}
                                  </td>
                                    
 

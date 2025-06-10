@@ -62,11 +62,18 @@
 
 <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 
-@if ($certi_ib == null || empty($certi_ib->doc_review_reject))
-    @include ('certify.applicant_ib/froms.infomation')
-    @include ('certify.applicant_ib/froms.form_request')
-@endif
 
+
+{{-- {{$certi_ib->tracking}} --}}
+
+@if ($certi_ib->tracking == null)
+        @if ($certi_ib == null || empty($certi_ib->doc_review_reject))
+            @include ('certify.applicant_ib/froms.infomation')
+            @include ('certify.applicant_ib/froms.form_request')
+        @endif
+
+
+@endif
 
 @include ('certify.applicant_ib/froms.form_modal_map')
 @include ('certify.applicant_ib/froms.form_evidence')

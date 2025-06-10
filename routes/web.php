@@ -64,6 +64,9 @@ Route::get('/get-attached-file-from-request','MyTestController@getAttachedFileFr
 Route::get('/cb-isic-sope-pdf','MyTestController@cbIsicSopePdf');
 Route::get('/ib-sope-pdf','MyTestController@ibSopePdf');
 Route::get('/test-db','MyTestController@testDb');
+Route::get('/certi-cb-map-req','MyTestController@certiCbMapReq');
+
+
 
 
 
@@ -774,17 +777,29 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
         return redirect('/certify/applicant-cb/'.$token.'/edit')->with('delete_message', 'Delete Complete!');
     });
 
+    Route::get('/certi_cb/is-cb-type-and-standard-belong','Certify\ApplicantCBController@isCbTypeAndStandardBelong');
+    Route::get('/certi_cb/get-certificate-belong','Certify\ApplicantCBController@getCertificatedBelong');
+
     Route::get('/certi_cb/applicant_cb_doc_review/{id}','Certify\ApplicantCBController@applicant_cb_doc_review');
     Route::put('/certi_cb/applicant_cb_doc_update/{id}','Certify\ApplicantCBController@applicant_cb_doc_update');
+
+    Route::post('/certi_cb/api/get_certificated','Certify\ApplicantCBController@apiGetCertificated')->name('certi_cb.api.get_certificated');
+
+    Route::post('/certi_cb/get_certificated','Certify\ApplicantCBController@checkTransferee')->name('certi_cb.check_cb_transferee');
 
     // ลบ ไฟล์แนบ
     Route::get('certi_cb/delete_file/{id?}','Certify\ApplicantCBController@delete_file');
 
     Route::get('/applicant-cb/draft_pdf/{id}','Certify\ApplicantCBController@draft_pdf');
+    
 
     //การประมาณค่าใช้จ่าย  (CB)
     Route::get('/applicant-cb/cost/{token?}','Certify\ApplicantCBController@EditCost');
     Route::post('/applicant-cb/update/status/cost/{token?}','Certify\ApplicantCBController@updateStatusCost');
+
+    Route::get('/applicant-cb/{token?}/edit_scope','Certify\ApplicantCBController@editScope')->name('applicant_cb.edit_scope');
+    Route::patch('/applicant-cb/update_scope/{token?}', 'Certify\ApplicantCBController@updateScope')->name('applicant_cb.update_scope');
+
     //ขอความเห็นแต่งคณะผู้ตรวจประเมินเอกสาร  (CB)
     Route::get('/applicant-cb/auditor_doc_review/{token?}','Certify\ApplicantCBController@EditAuditorDocReview');
 
@@ -845,6 +860,12 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
     Route::post('/certi_ib/get_ib_sub_category', 'Certify\ApplicantIBController@getIbSubCategory')->name('certi_ib.get-ib-sub-category');
     Route::post('/certi_ib/get_ib_scope_topic', 'Certify\ApplicantIBController@getIbScopeTopic')->name('certi_ib.get-ib-scope-topic');
     Route::post('/certi_ib/get_ib_scope_detail', 'Certify\ApplicantIBController@getIbScopeDetail')->name('certi_ib.get-ib-scope-detail');
+    Route::get('/certi_ib/is-ib-type-and-standard-belong', 'Certify\ApplicantIBController@isIbTypeAndStandardBelong');
+    Route::get('/certi_ib/get-certificate-belong', 'Certify\ApplicantIBController@getCertificatedBelong');
+
+    Route::post('/certi_ib/api/get_certificated','Certify\ApplicantIBController@apiGetCertificated')->name('certi_ib.api.get_certificated');
+
+    Route::post('/certi_ib/get_certificated','Certify\ApplicantIBController@checkTransferee')->name('certi_ib.check_ib_transferee');
 
     Route::get('applicant-ib/delete/file_app_certi_ib_attach_all/{id?}/{token?}', function($id,$token)
     {
@@ -860,9 +881,15 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
 
         return redirect('/certify/applicant-ib/'.$token.'/edit')->with('delete_message', 'Delete Complete!');
     });
+
+    
     //การประมาณค่าใช้จ่าย  (IB)
     Route::get('/applicant-ib/cost/{token?}','Certify\ApplicantIBController@EditCost');
     Route::post('/applicant-ib/update/status/cost','Certify\ApplicantIBController@updateStatusCost');
+
+    Route::get('/applicant-ib/{token?}/edit_scope','Certify\ApplicantIBController@editScope')->name('applicant_ib.edit_scope');
+    // Route::post('/applicant-ib/update_scope','Certify\ApplicantIBController@updateScope')->name('applicant_ib.update_scope');
+    Route::patch('/applicant-ib/update_scope/{token?}', 'Certify\ApplicantIBController@updateScope')->name('applicant_ib.update_scope');
 
     Route::post('/applicant-ib/update-doc-review-team','Certify\ApplicantIBController@updateDocReviewTeam')->name('applicant_ib.update_doc_review_team');
     Route::post('/applicant-ib/get-ib-doc-review-auditor','Certify\ApplicantIBController@getIbDocReviewAuditor')->name('applicant_ib.ge_ib_doc_review_auditor');
@@ -899,6 +926,8 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
 
 
     Route::group(['prefix' => 'tracking-labs'], function () {
+        Route::post('/lab-ability-confirm/{id?}','Certify\ApplicantTrackingLABController@abilityConfirm')->name('tracking-lab.ability-confirm');
+
         Route::get('/data_list','Certify\ApplicantTrackingLABController@data_list');
         Route::get('/', 'Certify\ApplicantTrackingLABController@index');
         Route::resource('/', 'Certify\ApplicantTrackingLABController');
@@ -925,6 +954,9 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
     });
 
     Route::group(['prefix' => 'tracking-cb'], function () {
+
+        Route::post('/cb-ability-confirm/{id?}','Certify\ApplicantTrackingCBController@abilityConfirm')->name('tracking-cb.ability-confirm');
+
         Route::get('/', 'Certify\ApplicantTrackingCBController@index');
         Route::resource('/', 'Certify\ApplicantTrackingCBController');
         // ขอความเห็นแต่งตั้งคณะผู้ตรวจประเมิน lab
@@ -939,15 +971,25 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
         // บันทึกผลการตรวจประเมิน
         Route::get('/evaluation/{id?}','Certify\ApplicantTrackingCBController@evaluation');
         Route::post('/evaluation/update/{id?}','Certify\ApplicantTrackingCBController@update_evaluation');
+
+        Route::post('/evaluation/confirm-cb-bug','Certify\ApplicantTrackingCBController@confirmBug')->name('evaluation.confirm-cb-bug');
         // สรุปผลตรวจประเมิน
         Route::post('/inspection/update/{id?}','Certify\ApplicantTrackingCBController@update_inspection');
         //สรุปรายงานและเสนออนุกรรมการฯ
         Route::post('/report/update/{id?}','Certify\ApplicantTrackingCBController@update_report');
          // Pay-in ครั้งที่ 2
         Route::post('/pay-in2/update/{id?}','Certify\ApplicantTrackingCBController@update_payin2');
+
+
+  Route::post('/update-doc-review-team','Certify\ApplicantTrackingCBController@updateDocReviewTeam')->name('tracking.update_cb_doc_review_team');
+        Route::post('/get-doc-review-auditor','Certify\ApplicantTrackingCBController@getTrackingDocReviewAuditor')->name('tracking.get_cb_doc_review_auditor');
+
+
     });
 
     Route::group(['prefix' => 'tracking-ib'], function () {
+        Route::post('/ib-ability-confirm/{id?}','Certify\\ApplicantTrackingIBController@abilityConfirm')->name('tracking-ib.ability-confirm');
+
         Route::get('/', 'Certify\\ApplicantTrackingIBController@index');
         Route::resource('/', 'Certify\\ApplicantTrackingIBController');
         // ขอความเห็นแต่งตั้งคณะผู้ตรวจประเมิน lab
@@ -962,12 +1004,19 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
         // บันทึกผลการตรวจประเมิน
         Route::get('/evaluation/{id?}','Certify\\ApplicantTrackingIBController@evaluation');
         Route::post('/evaluation/update/{id?}','Certify\\ApplicantTrackingIBController@update_evaluation');
+         Route::post('/evaluation/confirm-ib-bug','Certify\\ApplicantTrackingIBController@confirmBug')->name('evaluation.confirm-ib-bug');
+
         // สรุปผลตรวจประเมิน
         Route::post('/inspection/update/{id?}','Certify\\ApplicantTrackingIBController@update_inspection');
         //สรุปรายงานและเสนออนุกรรมการฯ
         Route::post('/report/update/{id?}','Certify\\ApplicantTrackingIBController@update_report');
          // Pay-in ครั้งที่ 2
         Route::post('/pay-in2/update/{id?}','Certify\\ApplicantTrackingIBController@update_payin2');
+
+
+        Route::post('/update-doc-review-team','Certify\\ApplicantTrackingIBController@updateDocReviewTeam')->name('tracking.update_ib_doc_review_team');
+        Route::post('/get-doc-review-auditor','Certify\\ApplicantTrackingIBController@getTrackingDocReviewAuditor')->name('tracking.get_ib_doc_review_auditor');
+
     });
 
 

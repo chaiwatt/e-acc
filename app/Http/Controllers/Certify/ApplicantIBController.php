@@ -13,49 +13,55 @@ use App\Mail\IB\IBCostMail;
 use App\Models\Basic\Amphur;
 use App\Models\Esurv\Trader;
 use Illuminate\Http\Request;
+use App\Models\Basic\Zipcode;
 use App\Mail\IB\IBReportMail; 
+
 use App\Models\Basic\District;
-
 use App\Models\Basic\Province;
+
 use App\Mail\IB\IBAuditorsMail; 
-
 use App\Mail\IB\IBPayInOneMail; 
-use App\Mail\IB\IBPayInTwoMail; 
 
+use App\Mail\IB\IBPayInTwoMail; 
 use App\Models\Bcertify\Formula;
 use App\Mail\IB\IBApplicantMail; 
-use App\Services\CreateIbScopePdf;
 
+use App\Mail\Lab\NotifyTransferer;
+use App\Services\CreateIbScopePdf;
 use Illuminate\Support\Facades\DB;
 use App\Mail\IB\IBInspectiontMail; 
 use App\Http\Controllers\Controller;
+use App\Mail\Lab\NotifyIBTransferer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail; 
 use App\Mail\IB\IBSaveAssessmentMail; 
+
 use Illuminate\Support\Facades\Storage;
 use App\Mail\IB\IBConFirmAuditorsMail;  
-use App\Mail\IB\IBRequestDocumentsMail; 
 
+use App\Mail\IB\IBRequestDocumentsMail; 
 use App\Models\Certificate\IbScopeTopic;
 use App\Models\Certificate\IbScopeDetail;
-
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\Certify\ApplicantIB\CertiIb; 
+use App\Models\Certify\SendCertificateLists;
 use App\Models\Certificate\IbDocReviewAuditor;
 use App\Models\Certificate\IbScopeTransaction;
 use App\Models\Certificate\IbSubCategoryScope;
 use App\Models\Certificate\IbMainCategoryScope;
 use App\Models\Certify\ApplicantIB\CertiIBCost; 
+
+use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantIB\CertiIBExport;
 use App\Models\Certify\ApplicantIB\CertiIBReview;
 use App\Models\Certify\ApplicantIB\CertiIBFileAll;
 use App\Models\Certify\ApplicantIB\CertiIBReport; 
-
 use App\Models\Certify\ApplicantIB\CertiIBAuditors;
 use App\Models\Certify\ApplicantIB\CertiIBCostItem;
 use App\Models\Certify\ApplicantIB\CertiIbHistory; 
 use App\Models\Certify\ApplicantIB\CertiIBPayInTwo;
+use App\Models\Certificate\TrackingDocReviewAuditor;
 use App\Models\Certify\ApplicantIB\CertiIBPayInOne; 
 use App\Models\Certify\ApplicantIB\CertiIBAttachAll; 
 use App\Models\Certify\ApplicantIB\CertiIbExportMapreq;
@@ -154,6 +160,26 @@ class ApplicantIBController extends Controller
             $certificate_exports = DB::table('app_certi_ib_export')->whereIn('app_certi_ib_id',$app_certi_ib)->where('status',3)->pluck('certificate','id');
             $certificate_no = DB::table('app_certi_ib_export')->select('id')->whereIn('app_certi_ib_id',$app_certi_ib)->where('status',3)->get();
             // dd('ok');
+
+            $Query = CertiIb::with(['app_certi_ib_export' => function($q){
+                $q->where('status', 4);
+            }]);
+
+
+            $certifieds = collect() ;
+            if(!is_null($data_session->agent_id)){  // ตัวแทน
+                $certiIbs = $Query->where('agent_id',  $data_session->agent_id ) ;
+            }else{
+                if($data_session->branch_type == 1){  // สำนักงานใหญ่
+                    $certiIbs = $Query->where('tax_id',  $data_session->tax_number ) ;
+                }else{   // ผู้บันทึก
+                    $certiIbs = $Query->where('created_by',   auth()->user()->getKey()) ;
+                }
+            }
+
+     
+            $certifieds = CertiIBExport::whereIn('app_no',$certiIbs->get()->pluck('app_no')->toArray())->get();
+          
             return view('certify.applicant_ib.create',[
                                                         'tis_data'=>$data_session,
                                                         'previousUrl' =>$previousUrl,
@@ -161,7 +187,8 @@ class ApplicantIBController extends Controller
                                                         'formulas' => $formulas,
                                                         'certificate_exports' => $certificate_exports,
                                                         'certificate_no' => $certificate_no,
-                                                        'methodType' => 'create'
+                                                        'methodType' => 'create',
+                                                        'certifieds' => $certifieds
                                                       ]);
             }
             abort(403);
@@ -273,6 +300,33 @@ class ApplicantIBController extends Controller
         $requestApp['telephone']               = !empty($request->telephone)?$request->telephone:null;
 
         $requestApp['hq_date_registered']      = Carbon::hasFormat($request->hq_date_registered, 'd/m/Y')?Carbon::createFromFormat("d/m/Y", $request->hq_date_registered)->addYear(-543)->format('Y-m-d'):null;
+
+
+        if(!empty($request->transferer_id_number) && !empty($request->transferee_certificate_number))
+        {
+            
+            $transfererIdNumber = $request->input('transferer_id_number');
+            $certificateNumber = $request->input('transferee_certificate_number');           
+    
+            $certificateExport = CertiIBExport::where('certificate',$certificateNumber)->first();
+            
+
+            if($certificateExport != null){
+                $certiIb = CertiIb::find($certificateExport->app_certi_ib_id);
+     
+                if($certiIb != null)
+                {
+                    $taxId = $certiIb->tax_id;
+                    // dd(trim($taxId) , trim($transfererIdNumber),$certiIb ,$request->transferer_id_number,$request->transferee_certificate_number, $certificateExport);
+                    if(trim($taxId) == trim($transfererIdNumber)) 
+                    {
+                        $requestApp['transferer_user_id']  = $transfererIdNumber;
+                        $requestApp['transferer_export_id'] = $certificateExport->id;
+                    }
+                }
+            }
+        }
+
 
         if(  is_null($token) ){
             $requestApp['agent_id']           =   !empty($data_session->agent_id) ? $data_session->agent_id : null;  
@@ -387,6 +441,39 @@ class ApplicantIBController extends Controller
                     $this->SET_EMAIL($certi_ib,1);
                 }  
 
+                if(!empty($request->transferer_id_number) && !empty($request->transferee_certificate_number))
+                {
+                   
+                    $transfererIdNumber = $request->input('transferer_id_number');
+                        $certificateNumber = $request->input('transferee_certificate_number');           
+                
+                        $certificateExport = CertiIBExport::where('certificate',$certificateNumber)->first();
+                       
+                        if($certificateExport != null){
+                            $certiIb = CertiIb::find($certificateExport->app_certi_ib_id);
+
+                            if($certiIb != null)
+                            {
+                                $taxId = $certiIb->tax_id;
+                                if(trim($taxId) == trim($transfererIdNumber)) 
+                                {
+                                    $user = User::where('username',$transfererIdNumber)->first();
+                                    
+                                    $data_app =  [
+                                                'certiIb'=>  $certiIb,
+                                                'certificateExport'=>  $certificateExport,
+                                                'transferee' => auth()->user(),
+                                                'transferer' => $user,
+                                                ];
+
+                                    $html = new NotifyIBTransferer($data_app);
+                                    $mail =  Mail::to($user->email)->send($html);
+
+                                }
+                            }
+                        }
+                }
+
                 return redirect('certify/applicant-ib')->with('flash_message', 'เพิ่มเรียบร้อยแล้ว');
             }
             abort(403);
@@ -410,7 +497,7 @@ class ApplicantIBController extends Controller
             ->where('type_standard', $certi_ib->type_standard)
             ->first();
 
-        dd($app_certi_ib);
+        // dd($app_certi_ib);
         if(!Is_null($app_certi_ib)){
             // dd('block1',$app_certi_ib->app_certi_ib_export);
             $certificate_exports_id = !empty($app_certi_ib->app_certi_ib_export->id) ? $app_certi_ib->app_certi_ib_export->id : null;
@@ -470,52 +557,72 @@ class ApplicantIBController extends Controller
      */
     public function edit($token)
     {
+       
         $model = str_slug('applicantibs','-');
         $data_session     =    HP::CheckSession();
         if(!empty($data_session)){
            if(HP::CheckPermission('edit-'.$model)){
 
-            $previousUrl = app('url')->previous();
-            $certi_ib =  CertiIb::where('token',$token)->first();
+                $previousUrl = app('url')->previous();
+                $certi_ib =  CertiIb::where('token',$token)->first();
 
-            $tis_data = $data_session;
-            $Province =  Province::where('PROVINCE_NAME', 'LIKE', '%'.str_replace(" ","",$data_session->province).'%')->first();
-            $contact_province =  Province::where('PROVINCE_NAME', 'LIKE', '%'.str_replace(" ","",$data_session->contact_province).'%')->first();
-            $data_session->contact_province_id  =    $contact_province->PROVINCE_ID ?? '';
-            $tis_data->PROVINCE_ID  =    $Province->PROVINCE_ID ?? '';
-            // $Amphur =  Amphur::where('AMPHUR_NAME', 'LIKE', '%'.str_replace(" ","",$user_tis->trader_address_amphur).'%')->first();
-            $tis_data->AMPHUR_ID    =    $data_session->district ?? '';
-            // $District =  District::where('DISTRICT_NAME', 'LIKE', '%'.str_replace(" ","",$user_tis->trader_address_tumbol).'%')->first();
-            $tis_data->DISTRICT_ID  =     $data_session->subdistrict ?? '';
+                $tis_data = $data_session;
+                $Province =  Province::where('PROVINCE_NAME', 'LIKE', '%'.str_replace(" ","",$data_session->province).'%')->first();
+                $contact_province =  Province::where('PROVINCE_NAME', 'LIKE', '%'.str_replace(" ","",$data_session->contact_province).'%')->first();
+                $data_session->contact_province_id  =    $contact_province->PROVINCE_ID ?? '';
+                $tis_data->PROVINCE_ID  =    $Province->PROVINCE_ID ?? '';
+                // $Amphur =  Amphur::where('AMPHUR_NAME', 'LIKE', '%'.str_replace(" ","",$user_tis->trader_address_amphur).'%')->first();
+                $tis_data->AMPHUR_ID    =    $data_session->district ?? '';
+                // $District =  District::where('DISTRICT_NAME', 'LIKE', '%'.str_replace(" ","",$user_tis->trader_address_tumbol).'%')->first();
+                $tis_data->DISTRICT_ID  =     $data_session->subdistrict ?? '';
 
-            $formulas = DB::table('bcertify_formulas')->select('*')->where('state',1)->where('applicant_type',2)->get();
+                $formulas = DB::table('bcertify_formulas')->select('*')->where('state',1)->where('applicant_type',2)->get();
 
-            $app_certi_ib = DB::table('app_certi_ib')->where('tax_id',$data_session->tax_number)->select('id');
-            $certificate_exports = DB::table('app_certi_ib_export')->whereIn('app_certi_ib_id',$app_certi_ib)->where('status',3)->pluck('certificate','id');
-            $certificate_no = DB::table('app_certi_ib_export')->select('id')->whereIn('app_certi_ib_id',$app_certi_ib)->where('status',3)->get();
-            $methodType = "edit";
-            $ibScopeTransactions = IbScopeTransaction::where('certi_ib_id', $certi_ib->id)
-            ->with([
-                'ibMainCategoryScope',
-                'ibSubCategoryScope',
-                'ibScopeTopic',
-                'ibScopeDetail'
-            ])
-            ->get();
-            return view('certify.applicant_ib.edit', compact('tis_data',
-                                                             'previousUrl',
-                                                             'certi_ib',
-                                                             'formulas',
-                                                             'certificate_exports',
-                                                             'certificate_no',
-                                                             'methodType',
-                                                             'ibScopeTransactions'
-                                                             ));
+                $app_certi_ib = DB::table('app_certi_ib')->where('tax_id',$data_session->tax_number)->select('id');
+                $certificate_exports = DB::table('app_certi_ib_export')->whereIn('app_certi_ib_id',$app_certi_ib)->where('status',3)->pluck('certificate','id');
+                $certificate_no = DB::table('app_certi_ib_export')->select('id')->whereIn('app_certi_ib_id',$app_certi_ib)->where('status',3)->get();
+                $methodType = "edit";
+                $ibScopeTransactions = IbScopeTransaction::where('certi_ib_id', $certi_ib->id)
+                ->with([
+                    'ibMainCategoryScope',
+                    'ibSubCategoryScope',
+                    'ibScopeTopic',
+                    'ibScopeDetail'
+                ])
+                ->get();
+
+                $certifieds = collect() ;
+                $Query = CertiIb::with(['app_certi_ib_export' => function($q){
+                    $q->where('status', 4);
+                }]);
+                if(!is_null($data_session->agent_id)){  // ตัวแทน
+                    $certiIbs = $Query->where('agent_id',  $data_session->agent_id ) ;
+                }else{
+                    if($data_session->branch_type == 1){  // สำนักงานใหญ่
+                        $certiIbs = $Query->where('tax_id',  $data_session->tax_number ) ;
+                    }else{   // ผู้บันทึก
+                        $certiIbs = $Query->where('created_by',   auth()->user()->getKey()) ;
+                    }
+                }
+    
+        
+                $certifieds = CertiIBExport::whereIn('app_no',$certiIbs->get()->pluck('app_no')->toArray())->get();
+                // dd('ok');
+                return view('certify.applicant_ib.edit', compact('tis_data',
+                                                                'previousUrl',
+                                                                'certi_ib',
+                                                                'formulas',
+                                                                'certificate_exports',
+                                                                'certificate_no',
+                                                                'methodType',
+                                                                'ibScopeTransactions',
+                                                                'certifieds'
+                                                                ));
+            }
+            abort(403);
+        }else{
+            return  redirect(HP::DomainTisiSso());  
         }
-        abort(403);
-    }else{
-        return  redirect(HP::DomainTisiSso());  
-    }
     }
 
     /**
@@ -541,84 +648,91 @@ class ApplicantIBController extends Controller
 
                     if($certi_ib->require_scope_update != "1")
                     {
-                       
-                        if($certi_ib->status == 9 && $certi_ib->doc_review_reject !== null)
+                        
+                        if($certi_ib->tracking == null)
                         {
-                            // dd($certi_ib->status,$certi_ib->doc_review_reject);
-                            $this->docUpdate($request, $token);
-                            $certi_ib->update([
-                                'doc_review_reject' => null
-                            ]);
-                        }
-                        else
-                        {
-                            $certi_ib = $this->SaveCertiIb($request, $data_session , $token );
+                            if($certi_ib->status == 9 && $certi_ib->doc_review_reject !== null)
+                            {
+                                // dd($certi_ib->status,$certi_ib->doc_review_reject);
+                                $this->docUpdate($request, $token);
+                                $certi_ib->update([
+                                    'doc_review_reject' => null
+                                ]);
+                            }
+                            else
+                            {
+                                $certi_ib = $this->SaveCertiIb($request, $data_session , $token );
 
-                            // dd($certi_ib);
-        
-                           
-        
-                            //  2. การปฏิบัติของหน่วยงานตรวจสอบที่สอดคล้องตามข้อกำหนดฐานฐานเลขที่ มอก.17020 (Inspection body implementations which are conformed with TIS 17020)
-                            if ( isset($requestData['repeater-section1'] ) ){
-                                $this->SaveFileSection($request, 'repeater-section1', 'attachs_sec1', 1 , $certi_ib );
-                            }
+                                // dd($certi_ib);
             
-                            //  3. รายชื่อคุณวุฒิประสบการณ์และขอบข่ายความรับผิดชอบของเจ้าหน้าที่ (List of relevant personnel providing name, qualification, experience and responsibility)
-                            if ( isset($requestData['repeater-section2'] ) ){
-                                $this->SaveFileSection($request, 'repeater-section2', 'attachs_sec2', 2 , $certi_ib );
-                            }
+                            
             
-                            // 4. ขอบข่ายที่ยื่นขอรับการรับรอง (Scope of Accreditation Sought) ไฟล์แนบ Word (doc,docx)
-                            if ( isset($requestData['repeater-section3'] ) ){
-                                $this->SaveFileSection($request, 'repeater-section3', 'attachs_sec3', 3 , $certi_ib );
-                            }
+                                //  2. การปฏิบัติของหน่วยงานตรวจสอบที่สอดคล้องตามข้อกำหนดฐานฐานเลขที่ มอก.17020 (Inspection body implementations which are conformed with TIS 17020)
+                                if ( isset($requestData['repeater-section1'] ) ){
+                                    $this->SaveFileSection($request, 'repeater-section1', 'attachs_sec1', 1 , $certi_ib );
+                                }
+                
+                                //  3. รายชื่อคุณวุฒิประสบการณ์และขอบข่ายความรับผิดชอบของเจ้าหน้าที่ (List of relevant personnel providing name, qualification, experience and responsibility)
+                                if ( isset($requestData['repeater-section2'] ) ){
+                                    $this->SaveFileSection($request, 'repeater-section2', 'attachs_sec2', 2 , $certi_ib );
+                                }
+                
+                                // 4. ขอบข่ายที่ยื่นขอรับการรับรอง (Scope of Accreditation Sought) ไฟล์แนบ Word (doc,docx)
+                                if ( isset($requestData['repeater-section3'] ) ){
+                                    $this->SaveFileSection($request, 'repeater-section3', 'attachs_sec3', 3 , $certi_ib );
+                                }
+                
+                                //  5. เครื่องมือ (Equipment) 
+                                if ( isset($requestData['repeater-section4'] ) ){
+                                    $this->SaveFileSection($request, 'repeater-section4', 'attachs_sec4', 4 , $certi_ib );
+                                }
+                
+                                // 6. วัสดุอ้างอิง/มาตรบานอ้างอิง (Reference material / Reference TIS)
+                                if ( isset($requestData['repeater-section5'] ) ){
+                                    $this->SaveFileSection($request, 'repeater-section5', 'attachs_sec5', 5 , $certi_ib );
+                                }
+                
+                                // 7. การเข้าร่วมการทดสอบความชำนาญ / การเปรียบเทียบผลระหว่างห้องปฏิบัติการ (Participation in Proficiency testing program / Interlaboratory comparison)
+                                if ( isset($requestData['repeater-section6'] ) ){
+                                    $this->SaveFileSection($request, 'repeater-section6', 'attachs_sec6', 6 , $certi_ib );
+                                }
+                
+                                // 8. เอกสารอื่นๆ (Others)
+                                if ( isset($requestData['repeater-section7'] ) ){
+                                    $this->SaveFileSection($request, 'repeater-section7', 'attachs_sec7', 7 , $certi_ib );
+                                }
+                
+                                if ( isset($requestData['repeater-section8'] ) ){
+                                    $this->SaveFileSection($request, 'repeater-section8', 'attachs_sec8', 8 , $certi_ib );
+                                }
+                                // เงื่อนไขเช็คมีใบรับรอง 
+                                $this->save_certiib_export_mapreq( $certi_ib );
             
-                            //  5. เครื่องมือ (Equipment) 
-                            if ( isset($requestData['repeater-section4'] ) ){
-                                $this->SaveFileSection($request, 'repeater-section4', 'attachs_sec4', 4 , $certi_ib );
-                            }
+                                $pdfService = new CreateIbScopePdf($certi_ib);
+                                $pdfContent = $pdfService->generatePdf();
             
-                            // 6. วัสดุอ้างอิง/มาตรบานอ้างอิง (Reference material / Reference TIS)
-                            if ( isset($requestData['repeater-section5'] ) ){
-                                $this->SaveFileSection($request, 'repeater-section5', 'attachs_sec5', 5 , $certi_ib );
-                            }
             
-                            // 7. การเข้าร่วมการทดสอบความชำนาญ / การเปรียบเทียบผลระหว่างห้องปฏิบัติการ (Participation in Proficiency testing program / Interlaboratory comparison)
-                            if ( isset($requestData['repeater-section6'] ) ){
-                                $this->SaveFileSection($request, 'repeater-section6', 'attachs_sec6', 6 , $certi_ib );
-                            }
+                                $status = $certi_ib->status ?? 1;
             
-                            // 8. เอกสารอื่นๆ (Others)
-                            if ( isset($requestData['repeater-section7'] ) ){
-                                $this->SaveFileSection($request, 'repeater-section7', 'attachs_sec7', 7 , $certi_ib );
-                            }
-            
-                            if ( isset($requestData['repeater-section8'] ) ){
-                                $this->SaveFileSection($request, 'repeater-section8', 'attachs_sec8', 8 , $certi_ib );
-                            }
-                            // เงื่อนไขเช็คมีใบรับรอง 
-                            $this->save_certiib_export_mapreq( $certi_ib );
-        
-                            $pdfService = new CreateIbScopePdf($certi_ib);
-                            $pdfContent = $pdfService->generatePdf();
-        
-        
-                            $status = $certi_ib->status ?? 1;
-        
-                            if($status == 3){
-                                $this->SET_EMAIL_Request_Documents($certi_ib);
-                            }else{
-                                if($certi_ib->status == 1){
-                                    $this->SET_EMAIL($certi_ib,$status);
-                                }   
-                            }
+                                if($status == 3){
+                                    $this->SET_EMAIL_Request_Documents($certi_ib);
+                                }else{
+                                    if($certi_ib->status == 1){
+                                        $this->SET_EMAIL($certi_ib,$status);
+                                    }   
+                                }
 
+                            }
+                        }else{
+                            // dd('ok',$certi_ib->tracking);
+                                $this->trackingDocUpdate($request, $token);
                         }
+                        
                     }
-                    else
-                    {
-                        dd('แก้ไขขอบข่าย');
-                    }
+                    // else
+                    // {
+                    //     dd('แก้ไขขอบข่าย');
+                    // }
                     
                 
 
@@ -634,6 +748,90 @@ class ApplicantIBController extends Controller
             return  redirect(HP::DomainTisiSso());  
         }
 
+    }
+
+    public function editScope($token)
+    {
+        // dd($token);
+        $model = str_slug('applicantibs','-');
+        $data_session     =    HP::CheckSession();
+        if(!empty($data_session)){
+           if(HP::CheckPermission('edit-'.$model)){
+
+                $previousUrl = app('url')->previous();
+                $certi_ib =  CertiIb::where('token',$token)->first();
+
+                $tis_data = $data_session;
+                $Province =  Province::where('PROVINCE_NAME', 'LIKE', '%'.str_replace(" ","",$data_session->province).'%')->first();
+                $contact_province =  Province::where('PROVINCE_NAME', 'LIKE', '%'.str_replace(" ","",$data_session->contact_province).'%')->first();
+                $data_session->contact_province_id  =    $contact_province->PROVINCE_ID ?? '';
+                $tis_data->PROVINCE_ID  =    $Province->PROVINCE_ID ?? '';
+                // $Amphur =  Amphur::where('AMPHUR_NAME', 'LIKE', '%'.str_replace(" ","",$user_tis->trader_address_amphur).'%')->first();
+                $tis_data->AMPHUR_ID    =    $data_session->district ?? '';
+                // $District =  District::where('DISTRICT_NAME', 'LIKE', '%'.str_replace(" ","",$user_tis->trader_address_tumbol).'%')->first();
+                $tis_data->DISTRICT_ID  =     $data_session->subdistrict ?? '';
+
+                $formulas = DB::table('bcertify_formulas')->select('*')->where('state',1)->where('applicant_type',2)->get();
+
+                $app_certi_ib = DB::table('app_certi_ib')->where('tax_id',$data_session->tax_number)->select('id');
+                $certificate_exports = DB::table('app_certi_ib_export')->whereIn('app_certi_ib_id',$app_certi_ib)->where('status',3)->pluck('certificate','id');
+                $certificate_no = DB::table('app_certi_ib_export')->select('id')->whereIn('app_certi_ib_id',$app_certi_ib)->where('status',3)->get();
+                $methodType = "edit";
+                $ibScopeTransactions = IbScopeTransaction::where('certi_ib_id', $certi_ib->id)
+                ->with([
+                    'ibMainCategoryScope',
+                    'ibSubCategoryScope',
+                    'ibScopeTopic',
+                    'ibScopeDetail'
+                ])
+                ->get();
+
+                $certifieds = collect() ;
+                $Query = CertiIb::with(['app_certi_ib_export' => function($q){
+                    $q->where('status', 4);
+                }]);
+                if(!is_null($data_session->agent_id)){  // ตัวแทน
+                    $certiIbs = $Query->where('agent_id',  $data_session->agent_id ) ;
+                }else{
+                    if($data_session->branch_type == 1){  // สำนักงานใหญ่
+                        $certiIbs = $Query->where('tax_id',  $data_session->tax_number ) ;
+                    }else{   // ผู้บันทึก
+                        $certiIbs = $Query->where('created_by',   auth()->user()->getKey()) ;
+                    }
+                }
+    
+        
+                $certifieds = CertiIBExport::whereIn('app_no',$certiIbs->get()->pluck('app_no')->toArray())->get();
+                // dd('ok');
+                return view('certify.applicant_ib.edit_scope', compact('tis_data',
+                                                                'previousUrl',
+                                                                'certi_ib',
+                                                                'formulas',
+                                                                'certificate_exports',
+                                                                'certificate_no',
+                                                                'methodType',
+                                                                'ibScopeTransactions',
+                                                                'certifieds'
+                                                                ));
+            }
+            abort(403);
+        }else{
+            return  redirect(HP::DomainTisiSso());  
+        }
+    }
+
+    public function updateScope(Request $request, $token)
+    {
+        // dd("ok");
+        CertiIb::where('token',$token)->update([
+            'require_scope_update' => null
+         ]);
+        $certi_ib =  CertiIb::where('token',$token)->first();
+        $this->storeIbScope($request,$certi_ib->id);
+        $pdfService = new CreateIbScopePdf($certi_ib);
+        $pdfContent = $pdfService->generatePdf();
+
+        return redirect('certify/applicant-ib')->with('flash_message', 'แก้ไข applicantIB เรียบร้อยแล้ว!');
     }
 
     public function docUpdate($request, $token)
@@ -689,6 +887,65 @@ class ApplicantIBController extends Controller
         $pdfContent = $pdfService->generatePdf();
 
         return redirect('certify/applicant-ib')->with('flash_message', 'แก้ไข applicantIB เรียบร้อยแล้ว!');
+        
+    }
+
+
+
+    public function trackingDocUpdate($request, $token)
+    {
+        // dd('doc update');
+        $certi_ib =  CertiIb::where('token',$token)->first();
+        
+        //  2. การปฏิบัติของหน่วยงานตรวจสอบที่สอดคล้องตามข้อกำหนดฐานฐานเลขที่ มอก.17020 (Inspection body implementations which are conformed with TIS 17020)
+        if ( isset($requestData['repeater-section1'] ) ){
+            $this->SaveFileSection($request, 'repeater-section1', 'attachs_sec1', 1 , $certi_ib );
+        }
+
+        //  3. รายชื่อคุณวุฒิประสบการณ์และขอบข่ายความรับผิดชอบของเจ้าหน้าที่ (List of relevant personnel providing name, qualification, experience and responsibility)
+        if ( isset($requestData['repeater-section2'] ) ){
+            $this->SaveFileSection($request, 'repeater-section2', 'attachs_sec2', 2 , $certi_ib );
+        }
+
+        // 4. ขอบข่ายที่ยื่นขอรับการรับรอง (Scope of Accreditation Sought) ไฟล์แนบ Word (doc,docx)
+        if ( isset($requestData['repeater-section3'] ) ){
+            $this->SaveFileSection($request, 'repeater-section3', 'attachs_sec3', 3 , $certi_ib );
+        }
+
+        //  5. เครื่องมือ (Equipment) 
+        if ( isset($requestData['repeater-section4'] ) ){
+            $this->SaveFileSection($request, 'repeater-section4', 'attachs_sec4', 4 , $certi_ib );
+        }
+
+        // 6. วัสดุอ้างอิง/มาตรบานอ้างอิง (Reference material / Reference TIS)
+        if ( isset($requestData['repeater-section5'] ) ){
+            $this->SaveFileSection($request, 'repeater-section5', 'attachs_sec5', 5 , $certi_ib );
+        }
+
+        // 7. การเข้าร่วมการทดสอบความชำนาญ / การเปรียบเทียบผลระหว่างห้องปฏิบัติการ (Participation in Proficiency testing program / Interlaboratory comparison)
+        if ( isset($requestData['repeater-section6'] ) ){
+            $this->SaveFileSection($request, 'repeater-section6', 'attachs_sec6', 6 , $certi_ib );
+        }
+
+        // 8. เอกสารอื่นๆ (Others)
+        if ( isset($requestData['repeater-section7'] ) ){
+            $this->SaveFileSection($request, 'repeater-section7', 'attachs_sec7', 7 , $certi_ib );
+        }
+
+        if ( isset($requestData['repeater-section8'] ) ){
+            $this->SaveFileSection($request, 'repeater-section8', 'attachs_sec8', 8 , $certi_ib );
+        }
+
+        // $trackingDocReviewAuditor = TrackingDocReviewAuditor::where('tracking_id',$certi_ib->tracking->id)->first();
+
+        //  dd($certi_ib->tracking->trackingDocReviewAuditor);
+
+        $certi_ib->tracking->update([
+            'doc_review_reject' => null
+        ]);
+
+
+        return redirect('certify/tracking-ib')->with('flash_message', 'แก้ไข applicantIB เรียบร้อยแล้ว!');
         
     }
 
@@ -1813,31 +2070,86 @@ class ApplicantIBController extends Controller
         }
 
 
-        public function abilityConfirm(Request $request)
+    public function abilityConfirm(Request $request)
+    {
+        $certilIb = CertiIb::find($request->id);
+        if($certilIb->standard_change == 6)
         {
-         // dd($request->all());
-         CertiIBReport::where('app_certi_ib_id',$request->id)->first()->update([
-             'ability_confirm' => 1
-         ]);
-        }
+            if($certilIb->transferer_export_id != null){
+                $province = Province::find($certilIb->province_id);
+                $export = CertiIBExport::find($certilIb->transferer_export_id);
+                $holdStatus = $export->status;
+                $exportId = $export->id;
+                $mainCertiIbId = $export->app_certi_ib_id;
+                CertiIBExport::find($certilIb->transferer_export_id)->update([
+                'app_no' => $certilIb->app_no,
+                'app_certi_ib_id' => $certilIb->id,
+                'name_unit' => $certilIb->name_unit,
+                'name_unit_en' => $certilIb->name_en_unit,
+                'address' => $certilIb->address,
+                'allay' => $certilIb->allay,
+                'village_no' => $certilIb->village_no,
+                'road' => $certilIb->road,
+                'province_name' => $province->PROVINCE_NAME,
+                'amphur_name' => $certilIb->amphur_id,
+                'district_name' => $certilIb->district_id,
+                'postcode' => $certilIb->postcode,
+                'address_en' => $certilIb->ib_address_no_eng,
+                'allay_en' => $certilIb->ib_moo_eng,
+                'village_no_en' => $certilIb->ib_soi_eng,
+                'road_en' => $certilIb->ib_street_eng,
+                'province_name_en' => $province->PROVINCE_NAME_EN,
+                'amphur_name_en' => $certilIb->ib_amphur_eng,
+                'district_name_en' => $certilIb->ib_district_eng,
+                'date_start' => Carbon::now(), //ใส่ carbon now
+                'contact_name' =>  $certilIb->contactor_name,
+                'contact_tel' =>  $certilIb->contact_tel,
+                'contact_mobile' =>  $certilIb->telephone,
+                'contact_email' =>  $certilIb->email,
+                'status' =>  2,
+                'hold_status' =>  $holdStatus
+            ]);
 
-         //log
-        public function DataLogIB($token)
-         {
-             $previousUrl = app('url')->previous();
-             $certi_ib = CertiIb::where('token',$token)->first();
-           
-            // ประวัติคำขอ
-             $history  =  CertiIbHistory::where('app_certi_ib_id',$certi_ib->id)
-                                                ->whereNotIN('system',[11])
-                                                ->orderby('id','desc')
-                                                ->get();
-                  
-             return view('certify/applicant_ib.log',['certi_ib'=>$certi_ib,
-                                                     'history' => $history,
-                                                      'previousUrl' => $previousUrl
-                                                    ]);
-         }
+            SendCertificateLists::where('certificate_id',$exportId)->delete();
+
+            $belongCertiIbsIds = CertiIbExportMapreq::where('certificate_exports_id',$exportId)->pluck('app_certi_ib_id')->toArray();
+
+            CertiIb::whereIn('id',$belongCertiIbsIds)->update([
+                'tax_id' => $certilIb->tax_id,
+                'email' => $certilIb->email,
+                'tel' => $certilIb->tel,
+                'contact_tel' => $certilIb->contact_tel,
+                'telephone' => $certilIb->telephone,
+              ]);
+
+              CertiIbExportMapreq::where('app_certi_ib_id',$mainCertiIbId)->first()->update([
+                'app_certi_ib_id' => $certilIb->id
+              ]);
+            }
+
+        }
+        CertiIBReport::where('app_certi_ib_id',$request->id)->first()->update([
+            'ability_confirm' => 1
+        ]);
+    }
+
+        //log
+    public function DataLogIB($token)
+        {
+            $previousUrl = app('url')->previous();
+            $certi_ib = CertiIb::where('token',$token)->first();
+        
+        // ประวัติคำขอ
+            $history  =  CertiIbHistory::where('app_certi_ib_id',$certi_ib->id)
+                                            ->whereNotIN('system',[11])
+                                            ->orderby('id','desc')
+                                            ->get();
+                
+            return view('certify/applicant_ib.log',['certi_ib'=>$certi_ib,
+                                                    'history' => $history,
+                                                    'previousUrl' => $previousUrl
+                                                ]);
+        }
 
 
         public function draft_pdf($certiib_id = null)
@@ -1860,7 +2172,7 @@ class ApplicantIBController extends Controller
                      
                      // if(!is_null($file) && !is_null($file->attach_pdf) ){
                   
-                          $url  =   url('/certify/check_files_cb/'. rtrim(strtr(base64_encode($certiib_id), '+/', '-_'), '=') );
+                          $url  =   url('/certify/check_files_ib/'. rtrim(strtr(base64_encode($certiib_id), '+/', '-_'), '=') );
                          //ข้อมูลภาพ QR Code
                           $image_qr = QrCode::format('png')->merge('plugins/images/tisi.png', 0.2, true)
                                        ->size(500)->errorCorrection('H')
@@ -2089,32 +2401,89 @@ class ApplicantIBController extends Controller
      
      private function FormatAddressEn($request){
          $address   = [];
-         $address[] = $request->cb_address_no_eng;
+         $address[] = $request->ib_address_no_eng;
  
-         if($request->cb_moo_eng!=''){
-           $address[] =    'Moo '.$request->cb_moo_eng;
+         if($request->ib_moo_eng!=''){
+           $address[] =    'Moo '.$request->ib_moo_eng;
          }
  
-         if($request->cb_soi_eng!='' && $request->cb_soi_eng !='-'  && $request->cb_soi_eng !='--'){
-           $address[] =   $request->cb_soi_eng;
+         if($request->ib_soi_eng!='' && $request->ib_soi_eng !='-'  && $request->ib_soi_eng !='--'){
+           $address[] =   $request->ib_soi_eng;
          }
-         if($request->cb_street_eng!='' && $request->cb_street_eng !='-'  && $request->cb_street_eng !='--'){
-             $address[] =   $request->cb_street_eng.',';
+         if($request->ib_street_eng!='' && $request->ib_street_eng !='-'  && $request->ib_street_eng !='--'){
+             $address[] =   $request->ib_street_eng.',';
          }
-         if($request->cb_district_eng!='' && $request->cb_district_eng !='-'  && $request->cb_district_eng !='--'){
-             $address[] =   $request->cb_district_eng.',';
+         if($request->ib_district_eng!='' && $request->ib_district_eng !='-'  && $request->ib_district_eng !='--'){
+             $address[] =   $request->ib_district_eng.',';
          }
-         if($request->cb_amphur_eng!='' && $request->cb_amphur_eng !='-'  && $request->cb_amphur_eng !='--'){
-             $address[] =   $request->cb_amphur_eng.',';
+         if($request->ib_amphur_eng!='' && $request->ib_amphur_eng !='-'  && $request->ib_amphur_eng !='--'){
+             $address[] =   $request->ib_amphur_eng.',';
          }
-         if($request->cb_province_eng!='' && $request->cb_province_eng !='-'  && $request->cb_province_eng !='--'){
-             $address[] =   $request->cb_province_eng;
+         if($request->ib_province_eng!='' && $request->ib_province_eng !='-'  && $request->ib_province_eng !='--'){
+             $address[] =   $request->ib_province_eng;
          }
-         if($request->cb_postcode_eng!='' && $request->cb_postcode_eng !='-'  && $request->cb_postcode_eng !='--'){
-             $address[] =   $request->cb_postcode_eng;
+         if($request->ib_postcode_eng!='' && $request->ib_postcode_eng !='-'  && $request->ib_postcode_eng !='--'){
+             $address[] =   $request->ib_postcode_eng;
          }
          return implode(' ', $address);
      }
+     public function isIbTypeAndStandardBelong(Request $request)
+     {
+         $user = auth()->user();
+         $appCertiIbIds = CertiIb::where('tax_id',$user->tax_number)->pluck('id')->toArray();
+         $certiIbExportMapreqs = CertiIbExportMapreq::whereIn('app_certi_ib_id',$appCertiIbIds)->pluck('app_certi_ib_id')->toArray();
+         $certiIbs = CertiIb::whereIn('id',$certiIbExportMapreqs)
+                   ->where('type_unit',$request->typeUnit)
+                   ->where('type_standard',$request->typeStandard)
+                   ->get();
+     
+        return response()->json([
+             'certiIbs' => $certiIbs
+        ]);
+     }
+
+     public function getCertificatedBelong(Request $request)
+     {
+        $user = auth()->user();
+        $appCertiIbIds = CertiIb::where('tax_id',$user->tax_number)
+        ->where('type_unit',$request->typeUnit)
+        ->where('type_standard',$request->typeStandard)
+        ->pluck('id')->toArray();
+
+        $certificateExports = CertiIBExport::whereIn('app_certi_ib_id',$appCertiIbIds)->get();
+
+        return response()->json([
+            'certificateExports' => $certificateExports
+       ]);
+     }
+
+    public function  checkTransferee(Request $request)
+    {
+        $user = null;
+       
+        $transfererIdNumber = $request->input('transferer_id_number');
+        $certificateNumber = $request->input('transferee_certificate_number');
+
+        $certificateExport = CertiIBExport::where('certificate',$certificateNumber)->first();
+       
+        if($certificateExport != null){
+            $certiIb = CertiIb::find($certificateExport->app_certi_ib_id);
+            if($certiIb != null)
+            {
+                $taxId = $certiIb->tax_id;
+                if(trim($taxId) == trim($transfererIdNumber)) 
+                {
+                    $user = User::where('username',$transfererIdNumber)->first();
+                }
+            }
+        }
+
+        return response()->json([
+            'user' => $user,
+            // 'certiIb' => $certiIb,
+       ]);
+    }
+
 
      public function get_app_no_and_certificate_exports_no(Request $request)
      {
@@ -2158,15 +2527,23 @@ class ApplicantIBController extends Controller
 
      private function save_certiib_export_mapreq($certi_ib)
      {
-           $app_certi_ib             = CertiIb::with([
-                                                     'app_certi_ib_export' => function($q){
-                                                         $q->whereIn('status',['0','1','2','3','4']);
-                                                     }
-                                                 ])
-                                                 ->where('created_by', $certi_ib->created_by)
-                                                 ->whereNotIn('status', ['0','4'])
-                                                 ->where('type_standard', $certi_ib->type_standard)
-                                                 ->first();
+        //    $app_certi_ib  = CertiIb::with([
+        //                                              'app_certi_ib_export' => function($q){
+        //                                                  $q->whereIn('status',['0','1','2','3','4']);
+        //                                              }
+        //                                          ])
+        //                                          ->where('created_by', $certi_ib->created_by)
+        //                                          ->whereNotIn('status', ['0','4'])
+        //                                          ->where('type_standard', $certi_ib->type_standard)
+        //                                          ->first();
+           $app_certi_ib  = CertiIb::whereHas('certiIBExport', function($q){
+                                $q->whereIn('status', ['0','1','2','3','4']);
+                            })
+                        ->where('created_by', $certi_ib->created_by)
+                        ->whereNotIn('status', ['0','4'])
+                        ->where('type_standard', $certi_ib->type_standard)
+                        ->where('type_unit', $certi_ib->type_unit)
+                        ->first();
           if(!Is_null($app_certi_ib)){
               $certificate_exports_id = !empty($app_certi_ib->app_certi_ib_export->id) ? $app_certi_ib->app_certi_ib_export->id : null;
                if(!Is_null($certificate_exports_id)){
@@ -2247,4 +2624,156 @@ class ApplicantIBController extends Controller
      return response()->json($assessment);
    }
 
+   public function GetAddreess($subdistrict_id){ // ดึงข้อมูลที่อยู่จาก ตำบล
+
+        $address_data  =  DB::table((new District)->getTable().' AS sub') // อำเภอ
+                    ->leftJoin((new Amphur)->getTable().' AS dis', 'dis.AMPHUR_ID', '=', 'sub.AMPHUR_ID') // ตำบล
+                    ->leftJoin((new Province)->getTable().' AS pro', 'pro.PROVINCE_ID', '=', 'sub.PROVINCE_ID')  // จังหวัด
+                    ->leftJoin((new Zipcode)->getTable().' AS code', 'code.district_code', '=', 'sub.DISTRICT_CODE')  // รหัสไปรษณีย์
+                    ->where(function($query) use($subdistrict_id){
+                        $query->where('sub.DISTRICT_ID', $subdistrict_id);
+                    })
+                    ->where(function($query){
+                        $query->where(DB::raw("REPLACE(sub.DISTRICT_NAME,' ','')"),  'NOT LIKE', "%*%");
+                    })
+                    ->select(
+
+                        DB::raw("sub.DISTRICT_ID AS sub_ids"),
+                        DB::raw("TRIM(sub.DISTRICT_NAME) AS sub_title"),
+                        DB::raw("TRIM(sub.DISTRICT_NAME_EN) AS sub_title_en"),
+
+                        DB::raw("dis.AMPHUR_ID AS dis_id"),
+                        DB::raw("TRIM(dis.AMPHUR_NAME) AS dis_title"),
+                        DB::raw("TRIM(dis.AMPHUR_NAME_EN) AS dis_title_en"),
+
+                        DB::raw("pro.PROVINCE_ID AS pro_id"),
+                        DB::raw("TRIM(pro.PROVINCE_NAME) AS pro_title"),
+                        DB::raw("TRIM(pro.PROVINCE_NAME_EN) AS pro_title_en"),
+
+                        DB::raw("code.zipcode AS zip_code")
+
+                    )
+                    ->first();
+
+        return response()->json($address_data);
+    }
+
+   public function apiGetCertificated(Request $request)
+   {
+    $data_session     =    HP::CheckSession();
+        // dd($request->all());
+        $certificateExport = CertiIBExport::find($request->certified_id);
+    
+        $certiIb = CertiIb::find($certificateExport->app_certi_ib_id);
+
+        $district= District::where('DISTRICT_NAME',trim($certiIb->district_id))->where('PROVINCE_ID',$certiIb->province_id)->first();
+        $address = $this->GetAddreess($district->DISTRICT_ID);
+
+        // dd($district,$certiIb->district_id,$certiIb->province_id);
+        $file_sectionn1s = CertiIBAttachAll::where('app_certi_ib_id', $certiIb->id)
+                    ->where('file_section', '1')
+                    ->where('table_name','app_certi_ib')
+                    ->get();
+
+        $file_sectionn2s = CertiIBAttachAll::where('app_certi_ib_id', $certiIb->id)
+                    ->where('file_section', '2')
+                    ->where('table_name','app_certi_ib')
+                    ->get();
+
+        $file_sectionn3s = CertiIBAttachAll::where('app_certi_ib_id', $certiIb->id)
+                    ->where('file_section', '3')
+                    ->where('table_name','app_certi_ib')
+                    ->get();
+
+        $file_sectionn4s = CertiIBAttachAll::where('app_certi_ib_id', $certiIb->id)
+                    ->where('file_section', '4')
+                    ->where('table_name','app_certi_ib')
+                    ->get();
+
+        $file_sectionn5s = CertiIBAttachAll::where('app_certi_ib_id', $certiIb->id)
+                    ->where('file_section', '5')
+                    ->where('table_name','app_certi_ib')
+                    ->get();
+
+        $file_sectionn6s = CertiIBAttachAll::where('app_certi_ib_id', $certiIb->id)
+                    ->where('file_section', '6')
+                    ->where('table_name','app_certi_ib')
+                    ->get();
+
+        $file_sectionn7s = CertiIBAttachAll::where('app_certi_ib_id', $certiIb->id)
+                    ->where('file_section', '7')
+                    ->where('table_name','app_certi_ib')
+                    ->get();
+
+        $file_sectionn8s = CertiIBAttachAll::where('app_certi_ib_id', $certiIb->id)
+                    ->where('file_section', '8')
+                    ->where('table_name','app_certi_ib')
+                    ->get();
+
+
+        $methodType = "edit";
+        $ibScopeTransactions = IbScopeTransaction::where('certi_ib_id', $certiIb->id)
+                    ->with([
+                        'ibMainCategoryScope',
+                        'ibSubCategoryScope',
+                        'ibScopeTopic',
+                        'ibScopeDetail'
+                    ])
+                    ->get();
+
+        $certifieds = collect() ;
+        $Query = CertiIb::with(['app_certi_ib_export' => function($q){
+            $q->where('status', 4);
+        }]);
+        if(!is_null($data_session->agent_id)){  // ตัวแทน
+            $certiIbs = $Query->where('agent_id',  $data_session->agent_id ) ;
+        }else{
+            if($data_session->branch_type == 1){  // สำนักงานใหญ่
+                $certiIbs = $Query->where('tax_id',  $data_session->tax_number ) ;
+            }else{   // ผู้บันทึก
+                $certiIbs = $Query->where('created_by',   auth()->user()->getKey()) ;
+            }
+        }
+
+     
+            $certifieds = CertiIBExport::whereIn('app_no',$certiIbs->get()->pluck('app_no')->toArray())->get();            
+        return response()->json([
+            'attach_path' => $this->attach_path,
+            'certiIb' => $certiIb,
+            'certificateExport' => $certificateExport,
+            'address' => $address,
+            'file_sectionn1s' => $file_sectionn1s,
+            'file_sectionn2s' => $file_sectionn2s,
+            'file_sectionn3s' => $file_sectionn3s,
+            'file_sectionn4s' => $file_sectionn4s,
+            'file_sectionn5s' => $file_sectionn5s,
+            'file_sectionn6s' => $file_sectionn6s,
+            'file_sectionn7s' => $file_sectionn7s,
+            'file_sectionn8s' => $file_sectionn8s,
+            'ibScopeTransactions' => $ibScopeTransactions,
+            'certifieds' => $certifieds,
+            'methodType' => $methodType
+        ]);           
+
+   }
+
 }
+
+
+
+
+
+
+                // if( isset($item[ $input_name ]) ){
+
+                //     $certi_ib_attach                   = new CertiIBAttachAll();
+                //     $certi_ib_attach->app_certi_ib_id  = $certi_ib->id;
+                //     $certi_ib_attach->table_name       = $tb->getTable();
+                //     $certi_ib_attach->file_section     = (string)$section;
+                //     $certi_ib_attach->file_desc        = !empty($item[ 'attachs_txt' ])?$item[ 'attachs_txt' ]:null;
+                //     $certi_ib_attach->file             = $this->storeFile( $item[ $input_name ] ,$certi_ib->app_no);
+                //     $certi_ib_attach->file_client_name = HP::ConvertCertifyFileName( $item[ $input_name ]->getClientOriginalName());
+                //     $certi_ib_attach->token            = str_random(16);
+                //     $certi_ib_attach->save();
+
+                // }

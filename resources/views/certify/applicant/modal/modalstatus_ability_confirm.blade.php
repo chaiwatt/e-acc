@@ -240,43 +240,6 @@
 
         });
 
-        // $(document).on('click', '#ability_confirm_button', function(e) {
-        //         // e.preventDefault();
-        //          console.log('hello')
-        //         // รับค่าจากฟอร์ม
-        //         const _token = $('input[name="_token"]').val();
-        //         var app_id = $('#app_id').val();
-
-        //         // แสดง overlay
-        //         $.LoadingOverlay("show", {
-        //             image: "",
-        //             text: "กำลังบันทึก กรุณารอสักครู่..."
-        //         });
-
-        //         // เรียก AJAX
-        //         $.ajax({
-        //             url: "{{route('assessment.ability-confirm')}}",
-        //             method: "POST",
-        //             data: {
-        //                 _token: _token,
-        //                 id: app_id,
-        //             },
-        //             success: function(result) {
-        //                 console.log(result);
-        //                 // window.location.reload();
-        //                 $('#action19{{$id}}').modal('hide');
-                         
-        //             },
-        //             error: function(xhr, status, error) {
-        //                 console.error("Error:", error);
-        //                 alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
-        //             },
-        //             complete: function() {
-        //                 // ซ่อน overlay
-        //                 $.LoadingOverlay("hide");
-        //             }
-        //         });
-        //     });
 
         $(document).off('click', '#ability_confirm_button').on('click', '#ability_confirm_button', function(e) {
        

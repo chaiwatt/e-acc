@@ -120,22 +120,17 @@
 
     $urlType = checkUrl();
 @endphp
-
-@php
-    if(isset($scope_edit)){
-
-    }
-@endphp
-
-
 <div style="display: none;">
     @include('certify.applicant.forms.form_infomation')
 </div>
-{{-- <div hidden> --}}
+
 @include ('certify.applicant.forms.form_request_edit_scope')
-{{-- </div> --}}
+
 @include ('certify.applicant.forms.form_model')
 @include ('certify.applicant.forms.form_evidence_edit_scope')
+
+
+
 
 @if( isset($certi_lab->desc_delete) && isset($certi_lab->id) && !is_null($certi_lab->desc_delete))
 
@@ -223,14 +218,31 @@
     let labRequestMain 
     let labRequestBranchs 
     let labRequestType = "test"
-    $(document).ready(function () {
+    let mainLabScopeTransaction 
+    let branchLabScopeTransactions
+    let mainLabTypes
+    let branchLabScopeTransactions
 
+
+    let mainLabScopeTransaction;
+    let branchLabScopeTransactions ;
+
+    // แปลงโครงสร้างของ lab_types
+
+
+    $(document).ready(function () {
+ 
         // ตัวแปร labCalRequest และ labTestRequest ที่ได้รับค่าจาก PHP
         let labCalRequest = @json($labCalRequest ?? []);
         let labTestRequest = @json($labTestRequest ?? []);
+    
 
+         transformedMainLabTypes = transformLabTypes(mainLabScopeTransaction.lab_types);
+         transformedBranchLabTypesArray = branchLabScopeTransactions.map(branch => transformLabTypes(branch.lab_types));
+
+        // alert('dddd');
         // ตรวจสอบความยาวของ labTestRequest
-        console.log('Lab Test Request Length:', labTestRequest.length);
+        // console.log('Lab Test Request Length 777777:', labTestRequest.length);
 
         // หาก labTestRequest ว่าง หรือไม่มีค่า ใช้ labCalRequest แทน
         if (labTestRequest.length > 0) {
@@ -265,12 +277,19 @@
     <script src="{{asset('plugins/components/repeater/jquery.repeater.min.js')}}"></script>
 
     <script src="{{asset('js/jasny-bootstrap.js')}}"></script>
-    <script src="{{asset('assets/js/lab/applicant.js?v=1.10')}}"></script>
+
 
     <script>
-   
+       let transformedMainLabTypes ;
+       let transformedBranchLabTypesArray ;
         $(document).ready(function () {
 
+            mainLabScopeTransaction = @json($mainLabScopeTransaction ?? []);
+            branchLabScopeTransactions = @json($branchLabScopeTransactions ?? []);
+
+            console.log('mainLabScopeTransaction ===> ',mainLabScopeTransaction);
+
+            // alert('111');
             $('.mydatepicker_th').datepicker({
                 toggleActive: true,
                 language:'th-th',
@@ -561,29 +580,22 @@
         //         }
         //     }
         //     }
-     
+
         function getUniqueCalMainBranches(lab_addresses_json, lab_main_address_json) {
             var resultArray = [];
 
-            // console.log('lab_addresses_json',lab_addresses_json)
-            // console.log('lab_main_address_json',lab_main_address_json)
+            // กำหนด keys สำหรับ lab_types
+            var keys = ['pl_2_1_info', 'pl_2_2_info', 'pl_2_3_info', 'pl_2_4_info', 'pl_2_5_info'];
 
-            
-
-            // สร้าง array ของ branch IDs และ main facilities
-            var branches = ['pl_2_1_branch', 'pl_2_2_branch', 'pl_2_3_branch', 'pl_2_4_branch', 'pl_2_5_branch'];
-            var main_facilities = ['pl_2_1_main', 'pl_2_2_main', 'pl_2_3_main', 'pl_2_4_main', 'pl_2_5_main'];
-
-            // ฟังก์ชันที่ใช้ในการวน loop และดึงค่า cal_main_branch
+            // ฟังก์ชันสำหรับดึง cal_main_branch.id จากสาขา
             function extractCalBranches(jsonData, keysArray) {
                 jsonData.forEach(function(address) {
                     if (address.lab_types) {
                         keysArray.forEach(function(keyId) {
                             if (Array.isArray(address.lab_types[keyId]) && address.lab_types[keyId].length > 0) {
                                 address.lab_types[keyId].forEach(function(item) {
-                                    // ตรวจสอบว่า item มี category และดึงค่าของ category
-                                    if (item.category) {
-                                        resultArray.push(item.category);
+                                    if (item.cal_main_branch && item.cal_main_branch.id) {
+                                        resultArray.push(item.cal_main_branch.id);
                                     }
                                 });
                             }
@@ -592,15 +604,14 @@
                 });
             }
 
-
+            // ฟังก์ชันสำหรับดึง cal_main_branch.id จากสำนักงานใหญ่
             function extractCalMain(jsonData, keysArray) {
                 if (jsonData.lab_types) {
                     keysArray.forEach(function(keyId) {
                         if (Array.isArray(jsonData.lab_types[keyId]) && jsonData.lab_types[keyId].length > 0) {
                             jsonData.lab_types[keyId].forEach(function(item) {
-                                // ตรวจสอบว่า item มี category และดึงค่าของ category
-                                if (item.category) {
-                                    resultArray.push(item.category);
+                                if (item.cal_main_branch && item.cal_main_branch.id) {
+                                    resultArray.push(item.cal_main_branch.id);
                                 }
                             });
                         }
@@ -608,17 +619,120 @@
                 }
             }
 
+            // เรียกใช้งานทั้งสองฟังก์ชัน
+            extractCalBranches(lab_addresses_json, keys);
+            extractCalMain(lab_main_address_json, keys);
 
-            extractCalBranches(lab_addresses_json, branches);
-            extractCalMain(lab_main_address_json, main_facilities);
-
+            // กำจัดค่าซ้ำและแปลงเป็น integer
             resultArray = Array.from(new Set(resultArray)).map(function(value) {
                 return parseInt(value, 10);
             });
 
+            return resultArray;
+        }
+
+        function getUniqueTestMainBranches(lab_addresses_json, lab_main_address_json) {
+            var resultArray = [];
+
+            // กำหนด keys สำหรับ lab_types
+            var keys = ['pl_2_1_info', 'pl_2_2_info', 'pl_2_3_info', 'pl_2_4_info', 'pl_2_5_info'];
+
+            // ฟังก์ชันสำหรับดึง test_main_branch.id จากสาขา
+            function extractTestBranches(jsonData, keysArray) {
+                jsonData.forEach(function(address) {
+                    if (address.lab_types) {
+                        keysArray.forEach(function(keyId) {
+                            if (Array.isArray(address.lab_types[keyId]) && address.lab_types[keyId].length > 0) {
+                                address.lab_types[keyId].forEach(function(item) {
+                                    if (item.test_main_branch && item.test_main_branch.id) {
+                                        resultArray.push(item.test_main_branch.id);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            // ฟังก์ชันสำหรับดึง test_main_branch.id จากสำนักงานใหญ่
+            function extractTestMain(jsonData, keysArray) {
+                if (jsonData.lab_types) {
+                    keysArray.forEach(function(keyId) {
+                        if (Array.isArray(jsonData.lab_types[keyId]) && jsonData.lab_types[keyId].length > 0) {
+                            jsonData.lab_types[keyId].forEach(function(item) {
+                                if (item.test_main_branch && item.test_main_branch.id) {
+                                    resultArray.push(item.test_main_branch.id);
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+
+            // เรียกใช้งานทั้งสองฟังก์ชัน
+            extractTestBranches(lab_addresses_json, keys);
+            extractTestMain(lab_main_address_json, keys);
+
+            // กำจัดค่าซ้ำและแปลงเป็น integer
+            resultArray = Array.from(new Set(resultArray)).map(function(value) {
+                return parseInt(value, 10);
+            });
 
             return resultArray;
         }
+     
+        // function getUniqueCalMainBranches(lab_addresses_json, lab_main_address_json) {
+        //     var resultArray = [];
+
+        //     // สร้าง array ของ branch IDs และ main facilities
+        //     var branches = ['pl_2_1_branch', 'pl_2_2_branch', 'pl_2_3_branch', 'pl_2_4_branch', 'pl_2_5_branch'];
+        //     var main_facilities = ['pl_2_1_main', 'pl_2_2_main', 'pl_2_3_main', 'pl_2_4_main', 'pl_2_5_main'];
+
+        //     // ฟังก์ชันที่ใช้ในการวน loop และดึงค่า cal_main_branch
+        //     function extractCalBranches(jsonData, keysArray) {
+        //         jsonData.forEach(function(address) {
+        //             if (address.lab_types) {
+        //                 keysArray.forEach(function(keyId) {
+        //                     if (Array.isArray(address.lab_types[keyId]) && address.lab_types[keyId].length > 0) {
+        //                         address.lab_types[keyId].forEach(function(item) {
+        //                             // ตรวจสอบว่า item มี category และดึงค่าของ category
+        //                             if (item.category) {
+        //                                 resultArray.push(item.category);
+        //                             }
+        //                         });
+        //                     }
+        //                 });
+        //             }
+        //         });
+        //     }
+
+
+        //     function extractCalMain(jsonData, keysArray) {
+        //         if (jsonData.lab_types) {
+        //             keysArray.forEach(function(keyId) {
+        //                 if (Array.isArray(jsonData.lab_types[keyId]) && jsonData.lab_types[keyId].length > 0) {
+        //                     jsonData.lab_types[keyId].forEach(function(item) {
+        //                         // ตรวจสอบว่า item มี category และดึงค่าของ category
+        //                         if (item.category) {
+        //                             resultArray.push(item.category);
+        //                         }
+        //                     });
+        //                 }
+        //             });
+        //         }
+        //     }
+
+
+        //     extractCalBranches(lab_addresses_json, branches);
+        //     extractCalMain(lab_main_address_json, main_facilities);
+
+        //     resultArray = Array.from(new Set(resultArray)).map(function(value) {
+        //         return parseInt(value, 10);
+        //     });
+
+
+        //     return resultArray;
+        // }
 
         function renderHiddenInputs(uniqueCalMainBranches) {
             // ล้างค่าใน <div id="unique-cal-main-branche"> ก่อน
@@ -638,76 +752,247 @@
             });
         }
 
+
+
+        function validateLabData() {
+            // ตรวจสอบ main_lab_info
+            const mainLabInfo = JSON.parse(sessionStorage.getItem('main_lab_info')) || {
+                lab_types: {
+                    pl_2_1_info: [],
+                    pl_2_2_info: [],
+                    pl_2_3_info: [],
+                    pl_2_4_info: [],
+                    pl_2_5_info: []
+                }
+            };
+            const mainLabTypes = mainLabInfo.lab_types || {
+                pl_2_1_info: [],
+                pl_2_2_info: [],
+                pl_2_3_info: [],
+                pl_2_4_info: [],
+                pl_2_5_info: []
+            };
+
+            // ตรวจสอบว่า main_lab_info มี labtype อย่างน้อย 1 รายการที่ไม่ว่าง
+            let hasMainLabType = false;
+            for (let i = 1; i <= 5; i++) {
+                const key = `pl_2_${i}_info`;
+                if (Array.isArray(mainLabTypes[key]) && mainLabTypes[key].length > 0) {
+                    hasMainLabType = true;
+                    break;
+                }
+            }
+
+            if (!hasMainLabType) {
+                alert('กรุณาเพิ่มข้อมูล labtype อย่างน้อย 1 รายการสำหรับสำนักงานใหญ่');
+                return false;
+            }
+
+            // ตรวจสอบ branch_lab_infos
+            const branchData = JSON.parse(sessionStorage.getItem('branch_lab_infos')) || [];
+
+            // ถ้ามีสาขา ตรวจสอบว่าแต่ละสาขามี labtype อย่างน้อย 1 รายการ
+            if (branchData.length > 0) {
+                for (let branchIndex = 0; branchIndex < branchData.length; branchIndex++) {
+                    const branch = branchData[branchIndex];
+                    const branchLabTypes = branch.lab_types || {
+                        pl_2_1_info: [],
+                        pl_2_2_info: [],
+                        pl_2_3_info: [],
+                        pl_2_4_info: [],
+                        pl_2_5_info: []
+                    };
+
+                    let hasBranchLabType = false;
+                    for (let i = 1; i <= 5; i++) {
+                        const key = `pl_2_${i}_info`;
+                        if (Array.isArray(branchLabTypes[key]) && branchLabTypes[key].length > 0) {
+                            hasBranchLabType = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasBranchLabType) {
+                        const branchName = branch.address_city_text_add || `สาขาที่ ${branchIndex + 1}`;
+                        alert(`กรุณาเพิ่มข้อมูล labtype อย่างน้อย 1 รายการสำหรับ${branchName}`);
+                        return false;
+                    }
+                }
+            }
+
+            // ถ้าผ่านทุกเงื่อนไข
+            return true;
+        }
+
+        // function transformLabTypes(labTypes) {
+        //     const transformed = {
+        //         pl_2_1_info: [],
+        //         pl_2_2_info: [],
+        //         pl_2_3_info: [],
+        //         pl_2_4_info: [],
+        //         pl_2_5_info: []
+        //     };
+
+        //     for (let i = 1; i <= 5; i++) {
+        //         const key = `pl_2_${i}_info`;
+        //         if (Array.isArray(labTypes[key])) {
+        //             transformed[key] = labTypes[key].map(item => ({
+        //                 cal_main_branch_id: item.cal_main_branch?.id || null,
+        //                 cal_main_branch_text: item.cal_main_branch?.text || '',
+        //                 cal_instrumentgroup_id: item.cal_instrumentgroup?.id || null,
+        //                 cal_instrumentgroup_text: item.cal_instrumentgroup?.text || '',
+        //                 cal_instrument_id: item.cal_instrument?.id || null,
+        //                 cal_instrument_text: item.cal_instrument?.text || '',
+        //                 cal_parameter_one_id: item.cal_parameter_one?.id || null,
+        //                 cal_parameter_one_text: item.cal_parameter_one?.text || '',
+        //                 cal_parameter_two_id: item.cal_parameter_two?.id || null,
+        //                 cal_parameter_two_text: item.cal_parameter_two?.text || '',
+        //                 cal_standard: item.cal_standard || '',
+        //                 cal_cmc_info: item.cal_cmc_info || []
+        //             }));
+        //         }
+        //     }
+
+        //     return transformed;
+        // }
+
+        function transformLabTypes(labTypes) {
+            const transformed = {
+                pl_2_1_info: [],
+                pl_2_2_info: [],
+                pl_2_3_info: [],
+                pl_2_4_info: [],
+                pl_2_5_info: []
+            };
+
+            for (let i = 1; i <= 5; i++) {
+                const key = `pl_2_${i}_info`;
+                if (Array.isArray(labTypes[key]) && labTypes[key].length > 0) {
+                    transformed[key] = labTypes[key].map(item => {
+                        // ตรวจสอบประเภทของ lab โดยดูจากฟิลด์ใน item
+                        const isCalLab = item.hasOwnProperty('cal_main_branch') || item.hasOwnProperty('cal_instrumentgroup');
+                        const isTestLab = item.hasOwnProperty('test_main_branch') || item.hasOwnProperty('test_category');
+
+                        if (isCalLab) {
+                            // กรณี Calibration Lab (cal_)
+                            return {
+                                cal_main_branch_id: item.cal_main_branch?.id || null,
+                                cal_main_branch_text: item.cal_main_branch?.text || '',
+                                cal_main_branch_text_en: item.cal_main_branch?.text_en || '',
+                                cal_instrumentgroup_id: item.cal_instrumentgroup?.id || null,
+                                cal_instrumentgroup_text: item.cal_instrumentgroup?.text || '',
+                                cal_instrument_id: item.cal_instrument?.id || null,
+                                cal_instrument_text: item.cal_instrument?.text || '',
+                                cal_parameter_one_id: item.cal_parameter_one?.id || null,
+                                cal_parameter_one_text: item.cal_parameter_one?.text || '',
+                                cal_parameter_two_id: item.cal_parameter_two?.id || null,
+                                cal_parameter_two_text: item.cal_parameter_two?.text || '',
+                                cal_standard: item.cal_standard || '',
+                                cal_cmc_info: item.cal_cmc_info || []
+                            };
+                        } else if (isTestLab) {
+                            // กรณี Test Lab (test_)
+                            return {
+                                test_main_branch_id: item.test_main_branch?.id || null,
+                                test_main_branch_text: item.test_main_branch?.text || '',
+                                test_main_branch_text_en: item.test_main_branch?.text_en || '',
+                                test_category_id: item.test_category?.id || null,
+                                test_category_text: item.test_category?.text || '',
+                                test_category_text_en: item.test_category?.text_en || '',
+                                test_parameter_id: item.test_parameter?.id || null,
+                                test_parameter_text: item.test_parameter?.text || '',
+                                test_parameter_text_en: item.test_parameter?.text_en || '',
+                                test_condition_description: item.test_condition_description || '',
+                                test_param_detail: item.test_param_detail || '',
+                                test_standard: item.test_standard || ''
+                            };
+                        } else {
+                            // กรณีไม่สามารถระบุประเภทของ lab ได้
+                            console.error('Cannot determine lab type for item:', item);
+                            return {};
+                        }
+                    });
+                }
+            }
+
+            return transformed;
+        }
+
+
         function submit_form(status) {
+
+           
+
+            // ตรวจสอบข้อมูลก่อนส่ง
+            if (!validateLabData()) { 
+                return; // หยุดการทำงานถ้าไม่ผ่านการตรวจสอบ
+            }
 
             let purpose = $('input[name="purpose"]:checked').val();
 
- 
-            if(validateMainScope() == false){
-                alert('รูปแบบขอบข่ายสำนักงานไม่ถูกต้อง โปรดตรวจสอบว่าได้เพิ่มขอบข่ายทุกประเภทสถานปฏิบัติการแล้ว');
-                return
+            if(purpose == 6)
+            {
+                if($('#transferee_name').val() == "")
+                {
+                    alert("โปรดตรวสอบข้อมูลผู้โอน");
+                    return;
+                }
             }
 
-            if(validateBranchScope() == false){
-                alert('รูปแบบขอบข่ายสาขาไม่ถูกต้อง โปรดตรวจสอบว่าได้เพิ่มขอบข่ายทุกประเภทสถานปฏิบัติการแล้ว');
-                return
+
+            // var lab_main_address = JSON.parse(sessionStorage.getItem('lab_main_address'));
+
+
+            // ดึงข้อมูล
+            const mainLabInfo = JSON.parse(sessionStorage.getItem('main_lab_info')) || {};
+
+            const branchData = JSON.parse(sessionStorage.getItem('branch_lab_infos')) || [];
+
+
+
+            var uniqueCalMainBranches;
+
+            if($("input[name=lab_ability]:checked").val() == "calibrate"){
+                uniqueCalMainBranches = getUniqueCalMainBranches(branchData, mainLabInfo);
+            }else if($("input[name=lab_ability]:checked").val() == "test")
+            {
+                uniqueCalMainBranches = getUniqueTestMainBranches(branchData, mainLabInfo);
             }
-
-            var lab_main_address = JSON.parse(sessionStorage.getItem('lab_main_address'));
-
-       
-            var updatedFields = {
-                checkbox_main: null,
-                address_number_add: $('#address_number').val(),
-                village_no_add: $('#village_no').val(),
-                address_soi_add: $('#address_soi').val(),
-                address_street_add: $('#address_street').val(),
-                address_city_add: $('#address_city').val(),
-                address_city_text_add: $('#address_city option:selected').text(),
-                address_district_add: $('#address_district').val(),
-                sub_district_add: $('#sub_district').val(),
-                postcode_add: $('#postcode').val(),
-                lab_address_no_eng_add: $('#lab_address_no_eng').val(),
-                lab_moo_eng_add: $('#lab_moo_eng').val(),
-                lab_soi_eng_add: $('#lab_soi_eng').val(),
-                lab_street_eng_add: $('#lab_street_eng').val(),
-                lab_province_text_eng_add: $('#lab_province_eng option:selected').text(),
-                lab_province_eng_add: $('#lab_province_eng').val(),
-                lab_amphur_eng_add: $('#lab_amphur_eng').val(),
-                lab_district_eng_add: $('#lab_district_eng').val(),
-
-                amphur_id_add: $('#address_district').data('id'),
-                tambol_id_add: $('#sub_district').data('id'),
-            };
-
-            // รวมข้อมูลใหม่เข้ากับข้อมูลเดิม
-            lab_main_address = { ...lab_main_address, ...updatedFields };
-
-            // console.log()
-
-            sessionStorage.setItem('lab_main_address', JSON.stringify(lab_main_address));
-
-            // console.log(sessionStorage.getItem('lab_main_address'))
-
-            var lab_addresses_array = JSON.stringify(JSON.parse(sessionStorage.getItem('lab_addresses_array')) || []);
-            var lab_main_address = JSON.stringify(JSON.parse(sessionStorage.getItem('lab_main_address')) || {});
-
-            
+            // console.log('uniqueCalMainBranches',uniqueCalMainBranches);
             // return;
-          
-            // เรียกใช้ฟังก์ชัน
-            var lab_addresses_json = JSON.parse(sessionStorage.getItem('lab_addresses_array')) || [];
-            var lab_main_address_json = JSON.parse(sessionStorage.getItem('lab_main_address')) || {};
-
- 
-            var uniqueCalMainBranches = getUniqueCalMainBranches(lab_addresses_json, lab_main_address_json);
-
-
             renderHiddenInputs(uniqueCalMainBranches);
 
-            // ใส่ค่าสตริง JSON ลงใน input fields แบบซ่อน
-            $('#lab_addresses_input').val(lab_addresses_array);
-            $('#lab_main_address_input').val(lab_main_address);
+
+            // แปลง lab_types ของ main_lab_info
+            mainLabInfo.lab_types = transformLabTypes(mainLabInfo.lab_types);
+
+            // แปลง lab_types ของแต่ละสาขา
+            branchData.forEach(branch => {
+                branch.lab_types = transformLabTypes(branch.lab_types);
+            });
+
+            // ล้าง hidden input เดิม (ถ้ามี)
+            $('#app_certi_form').find('input[name="main_lab_info"]').remove();
+            $('#app_certi_form').find('input[name="branch_lab_infos"]').remove();
+
+            // เพิ่ม hidden input สำหรับ main_lab_info
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'main_lab_info',
+                value: JSON.stringify(mainLabInfo)
+            }).appendTo('#app_certi_form');
+
+            // เพิ่ม hidden input สำหรับ branch_lab_infos
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'branch_lab_infos',
+                value: JSON.stringify(branchData)
+            }).appendTo('#app_certi_form');
+
+
+
+            // console.log('mainLabInfo==>',mainLabInfo);
+            // return;
 
             // return;
             var  number =  1;
@@ -718,14 +1003,16 @@
                     number +=  (el.files[0].size /1024/1024);
                 }
             });
-            
+             
             var row = $("input[name=lab_ability]:checked").val();
             if(row == 'test'){ 
                 // var test_scope_branch_id = $(".test_scope_branch_id").length;
                 // if(test_scope_branch_id > 0){
+                
                 if(number < res){
                     $('div#status_btn').html('<input type="text" name="save" value="' + status + '" hidden>');
                     setTimeout(function () {
+                        
                         $('#app_certi_form').submit();
                     }, 500);
                 }else{
@@ -743,7 +1030,7 @@
                 //      )
                 // }
             }else{  //ห้องปฏิบัติการ (สอบเทียบ)
-               
+              
                 var calibrate_branch_id = $(".calibrate_branch_id").length;
                 
                 // if(calibrate_branch_id > 0){
@@ -752,7 +1039,8 @@
                 console.log('res ' + res);
                 if(number < res){
                     $('div#status_btn').html('<input type="text" name="save" value="' + status + '" hidden>');
-                    console.log('aha');
+                    console.log('ahaกกกก');
+                    $('#app_certi_form').submit();
                     setTimeout(function () {
                         $('#app_certi_form').submit();
                     }, 500);
@@ -776,95 +1064,133 @@
         //ฉบับร่าง
         function  submit_form_draft(status){
 
-            let purpose = $('input[name="purpose"]:checked').val();
+            // let purpose = $('input[name="purpose"]:checked').val();
 
     
- 
-            if(validateMainScope() == false){
-                alert('รูปแบบขอบข่ายสำนักงานไม่ถูกต้อง โปรดตรวจสอบว่าได้เพิ่มขอบข่ายทุกประเภทสถานปฏิบัติการแล้ว');
-                return
-            }
-
-            if(validateBranchScope() == false){
-                alert('รูปแบบขอบข่ายสาขาไม่ถูกต้อง โปรดตรวจสอบว่าได้เพิ่มขอบข่ายทุกประเภทสถานปฏิบัติการแล้ว');
-                return
-            }
-
-            var lab_main_address = JSON.parse(sessionStorage.getItem('lab_main_address'));
-
-       
-            var updatedFields = {
-                checkbox_main: null,
-                address_number_add: $('#address_number').val(),
-                village_no_add: $('#village_no').val(),
-                address_soi: $('#address_soi').val(),
-                address_street: $('#address_street').val(),
-                address_city_add: $('#address_city').val(),
-                address_city_text_add: $('#address_city option:selected').text(),
-                address_district_add: $('#address_district').val(),
-                sub_district_add: $('#sub_district').val(),
-                postcode_add: $('#postcode').val(),
-                lab_address_no_eng_add: $('#lab_address_no_eng').val(),
-                lab_moo_eng_add: $('#lab_moo_eng').val(),
-                lab_soi_eng_add: $('#lab_soi_eng').val(),
-                lab_street_eng_add: $('#lab_street_eng').val(),
-                lab_province_text_eng_add: $('#lab_province_eng option:selected').text(),
-                lab_province_eng_add: $('#lab_province_eng').val(),
-                lab_amphur_eng_add: $('#lab_amphur_eng').val(),
-                lab_district_eng_add: $('#lab_district_eng').val(),
-
-                amphur_id_add: $('#address_district').data('id'),
-                tambol_id_add: $('#sub_district').data('id'),
-            };
-
-            // รวมข้อมูลใหม่เข้ากับข้อมูลเดิม
-            lab_main_address = { ...lab_main_address, ...updatedFields };
-
-            // console.log()
-
-            sessionStorage.setItem('lab_main_address', JSON.stringify(lab_main_address));
-
-            // console.log(sessionStorage.getItem('lab_main_address'))
-
-            var lab_addresses_array = JSON.stringify(JSON.parse(sessionStorage.getItem('lab_addresses_array')) || []);
-            var lab_main_address = JSON.stringify(JSON.parse(sessionStorage.getItem('lab_main_address')) || {});
-
-            
-            // return;
-          
-            // เรียกใช้ฟังก์ชัน
-            var lab_addresses_json = JSON.parse(sessionStorage.getItem('lab_addresses_array')) || [];
-            var lab_main_address_json = JSON.parse(sessionStorage.getItem('lab_main_address')) || {};
+            // if(purpose == 6)
+            // {
+            //     if($('#transferee_name').val() == "")
+            //     {
+            //         alert("โปรดตรวสอบข้อมูลผู้โอน")
+            //         return;
+            //     }
+            // }
 
  
-            var uniqueCalMainBranches = getUniqueCalMainBranches(lab_addresses_json, lab_main_address_json);
-
-
-            renderHiddenInputs(uniqueCalMainBranches);
-
-
-            // // return
-            // if(validateAddressesAndMainScope() == false){
-            //     alert('รูปแบบขอบข่ายไม่ถูกต้อง โปรดแก้ไข');
+            // if(validateMainScope() == false){
+            //     alert('รูปแบบขอบข่ายสำนักงานไม่ถูกต้อง โปรดตรวจสอบว่าได้เพิ่มขอบข่ายทุกประเภทสถานปฏิบัติการแล้ว');
             //     return
             // }
+
+            // if(validateBranchScope() == false){
+            //     alert('รูปแบบขอบข่ายสาขาไม่ถูกต้อง โปรดตรวจสอบว่าได้เพิ่มขอบข่ายทุกประเภทสถานปฏิบัติการแล้ว');
+            //     return
+            // }
+
+            // var lab_main_address = JSON.parse(sessionStorage.getItem('lab_main_address'));
+
+            // var updatedFields = {
+            //     checkbox_main: null,
+            //     address_number_add: $('#address_number').val(),
+            //     village_no_add: $('#village_no').val(),
+            //     address_soi: $('#address_soi').val(),
+            //     address_street: $('#address_street').val(),
+            //     address_city_add: $('#address_city').val(),
+            //     address_city_text_add: $('#address_city option:selected').text(),
+            //     address_district_add: $('#address_district').val(),
+            //     sub_district_add: $('#sub_district').val(),
+            //     postcode_add: $('#postcode').val(),
+            //     lab_address_no_eng_add: $('#lab_address_no_eng').val(),
+            //     lab_moo_eng_add: $('#lab_moo_eng').val(),
+            //     lab_soi_eng_add: $('#lab_soi_eng').val(),
+            //     lab_street_eng_add: $('#lab_street_eng').val(),
+            //     lab_province_text_eng_add: $('#lab_province_eng option:selected').text(),
+            //     lab_province_eng_add: $('#lab_province_eng').val(),
+            //     lab_amphur_eng_add: $('#lab_amphur_eng').val(),
+            //     lab_district_eng_add: $('#lab_district_eng').val(),
+
+            //     amphur_id_add: $('#address_district').data('id'),
+            //     tambol_id_add: $('#sub_district').data('id'),
+            // };
+
+            // // รวมข้อมูลใหม่เข้ากับข้อมูลเดิม
+            // lab_main_address = { ...lab_main_address, ...updatedFields };
+
+            // sessionStorage.setItem('lab_main_address', JSON.stringify(lab_main_address));
+
             // var lab_addresses_array = JSON.stringify(JSON.parse(sessionStorage.getItem('lab_addresses_array')) || []);
             // var lab_main_address = JSON.stringify(JSON.parse(sessionStorage.getItem('lab_main_address')) || {});
 
-            // // console.log('lab_addresses_array',lab_addresses_array)
-            // // console.log('lab_main_address',lab_main_address)
-            // // เรียกใช้ฟังก์ชัน
             // var lab_addresses_json = JSON.parse(sessionStorage.getItem('lab_addresses_array')) || [];
             // var lab_main_address_json = JSON.parse(sessionStorage.getItem('lab_main_address')) || {};
 
  
             // var uniqueCalMainBranches = getUniqueCalMainBranches(lab_addresses_json, lab_main_address_json);
-            // // return;
-            // renderHiddenInputs(uniqueCalMainBranches);
 
-            // ใส่ค่าสตริง JSON ลงใน input fields แบบซ่อน
-            $('#lab_addresses_input').val(lab_addresses_array);
-            $('#lab_main_address_input').val(lab_main_address);
+
+            // $('#lab_addresses_input').val(lab_addresses_array);
+            // $('#lab_main_address_input').val(lab_main_address);
+
+            // ตรวจสอบข้อมูลก่อนส่ง
+            if (!validateLabData()) { 
+                return; // หยุดการทำงานถ้าไม่ผ่านการตรวจสอบ
+            }
+
+            let purpose = $('input[name="purpose"]:checked').val();
+
+            if(purpose == 6)
+            {
+                if($('#transferee_name').val() == "")
+                {
+                    alert("โปรดตรวสอบข้อมูลผู้โอน");
+                    return;
+                }
+            }
+
+
+            const mainLabInfo = JSON.parse(sessionStorage.getItem('main_lab_info')) || {};
+
+            const branchData = JSON.parse(sessionStorage.getItem('branch_lab_infos')) || [];
+
+
+            // var uniqueCalMainBranches = getUniqueCalMainBranches(branchData, mainLabInfo);
+            var uniqueCalMainBranches;
+            if($("input[name=lab_ability]:checked").val() == "calibrate"){
+                uniqueCalMainBranches = getUniqueCalMainBranches(branchData, mainLabInfo);
+            }else if($("input[name=lab_ability]:checked").val() == "test")
+            {
+                uniqueCalMainBranches = getUniqueTestMainBranches(branchData, mainLabInfo);
+            }
+
+            renderHiddenInputs(uniqueCalMainBranches);
+
+
+            // แปลง lab_types ของ main_lab_info
+            mainLabInfo.lab_types = transformLabTypes(mainLabInfo.lab_types);
+
+            // แปลง lab_types ของแต่ละสาขา
+            branchData.forEach(branch => {
+                branch.lab_types = transformLabTypes(branch.lab_types);
+            });
+
+            // ล้าง hidden input เดิม (ถ้ามี)
+            $('#app_certi_form').find('input[name="main_lab_info"]').remove();
+            $('#app_certi_form').find('input[name="branch_lab_infos"]').remove();
+
+            // เพิ่ม hidden input สำหรับ main_lab_info
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'main_lab_info',
+                value: JSON.stringify(mainLabInfo)
+            }).appendTo('#app_certi_form');
+
+            // เพิ่ม hidden input สำหรับ branch_lab_infos
+            $('<input>').attr({
+                type: 'hidden',
+                name: 'branch_lab_infos',
+                value: JSON.stringify(branchData)
+            }).appendTo('#app_certi_form');
+
 
 
             var  number =  1;
@@ -927,4 +1253,6 @@
             $(obj).val(Result);
         }
     </script>
+
+<script src="{{asset('assets/js/lab/applicant.js?v=1.10')}}"></script>
 @endpush

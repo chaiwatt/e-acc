@@ -67,6 +67,7 @@ class StandardOffersController extends Controller
             }
         }
 
+       
 
         // if ($request->attach && $request->hasFile('attach')){
         //     $attach_path                    =  $this->attach_path; 
@@ -92,6 +93,7 @@ class StandardOffersController extends Controller
             ); 
         }
     
+        //  dd($offers);
  
 
 

@@ -25,7 +25,7 @@ class CreateSignAssessmentTrackingReportTransactionsTable extends Migration
             $table->string('file_path')->nullable();
             $table->char('linesapce', 5)->nullable();
             $table->string('view_url')->nullable();
-            $table->char('approval',1)->nullable();
+            $table->char('approval',1)->default(1);
             $table->timestamps();
         });
     }

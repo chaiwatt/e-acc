@@ -453,80 +453,7 @@
     @endif
     
     <div id="box_ref_application_no" style="display: none;">
-
-            {{-- @if ($certifieds->count() > 0)
-            <div class="form-group {{ $errors->has('according_formula') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('according_formula', '<span class="text-danger">*</span> ตามมาตรฐานเลข'.':'.'<br/><span class="  font_size">(According to TIS)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <div class="col-md-4" >
-                    {!! Form::select('according_formula',$Formula_Arr, !empty( $certi_lab->standard_id )?$certi_lab->standard_id:$formulas[0]->id, ['class' => 'form-control', 'id'=>'certified','readonly' => 'readonly']) !!}
-                    {!! $errors->first('according_formula', '<p class="help-block">:message</p>') !!}
-                </div>
-            </div>
-            @endif --}}
-{{-- 
-            @if ($certifieds->count() > 0)
-            <div class="form-group {{ $errors->has('certified') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('certified', '<span class="text-danger">*</span> ตามมาตรฐานเลข'.':'.'<br/><span class="font_size">(According to TIS)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <div class="col-md-4">
-                    {!! Form::select('certified', $certifieds->pluck('certificate_no', 'id')->toArray(), null, ['class' => 'form-control', 'id' => 'certified', 'readonly' => 'readonly']) !!}
-                    {!! $errors->first('certified', '<p class="help-block">:message</p>') !!}
-                </div>
-            </div>
-        @endif --}}
-
-        {{-- @if ($certifieds->count() > 0)
-        <div class="form-group {{ $errors->has('certified') ? 'has-error' : ''}}">
-            <label class="col-md-3 control-label label-height">
-                <span class="text-danger">*</span> ใบรับรองเลขที่:<br />
-                <span class="font_size">(According to TIS)</span>
-            </label>
-            <div class="col-md-4">
-                <select name="select_certified" id="select_certified" class="form-control" readonly="readonly">
-                    <option value="{{null}}">- เลือกใบรับรอง -</option>
-                    @foreach($certifieds as $certified)
-                        <option value="{{$certified->id}}" 
-
-                            
-                            >{{ $certified->certificate_no }}</option>
-                    @endforeach
-                </select>
-                @if($errors->has('certified'))
-                    <p class="help-block">{{ $errors->first('certified') }}</p>
-                @endif
-            </div>
-        </div>
-        @endif --}}
-
-        {{-- @if ($certifieds->count() > 0)
-            <div class="form-group {{ $errors->has('select_certified') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('select_certified', '<span class="text-danger">*</span> ใบรับรองเลขที่:'.'<br/><span class="font_size">(According to TIS)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <div class="col-md-4">
-                    {!! Form::select('select_certified', $certifieds->pluck('certificate_no', 'id'), 'aaa', ['class' => 'form-control', 'id' => 'select_certified', 'readonly' => 'readonly', 'required' => true]) !!}
-                    {!! $errors->first('select_certified', '<p class="help-block">:message</p>') !!}
-                </div>
-            </div>
-        @endif --}}
-{{-- 
-        <div class="form-group{{ $errors->has('select_certified_temp') ? 'has-error' : ''}}">
-            {!! HTML::decode(Form::label('select_certified_temp', '<span class="text-danger">*</span> select_certified_temp'.':'.'<br/><span class=" font_size">(Name laboratory)</span>', ['class' => 'col-md-3 control-label  label-height'])) !!}
-            <div class="col-md-7">
-                {!! Form::text('select_certified_temp', null, ['class' => 'form-control']) !!}
-                {!! $errors->first('select_certified_temp', '<p class="help-block">:message</p>') !!}
-            </div>
-        </div> --}}
-
         <input type="text" id="select_certified_temp" name="select_certified_temp" value="{{ isset($labRequestType) ? $labRequestType->certificate_id : '' }}" hidden >
-
-         {{-- @if ($certifieds->count() > 0)
-            <div class="form-group {{ $errors->has('select_certified') ? 'has-error' : ''}}">
-                {!! HTML::decode(Form::label('select_certified', '<span class="text-danger">*</span> ใบรับรองเลขที่:'.'<br/><span class="font_size">(According to TIS)</span>', ['class' => 'col-md-3 control-label label-height'])) !!}
-                <div class="col-md-4">
-                    {!! Form::select('select_certified', $certifieds->pluck('certificate_no', 'id'), '111', ['class' => 'form-control', 'id' => 'select_certified', 'readonly' => 'readonly']) !!}
-                    {!! $errors->first('select_certified', '<p class="help-block">:message</p>') !!}
-                </div>
-            </div>
-        @endif  --}}
-
         @if ($certifieds->count() > 0)
             <div class="form-group {{ $errors->has('select_certified') ? 'has-error' : '' }}">
                 <label for="select_certified" class="col-md-3 control-label label-height">
@@ -536,11 +463,6 @@
                 </label>
                 <div class="col-md-4">
                     <select name="select_certified" id="select_certified" class="form-control" readonly>
-                        {{-- @foreach ($certifieds as $certified)
-                            <option value="{{ $certified->id }}" {{ $certified->id == 111 ? 'selected' : '' }}>
-                                {{ $certified->certificate_no }}
-                            </option>
-                        @endforeach --}}
                     </select>
                     @if ($errors->has('select_certified'))
                         <p class="help-block">{{ $errors->first('select_certified') }}</p>
@@ -548,7 +470,6 @@
                 </div>
             </div>
         @endif
-
 
 
         <div class="form-group {{ $errors->has('ref_application_no') ? 'has-error' : ''}}">
@@ -1236,13 +1157,12 @@
         labCalScopeTransactions = @json($labCalScopeTransactions ?? []);
         branchLabAdresses = @json($branchLabAdresses ?? []);
 
-        console.log(branchLabAdresses);
-        console.log(labCalScopeTransactions);
+        // console.log(branchLabAdresses);
+        // console.log(labCalScopeTransactions);
 
         certifieds = @json($certifieds->mapWithKeys(function($certified) {
             return [$certified->id => $certified->certificate_no];
         }) ?? []);
-
    
         //เมื่อกรอกภาษาอังกฤษ
         $('.input_address_eng').keyup(function(event) {
@@ -1770,18 +1690,16 @@
                 {
                     lab_type = 3;
                 }
-                console.log(lab_type)
-                console.log(std_id)
+
                 
                 $.get("{{ url('/certify/applicant/get-certificate-belong') }}", { 
                         std_id: std_id,
                         lab_type: lab_type
                     }).done(function( data ) {
-                       
+                       console.log('fk',data)
                         if (data.certificateExports.length > 0) {
                             // ล้างเนื้อหาใน select เดิมก่อน (ถ้ามี)
                             $('#select_certified').empty();
-
                             // Loop ข้อมูลจาก data.certificateExports เพื่อสร้าง option
                             data.certificateExports.forEach(function(cert) {
                                 $('#select_certified').append(
@@ -1800,14 +1718,13 @@
                                 // กรณีไม่มีข้อมูล
                                 console.log("No certificate exports found.");
                             }
-
-                
-                        
+ 
                     });
                 
                 $('#box_ref_application_no').show();
                 $('#box_ref_application_no').find('input').prop('disabled', false);
                 $('#accereditation_no').prop('required', true);
+                
                 
             }else if(purpose == 1){
                 $('#box_ref_application_no').hide();

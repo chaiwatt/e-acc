@@ -30,7 +30,7 @@
      <div class="row">
         <div class="col-md-12">
            <div class="white-box">
-           <h3 class="box-title pull-left">ใบรับรองระบบงาน (LAB) #{{$assessment->id}}</h3>
+           <h3 class="box-title pull-left">ใบรับรองระบบงานติดตาม (LAB) #{{$assessment->id}}</h3>
 
                 <a class="btn btn-danger text-white pull-right" href="{{  app('url')->previous()  }}">
                         <i class="icon-arrow-left-circle"></i> กลับ
@@ -48,14 +48,15 @@
 
  <div class="panel-heading">
     <h4 class="panel-title">
-        <a data-toggle="collapse" data-parent="#accordion" href="#collapse"> <dd> ข้อบกพร่อง/ข้อสังเกต</dd>  </a>
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapse" > <dd> ข้อบกพร่อง/ข้อสังเกต</dd>  </a>
     </h4>
 </div>
-<input type="text" id="notice_id" value="{{$assessment->id}}">
-<div id="collapse" class="panel-collapse collapse ">
+<input type="hidden" id="notice_id" value="{{$assessment->id}}">
+<div id="collapse" class="panel-collapse collapse in">
     <br>
  <div class="container-fluid">
-@foreach($assessment->history_labs_many as $key1 => $item)
+{{-- @foreach($assessment->history_labs_many as $key1 => $item) --}}
+@foreach(collect([$assessment->history_labs_many->last()]) as $key1 => $item)
 
 <div class="row form-group">
     <div class="col-md-12">
@@ -149,7 +150,7 @@
 
 
  @if(!is_null($item->details_three)) 
-    {{-- @php
+    @php
       $details_three = json_decode($item->details_three);    
     @endphp
     @if(!is_null($details_three)) 
@@ -166,7 +167,7 @@
                     </p>
             </div>
         </div>
-    @endif --}}
+    @endif
  @endif
 
  @if(!is_null($item->file)) 
@@ -243,7 +244,9 @@
     <div class="col-md-12">
        <div class="white-box" style="border: 2px solid #e5ebec;">
   {{-- <legend><h3>   แก้ไขข้อบกพร่อง/ข้อสังเกต   </h3></legend> --}}
-
+{{-- @php
+    dd($assessment);
+@endphp --}}
   <legend><h3>   แก้ไขข้อบกพร่อง/ข้อสังเกต @if ($assessment->accept_fault == null)
     <span class="text-warning">(โปรดยอมรับข้อบกพร่อง)</span>
 @elseif ($assessment->submit_type != 'confirm')

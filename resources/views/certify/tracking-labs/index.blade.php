@@ -121,7 +121,24 @@
                                                               @include ('certify.tracking-labs.modal.modalstatus5',['id'=> $loop->iteration,
                                                                                                                       'certi' => $item,
                                                                                                                       'inspection'=> $item->tracking_inspection_to
-                                                                                                                   ])          
+                                                                                                                   ])     
+                                                                                                                   
+                                                      @elseif($item->status_id == 7 && $item->ability_confirm == null)  
+
+                                                           <button style="border: none" data-toggle="modal"
+                                                                  data-target="#report{{$loop->iteration}}"   >
+                                                                  <i class="mdi mdi-magnify"></i>  ยืนยันความสามารถ
+                                                            </button>     
+                                                          
+                                                            @php
+                                                                $certificate= $item->certificate_export_to;
+                                                                $applicant= $item->certificate_export_to->CertiLabTo;
+                                                                $id= $loop->iteration;
+                                                                $tracking = $item;
+                                                            @endphp
+                                                            
+                                                             @include ('certify.tracking-labs.modal.modalstatus_ability_confirm')
+
                                                       {{-- @elseif($item->status_id == 7 && !Is_null($item->tracking_report_to))                                                                  
                                                              <button style="border: none" data-toggle="modal"
                                                                   data-target="#report{{$loop->iteration}}"   >

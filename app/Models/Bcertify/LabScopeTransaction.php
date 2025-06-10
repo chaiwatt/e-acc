@@ -4,6 +4,7 @@ namespace App\Models\Bcertify;
 
 use Kyslik\ColumnSortable\Sortable;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Certify\Applicant\CertiLab;
 
 class LabScopeTransaction extends Model
 {
@@ -39,4 +40,9 @@ class LabScopeTransaction extends Model
     protected $casts = [
         'lab_types' => 'array', // แปลง lab_types เป็น array อัตโนมัติเมื่อ query
     ];
+
+    public function certiLab()
+    {
+        return $this->belongsTo(CertiLab::class, 'app_certi_lab_id', 'id');
+    }
 }

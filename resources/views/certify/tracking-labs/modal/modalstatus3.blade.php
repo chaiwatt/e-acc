@@ -19,10 +19,7 @@
               $auditors_btn = 'btn-danger';
           }
       @endphp
-{{-- 
-@php
-    dd($certi->fullyApprovedAuditorNoCancels->count());
-@endphp --}}
+
 @if($certi->fullyApprovedAuditorNoCancels->count() > 0) 
 <a class="btn  btn-sm  form-group {{  $auditors_btn  }}" 
 href="{{url('certify/tracking-labs/tracking-auditor/'.base64_encode($certi->id))}}" style="width:300px;">

@@ -15,9 +15,12 @@ use Illuminate\Support\Facades\DB;
 
 use Kyslik\ColumnSortable\Sortable;
 
+use App\Models\Bcertify\PurposeType;
 use App\Models\Sso\User AS SSO_User;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Certificate\IbDocReviewAuditor;
+use App\Models\Certificate\Tracking;
+use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantIB\CertiIBExport;
 use App\Models\Certify\CertiEmailLt;  //E-mail ลท.
 
@@ -99,6 +102,8 @@ class CertiIb extends Model
                              'require_scope_update',
                              'scope_view_signer_id',
                              'scope_view_status',
+                              'transferer_user_id',
+                            'transferer_export_id'
                             ];
 
     // TEXT  หน่วยตรวจประเภท
@@ -107,7 +112,13 @@ class CertiIb extends Model
           return array_key_exists($this->type_unit,$datas) ? $datas[$this->type_unit] : '';
       }
 
-   public function EsurvTrader()
+      public function purposeType()
+      {
+          return $this->belongsTo(PurposeType::class, 'standard_change');
+      }   
+   
+   
+      public function EsurvTrader()
  {
      return $this->belongsTo(Trader::class,'created_by','trader_autonumber');
  }
@@ -286,6 +297,10 @@ class CertiIb extends Model
         return $this->hasOne(CertiIBExport::class, 'app_certi_ib_id');
     }
 
+    public function certiIBExport()
+    {
+        return $this->hasOne(CertiIBExport::class, 'app_certi_ib_id');
+    }
 
  public function getCertifyEmailStaffAttribute() {
     $datas = [];
@@ -663,6 +678,17 @@ class CertiIb extends Model
     public function FormulaTo()
     {
         return $this->belongsTo(Formula::class,'type_standard');
+    }
+
+    public function getTrackingAttribute()
+    {
+        $certiIBExport = CertiIBExport::where('app_certi_ib_id',$this->id)->first();
+        if($certiIBExport == null)
+        {
+            return null;
+        }else{
+        return Tracking::where('ref_id',$certiIBExport->id)->where('ref_table','app_certi_ib_export')->first();
+        }
     }
 
 }

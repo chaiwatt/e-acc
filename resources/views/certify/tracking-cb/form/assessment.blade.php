@@ -2,13 +2,35 @@
 @push('css')
 <link href="{{asset('plugins/components/icheck/skins/all.css')}}" rel="stylesheet" type="text/css" />
 <link href="{{asset('plugins/components/bootstrap-datepicker-thai/css/datepicker.css')}}" rel="stylesheet" type="text/css" />
+<style>
+    textarea.form-control {
+        border-radius: 0 !important;
+        border-top: none !important;
+        border-bottom: none !important;
+        resize: none;
+        overflow: hidden; /* ซ่อน scrollbar */
+    }
+    .no-hover-animate tbody tr:hover {
+        background-color: inherit !important; /* ปิดการเปลี่ยนสี background */
+        transition: none !important; /* ปิดเอฟเฟกต์การเปลี่ยนแปลง */
+    }
+    
+    /* กำหนดขนาดความกว้างของ SweetAlert2 */
+    .custom-swal-popup {
+        width: 500px !important;  /* ปรับความกว้างตามต้องการ */
+    }
+    textarea.non-editable {
+        pointer-events: none; /* ทำให้ไม่สามารถคลิกหรือแก้ไขได้ */
+        opacity: 0.6; /* กำหนดความทึบของ textarea */
+    }
+</style>
 @endpush
 @section('content')
  <div class="container-fluid">
      <div class="row">
         <div class="col-md-12">
            <div class="white-box">
-           <h3 class="box-title pull-left">ใบรับรองระบบงาน (CB)  </h3>
+           <h3 class="box-title pull-left">ใบรับรองระบบงานติดตาม (CB) </h3>
 
                 <a class="btn btn-danger text-white pull-right" href="{{  app('url')->previous()  }}">
                         <i class="icon-arrow-left-circle"></i> กลับ
@@ -29,11 +51,13 @@
         <a data-toggle="collapse" data-parent="#accordion" href="#collapse"> <dd> ข้อบกพร่อง/ข้อสังเกต</dd>  </a>
     </h4>
 </div>
+<input type="hidden" id="assessment_id" value="{{$assessment->id}}">
  
-<div id="collapse" class="panel-collapse collapse ">
+<div id="collapse" class="panel-collapse collapse in">
     <br>
  <div class="container-fluid">
-@foreach($assessment->history_cb_many as $key1 => $item)
+{{-- @foreach($assessment->history_cb_many as $key1 => $item) --}}
+@foreach(collect([$assessment->history_cb_many->last()]) as $key1 => $item)
 
 <div class="row form-group">
     <div class="col-md-12">
@@ -220,7 +244,11 @@
  <div class="row form-group">
     <div class="col-md-12">
        <div class="white-box" style="border: 2px solid #e5ebec;">
-  <legend><h3>   แก้ไขข้อบกพร่อง/ข้อสังเกต   </h3></legend>
+  <legend><h3>   แก้ไขข้อบกพร่อง/ข้อสังเกต    @if ($assessment->accept_fault == null)
+    <span class="text-warning">(โปรดยอมรับข้อบกพร่อง)</span>
+@elseif ($assessment->submit_type != 'confirm')
+<span class="text-warning">(กำลังดำเนินการ)</span>
+@endif</h3></legend>
 
 <div class="container-fluid">
         <table class="table color-bordered-table primary-bordered-table table-bordered">
@@ -232,7 +260,7 @@
             </tr>
         </thead>
         <tbody id="table-body">
-            @foreach($assessment->tracking_assessment_bug_many as $key => $item)
+            {{-- @foreach($assessment->tracking_assessment_bug_many as $key => $item)
             <tr>
                 <td class="text-center">{{ $key+1 }}</td>
                 <td>
@@ -243,6 +271,20 @@
                     {!! Form::textarea('detail[details][]',!empty($item->details)?$item->details:null, [ 'class' => 'form-control','rows' => 3,'required'=>true]) !!} 
                 </td>
             </tr>
+           @endforeach  --}}
+
+             @foreach($assessment->tracking_assessment_bug_many as $key => $item)
+            <tr>
+                <td class="text-center" style="padding: 0px">{{ $key + 1 }}</td>
+                <td style="padding: 0px">
+                    <input type="hidden" name="detail[id][]" value="{{ !empty($item->id) ? $item->id : '' }}" class="form-control">
+                    {{ $item->remark ?? null }}
+                </td>
+                <td style="padding: 0px">
+                    <textarea name="detail[details][]" class="form-control auto-expand {{ $assessment->accept_fault == null || $assessment->submit_type != 'confirm' ? 'non-editable' : '' }}"  rows="5"  rows="3" required>{{ !empty($item->details) ? $item->details : '' }}</textarea>
+                </td>
+            </tr>
+            
            @endforeach 
         </tbody>
     </table>
@@ -276,21 +318,28 @@
                                 <td class="text-center">
                                     {{$key+1}}
                                 </td>
-                                <td>
+                                {{-- <td>
                                     {!! Form::hidden('detail[id][]',!empty($item->id)?$item->id:null, ['class' => 'form-control '])  !!}
                                     {!! Form::text('notice[]', $item->remark ?? null,  ['class' => 'form-control','disabled'=>true])!!}
+                                </td> --}}
+
+                                <td style="padding: 0px;">
+                                    <input type="hidden" name="detail[id][]" value="{{ !empty($item->id) ? $item->id : '' }}" class="form-control">
+                                    <textarea name="notice[]" class="form-control" rows="5" disabled style="border: none;">{{ $item->remark ?? '' }}</textarea>
                                 </td>
 
-                                <td>  
+                                <td >  
                                       {{ $item->details ?? null }}    <br>
                                       @if($item->status == 1) 
                                             <label for="app_name">ผลแนวทาง : <span> <i class="fa fa-check-square" style="font-size:20px;color:rgb(0, 255, 42)"></i> </span> </label> 
                                        @else 
                                             <label for="app_name">ผลแนวทาง : <span>  <i class="fa  fa-close" style="font-size:20px;color:rgb(255, 0, 0)"></i> {{  $item->comment ?? null   }}</span> </label>
+                                            <br>
+                                            <label for="app_name">สาเหตุ : <span> {{  $item->cause ?? null   }}</span> </label>
                                        @endif
                            
                                 </td>
-                                <td>
+                                <td style="padding: 0px;">
       
                                          @if($item->status == 1) 
                                                  @if(!is_null($item->file_comment)) 
@@ -326,7 +375,8 @@
                                                   </label> 
                                                 @endif
                                         @else 
-                                             {!! Form::textarea('detail[details]['.$key.']',null , ['class' => 'form-control', 'rows' => 1,'cols'=>'40','required'=>true]) !!}
+                                             {{-- {!! Form::textarea('detail[details]['.$key.']',null , ['class' => 'form-control', 'rows' => 1,'cols'=>'40','required'=>true]) !!} --}}
+                                             <textarea name="detail[details][{{ $key }}]" class="form-control auto-expand" rows="5" style="border-right: 1px solid #ccc;"  cols="40" required></textarea>
                                         @endif
                                 </td>
                              </tr>
@@ -345,12 +395,24 @@
 <div class="row">
     <div class="form-group">
         <div class="col-md-offset-5 col-md-6">
+
+            @if ($assessment->accept_fault == '1' && $assessment->submit_type == 'confirm')
                 <button class="btn btn-primary" type="submit"  onclick="submit_form();return false">
-                <i class="fa fa-paper-plane"></i> บันทึก
+                    <i class="fa fa-paper-plane"></i> บันทึก
+                    </button>
+                    <a class="btn btn-default" href="{{  app('url')->previous() }}">
+                        <i class="fa fa-rotate-left"></i> ยกเลิก
+                    </a>
+            @elseif($assessment->accept_fault == null)    
+                <button type="button" class="btn btn-warning" id="accept_fault">
+                    <i class="fa fa-paper-plane"></i> ยอมรับข้อบกพร่อง
                 </button>
-                <a class="btn btn-default" href="{{  app('url')->previous() }}">
+                <a class="btn btn-default" href="{{app('url')->previous()}}">
                     <i class="fa fa-rotate-left"></i> ยกเลิก
                 </a>
+            @endif
+
+    
         </div>
     </div>
 </div> 
@@ -469,5 +531,72 @@ $(".attach-add").unbind();
                         return true; // Don't submit form for this demo
           });
      });
+
+          $(document).on('click', '#accept_fault', function(e) {
+            e.preventDefault();
+
+            // รับค่าจากฟอร์ม
+            const _token = $('input[name="_token"]').val();
+
+            var assessment_id = $('#assessment_id').val();
+  
+
+            // สร้าง overlay
+            showOverlay();
+
+            // เรียก AJAX
+            $.ajax({
+                url: "{{route('evaluation.confirm-cb-bug')}}",
+                method: "POST",
+                data: {
+                    _token: _token,
+                    assessment_id:assessment_id,
+                },
+                success: function(result) {
+                    console.log(result);
+                    location.reload(); // รีโหลดหน้าเว็บหลังจากสำเร็จ
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                    alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
+                },
+                complete: function() {
+                    // ลบ overlay เมื่อคำขอเสร็จสิ้น
+                    hideOverlay();
+                }
+            });
+        });
+
+        function showOverlay() {
+        // ตรวจสอบว่ามี overlay อยู่หรือยัง
+        if ($('#loading-overlay').length === 0) {
+            $('body').append(`
+                <div id="loading-overlay" style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(255, 255, 255, 0.4);
+                    z-index: 1050;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: black;
+                    font-size: 65px;
+                    font-family: 'Kanit', sans-serif;
+                ">
+                    กำลังบันทึก กรุณารอสักครู่...
+                </div>
+            `);
+        }
+    }
+
+
+    // ฟังก์ชันสำหรับลบ overlay
+    function hideOverlay() {
+        $('#loading-overlay').remove();
+    }
+
 </script>       
 @endpush
