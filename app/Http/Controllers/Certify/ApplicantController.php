@@ -2926,6 +2926,7 @@ class ApplicantController extends Controller
                 ->first();
 
             if ($signer && $signer->tax_number) {
+
                 $user = Staff::whereRaw("REPLACE(reg_13ID, '-', '') = ?", [$signer->tax_number])->first();
 
                 
