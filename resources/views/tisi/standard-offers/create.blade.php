@@ -89,7 +89,7 @@
             <div class="col-sm-12">
                 <div class="white-box">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
-                    <h3 class="box-title pull-left">เสนอความเห็นการกำหนดมาตรฐานการตรวจสอบและรับรอง</h3>
+                    <h3 class="box-title pull-left">เสนอความเห็นการกำหนดมาตรฐานการตรวจสอบและรับรอง #</h3>
 
                     <div class="pull-right">
 
@@ -105,12 +105,13 @@
                     <div class="clearfix"></div>
                     <hr>
 
-
+                  
+                    
                     {!! Form::open(['url' => '/tisi/standard-offers/store',  'method' => 'POST', 'class' => 'form-horizontal', 'files' => true]) !!}
-                    @include ('tisi.standard-offers.form')
-                {!! Form::close() !!}
-                @include ('tisi/standard-offers.modal_department')
-
+                        @include ('tisi.standard-offers.form')
+                    {!! Form::close() !!}
+             
+                    @include ('tisi.standard-offers.modal_department')
        
 
                 </div>

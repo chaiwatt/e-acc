@@ -2915,18 +2915,28 @@ class ApplicantController extends Controller
                                                 );
             
                 
+            // $singer = DB::table('besurv_signers')
+            // ->where('id', $certilab->scope_view_signer_id)
+            // ->first();
+
+            // $user = Staff::find($singer->user_register_id); 
+            
             $singer = DB::table('besurv_signers')
-            ->where('id', $certilab->scope_view_signer_id)
-            ->first();
+                ->where('id', $certilab->scope_view_signer_id)
+                ->first();
 
-            $user = Staff::find($singer->user_register_id);                                    
+            if ($singer && $singer->tax_number) {
+                $user = Staff::whereRaw("REPLACE(reg_13ID, '-', '') = ?", [$singer->tax_number])->first();
 
-            $html = new LabScopeReview($data_app);
-            $mail =  Mail::to($user->reg_email)->send($html);
+                
+                $html = new LabScopeReview($data_app);
+                $mail =  Mail::to($user->reg_email)->send($html);
 
-            if(is_null($mail) && !empty($log_email)){
-                HP::getUpdateCertifyLogEmail($log_email->id);
+                if(is_null($mail) && !empty($log_email)){
+                    HP::getUpdateCertifyLogEmail($log_email->id);
+                }
             }
+
 
         }
 

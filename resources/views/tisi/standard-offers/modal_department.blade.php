@@ -26,13 +26,6 @@
                     </div>
                 </div>
 
-                {{-- <div class="form-group {{ $errors->has('department_type') ? 'has-error' : ''}}">
-                    {!! Form::label('department_type_id', 'ประเภทหน่วยงาน', ['class' => 'col-md-4 control-label']) !!}
-                    <div class="col-md-6">
-                        {!! Form::select('department_type_id[]', HP::DepartmentTypes(), null, ['class' => 'select2-multiple', 'multiple' => 'multiple', 'data-placeholder'=>'- เลือกประเภทหน่วยงาน -']) !!}
-                        {!! $errors->first('department_type_id', '<p class="help-block">:message</p>') !!}
-                    </div>
-                </div> --}}
 
                 <div class="form-group {{ $errors->has('address') ? 'has-error' : ''}}">
                     {!! Form::label('address', 'ที่อยู่', ['class' => 'col-md-4 control-label']) !!}

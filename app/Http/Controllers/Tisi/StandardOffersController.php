@@ -52,21 +52,45 @@ class StandardOffersController extends Controller
      */
     public function store(Request $request)
     {
-        $data_session     =    HP::CheckSession();
+
+
+            // protected $fillable = ['title', 'address', 'province_id', 'amphur_id', 'district_id', 'poscode', 'tel', 'mobile', 'fax', 'email', 'state', 'created_by', 'updated_by'];
+        // $department =  new Department();
+        // $department->tiele = $request->title;
+        // $department->address = $request->address;
+        // $department->province_id = $request->province_id;
+        // $department->amphur_id = $request->amphur_id;
+        // $department->district_id = $request->district_id;
+        // $department->poscode = $request->poscode;
+        // $department->district_id = $request->district_id;
+        // $department->district_id = $request->district_id;
         $requestData = $request->all();
+        // dd($requestData);
+
+        $department = Department::create($requestData);
+
+        // dd($appoint_department);
+
+        $data_session     =    HP::CheckSession();
+       
         $requestData['state'] = 1;
         $requestData['owner'] = $data_session->username;
         $requestData['ip_address'] =  $request->ip();
         $requestData['user_agent'] = $request->server('HTTP_USER_AGENT');
         $requestData['created_by'] =  !empty(auth()->user()) ? auth()->user()->id : null;
+        $requestData['telephone'] = $data_session->tel;
+        $requestData['owner'] = $data_session->username;
+        $requestData['department_id'] = $department->id;
+        $requestData['department'] = $department->title;
 
-        if(isset($request->department_id)){
-            $department =  Department::where('id',$request->department_id)->first();
-            if(!is_null($department)){
-                $requestData['department']  =   !empty($department->title) ? $department->title : null; 
-            }
-        }
+        // if(isset($request->department_id)){
+        //     $department =  Department::where('id',$request->department_id)->first();
+        //     if(!is_null($department)){
+        //         $requestData['department']  =   !empty($department->title) ? $department->title : null; 
+        //     }
+        // }
 
+        // dd($requestData);
        
 
         // if ($request->attach && $request->hasFile('attach')){
@@ -77,9 +101,13 @@ class StandardOffersController extends Controller
         //     $requestData['attach_old']      = HP::ConvertCertifyFileName($request->attach->getClientOriginalName());
         //     $requestData['attach_type']     = $request->attach->getClientOriginalExtension();
         // }
+        // $requestData['scope']     = $request->attach->getClientOriginalExtension();
+        //    protected $fillable = ['title','owner', 'title_eng', 'std_type', 'scope', 'objectve', 'path','caption', 'attach_old', 'attach_new', 'attach_type', 'stakeholders', 'name', 'telephone','department_id', 'department', 'email', 'address', 'ip_address', 'user_agent', 'state', 'created_by', 'updated_by'];
+
         $offers = EstandardOffers::create($requestData);
 
         if ($request->attach_file && $request->hasFile('attach_file')) {
+            // dd($request->attach_file);
             HP::singleFileUpload(
                 $request->file('attach_file') ,
                 $this->attach_path,
@@ -95,7 +123,6 @@ class StandardOffersController extends Controller
     
         //  dd($offers);
  
-
 
         return redirect('tisi/standard-offers')->with('message',  'เสนอความเห็นฯ เรียบร้อย'  );
 
@@ -147,7 +174,7 @@ class StandardOffersController extends Controller
             }
         }
 
-        return response()->json(['address'=> $address]);
+        return response()->json(['address'=> $address,'tel'=> $department->tel,'email'=> $department->email]);
     }
 
     public function save_department(Request $request)
