@@ -49,12 +49,17 @@
 
         $certi_ib->branch_type = !empty($tis_data->branch_type)?$tis_data->branch_type:null;
 
+         $certi_ib->tracking = !empty($tis_data->tracking) ? $tis_data->tracking : null;
+        $certi_ib->doc_review_reject = !empty($tis_data->doc_review_reject) ? $tis_data->doc_review_reject : null;
+
     }else{
 
         $certi_ib->tax_number = !empty($certi_ib->tax_id) ? $certi_ib->tax_id : null;
         $certi_ib->hq_subdistrict_txt = !empty($certi_ib->HqSubdistrictName)? $certi_ib->HqSubdistrictName : null;
         $certi_ib->hq_district_txt = !empty($certi_ib->HqDistrictName)? $certi_ib->HqDistrictName : null;
         $certi_ib->hq_province_txt = !empty($certi_ib->HqProvinceName)? $certi_ib->HqProvinceName : null;
+        $certi_ib->tracking = !empty($tis_data->tracking) ? $tis_data->tracking : null;
+        $certi_ib->doc_review_reject = !empty($tis_data->doc_review_reject) ? $tis_data->doc_review_reject : null;
 
         
     } 
@@ -66,13 +71,20 @@
 
 {{-- {{$certi_ib->tracking}} --}}
 
-@if ($certi_ib->tracking == null)
+{{-- @if ($certi_ib->tracking == null)
         @if ($certi_ib == null || empty($certi_ib->doc_review_reject))
             @include ('certify.applicant_ib/froms.infomation')
             @include ('certify.applicant_ib/froms.form_request')
         @endif
 
 
+@endif --}}
+
+@if (empty($certi_ib->tracking))
+    @if (empty($certi_ib->doc_review_reject))
+         @include ('certify.applicant_ib/froms.infomation')
+        @include ('certify.applicant_ib/froms.form_request')
+    @endif
 @endif
 {{-- 
 @include ('certify.applicant_ib/froms.infomation')

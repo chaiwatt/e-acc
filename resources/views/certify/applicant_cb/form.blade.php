@@ -85,6 +85,8 @@
         $certi_cb->telephone = !empty($tis_data->contact_phone_number)?$tis_data->contact_phone_number:null;
 
         $certi_cb->branch_type = !empty($tis_data->branch_type)?$tis_data->branch_type:null;
+        $certi_cb->tracking = !empty($tis_data->tracking) ? $tis_data->tracking : null;
+        $certi_cb->doc_review_reject = !empty($tis_data->doc_review_reject) ? $tis_data->doc_review_reject : null;
 
     } else{
 
@@ -92,6 +94,9 @@
         $certi_cb->hq_subdistrict_txt = !empty($certi_cb->HqSubdistrictName)? $certi_cb->HqSubdistrictName : null;
         $certi_cb->hq_district_txt = !empty($certi_cb->HqDistrictName)? $certi_cb->HqDistrictName : null;
         $certi_cb->hq_province_txt = !empty($certi_cb->HqProvinceName)? $certi_cb->HqProvinceName : null;
+
+        $certi_cb->tracking = !empty($certi_cb->tracking) ? $certi_cb->tracking : null;
+        $certi_cb->doc_review_reject = !empty($tis_data->doc_review_reject) ? $tis_data->doc_review_reject : null;
 
         
     }  
@@ -106,7 +111,7 @@
 @endif --}}
 
 
-@if ($certi_cb->tracking == null)
+{{-- @if ($certi_cb->tracking == null)
         @if ($certi_cb == null || empty($certi_cb->doc_review_reject))
                @include ('certify.applicant_cb.froms.scope-modal.cb_scope_isic_isic')
                 @include ('certify.applicant_cb.froms.scope-modal.cb_scope_bcms')
@@ -116,6 +121,15 @@
         @endif
 
 
+@endif --}}
+
+@if (empty($certi_cb->tracking))
+    @if (empty($certi_cb->doc_review_reject))
+        @include('certify.applicant_cb.forms.scope-modal.cb_scope_isic_isic')
+        @include('certify.applicant_cb.forms.scope-modal.cb_scope_bcms')
+        @include('certify.applicant_cb.forms.form_information')
+        @include('certify.applicant_cb.forms.form_request')
+    @endif
 @endif
 
 
