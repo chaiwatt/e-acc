@@ -2921,12 +2921,12 @@ class ApplicantController extends Controller
 
             // $user = Staff::find($singer->user_register_id); 
             
-            $singer = DB::table('besurv_signers')
+            $signer = DB::table('besurv_signers')
                 ->where('id', $certilab->scope_view_signer_id)
                 ->first();
 
-            if ($singer && $singer->tax_number) {
-                $user = Staff::whereRaw("REPLACE(reg_13ID, '-', '') = ?", [$singer->tax_number])->first();
+            if ($signer && $signer->tax_number) {
+                $user = Staff::whereRaw("REPLACE(reg_13ID, '-', '') = ?", [$signer->tax_number])->first();
 
                 
                 $html = new LabScopeReview($data_app);
