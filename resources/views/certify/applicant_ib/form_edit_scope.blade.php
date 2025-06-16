@@ -71,21 +71,21 @@
 
 {{-- {{$certi_ib->tracking}} --}}
 
-{{-- @if ($certi_ib->tracking == null)
+@if ($certi_ib->tracking == null)
         @if ($certi_ib == null || empty($certi_ib->doc_review_reject))
             @include ('certify.applicant_ib/froms.infomation')
             @include ('certify.applicant_ib/froms.form_request')
         @endif
 
 
-@endif --}}
+@endif
 
-@if (empty($certi_ib->tracking))
+{{-- @if (empty($certi_ib->tracking))
     @if (empty($certi_ib->doc_review_reject))
          @include ('certify.applicant_ib/froms.infomation')
         @include ('certify.applicant_ib/froms.form_request')
     @endif
-@endif
+@endif --}}
 {{-- 
 @include ('certify.applicant_ib/froms.infomation')
 @include ('certify.applicant_ib/froms.form_request') --}}

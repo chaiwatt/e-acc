@@ -97,6 +97,9 @@
         $certi_cb->tracking = !empty($tis_data->tracking) ? $tis_data->tracking : null;
         $certi_cb->doc_review_reject = !empty($tis_data->doc_review_reject) ? $tis_data->doc_review_reject : null;
 
+        $certi_cb->tracking = !empty($tis_data->tracking) ? $tis_data->tracking : null;
+        $certi_cb->doc_review_reject = !empty($tis_data->doc_review_reject) ? $tis_data->doc_review_reject : null;
+
         
     }  
 @endphp
