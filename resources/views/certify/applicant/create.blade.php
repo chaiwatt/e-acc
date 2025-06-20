@@ -32,7 +32,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">คำขอรับบริการห้องปฏิบัติการ (LAB)</h3>
+                    <h3 class="box-title pull-left">คำขอรับบริการห้องปฏิบัติการ (LAB) #</h3>
 
                     <a class="btn btn-danger text-white pull-right" href="{{url('certify/applicant')}}">
                         <i class="icon-arrow-left-circle"></i> กลับ
