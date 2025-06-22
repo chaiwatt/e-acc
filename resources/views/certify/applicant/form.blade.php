@@ -213,13 +213,13 @@
     let labRequestMain 
     let labRequestBranchs 
     let labRequestType = "test"
-    let mainLabScopeTransaction 
+    // let mainLabScopeTransaction 
     // let branchLabScopeTransactions
     let mainLabTypes
     // let branchLabScopeTransactions
 
 
-    // let mainLabScopeTransaction;
+    let mainLabScopeTransaction;
     // let branchLabScopeTransactions ;
 
     // แปลงโครงสร้างของ lab_types
