@@ -6,6 +6,7 @@
 !/database/
 !/resources/
 !/routes/
+!/public/assets/js/
 !.gitignore
 !composer.json
 !composer.lock
