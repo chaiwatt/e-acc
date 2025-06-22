@@ -1793,6 +1793,13 @@ class ApplicantController extends Controller
    
 
 
+
+
+                    $pdfService = new CreateLabScopePdf($certi_lab);
+                    $pdfContent = $pdfService->generatePdf();
+
+      
+
                         $babCalScopeUsageStatus = new LabCalScopeUsageStatus();
                         $babCalScopeUsageStatus->app_certi_lab_id = $certi_lab->id;
                         $babCalScopeUsageStatus->group = 1;

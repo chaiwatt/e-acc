@@ -55,8 +55,8 @@
             if (!isset($groupedByMainBranch[$mainBranchKey])) {
                 $groupedByMainBranch[$mainBranchKey] = [
                     'mainBranch' => isset($item['test_main_branch']['text_en']) 
-                        ? 'สาขา' . ($item['test_main_branch']['text'] ?? '') . '<br>' . ($item['test_main_branch']['text_en'] ?? '') 
-                        : 'สาขา' . ($item['test_main_branch']['text'] ?? '-'),
+                        ? '' . ($item['test_main_branch']['text'] ?? '') . '<br>' . ($item['test_main_branch']['text_en'] ?? '') 
+                        : '' . ($item['test_main_branch']['text'] ?? '-'),
                     'categories' => []
                 ];
             }

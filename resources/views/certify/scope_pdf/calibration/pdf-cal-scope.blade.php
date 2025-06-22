@@ -86,8 +86,8 @@ if (!function_exists('formatRangeWithSpecialChars')) {
             if (!isset($groupedByMainBranch[$mainBranchKey])) {
                 $groupedByMainBranch[$mainBranchKey] = [
                     'mainBranch' => isset($item['cal_main_branch']['text_en']) 
-                        ? 'สาขา' . ($item['cal_main_branch']['text'] ?? '') . '<br>' . ($item['cal_main_branch']['text_en'] ?? '') 
-                        : 'สาขา' . ($item['cal_main_branch']['text'] ?? '-'),
+                        ? '' . ($item['cal_main_branch']['text'] ?? '') . '<br>' . ($item['cal_main_branch']['text_en'] ?? '') 
+                        : '' . ($item['cal_main_branch']['text'] ?? '-'),
                     'instrumentGroups' => []
                 ];
             }
@@ -224,10 +224,12 @@ if (!function_exists('formatRangeWithSpecialChars')) {
                                         @endphp
                                         <tr class="parameter-one">
                                             <td style="vertical-align: top;"></td>
-                                            <td style="vertical-align: top; padding-left: 20px; text-align: center;">
+                                            {{-- <td style="vertical-align: top; padding-left: 20px; text-align: center;"> --}}
+                                            <td style="vertical-align: top; padding-left: 40px;">
                                                 {!! formatRangeWithSpecialChars($rangeDisplay) !!}
                                             </td>
-                                            <td style="vertical-align: top; text-align: center;">
+                                            {{-- <td style="vertical-align: top; text-align: center;"> --}}
+                                            <td style="vertical-align: top; ">
                                                 {!! formatRangeWithSpecialChars($uncertaintyDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top;"></td>
@@ -298,10 +300,12 @@ if (!function_exists('formatRangeWithSpecialChars')) {
                                         @endphp
                                         <tr class="parameter-one">
                                             <td style="vertical-align: top;"></td>
-                                            <td style="vertical-align: top; padding-left: 20px; text-align: center;">
+                                            {{-- <td style="vertical-align: top; padding-left: 20px; text-align: center;"> --}}
+                                            <td style="vertical-align: top; padding-left: 40px;">
                                                 {!! formatRangeWithSpecialChars($rangeDisplay) !!}
                                             </td>
-                                            <td style="vertical-align: top; text-align: center;">
+                                            {{-- <td style="vertical-align: top; text-align: center;"> --}}
+                                            <td style="vertical-align: top;">
                                                 {!! formatRangeWithSpecialChars($uncertaintyDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top;"></td>
@@ -374,10 +378,12 @@ if (!function_exists('formatRangeWithSpecialChars')) {
                                         @endphp
                                         <tr class="parameter-one">
                                             <td style="vertical-align: top;"></td>
-                                            <td style="vertical-align: top; padding-left: 20px; text-align: center;">
+                                            {{-- <td style="vertical-align: top; padding-left: 20px; text-align: center;"> --}}
+                                            <td style="vertical-align: top; padding-left: 40px;">
                                                 {!! formatRangeWithSpecialChars($rangeDisplay) !!}
                                             </td>
-                                            <td style="vertical-align: top; text-align: center;">
+                                            {{-- <td style="vertical-align: top; text-align: center;"> --}}
+                                            <td style="vertical-align: top; ">
                                                 {!! formatRangeWithSpecialChars($uncertaintyDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top;"></td>

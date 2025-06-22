@@ -60,7 +60,7 @@
                     <input type="checkbox" {{ $key == 'pl_2_3_info' ? 'checked="checked"' : '' }}>ชั่วคราว<br> <span>(Temporary)</span>
                 </div>
                 <div class="inline-block w-20 float-left">
-                    <input type="checkbox" {{ $key == 'pl_2_2_info' ? 'checked="checked"' : '' }}>เคลื่อนที่<br> <span>(Mobile)</span>
+                    <input type="checkbox" {{ $key == 'pl_2_4_info' ? 'checked="checked"' : '' }}>เคลื่อนที่<br> <span>(Mobile)</span>
                 </div>
                 <div class="inline-block w-17 float-left">
                     <input type="checkbox" {{ $pdfData->siteType == "multi" ? 'checked="checked"' : '' }} >หลายสถานที่<br> <span>(Multisite)</span>

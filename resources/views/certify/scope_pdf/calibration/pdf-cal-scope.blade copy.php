@@ -86,8 +86,8 @@ if (!function_exists('formatRangeWithSpecialChars')) {
             if (!isset($groupedByMainBranch[$mainBranchKey])) {
                 $groupedByMainBranch[$mainBranchKey] = [
                     'mainBranch' => isset($item['cal_main_branch']['text_en']) 
-                        ? 'สาขา' . ($item['cal_main_branch']['text'] ?? '') . '<br>' . ($item['cal_main_branch']['text_en'] ?? '') 
-                        : 'สาขา' . ($item['cal_main_branch']['text'] ?? '-'),
+                        ? '' . ($item['cal_main_branch']['text'] ?? '') . '<br>' . ($item['cal_main_branch']['text_en'] ?? '') 
+                        : '' . ($item['cal_main_branch']['text'] ?? '-'),
                     'instrumentGroups' => []
                 ];
             }
@@ -104,15 +104,19 @@ if (!function_exists('formatRangeWithSpecialChars')) {
         }
     }
 @endphp
-{{-- <div style="margin-bottom: 160px;color:white">.</div> --}}
-<!-- สร้างตาราง -->
 <table class="table table-bordered align-middle" id="cal_scope_table_{{ $key }}">
-
     <tbody>
         @foreach($groupedByMainBranch as $mainBranchGroup)
-            @php
-                $isFirstInstrumentGroup = true;
-            @endphp
+            <!-- แถวแรกสำหรับ mainBranch -->
+            <tr>
+                <td style="vertical-align: top;">
+                    {!! $mainBranchGroup['mainBranch'] !!}
+                </td>
+                <td style="vertical-align: top;"></td>
+                <td style="vertical-align: top;"></td>
+                <td style="vertical-align: top;"></td>
+            </tr>
+
             @foreach($mainBranchGroup['instrumentGroups'] as $mainGroup)
                 @php
                     // ตรวจสอบว่าไม่มี parameterOne และ parameterTwo
@@ -130,9 +134,7 @@ if (!function_exists('formatRangeWithSpecialChars')) {
                         : '';
                 @endphp
                 <tr>
-                    <td style="vertical-align: top;">
-                        {!! $isFirstInstrumentGroup ? $mainBranchGroup['mainBranch'] : '' !!}
-                    </td>
+                    <td style="vertical-align: top;"></td>
                     <td style="vertical-align: top;">
                         {{ $mainGroup['instrumentGroup'] }}
                     </td>
@@ -142,8 +144,6 @@ if (!function_exists('formatRangeWithSpecialChars')) {
                     </td>
                 </tr>
                 @php
-                    $isFirstInstrumentGroup = false;
-
                     // จัดกลุ่มตาม cal_instrument และ cal_parameter_one
                     $groupedData = [];
                     foreach ($mainGroup['items'] as $index => $item) {
@@ -299,11 +299,9 @@ if (!function_exists('formatRangeWithSpecialChars')) {
                                         <tr class="parameter-one">
                                             <td style="vertical-align: top;"></td>
                                             <td style="vertical-align: top; padding-left: 20px; text-align: center;">
-                                                {{-- {{ $rangeDisplay }} --}}
                                                 {!! formatRangeWithSpecialChars($rangeDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top; text-align: center;">
-                                                {{-- {!! $uncertaintyDisplay !!} --}}
                                                 {!! formatRangeWithSpecialChars($uncertaintyDisplay) !!}
                                             </td>
                                             <td style="vertical-align: top;"></td>
