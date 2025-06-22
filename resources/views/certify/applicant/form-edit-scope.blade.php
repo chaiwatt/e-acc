@@ -1254,5 +1254,5 @@
         }
     </script>
 
-<script src="{{asset('assets/js/lab/applicant.js?v=1.10')}}"></script>
+<script src="{{asset('assets/js/lab/applicant.js?v=1.11')}}"></script>
 @endpush
