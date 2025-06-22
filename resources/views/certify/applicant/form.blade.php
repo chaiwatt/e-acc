@@ -213,7 +213,7 @@
     let labRequestMain 
     let labRequestBranchs 
     let labRequestType = "test"
-    let mainLabScopeTransaction 
+    // let mainLabScopeTransaction 
     // let branchLabScopeTransactions
     let mainLabTypes
     // let branchLabScopeTransactions
