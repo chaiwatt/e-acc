@@ -316,7 +316,7 @@ class ApplicantTrackingLABController extends Controller
 
 
   public function update_pay_in1(Request $request, $id){
-        dd($request->all());
+        // dd($request->all());
         $data_session     =    HP::CheckSession();
  
          $tb       = new TrackingPayInOne;
