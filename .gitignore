@@ -6,7 +6,6 @@
 !/database/
 !/resources/
 !/routes/
-!/public/assets/js/
 !.gitignore
 !composer.json
 !composer.lock
@@ -14,3 +13,10 @@
 # Ignore database/database_start and its contents
 database/database_start/
 
+# NEW RULES START HERE
+# Ignore everything in public/ by default (but this is handled by /* already)
+# So we only need to explicitly allow the path we want
+/public/*
+!/public/assets/
+!/public/assets/js/
+!/public/assets/js/lab/
