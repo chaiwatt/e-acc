@@ -219,7 +219,7 @@
     // let branchLabScopeTransactions
 
 
-    let mainLabScopeTransaction;
+    // let mainLabScopeTransaction;
     // let branchLabScopeTransactions ;
 
     // แปลงโครงสร้างของ lab_types
