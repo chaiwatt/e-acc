@@ -277,7 +277,9 @@
                 </h4>
             </legend>
             <div class="row repeater-form-file">
-                <div class="col-md-12 box_section3" data-repeater-list="repeater-section3" id="repeater_section3_wrapper">
+              
+                <div class="col-md-12 box_section3" >
+                    {{-- <div class="col-md-12 box_section3" data-repeater-list="repeater-section3" id="repeater_section3_wrapper"> --}}
 
 
                     <div class="col-md-12">
@@ -680,7 +682,7 @@ ibScopeTransactions = @json($ibScopeTransactions ?? []);
 
         const groupedArray = groupTransactions(transactions);
         renderIbScopeTable(groupedArray);
-        console.log('server transactions', transactions);
+        console.log('server transactions => ', transactions);
     }
 
 
@@ -1028,6 +1030,7 @@ ibScopeTransactions = @json($ibScopeTransactions ?? []);
     
 
     function renderIbScopeTable(groupedArray) {
+       
         // ล้าง HTML เก่าก่อน render
         $("#ib_scope_wrapper").empty();
 
@@ -1122,7 +1125,7 @@ ibScopeTransactions = @json($ibScopeTransactions ?? []);
                 `;
                 html += "</tr>";
             });
-
+            console.log("html",html)
             $("#ib_scope_wrapper").append(html);
         });
     }

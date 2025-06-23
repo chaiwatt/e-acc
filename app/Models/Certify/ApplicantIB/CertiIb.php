@@ -108,7 +108,7 @@ class CertiIb extends Model
 
     // TEXT  หน่วยตรวจประเภท
     public function getTypeUnitTitleAttribute() {
-        $datas = ['1'=>'A','2'=>'B','3'=>'C'];
+        $datas = ['1'=>'A','2'=>'B','3'=>'C','4'=>'Other'];
           return array_key_exists($this->type_unit,$datas) ? $datas[$this->type_unit] : '';
       }
 

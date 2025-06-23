@@ -64,7 +64,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">คำขอรับบริการหน่วยตรวจ (IB) home</h3>
+                    <h3 class="box-title pull-left">คำขอรับบริการหน่วยตรวจ (IB)</h3>
 
                     <div class="pull-right">
  

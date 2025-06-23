@@ -9181,7 +9181,7 @@ class MyTestController extends Controller
 
     // dd($cbScopeIsicTransactions);
 
-    $certiCb = CertiIb::find(146);
+    $certiCb = CertiIb::find(156);
     $pdfService = new CreateIbScopePdf($certiCb);
     $pdfContent = $pdfService->generatePdf();
 

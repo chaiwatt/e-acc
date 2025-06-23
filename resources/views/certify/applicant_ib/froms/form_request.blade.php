@@ -40,6 +40,10 @@
                 {!! Form::radio('type_unit', '3', !empty( $certi_ib->type_unit ) && $certi_ib->type_unit == '1' ?true:false, ['class'=>'check checkLab', 'data-radio'=>'iradio_square-green']) !!}
                  &nbsp;C
             </label>
+            <label class="col-md-1  label-height" >
+                {!! Form::radio('type_unit', '4', !empty( $certi_ib->type_unit ) && $certi_ib->type_unit == '1' ?true:false, ['class'=>'check checkLab', 'data-radio'=>'iradio_square-green']) !!}
+                 &nbsp;Other
+            </label>
            {!! $errors->first('type_unit', '<p class="help-block">:message</p>') !!}
         </div>
         {{-- {{$certifieds->count()}} --}}
@@ -686,6 +690,7 @@
                   
             // change   สาขาที่ขอรับการรับรอง
             $("input[name=standard_change]").on("ifChanged",function(){
+                // console.log("aha")
                 box_ref_application_no();
                 get_app_no_and_certificate_exports_no();
             });   

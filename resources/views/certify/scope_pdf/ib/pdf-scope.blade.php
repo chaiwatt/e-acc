@@ -5,102 +5,128 @@
         font-family: "TH Sarabun New", sans-serif;
         font-size: 16px;
     }
-    .ib-scope-table td {
+    .ib-scope-table th, .ib-scope-table td {
         border: 1px solid black;
         padding: 8px;
-        vertical-align: top;
+        text-align: left;
     }
-    .no-border {
-        border: none !important;
+    .ib-scope-table th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+        text-align: center;
+        font-size: 20px;
     }
-    .sub-table {
-        width: 100%;
-        border: none;
-        /* margin-top: -15px; */
+    .ib-category {
+        width: 30%;
+        text-align: center;
+        font-weight: bold;
     }
-    .sub-table td {
-        border: none;
-        padding: 0;
+    .description {
+        width: 35%;
     }
-    .detail-table {
-        width: 100%;
-        border: none;
-    }
-    .detail-table td {
-        border: none;
-        padding: 0;
-    }
-    ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-    }
-    li {
-        margin: 0;
-        padding: 0;
-        line-height: 1.2;
-    }
-    .hidden-span {
-        visibility: hidden;
+    .sub-text {
+        font-size: 14px;
+        font-style: italic;
     }
 </style>
 
-@php
-    // Group transactions by main category
-    $groupedTransactions = $ibScopeTransactions->groupBy(function ($item) {
-        return $item->ibMainCategoryScope ? $item->ibMainCategoryScope->name : '';
-    });
+<table class="ib-scope-table" style="margin-top: 20px">
+    <tr>
+        <th >หมวดหมู่ / สาขาการตรวจ</th>
+        <th >ขั้นตอนและช่วงการตรวจ</th>
+        <th >ข้อกำหนดที่ใช้</th>
+    </tr>
 
-    // Transform into the groupedArray structure
-    $groupedArray = $groupedTransactions->map(function ($transactions, $mainCategoryText) {
-        // Group by sub-category
-        $subGrouped = $transactions->groupBy(function ($item) {
-            return $item->ibSubCategoryScope ? $item->ibSubCategoryScope->name : '';
+    @php
+        // จัดกลุ่มตาม ib_main_category_scope_text
+        $groupedTransactions = $ibScopeTransactions->groupBy(function ($item) {
+            return $item->ibMainCategoryScope ? $item->ibMainCategoryScope->name : '';
         });
 
-        $subCategories = $subGrouped->map(function ($transactions, $subCategoryText) {
-            // Group by scope topic
-            $topicGrouped = $transactions->groupBy(function ($item) {
-                return $item->ibScopeTopic ? $item->ibScopeTopic->name : '';
+        // แปลงเป็นโครงสร้างเหมือน groupedArray พร้อมกรองข้อมูลว่าง
+        $groupedArray = $groupedTransactions->map(function ($transactions, $mainCategoryText) {
+            // กรองเฉพาะ transactions ที่มีข้อมูล
+            $transactions = $transactions->filter(function ($item) {
+                return !empty($item->ibMainCategoryScope) && !empty($item->ibMainCategoryScope->name);
             });
 
-            $scopeTopics = $topicGrouped->map(function ($transactions, $scopeTopicText) {
+            if ($transactions->isEmpty()) {
+                return null; // ข้าม mainCategoryText ถ้าไม่มี transactions
+            }
+
+            // จัดกลุ่มย่อยตาม ib_sub_category_scope_text
+            $subGrouped = $transactions->groupBy(function ($item) {
+                return $item->ibSubCategoryScope ? $item->ibSubCategoryScope->name : '';
+            });
+
+            $subCategories = $subGrouped->map(function ($transactions, $subCategoryText) {
+                // กรองเฉพาะ transactions ที่มี subCategory
+                $transactions = $transactions->filter(function ($item) {
+                    return !empty($item->ibSubCategoryScope) && !empty($item->ibSubCategoryScope->name);
+                });
+
+                if ($transactions->isEmpty()) {
+                    return null; // ข้าม subCategoryText ถ้าไม่มี transactions
+                }
+
+                // จัดกลุ่มตาม ib_scope_topic_text
+                $topicGrouped = $transactions->groupBy(function ($item) {
+                    return $item->ibScopeTopic ? $item->ibScopeTopic->name : '';
+                });
+
+                $scopeTopics = $topicGrouped->map(function ($transactions, $scopeTopicText) {
+                    // กรองเฉพาะ transactions ที่มี scopeTopic และ ib_scope_detail_id
+                    $filteredTransactions = $transactions->filter(function ($transaction) {
+                        return !empty($transaction->ibScopeTopic) && 
+                               !empty($transaction->ibScopeTopic->name) && 
+                               $transaction->ib_scope_detail_id !== null;
+                    });
+
+                    if ($filteredTransactions->isEmpty()) {
+                        return null; // ข้าม scopeTopicText ถ้าไม่มี transactions
+                    }
+
+                    return [
+                        'scopeTopicText' => $scopeTopicText,
+                        'transactions' => $filteredTransactions->values()
+                    ];
+                })->filter()->values(); // กรอง scopeTopics ว่างเปล่า
+
+                if ($scopeTopics->isEmpty()) {
+                    return null; // ข้าม subCategoryText ถ้าไม่มี scopeTopics
+                }
+
                 return [
-                    'scopeTopicText' => $scopeTopicText,
-                    'transactions' => $transactions->filter(function ($transaction) {
-                        return $transaction->ib_scope_detail_id !== null;
-                    })->values()
+                    'subCategoryText' => $subCategoryText,
+                    'scopeTopics' => $scopeTopics
                 ];
-            })->values();
+            })->filter()->values(); // กรอง subCategories ว่างเปล่า
+
+            if ($subCategories->isEmpty()) {
+                return null; // ข้าม mainCategoryText ถ้าไม่มี subCategories
+            }
 
             return [
-                'subCategoryText' => $subCategoryText,
-                'scopeTopics' => $scopeTopics
+                'mainCategoryText' => $mainCategoryText,
+                'subCategories' => $subCategories
             ];
-        })->values();
+        })->filter()->values(); // กรอง mainCategories ว่างเปล่า
+    @endphp
 
-        return [
-            'mainCategoryText' => $mainCategoryText,
-            'subCategories' => $subCategories
-        ];
-    })->values();
-@endphp
-
-<table class="ib-scope-table">
-    @foreach ($groupedArray as $group)
+    @foreach ($groupedArray as $key => $group)
         @php
             $mainCategoryTextResult = TextHelper::callLonganTokenizePost($group['mainCategoryText']);
-            $mainCategoryTextResult = str_replace('!', '<span class="hidden-span">!</span>', $mainCategoryTextResult);
+            $mainCategoryTextResult = str_replace('!', '<span style="visibility: hidden;">!</span>', $mainCategoryTextResult);
         @endphp
-        <tr>
-            <td>
-                <span style="font-size: 22px; word-spacing: -0.2em;">{!! $mainCategoryTextResult !!}</span>
+        <tr style="border-bottom: none !important;">
+            <td style="vertical-align: top; border-bottom: none !important;">
+                <span style="word-spacing: -0.2em; font-size: 22px">{!! $mainCategoryTextResult !!}</span>
             </td>
-            <td>
-                <span class="hidden-span" style="font-size: 22px; word-spacing: -0.2em;">{!! $mainCategoryTextResult !!}</span>
+            <td style="vertical-align: top; border-bottom: none !important;">
+                <span style="visibility: hidden; word-spacing: -0.2em; font-size: 22px">{!! $mainCategoryTextResult !!}</span>
             </td>
-            <td>
-                <span class="hidden-span" style="font-size: 22px; word-spacing: -0.2em;">{!! $mainCategoryTextResult !!}</span>
+            <td style="vertical-align: top; border-bottom: none !important;">
+                <span style="visibility: hidden; word-spacing: -0.2em; font-size: 22px">{!! $mainCategoryTextResult !!}</span>
             </td>
         </tr>
 
@@ -108,68 +134,79 @@
             @php
                 $subCategoryArray = explode(',', $subCategory['subCategoryText']);
                 $subCategoryArray = array_map('trim', $subCategoryArray);
+                $subCategoryArray = array_filter($subCategoryArray); // กรอง subCategory ว่าง
             @endphp
-            <tr>
-                <td style="padding-left: 15px;">
-                    <ul>
-                        @foreach ($subCategoryArray as $subCat)
-                            @php
-                                $subCategoryTextResult = TextHelper::callLonganTokenizePost($subCat);
-                                $subCategoryTextResult = str_replace('!', '<span class="hidden-span">!</span>', $subCategoryTextResult);
-                            @endphp
-                            <li><span style="font-size: 22px; word-spacing: -0.2em;">- {!! $subCategoryTextResult !!}</span></li>
-                        @endforeach
-                    </ul>
-                </td>
-                <td>
-                    
-                    <table class="sub-table">
-                        @foreach ($subCategory['scopeTopics'] as $topic)
-                            @php
-                                $topicTextResult = TextHelper::callLonganTokenizePost($topic['scopeTopicText']);
-                                $topicTextResult = str_replace('!', '<span class="hidden-span">!</span>', $topicTextResult);
-                            @endphp
-                            <tr>
-                                <td>
-                                    <span style="font-size: 22px; word-spacing: -0.2em;">{!! $topicTextResult !!}</span><br>
-                                    <table class="detail-table">
-                                        @foreach ($topic['transactions'] as $transaction)
+
+            @if (!empty($subCategoryArray))
+                <tr>
+                    <td style="width:200px;padding-left:25px; vertical-align: top; border-top: none !important;">
+                        <ul style="list-style-type: none;">
+                            @foreach ($subCategoryArray as $subCat)
+                                @php
+                                    $subCategoryTextResult = TextHelper::callLonganTokenizePost($subCat);
+                                    $subCategoryTextResult = str_replace('!', '<span style="visibility: hidden;">!</span>', $subCategoryTextResult);
+                                @endphp
+                                <li><span style="word-spacing: -0.2em;font-size:22px">{!! $subCategoryTextResult !!}</span></li>
+                            @endforeach
+                        </ul>
+                    </td>
+                    <td style="vertical-align: top;width:35%; border-top: none !important;">
+                        <table style="border: none !important; width: 100% !important;padding-top:-10px">
+                            @foreach ($subCategory['scopeTopics'] as $topic)
+                                @if (!empty($topic['scopeTopicText']) && $topic['transactions']->isNotEmpty())
+                                    <tr style="border: none !important;">
+                                        <td style="vertical-align: top; border: none !important;padding-left:0px">
                                             @php
-                                                $detailArray = explode(',', $transaction->ibScopeDetail ? $transaction->ibScopeDetail->name : '');
-                                                $detailArray = array_map('trim', $detailArray);
+                                                $topicText = TextHelper::callLonganTokenizePost($topic['scopeTopicText']);
+                                                $topicTextResult = str_replace('!', '<span style="visibility: hidden;">!</span>', $topicText);
                                             @endphp
-                                            <tr>
-                                                <td>
-                                                    <ul>
-                                                        @foreach ($detailArray as $detail)
-                                                            @php
-                                                                $detailTextResult = TextHelper::callLonganTokenizePost($detail);
-                                                                $detailTextResult = str_replace('!', '<span class="hidden-span">!</span>', $detailTextResult);
-                                                            @endphp
-                                                            <li><span style="font-size: 22px; word-spacing: -0.2em;">{!! $detailTextResult !!}</span></li>
-                                                        @endforeach
-                                                    </ul>
-                                                </td>
-                                            </tr>
-                                        @endforeach
-                                    </table>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </table>
-                </td>
-                <td>
-                    @php
-                        $std = $subCategory['scopeTopics'][0]['transactions'][0]->standard ?? '-';
-                        $standardTextResult = TextHelper::callLonganTokenizePost($std);
-                        $standardTextResult = str_replace('!', '<span class="hidden-span">!</span>', $standardTextResult);
-                    @endphp
-                    <span style="font-size: 22px; word-spacing: -0.2em;">{!! $standardTextResult !!}</span>
-                </td>
-            </tr>
+                                            <span style="word-spacing: -0.2em;font-size:22px">{!! $topicTextResult !!}</span>
+                                            <br>
+                                            <table style="border: none !important; width: 100% !important;">
+                                                @foreach ($topic['transactions'] as $transaction)
+                                                    @php
+                                                        $detailArray = explode(',', $transaction->ibScopeDetail ? $transaction->ibScopeDetail->name : '');
+                                                        $detailArray = array_map('trim', $detailArray);
+                                                        $detailArray = array_filter($detailArray); // กรอง detail ว่าง
+                                                    @endphp
+                                                    @if (!empty($detailArray))
+                                                        <tr style="border: none !important;">
+                                                            <td style="vertical-align: top; border: none !important;padding-left:0px">
+                                                                <ul>
+                                                                    @foreach ($detailArray as $detail)
+                                                                        @php
+                                                                            $detailTextResult = TextHelper::callLonganTokenizePost($detail);
+                                                                            $detailTextResult = str_replace('!', '<span style="visibility: hidden;">!</span>', $detailTextResult);
+                                                                        @endphp
+                                                                        <li style="margin: 0; padding: 0; line-height: 1.0;"><span style="word-spacing: -0.2em; font-size: 22px">{!! $detailTextResult !!}</span></li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            </td>
+                                                        </tr>
+                                                    @endif
+                                                @endforeach
+                                            </table>
+                                        </td>
+                                    </tr>
+                                @endif
+                            @endforeach
+                        </table>
+                    </td>
+                    <td style="vertical-align: top;width:35%; border-top: none !important;">
+                        @php
+                            $std = $subCategory['scopeTopics'][0]['transactions'][0]->standard ?? '-';
+                            $standardTextResult = TextHelper::callLonganTokenizePost($std);
+                            $standardTextResult = str_replace('!', '<span style="visibility: hidden;">!</span>', $standardTextResult);
+                        @endphp
+                        <span style="word-spacing: -0.2em;font-size:22px">{!! $standardTextResult !!}</span>
+                        <span style="font-size: 0.01px">*{{$key}}*</span>
+                    </td>
+                </tr>
+            @endif
         @endforeach
     @endforeach
 </table>
+
 
 <table style="margin-top: 30px">
     <tr>
@@ -177,6 +214,11 @@
         <td>
             <div >
 
+                {{-- @php
+                    $tmpIssueDate = \Carbon\Carbon::now()->format('Y/m/d');
+                    $issuedDate = HP::formatDateThaiFull($tmpIssueDate);
+                    $issuedDateEn  = HP::BEDate($tmpIssueDate);
+                @endphp --}}
 
                 @php
                     // $issuedDate = "";
@@ -206,10 +248,11 @@
                         }
                     }
                 @endphp
-                <span style="font-size:22px">ตั้งแต่ วันที่ {{$startDate}}</span><br>
-                <span style="font-size:22px">ถึง วันที่ {{$toDate}}</span><br>
-                <span style="font-size:22px">ออกให้ ณ วันที่ {{$issuedDate}}</span><br>
+                <span style="font-size:22px">ตั้งแต่ วันที่ : {{$startDate}}</span><br>
+                <span style="font-size:22px">ถึง วันที่ : {{$toDate}}</span><br>
+                <span style="font-size:22px">ออกให้ ณ วันที่ : {{$issuedDate}}</span>
             </div>
         </td>
     </tr>
 </table> 
+
