@@ -67,7 +67,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">ใบรับรองระบบงาน (CB) landingsss</h3>
+                    <h3 class="box-title pull-left">ใบรับรองระบบงาน (CB)</h3>
 
                     <div class="pull-right">
 
@@ -342,7 +342,7 @@
                                        
                                         {{-- {{$item->fullyApprovedAuditorNoCancels()->count() }} --}}
                                             <button style="border: none" data-toggle="modal"  data-target="#TakeAction{{$loop->iteration}}" data-id="{{ $item->token }}"  >
-                                                <i class="mdi mdi-magnify"></i>เห็นชอบการแต่งตั้งคณะผู้ตรวจประเมิน
+                                                <i class="mdi mdi-magnify"></i>อยู่ระหว่างดำเนินการ
                                             </button>
 
                                             @include ('certify.applicant_cb.modal.modalstatus10',['id'=> $loop->iteration,'token'=> $item->token,'auditors' => $item->CertiAuditorsMany,'certi' => $item ])

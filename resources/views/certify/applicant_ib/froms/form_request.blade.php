@@ -690,7 +690,6 @@
                   
             // change   สาขาที่ขอรับการรับรอง
             $("input[name=standard_change]").on("ifChanged",function(){
-                // console.log("aha")
                 box_ref_application_no();
                 get_app_no_and_certificate_exports_no();
             });   
@@ -1078,10 +1077,10 @@
 
         const _token            = $('input[name="_token"]').val();
 
-        let pattern = /^\d{2}L:IB\d{4}$/;
+        let pattern = /^\d{2}-IB\d{4}$/;
 
         if (!pattern.test(transferee_certificate_number)) {
-            alert("รูปแบบใบรับรองไม่ถูกต้อง");
+            alert("รูปแบบใบรับรอง IB ไม่ถูกต้อง");
             return;
         } 
 

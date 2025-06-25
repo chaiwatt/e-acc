@@ -16,13 +16,14 @@ use Illuminate\Support\Facades\DB;
 use Kyslik\ColumnSortable\Sortable;
 
 use App\Models\Bcertify\PurposeType;
+use App\Models\Certificate\Tracking;
 use App\Models\Sso\User AS SSO_User;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Certificate\IbDocReviewAuditor;
-use App\Models\Certificate\Tracking;
 use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantIB\CertiIBExport;
 use App\Models\Certify\CertiEmailLt;  //E-mail ลท.
+use App\Models\Certify\ApplicantIB\CertiIbExportMapreq;
 
 class CertiIb extends Model
 {
@@ -689,6 +690,12 @@ class CertiIb extends Model
         }else{
         return Tracking::where('ref_id',$certiIBExport->id)->where('ref_table','app_certi_ib_export')->first();
         }
+    }
+
+        // เช็คขอบข่ายใน mapreq
+    public function certi_ib_export_mapreq_to()
+    {
+        return $this->hasOne(CertiIbExportMapreq::class, 'app_certi_ib_id');
     }
 
 }

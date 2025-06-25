@@ -2069,10 +2069,89 @@ class ApplicantIBController extends Controller
    }  
         }
 
+        
+   public function updateCertiIBFileAll($token = null)
+   {
+
+       $certi_ib_primary = CertiIb::where('token', $token)->firstOrfail();
+       
+       
+       if(!empty($certi_ib_primary->certi_ib_export_mapreq_to)){
+    //    dd($certi_ib_primary->certi_ib_export_mapreq_to);
+            $certi_ib_mapreq = CertiIbExportMapreq::where('certificate_exports_id', $certi_ib_primary->certi_ib_export_mapreq_to->certificate_exports_id)->orderBy('id')->firstOrfail();
+            // dd( $certi_ib_primary->id,$certi_ib_primary->certi_ib_export_mapreq_to, $certi_ib_mapreq);
+            // dd($certi_ib_mapreq);
+            if(!empty($certi_ib_mapreq->app_certi_ib_to)){
+                $certi_ib = $certi_ib_mapreq->app_certi_ib_to;
+            }
+       }
+
+
+        
+       if(!empty($certi_ib->certi_ib_export_mapreq_to)){
+        //    $export               =  $certi_ib->app_certi_ib_export;  
+        //    $certiib_file_all    =  !empty($export->CertiIBCostTo->cert_ibs_file_all_order_desc) ?  $export->CertiIBCostTo->cert_ibs_file_all_order_desc : []; 
+
+         // ใบรับรอง และ ขอบข่าย    
+         if(!is_null($certi_ib->certi_ib_export_mapreq_to)){
+            $certificate =  !empty($certi_ib->certi_ib_export_mapreq_to->app_certi_ib_export_to->certificate) ? $certi_ib->certi_ib_export_mapreq_to->app_certi_ib_export_to->certificate : null;
+
+
+
+            if(!is_null($certificate)){
+                     $export_no         =  CertiIBExport::where('certificate',$certificate);
+
+                    
+                     
+                    if(count($export_no->get()) > 0){
+
+                      $ib_ids = [];
+                      if($export_no->pluck('app_certi_ib_id')->count() > 0){
+                          foreach ($export_no->pluck('app_certi_ib_id') as $item) {
+                              if(!in_array($item,$ib_ids)){
+                                 $ib_ids[] =  $item;
+                              }
+                          }
+                      }
+
+                    //   dd($certi_ib->certi_ib_export_mapreq_to, $export,$certificate,$export_no->get()->count(),$ib_ids);
+
+                      if($certi_ib->certi_ib_export_mapreq_to->certiib_export_mapreq_group_many->count() > 0){
+                          foreach ($certi_ib->certi_ib_export_mapreq_to->certiib_export_mapreq_group_many->pluck('app_certi_ib_id') as $item) {
+                              if(!in_array($item,$ib_ids)){
+                                  $ib_ids[] =  $item;
+                              }
+                          }
+                      }
+
+                    // 
+
+                      // ขอบข่าย
+                      CertiIBFileAll::whereIn('app_certi_ib_id',$ib_ids)->orderby('created_at','desc')->whereNotIn('status_cancel',[1])->update([
+                        'state' => 0
+                      ]);
+   
+                       CertiIBFileAll::where('app_certi_ib_id', $certi_ib_primary->id)->update([
+                            'state' => 1
+                        ]);
+
+              
+                 } 
+            }
+       }
+
+
+       }
+
+   }
+
+
+
 
     public function abilityConfirm(Request $request)
     {
         $certilIb = CertiIb::find($request->id);
+        // dd($certilIb->token);
         if($certilIb->standard_change == 6)
         {
             if($certilIb->transferer_export_id != null){
@@ -2082,33 +2161,33 @@ class ApplicantIBController extends Controller
                 $exportId = $export->id;
                 $mainCertiIbId = $export->app_certi_ib_id;
                 CertiIBExport::find($certilIb->transferer_export_id)->update([
-                'app_no' => $certilIb->app_no,
-                'app_certi_ib_id' => $certilIb->id,
-                'name_unit' => $certilIb->name_unit,
-                'name_unit_en' => $certilIb->name_en_unit,
-                'address' => $certilIb->address,
-                'allay' => $certilIb->allay,
-                'village_no' => $certilIb->village_no,
-                'road' => $certilIb->road,
-                'province_name' => $province->PROVINCE_NAME,
-                'amphur_name' => $certilIb->amphur_id,
-                'district_name' => $certilIb->district_id,
-                'postcode' => $certilIb->postcode,
-                'address_en' => $certilIb->ib_address_no_eng,
-                'allay_en' => $certilIb->ib_moo_eng,
-                'village_no_en' => $certilIb->ib_soi_eng,
-                'road_en' => $certilIb->ib_street_eng,
-                'province_name_en' => $province->PROVINCE_NAME_EN,
-                'amphur_name_en' => $certilIb->ib_amphur_eng,
-                'district_name_en' => $certilIb->ib_district_eng,
-                'date_start' => Carbon::now(), //ใส่ carbon now
-                'contact_name' =>  $certilIb->contactor_name,
-                'contact_tel' =>  $certilIb->contact_tel,
-                'contact_mobile' =>  $certilIb->telephone,
-                'contact_email' =>  $certilIb->email,
-                'status' =>  2,
-                'hold_status' =>  $holdStatus
-            ]);
+                    'app_no' => $certilIb->app_no,
+                    'app_certi_ib_id' => $certilIb->id,
+                    'name_unit' => $certilIb->name_unit,
+                    'name_unit_en' => $certilIb->name_en_unit,
+                    'address' => $certilIb->address,
+                    'allay' => $certilIb->allay,
+                    'village_no' => $certilIb->village_no,
+                    'road' => $certilIb->road,
+                    'province_name' => $province->PROVINCE_NAME,
+                    'amphur_name' => $certilIb->amphur_id,
+                    'district_name' => $certilIb->district_id,
+                    'postcode' => $certilIb->postcode,
+                    'address_en' => $certilIb->ib_address_no_eng,
+                    'allay_en' => $certilIb->ib_moo_eng,
+                    'village_no_en' => $certilIb->ib_soi_eng,
+                    'road_en' => $certilIb->ib_street_eng,
+                    'province_name_en' => $province->PROVINCE_NAME_EN,
+                    'amphur_name_en' => $certilIb->ib_amphur_eng,
+                    'district_name_en' => $certilIb->ib_district_eng,
+                    'date_start' => Carbon::now(), //ใส่ carbon now
+                    'contact_name' =>  $certilIb->contactor_name,
+                    'contact_tel' =>  $certilIb->contact_tel,
+                    'contact_mobile' =>  $certilIb->telephone,
+                    'contact_email' =>  $certilIb->email,
+                    'status' =>  2,
+                    'hold_status' =>  $holdStatus
+                ]);
 
             SendCertificateLists::where('certificate_id',$exportId)->delete();
 
@@ -2125,12 +2204,18 @@ class ApplicantIBController extends Controller
               CertiIbExportMapreq::where('app_certi_ib_id',$mainCertiIbId)->first()->update([
                 'app_certi_ib_id' => $certilIb->id
               ]);
+
+
+
             }
 
         }
+
+        $this->updateCertiIBFileAll($certilIb->token);
         CertiIBReport::where('app_certi_ib_id',$request->id)->first()->update([
             'ability_confirm' => 1
         ]);
+        // dd(CertiIBReport::where('app_certi_ib_id',$request->id)->first());
     }
 
         //log

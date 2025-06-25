@@ -297,7 +297,7 @@
 
                                             @elseif($item->status == 10 || $item->status == 11) <!-- อยู่ระหว่างดำเนินการ  -->
                                                 <button style="border: none" data-toggle="modal"  data-target="#TakeAction{{$loop->iteration}}"  data-id="{{ $item->token }}"  >
-                                                    <i class="mdi mdi-magnify"></i> เห็นชอบการแต่งตั้งคณะผู้ตรวจประเมิน
+                                                    <i class="mdi mdi-magnify"></i> อยู่ระหว่างดำเนินการ
                                                 </button>
                                                 @include ('certify.applicant_ib.modal.modalstatus10',['id'=> $loop->iteration,
                                                                                                        'token'=> $item->token,

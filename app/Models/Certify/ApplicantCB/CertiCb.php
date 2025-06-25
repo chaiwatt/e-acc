@@ -649,4 +649,10 @@ public function purposeType()
         }
     }
 
+            // เช็คขอบข่ายใน mapreq
+        public function certi_cb_export_mapreq_to()
+        {
+            return $this->hasOne(CertiCbExportMapreq::class, 'app_certi_cb_id');
+        }
+
 }

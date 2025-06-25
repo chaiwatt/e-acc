@@ -2588,6 +2588,65 @@ class ApplicantCBController extends Controller
     } 
    }
 
+
+    public function updateCertiCBFileAll($token = null)
+    {
+        $certi_cb_primary = CertiCb::where('token',$token)->firstOrfail();
+                // dd($certi_cb_primary);
+        if(!empty($certi_cb_primary->certi_cb_export_mapreq_to)){
+             $certi_cb_mapreq = CertiCbExportMapreq::where('certificate_exports_id', $certi_cb_primary->certi_cb_export_mapreq_to->certificate_exports_id)->orderBy('id')->firstOrfail();
+             if(!empty($certi_cb_mapreq->app_certi_cb_to)){
+                 $certi_cb = $certi_cb_mapreq->app_certi_cb_to;
+             }
+        }
+        if(!empty($certi_cb->certi_cb_export_mapreq_to)){
+        // $export               =  $certi_cb->app_certi_cb_export;
+        // $cert_cbs_file_all    =  !empty($export->CertiCbTo->cert_ibs_file_all_order_desc) ?  $export->CertiCbTo->cert_ibs_file_all_order_desc : []; 
+         // ใบรับรอง และ ขอบข่าย    
+         if(!is_null($certi_cb->certi_cb_export_mapreq_to)){
+            $certificate =  !empty($certi_cb->certi_cb_export_mapreq_to->app_certi_cb_export_to->certificate) ? $certi_cb->certi_cb_export_mapreq_to->app_certi_cb_export_to->certificate : null;
+            if(!is_null($certificate)){
+                     $export_no         =  CertiCBExport::where('certificate',$certificate);
+                    if(count($export_no->get()) > 0){
+
+                      $cb_ids = [];
+                      if($export_no->pluck('app_certi_cb_id')->count() > 0){
+                          foreach ($export_no->pluck('app_certi_cb_id') as $item) {
+                              if(!in_array($item,$cb_ids)){
+                                 $cb_ids[] =  $item;
+                              }
+                          }
+                      }
+
+                      if($certi_cb->certi_cb_export_mapreq_to->certicb_export_mapreq_group_many->count() > 0){
+                          foreach ($certi_cb->certi_cb_export_mapreq_to->certicb_export_mapreq_group_many->pluck('app_certi_cb_id') as $item) {
+                              if(!in_array($item,$cb_ids)){
+                                  $cb_ids[] =  $item;
+                              }
+                          }
+                      }
+
+
+                     // ขอบข่าย
+                      CertiCBFileAll::whereIn('app_certi_cb_id',$cb_ids)->orderby('created_at','desc')->whereNotIn('status_cancel',[1])->update([
+                        'state' => 0
+                      ]);
+   
+                       CertiCBFileAll::where('app_certi_cb_id', $certi_cb_primary->id)->update([
+                            'state' => 1
+                        ]);
+
+              
+                 } 
+            }
+         }
+      }
+
+
+        // return view('certify/cb/check_certificate_cb.certificate_detail', compact('certi_cb','cert_cbs_file_all', 'certi_cb_primary' ));
+    }
+
+
    public function abilityConfirm(Request $request)
    {
     // dd($request->all());
@@ -2650,7 +2709,7 @@ class ApplicantCBController extends Controller
 
         }
 
-        
+        $this->updateCertiCBFileAll($certilCb->token);
         CertiCBReport::where('app_certi_cb_id',$request->id)->first()->update([
             'ability_confirm' => 1
         ]);
