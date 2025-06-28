@@ -946,7 +946,7 @@ public function update_payin2(Request $request, $id)
    {
     //    dd($request->trackingId);
        $trackingDocReviewAuditor = TrackingDocReviewAuditor::where('tracking_id',$request->trackingId)->first();
-       dd(json_decode($trackingDocReviewAuditor->auditors, true));
+    //    dd(json_decode($trackingDocReviewAuditor->auditors, true));
        return response()->json([
            'trackingDocReviewAuditors' => json_decode($trackingDocReviewAuditor->auditors, true),
        ]);
