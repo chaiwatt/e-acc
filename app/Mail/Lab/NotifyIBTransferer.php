@@ -33,7 +33,7 @@ class NotifyIBTransferer extends Mailable
     {
         return $this->from( config('mail.from.address'),config('mail.from.name') ) // $this->email
         ->subject('มีการสร้างคำขอเพื่อขอโอนใบรับรองของท่าน')
-        ->view('mail.ib.mail_notify_transferer')
+        ->view('mail.IB.mail_notify_transferer')
         ->with([
                 'certificateExport' => $this->certificateExport,
                 'transferee' => $this->transferee,
