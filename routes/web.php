@@ -48,6 +48,9 @@ Route::get('funtions/get-view/files/{systems}/{tax_number}/{new_filename}/{filen
 
 // Test function
 
+Route::get('/abtest','MyTestController@abTest');
+Route::post('/export-pdf', 'MyTestController@exportPdf');
+
 Route::get('/test','MyTestController@index');
 Route::get('/add-lab-cal-scope','MyTestController@addLabCalScope');
 Route::get('/get-lab-cal-scope','MyTestController@getLabCalScope');

@@ -9,6 +9,7 @@ use Mpdf\Mpdf;
 use Mpdf\Tag\P;
 use Carbon\Carbon;
 use App\AttachFile;
+use Mpdf\HTMLParserMode;
 use App\CertificateExport;
 use App\Models\Basic\Staff;
 use Illuminate\Http\Request;
@@ -38,9 +39,72 @@ use App\Models\Bcertify\LabCalInstrumentTransaction;
 use App\Models\Bcertify\LabCalParameterOneTransaction;
 use App\Models\Certify\Applicant\CertiLabExportMapreq;
 use App\Models\Bcertify\CalibrationBranchInstrumentGroup;
-
+use Illuminate\Support\Facades\Response;
 class MyTestController extends Controller
 {
+
+   public function abTest()
+   {
+     return view('abtest.html');
+   }
+
+    public function exportPdf(Request $request)
+    {
+        $htmlPages = $request->input('html_pages');
+
+        if (!is_array($htmlPages) || empty($htmlPages)) {
+            return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+        }
+
+        $type = 'I'; 
+        $fontDirs = [public_path('pdf_fonts/')]; 
+
+        $fontData = [
+            'thsarabunnew' => [
+                'R' => "THSarabunNew.ttf",
+                'B' => "THSarabunNew-Bold.ttf",
+                'I' => "THSarabunNew-Italic.ttf",
+                'BI' => "THSarabunNew-BoldItalic.ttf",
+            ]
+        ];
+
+        $mpdf = new Mpdf([
+            'PDFA'              => $type == 'F' ? true : false,
+            'PDFAauto'          => $type == 'F' ? true : false,
+            'format'            => 'A4',
+            'mode'              => 'utf-8',
+            'default_font_size' => 15,
+            'fontDir'           => array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], $fontDirs),
+            'fontdata'          => array_merge((new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'], $fontData),
+            'default_font'      => 'thsarabunnew',
+            'fontdata_fallback' => ['dejavusans', 'freesans', 'arial'], 
+            'margin_left'       => 13,
+            'margin_right'      => 13,
+            'margin_top'        => 10,
+            'margin_bottom'     => 10,
+            'tempDir'           => sys_get_temp_dir(),
+        ]);
+
+        $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
+        $mpdf->WriteHTML($stylesheet, 1);
+        // dd(count($htmlPages));
+        foreach ($htmlPages as $index => $pageHtml) {
+            if ($index > 0) {
+                $mpdf->AddPage(); 
+            }
+            // ใช้ HTMLParserMode::HTML_BODY เพื่อให้ mPDF จัดการโครงสร้าง body สำหรับแต่ละหน้า
+            $mpdf->WriteHTML($pageHtml,HTMLParserMode::HTML_BODY); 
+        }
+
+        // *** เปลี่ยนบรรทัดนี้เพื่อส่ง PDF Output พร้อม Header ที่ชัดเจน ***
+        return Response::make($mpdf->Output(), 200, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => ($type === 'D' ? 'attachment' : 'inline') . '; filename="document.pdf"',
+        ]);
+    }
+   
+
+
     public function index()
     {
 

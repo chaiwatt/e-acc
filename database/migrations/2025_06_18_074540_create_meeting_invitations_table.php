@@ -23,7 +23,9 @@ class CreateMeetingInvitationsTable extends Migration
             $table->longText('details')->nullable(); // รายละเอียด
             $table->longText('ps_text')->nullable(); // รายละเอียด
             $table->string('qr_file_path')->nullable(); // เก็บชื่อไฟล์ QR
+            $table->string('google_form_qr')->nullable(); 
             $table->unsignedInteger('signer_id')->nullable(); 
+            $table->string('signer_position')->nullable(); // เก็บชื่อไฟล์ QR
             $table->char('status',1)->default(1);
             $table->timestamps();
         });
