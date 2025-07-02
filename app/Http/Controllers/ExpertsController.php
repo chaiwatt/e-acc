@@ -41,7 +41,7 @@ class ExpertsController extends Controller
 
     public function index(Request $request)
     {
-
+        // dd("ok");
 
         if(isset($request['session_id'])){//รับค่า session_id จาก form
             if(HP::CheckSession()){

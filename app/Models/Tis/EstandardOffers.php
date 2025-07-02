@@ -35,7 +35,4 @@ class EstandardOffers extends Model
     */
     public $sortable =  ['title', 'title_eng', 'std_type', 'scope', 'objectve', 'path','caption', 'attach_old', 'attach_new', 'attach_type', 'stakeholders', 'name', 'telephone','department_id', 'department', 'email', 'address', 'ip_address', 'user_agent', 'state', 'created_by', 'updated_by'];
 
-
-
-
 }

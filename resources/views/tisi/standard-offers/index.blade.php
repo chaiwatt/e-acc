@@ -124,7 +124,7 @@
                                     <th class="text-left" width="10%">ชื่อเรื่อง</th>
                                     <th class="text-left" width="10%">วันที่รับคำขอ</th>
                                     <th class="text-left" width="10%">สถานะ</th>
-                                    <th class="text-center"width="10%">เครื่องมือ</th>
+                                    <th class="text-right"width="10%">จัดการ</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -143,19 +143,33 @@
                                     <td> 
 
                                      {{ HP::DateThai($offer->created_at) }}
-                                        
                                  </td>
-
                                     <td> 
-
                                          ID:{{$offer->state}} {{ HP::StateEstandardOffers()[$offer->state] ?? 'ไม่พบข้อมูล' }}
                                  </td>
                                    
-
-                                    <td class="text-nowrap text-left">
-            
-                                       
-                                    </td>
+{{-- 
+                                <td class="text-nowrap text-right">
+                                    @if(HP::CheckPermission('edit-'.str_slug('applicantcbs')))
+                                        <a href="{{ route('tisi.standard-offers.edit', $offer->id) }}" class="btn btn-warning btn-xs"> <i class="fa fa-edit"></i>  </a>
+                                    @endif
+                                </td> --}}
+                                <td class="text-nowrap text-right">
+                                    
+                                    @if(HP::CheckPermission('view-'.str_slug('applicantcbs')))
+                                        <a href="{{ route('tisi.standard-offers.view', $offer->id) }}" class="btn btn-info btn-xs">
+                                            <i class="fa fa-eye"></i>
+                                        </a>
+                                    @endif
+                                   
+                                    @if ($offer->id == 1)
+                                         @if(HP::CheckPermission('edit-'.str_slug('applicantcbs')))
+                                            <a href="{{ route('tisi.standard-offers.edit', $offer->id) }}" class="btn btn-warning btn-xs">
+                                                <i class="fa fa-edit"></i>
+                                            </a>
+                                        @endif
+                                    @endif
+                                </td>
                                 </tr>
                                
                             @endforeach

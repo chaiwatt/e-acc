@@ -53,24 +53,11 @@ class StandardOffersController extends Controller
     public function store(Request $request)
     {
 
-
-            // protected $fillable = ['title', 'address', 'province_id', 'amphur_id', 'district_id', 'poscode', 'tel', 'mobile', 'fax', 'email', 'state', 'created_by', 'updated_by'];
-        // $department =  new Department();
-        // $department->tiele = $request->title;
-        // $department->address = $request->address;
-        // $department->province_id = $request->province_id;
-        // $department->amphur_id = $request->amphur_id;
-        // $department->district_id = $request->district_id;
-        // $department->poscode = $request->poscode;
-        // $department->district_id = $request->district_id;
-        // $department->district_id = $request->district_id;
         $requestData = $request->all();
-        // dd($requestData);
 
         $department = Department::create($requestData);
-
-        // dd($appoint_department);
-
+ 
+        // dd($requestData);
         $data_session     =    HP::CheckSession();
        
         $requestData['state'] = 1;
@@ -82,27 +69,6 @@ class StandardOffersController extends Controller
         $requestData['owner'] = $data_session->username;
         $requestData['department_id'] = $department->id;
         $requestData['department'] = $department->title;
-
-        // if(isset($request->department_id)){
-        //     $department =  Department::where('id',$request->department_id)->first();
-        //     if(!is_null($department)){
-        //         $requestData['department']  =   !empty($department->title) ? $department->title : null; 
-        //     }
-        // }
-
-        // dd($requestData);
-       
-
-        // if ($request->attach && $request->hasFile('attach')){
-        //     $attach_path                    =  $this->attach_path; 
-        //     $requestData['caption']         =   !empty($request->caption) ? $request->caption : null;
-        //     $requestData['path']            =   $attach_path;
-        //     $requestData['attach_new']      = $this->storeFile($request->attach,$attach_path);
-        //     $requestData['attach_old']      = HP::ConvertCertifyFileName($request->attach->getClientOriginalName());
-        //     $requestData['attach_type']     = $request->attach->getClientOriginalExtension();
-        // }
-        // $requestData['scope']     = $request->attach->getClientOriginalExtension();
-        //    protected $fillable = ['title','owner', 'title_eng', 'std_type', 'scope', 'objectve', 'path','caption', 'attach_old', 'attach_new', 'attach_type', 'stakeholders', 'name', 'telephone','department_id', 'department', 'email', 'address', 'ip_address', 'user_agent', 'state', 'created_by', 'updated_by'];
 
         $offers = EstandardOffers::create($requestData);
 
@@ -120,8 +86,6 @@ class StandardOffersController extends Controller
                  ( !empty($request->caption) ? $request->caption : null)
             ); 
         }
-    
-        //  dd($offers);
  
 
         return redirect('tisi/standard-offers')->with('message',  'เสนอความเห็นฯ เรียบร้อย'  );
@@ -143,6 +107,68 @@ class StandardOffersController extends Controller
                 return null;
             }
         }
+
+
+    public function edit($id)
+    {
+        $offer = EstandardOffers::findOrFail($id);
+        $department = Department::findOrFail($offer->department_id);
+        $districts = []; // Populate as needed
+        $amphurs = []; // Populate as needed
+            $addressInfo = $this->getAddress($offer->department_id);
+
+        // dd($department);
+
+        return view('tisi.standard-offers.edit', compact('offer', 'department', 'districts', 'amphurs','addressInfo'));
+    }
+
+    public function update(Request $request, $id)
+{
+    $requestData = $request->all();
+    $offer = EstandardOffers::findOrFail($id);
+    $department = Department::findOrFail($offer->department_id);
+
+
+
+    $department->update($requestData);
+    $requestData['department'] = $department->title;
+    $requestData['department_id'] = $department->id;
+    $requestData['owner'] = HP::CheckSession()->username;
+    $requestData['ip_address'] = $request->ip();
+    $requestData['user_agent'] = $request->server('HTTP_USER_AGENT');
+    $requestData['created_by'] = auth()->user()->id ?? null;
+    $requestData['telephone'] = HP::CheckSession()->tel;
+
+    $offer->update($requestData);
+
+    if ($request->hasFile('attach_file')) {
+        HP::singleFileUpload(
+            $request->file('attach_file'),
+            $this->attach_path,
+            auth()->user()->tax_number ?? null,
+            auth()->user()->name ?? null,
+            'E-ACC',
+            (new EstandardOffers)->getTable(),
+            $offer->id,
+            'attach_file',
+            $request->caption ?? null
+        );
+    }
+
+    return redirect('tisi/standard-offers')->with('message', 'แก้ไขความเห็นฯ เรียบร้อย');
+}
+
+public function view($id)
+    {
+        $offer = EstandardOffers::findOrFail($id);
+        $department = Department::findOrFail($offer->department_id);
+        $districts = []; // Populate as needed
+        $amphurs = []; // Populate as needed
+        $addressInfo = $this->getAddress($offer->department_id);
+
+        return view('tisi.standard-offers.view', compact('offer', 'department', 'districts', 'amphurs', 'addressInfo'));
+    }
+
     function address_department(Request $request){
         
          $department =  Department::where('id',$request->select)->first();
@@ -176,6 +202,41 @@ class StandardOffersController extends Controller
 
         return response()->json(['address'=> $address,'tel'=> $department->tel,'email'=> $department->email]);
     }
+
+        function getAddress($id){
+        
+         $department =  Department::find($id);
+         $address = '';
+        if(!is_null($department)){
+            $address .= @$department->address;
+            if(!empty($department->province->PROVINCE_NAME)){
+                 $PROVINCE_NAME = $department->province->PROVINCE_NAME;
+                if($PROVINCE_NAME ==' กรุงเทพมหานคร'){
+
+                    if(!empty($department->district->DISTRICT_NAME)){
+                        $address .= " แขวง".$department->district->DISTRICT_NAME;
+                    }
+
+                    if(!empty($department->amphur->AMPHUR_NAME)){
+                        $address .= " ตำบล".$department->amphur->AMPHUR_NAME;
+                    }
+                         $address .= " ".$PROVINCE_NAME;
+                }else{
+                    if(!empty($department->district->DISTRICT_NAME)){
+                        $address .= " แขวง".$department->district->DISTRICT_NAME;
+                    }
+
+                    if(!empty($department->amphur->AMPHUR_NAME)){
+                        $address .= " อำเภอ".$department->amphur->AMPHUR_NAME;
+                    }
+                         $address .= " จังหวัด".$PROVINCE_NAME;
+                }
+            }
+        }
+
+        return $address;
+    }
+
 
     public function save_department(Request $request)
     {

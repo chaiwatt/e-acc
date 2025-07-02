@@ -92,6 +92,15 @@ Route::get('tisi/standard-offers','Tisi\\StandardOffersController@index');
 Route::post('tisi/standard-offers/store','Tisi\\StandardOffersController@store');
 Route::post('tisi/standard-offers/save_department','Tisi\\StandardOffersController@save_department');
 
+// Route to show the edit form
+Route::get('tisi/standard-offers/{id}/edit', 'Tisi\\StandardOffersController@edit')->name('tisi.standard-offers.edit');
+
+// Route to show the view page
+Route::get('/{id}/view', 'Tisi\\StandardOffersController@view')->name('tisi.standard-offers.view');
+
+// Route to update an existing standard offer
+Route::put('tisi/standard-offers/{id}/update', 'Tisi\\StandardOffersController@update')->name('tisi.standard-offers.update');
+
 
     // อ่านไฟล์ที่แนบ pay-in LAB
     Route::get('certify/check/files/pay_in_lab/{filename}', function($filename)
