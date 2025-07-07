@@ -14,7 +14,8 @@
 
         @font-face {
             font-family: 'thsarabunnew';
-            src: url('/fonts/THSarabunNew.ttf') format('truetype');
+            /* src: url('/fonts/THSarabunNew.ttf') format('truetype'); */
+            src: url('{{ asset('fonts/THSarabunNew.ttf') }}') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
