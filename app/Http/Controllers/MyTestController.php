@@ -357,6 +357,8 @@ class MyTestController extends Controller
    
     public function exportPdf(Request $request)
     {
+
+      // dd("ok");
         $htmlPages = $request->input('html_pages');
 
        
@@ -411,7 +413,7 @@ class MyTestController extends Controller
             'margin_right'      => 13,
             'margin_top'        => 10,
             'margin_bottom'     => 0,
-            // 'tempDir'           => sys_get_temp_dir(),
+            'tempDir'           => sys_get_temp_dir(),
         ]);
 
         $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
