@@ -682,10 +682,10 @@
     <div id="context-menu">
         <div class="context-menu-item" data-action="add-item">เพิ่มรายการ</div>
         <div class="context-menu-separator" data-action="separator-add"></div>
-        <div class="context-menu-item" data-action="insert-row-above">แทรกแถวด้านบน <span style="float: right; color: #888; margin-left: 20px;">Shift+F1</span></div>
-        <div class="context-menu-item" data-action="insert-row-above-no-border">แทรกแถวด้านบน (ไม่มีขอบ) <span style="float: right; color: #888; margin-left: 20px;">Shift+F2</span></div>
-        <div class="context-menu-item" data-action="insert-row-below">แทรกแถวด้านล่าง <span style="float: right; color: #888; margin-left: 20px;">Shift+F4</span></div>
-        <div class="context-menu-item" data-action="insert-row-below-no-border">แทรกแถวด้านล่าง (ไม่มีขอบ) <span style="float: right; color: #888; margin-left: 20px;">Shift+F5</span></div>
+        <div class="context-menu-item" data-action="insert-row-above">แทรกแถวด้านบน</div>
+        <div class="context-menu-item" data-action="insert-row-above-no-border">แทรกแถวด้านบน (ไม่มีขอบ)</div>
+        <div class="context-menu-item" data-action="insert-row-below">แทรกแถวด้านล่าง</div>
+        <div class="context-menu-item" data-action="insert-row-below-no-border">แทรกแถวด้านล่าง (ไม่มีขอบ)</div>
         <div class="context-menu-item" data-action="insert-column-left">แทรกคอลัมน์ด้านซ้าย</div>
         <div class="context-menu-item" data-action="insert-column-right">แทรกคอลัมน์ด้านขวา</div>
         <div class="context-menu-separator"></div>
@@ -1661,20 +1661,10 @@ const insertCbTemplate = () => {
             if (thead && thead.rows.length > 0 && thead.rows[0].cells.length > 0) {
                 colCount = thead.rows[0].cells.length;
             } else if (table.rows.length > 1) {
-                // Find a row with the most cells to account for colspans
-                for(let i = 0; i < table.rows.length; i++) {
-                    let currentCellCount = 0;
-                    for(let j = 0; j < table.rows[i].cells.length; j++) {
-                        currentCellCount += table.rows[i].cells[j].colSpan;
-                    }
-                    if(currentCellCount > colCount) {
-                        colCount = currentCellCount;
-                    }
-                }
+                colCount = table.rows[0].cells.length;
             } else {
                 colCount = table.rows[rowIndex].cells.length;
             }
-
 
             // Create cells for the new row
             for (let i = 0; i < colCount; i++) {
@@ -1861,9 +1851,7 @@ const insertCbTemplate = () => {
         // --- FIXED: Context Menu Click Logic ---
         // === START: MODIFICATION ===
         contextMenu.addEventListener('click', (event) => {
-            const actionTarget = event.target.closest('.context-menu-item');
-            if (!actionTarget) return;
-            const action = actionTarget.dataset.action;
+            const action = event.target.dataset.action;
             if (!action) return;
 
             const table = contextMenuTarget?.closest('table');
@@ -1987,51 +1975,6 @@ const insertCbTemplate = () => {
                 }
             }
         });
-        
-        // === START: NEW KEYBOARD SHORTCUTS FOR TABLE ROWS ===
-        document.addEventListener('keydown', (event) => {
-            // Check for Shift key and F1, F2, F4, F5 keys
-            if (event.shiftKey && ['F1', 'F2', 'F4', 'F5'].includes(event.key)) {
-                const selection = window.getSelection();
-                if (!selection.rangeCount) return;
-
-                const range = selection.getRangeAt(0);
-                const currentElement = range.startContainer;
-                // Find the closest cell (td or th) from the current cursor position
-                const cell = currentElement.nodeType === Node.ELEMENT_NODE 
-                             ? currentElement.closest('td, th') 
-                             : currentElement.parentElement.closest('td, th');
-
-                if (cell) {
-                    event.preventDefault(); // Prevent default browser actions (like opening help)
-
-                    const table = cell.closest('table');
-                    const row = cell.closest('tr');
-                    const rowIndex = Array.from(table.rows).indexOf(row);
-
-                    if (rowIndex === -1) return;
-
-                    switch (event.key) {
-                        case 'F1': // Shift+F1: Insert row above
-                            insertTableRow(table, rowIndex, true, false);
-                            break;
-                        case 'F2': // Shift+F2: Insert row above (no border)
-                            insertTableRow(table, rowIndex, true, true);
-                            break;
-                        case 'F4': // Shift+F4: Insert row below
-                            insertTableRow(table, rowIndex, false, false);
-                            break;
-                        case 'F5': // Shift+F5: Insert row below (no border)
-                            insertTableRow(table, rowIndex, false, true);
-                            break;
-                    }
-                     const activePage = table?.closest('.page');
-                     activePage?.focus();
-                }
-            }
-        });
-        // === END: NEW KEYBOARD SHORTCUTS FOR TABLE ROWS ===
-
 
         document.addEventListener('mousedown', (event) => {
             if (!event.target.closest('.image-container')) {

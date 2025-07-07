@@ -49,6 +49,17 @@ Route::get('funtions/get-view/files/{systems}/{tax_number}/{new_filename}/{filen
 // Test function
 
 Route::get('/abtest','MyTestController@abTest');
+
+Route::get('/show-lab-cal-details','MyTestController@showLabCalDetails');
+Route::get('/show-lab-test-details','MyTestController@showLabTestDetails');
+Route::get('/show-cb-details','MyTestController@showCbDetails');
+Route::get('/show-ib-details','MyTestController@showIbDetails');
+
+Route::post('/save-html-template','MyTestController@saveHtmlTemplate');
+
+Route::post('/download-html-template','MyTestController@downloadHtmlTemplate');
+
+
 Route::post('/export-pdf', 'MyTestController@exportPdf');
 
 Route::get('/test','MyTestController@index');
@@ -608,6 +619,11 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
         Route::get('/delete/file_certiLab/{path}/{token}','Certify\ApplicantController@removeFilesCertiLabAttachAll');
         Route::get('/delete/file_certiLab_more/{path}/{token}','Certify\ApplicantController@removeFilesCertiLabAttachhMoreAll');
         Route::get('/delete/file_box_image/{path}/{token}','Certify\ApplicantController@removeFilesCertiLabCheckBoxImage');
+
+        // start scope
+        Route::get('/lab-scope-editor','Certify\ApplicantController@scopeEditor')->name('certify.applicant.lab-scope-editor');
+        Route::get('/special-sign','Certify\ApplicantController@specialSign')->name('certify.applicant.special-sign');
+        // scope end
 
         Route::get('/delete/certi_lab_info/{id?}/{token?}','Certify\ApplicantController@UpdateFileLabInfo');
 

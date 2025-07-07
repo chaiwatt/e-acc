@@ -82,6 +82,7 @@
     <legend><h4><span class="text-danger">*</span> 5. ขอบข่ายที่ยื่นขอรับการรับรอง
         (<span class="text-warning">ห้องปฏิบัติการสอบเทียบ</span>) (Scope of Accreditation Sought (<span class="text-warning">For calibration laboratory</span>)) </h4></legend>
             <div class="clearfix"></div>
+            <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">เพิ่มขอบข่าย</a> 
             @if ($urlType == 'create')
                 <table class="table table-bordered" id="myTable_labScope">
                     <thead class="bg-primary">
@@ -716,6 +717,34 @@
 
 
         $(document).ready(function () {
+
+
+            $('#scope-editor').on('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Get the values from the form inputs
+                    var accordingFormula = $('#according_formula').val();
+                    var labAbility = $('input[name="lab_ability"]:checked').val();
+                    var purpose = $('input[name="purpose"]:checked').val();
+                    var labName = $('#lab_name').val();
+                    var labNameEn = $('#lab_name_en').val();
+                    
+                    // Check if any value is undefined or empty
+                    if (!accordingFormula || !labAbility || !purpose || !labName || !labNameEn) {
+                        alert('กรุณากรอกข้อมูลให้ครบถ้วน: ตามมาตรฐานเลข, ความสามารถห้องปฏิบัติการ, วัตถุประสงค์, ชื่อห้องปฏิบัติการ (TH), และชื่อห้องปฏิบัติการ (EN)');
+                        return;
+                    }
+                    
+                    // Build the URL with query parameters
+                    var url = $(this).attr('href') + '?according_formula=' + encodeURIComponent(accordingFormula) +
+                            '&lab_ability=' + encodeURIComponent(labAbility) +
+                            '&purpose=' + encodeURIComponent(purpose) +
+                            '&lab_name=' + encodeURIComponent(labName) +
+                            '&lab_name_en=' + encodeURIComponent(labNameEn);
+                    
+                    // Open the URL in a new tab
+                    window.open(url, '_blank');
+                });
 
             //เพิ่มตำแหน่งงาน
             $('#test_tools_add').click(function() {

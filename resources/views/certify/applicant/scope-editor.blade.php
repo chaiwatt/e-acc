@@ -8,6 +8,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    {{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> --}}
+   
     <style>
 
         @font-face {
@@ -425,6 +427,37 @@
         .cb-modal .detail {
             width: 540px;
         }
+
+        /* Adjust select element styling to match other inputs */
+        #lab-cal-item-modal select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 22px;
+            font-family: 'thsarabunnew', sans-serif;
+            appearance: none; /* Remove default arrow */
+            background-color: #fff;
+            cursor: pointer;
+            width: 200px;
+        }
+
+        /* Custom arrow for select */
+        #lab-cal-item-modal select::-ms-expand {
+            display: none; /* Hide default arrow in IE */
+        }
+
+        #lab-cal-item-modal .modal-input-group select:focus {
+            outline: none;
+            border-color: #4285f4;
+            box-shadow: 0 0 5px rgba(66, 133, 244, 0.5);
+        }
+
+        /* Ensure consistent height and alignment */
+        #lab-cal-item-modal .modal-input-group {
+            align-items: center;
+        }
     </style>
 </head>
 <body>
@@ -593,17 +626,26 @@
             <div class="modal-input-group" style="display: flex; gap: 20px;">
                 <div style="flex: 1;">
                     <label for="lab-cal-field">สาขาการสอบเทียบ:</label>
-                    <input type="text" id="lab-cal-field" >
+                    <select id="lab-cal-field" >
+                        {{-- <option value="1">1</option>
+                         <option value="2">2</option> --}}
+                    </select>
                 </div>
                 <div style="flex: 1;">
                     <label for="lab-cal-instrument">เครื่องมือ:</label>
-                    <input type="text" id="lab-cal-instrument">
+                    <select id="lab-cal-instrument" >
+                        {{-- <option value="1">1</option>
+                         <option value="2">2</option> --}}
+                    </select>
                 </div>
             </div>
             <div class="modal-input-group" style="display: flex; gap: 20px;">
                 <div style="flex: 1;">
-                    <label for="lab-cal-parameter">พารามิเตอร์:</label>
-                    <input type="text" id="lab-cal-parameter" >
+                    <label for="lab-cal-parameter">พารามิเตอร์: <a href="{{ route('certify.applicant.special-sign') }}" style="text-decoration: none; font-size: 18px;" target="_blank">สัญลักษณ์พิเศษ</a></label>
+                     <select id="lab-cal-parameter" >
+                        {{-- <option value="1">1</option>
+                         <option value="2">2</option> --}}
+                    </select>
                 </div>
                 <div style="flex: 1;">
                     <label for="lab-cal-condition">เงื่อนไขการวัด:</label>
@@ -695,7 +737,7 @@
         <div class="context-menu-item" data-action="merge-columns">รวมคอลัมน์</div>
     </div>
     <!-- === END: MODIFICATION === -->
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         document.execCommand('styleWithCSS', false, true);
 
@@ -728,7 +770,6 @@
         const labTestDetailsFromBlade = @json($labTestDetails ?? null);
         const cbDetailsFromBlade = @json($cbDetails ?? null);
         const ibDetailsFromBlade = @json($ibDetails ?? null);
-
                                                                 
         let savedRange = null; // Used for image insertion
         let contextMenuTarget = null;
@@ -1875,7 +1916,28 @@ const insertCbTemplate = () => {
                 switch (templateType) {
                     case 'cb':      cbItemModal.style.display = 'flex'; break;
                     case 'ib':      ibItemModal.style.display = 'flex'; break;
-                    case 'lab_cal': labCalItemModal.style.display = 'flex'; break;
+                    case 'lab_cal': 
+                    
+                     $.ajax({
+                            url: "/certify/applicant/api/calibrate", // As requested
+                            method: "POST",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            success: function(response) {
+                                const fieldSelect = $('#lab-cal-field');
+                                fieldSelect.empty().append('<option value="" disabled selected>- สาขาสอบเทียบ -</option>');
+                                if (Array.isArray(response)) {
+                                    $.each(response, function (index, value) {
+                                        fieldSelect.append(`<option value="${value.id}" data-en="${value.title_en}">${value.title}</option>`);
+                                    });
+                                }
+                                labCalItemModal.style.display = 'flex';
+                            }
+                        });
+                        labCalItemModal.style.display = 'flex'; 
+                    
+                    break;
                     case 'lab_test':labTestItemModal.style.display = 'flex'; break;
                     default:
                         alert('ไม่พบ Template ที่ใช้งานอยู่เพื่อเพิ่มรายการ');
@@ -1942,6 +2004,54 @@ const insertCbTemplate = () => {
         });
         // === END: MODIFICATION ===
 
+
+        $('#lab-cal-field').on('change', function() {
+            const fieldId = $(this).val();
+            if (fieldId) {
+                $.ajax({
+                    url: "/certify/applicant/api/instrumentgroup",
+                    method: "POST",
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    data: { bcertify_calibration_branche_id: fieldId},
+                    success: function(response) {
+
+                        console.log(response)
+                        const instrumentSelect = $('#lab-cal-instrument');
+                        instrumentSelect.empty();
+                        if (Array.isArray(response)) {
+                            $.each(response, function(index, value) {
+                                instrumentSelect.append(`<option value="${value.id}">${value.name}</option>`);
+                            });
+                        }
+                    }
+                });
+            }
+        });
+
+        $('#lab-cal-instrument').on('change', function() {
+            const fieldId = $(this).val();
+            if (fieldId) {
+                $.ajax({
+                    url: "/certify/applicant/api/instrument",
+                    method: "POST",
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    data: { calibration_branch_instrument_group_id: fieldId},
+                    success: function(response) {
+                        const parameterSelect = $('#lab-cal-parameter');
+                        parameterSelect.empty();
+                        if (Array.isArray(response.instrument)) {
+                            $.each(response.instrument, function(index, value) {
+                                parameterSelect.append(`<option value="${value.id}">${value.name}</option>`);
+                            });
+                        }
+                    }
+                });
+            }
+        });
 
         document.addEventListener('click', (event) => {
             // Hide context menu if the click is outside of it AND not inside a modal overlay
@@ -2227,10 +2337,15 @@ const insertCbTemplate = () => {
             }
 
             // Get values from modal and trim them
-            const field = document.getElementById('lab-cal-field').value.trim();
-            const instrument = document.getElementById('lab-cal-instrument').value.trim();
-            const parameter = document.getElementById('lab-cal-parameter').value.trim();
+            // const field = document.getElementById('lab-cal-field').value.trim();
+            const field = $('#lab-cal-field option:selected').text();
+            const instrument = $('#lab-cal-instrument option:selected').text();
+            // const instrument = document.getElementById('lab-cal-instrument').value.trim();
+            const parameter = $('#lab-cal-parameter option:selected').text();
+            // const parameter = document.getElementById('lab-cal-parameter').value.trim();
             const condition = document.getElementById('lab-cal-condition').value.trim();
+
+            console.log(field)
             
             // Get values from editable divs using LineExtractor
             const paramDetailsLines = labCalParamDetailsEditorExtractor.getLines();

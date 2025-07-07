@@ -728,7 +728,6 @@
         const labTestDetailsFromBlade = @json($labTestDetails ?? null);
         const cbDetailsFromBlade = @json($cbDetails ?? null);
         const ibDetailsFromBlade = @json($ibDetails ?? null);
-
                                                                 
         let savedRange = null; // Used for image insertion
         let contextMenuTarget = null;

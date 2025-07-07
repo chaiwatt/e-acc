@@ -8,6 +8,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- === START: Added CDNs for jQuery and Select2 === -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <!-- === END: Added CDNs === -->
+
     <style>
 
         @font-face {
@@ -300,7 +307,8 @@
         }
         
         .modal-input-group input[type="number"],
-        .modal-input-group input[type="text"] {
+        .modal-input-group input[type="text"],
+        .modal-input-group select { /* Added select styling */
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
@@ -390,7 +398,8 @@
             font-size: 22px;
         }
         /* Input field styling */
-        .lab-cal-modal input[type="text"] {
+        .lab-cal-modal input[type="text"],
+        .lab-cal-modal select { /* Added select */
             width: 200px;
             font-family: 'thsarabunnew', sans-serif;
             font-size: 22px;
@@ -407,6 +416,24 @@
         .lab-cal-modal #lab-cal-method-editor {
             width: 200px;
         }
+        
+        /* === START: Select2 Styling Override === */
+        .select2-container .select2-selection--single {
+            height: 40px; /* Match other inputs */
+            font-size: 18px;
+            font-family: 'thsarabunnew', sans-serif;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 38px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 38px;
+        }
+        .select2-dropdown {
+            font-size: 18px;
+            font-family: 'thsarabunnew', sans-serif;
+        }
+        /* === END: Select2 Styling Override === */
 
         /* Input field styling */
         .ib-modal input[type="text"],
@@ -589,27 +616,28 @@
     <div id="lab-cal-item-modal" class="modal-overlay lab-cal-modal">
         <div class="modal-content">
             <h3>เพิ่มรายการ (Lab Cal)</h3>
-            <!-- === START: MODIFICATION === -->
+            <!-- === START: MODIFICATION (input to select) === -->
             <div class="modal-input-group" style="display: flex; gap: 20px;">
                 <div style="flex: 1;">
                     <label for="lab-cal-field">สาขาการสอบเทียบ:</label>
-                    <input type="text" id="lab-cal-field" >
+                    <select id="lab-cal-field" style="width: 100%;"></select>
                 </div>
                 <div style="flex: 1;">
                     <label for="lab-cal-instrument">เครื่องมือ:</label>
-                    <input type="text" id="lab-cal-instrument">
+                    <select id="lab-cal-instrument" style="width: 100%;"></select>
                 </div>
             </div>
             <div class="modal-input-group" style="display: flex; gap: 20px;">
                 <div style="flex: 1;">
                     <label for="lab-cal-parameter">พารามิเตอร์:</label>
-                    <input type="text" id="lab-cal-parameter" >
+                    <select id="lab-cal-parameter" style="width: 100%;"></select>
                 </div>
                 <div style="flex: 1;">
                     <label for="lab-cal-condition">เงื่อนไขการวัด:</label>
                     <input type="text" id="lab-cal-condition" >
                 </div>
             </div>
+            <!-- === END: MODIFICATION === -->
             <div class="modal-input-group" style="display: flex; gap: 20px;">
                 <div style="flex: 1;">
                     <label for="lab-cal-param-details-editor">รายละเอียดพารามิเตอร์:</label>
@@ -620,7 +648,6 @@
                     <div id="lab-cal-capability-editor" class="editable-div" contenteditable="true"></div>
                 </div>
             </div>
-            <!-- === END: MODIFICATION === -->
             <div class="modal-input-group">
                 <label for="lab-cal-method-editor" style="display: block;">วิธีสอบเทียบ / มาตรฐานที่ใช้:</label>
                 <div id="lab-cal-method-editor" class="editable-div" contenteditable="true"></div>
@@ -728,7 +755,6 @@
         const labTestDetailsFromBlade = @json($labTestDetails ?? null);
         const cbDetailsFromBlade = @json($cbDetails ?? null);
         const ibDetailsFromBlade = @json($ibDetails ?? null);
-
                                                                 
         let savedRange = null; // Used for image insertion
         let contextMenuTarget = null;
@@ -1875,7 +1901,62 @@ const insertCbTemplate = () => {
                 switch (templateType) {
                     case 'cb':      cbItemModal.style.display = 'flex'; break;
                     case 'ib':      ibItemModal.style.display = 'flex'; break;
-                    case 'lab_cal': labCalItemModal.style.display = 'flex'; break;
+                    case 'lab_cal':
+                        // === START: AJAX Call for Lab Cal ===
+                        actionTarget.innerHTML = 'กำลังโหลด...'; // Loading indicator
+                        actionTarget.style.pointerEvents = 'none';
+
+                        $.ajax({
+                            url: "/certify/applicant/api/calibrate", // As requested
+                            method: "POST",
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                            },
+                            success: function(response) {
+                                console.log(response)
+                                
+                              const fieldSelect = $('#lab-cal-field');
+
+                                // Destroy existing select2 if any
+                                if (fieldSelect.hasClass('select2-hidden-accessible')) {
+                                    console.log
+                                    fieldSelect.select2('destroy');
+                                }
+
+                                // Populate fields based on the provided response structure
+                                fieldSelect.empty().append('<option value="" disabled selected>- สาขาสอบเทียบ -</option>');
+                                if (Array.isArray(response)) {
+                                    $.each(response, function (index, value) {
+                                        fieldSelect.append(`<option value="${value.id}" data-en="${value.title_en}">${value.title}</option>`);
+                                    });
+                                }
+                                
+                                // For now, just clear the other selects as their data source is different
+                                $('#lab-cal-instrument').empty().append('<option value="" disabled selected>- เลือกเครื่องมือ -</option>');
+                                $('#lab-cal-parameter').empty().append('<option value="" disabled selected>- เลือกพารามิเตอร์ -</option>');
+
+
+                                // Initialize Select2
+                                fieldSelect.select2();
+                                $('#lab-cal-instrument').select2();
+                                $('#lab-cal-parameter').select2();
+
+                                // Show the modal
+                                labCalItemModal.style.display = 'flex';
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("AJAX Error:", error);
+                                alert("เกิดข้อผิดพลาดในการโหลดข้อมูล: " + error);
+                            },
+                            complete: function() {
+                                // Reset the context menu item
+                                actionTarget.innerHTML = 'เพิ่มรายการ';
+                                actionTarget.style.pointerEvents = 'auto';
+                                hideContextMenu();
+                            }
+                        });
+                        // === END: AJAX Call for Lab Cal ===
+                        break;
                     case 'lab_test':labTestItemModal.style.display = 'flex'; break;
                     default:
                         alert('ไม่พบ Template ที่ใช้งานอยู่เพื่อเพิ่มรายการ');
@@ -2082,6 +2163,17 @@ const insertCbTemplate = () => {
             // MODIFIED: Also clear contenteditable divs
             modal.querySelectorAll('.editable-div').forEach(div => div.innerHTML = '');
             // Also reset the context menu state since the modal action is complete.
+            
+            // === START: Clear Select2 ===
+            const selects = modal.querySelectorAll('select');
+            selects.forEach(select => {
+                const $select = $(select);
+                if ($select.hasClass('select2-hidden-accessible')) {
+                    $select.val(null).trigger('change');
+                }
+            });
+            // === END: Clear Select2 ===
+
             hideContextMenu();
             activeModalTargetRow = null; // **NEW**: Clear the persisted row
         }
@@ -2226,11 +2318,12 @@ const insertCbTemplate = () => {
                  return;
             }
 
-            // Get values from modal and trim them
-            const field = document.getElementById('lab-cal-field').value.trim();
-            const instrument = document.getElementById('lab-cal-instrument').value.trim();
-            const parameter = document.getElementById('lab-cal-parameter').value.trim();
+            // === START: Get values from Select2 and inputs ===
+            const field = $('#lab-cal-field option:selected').text();
+            const instrument = $('#lab-cal-instrument option:selected').text();
+            const parameter = $('#lab-cal-parameter option:selected').text();
             const condition = document.getElementById('lab-cal-condition').value.trim();
+            // === END: Get values from Select2 and inputs ===
             
             // Get values from editable divs using LineExtractor
             const paramDetailsLines = labCalParamDetailsEditorExtractor.getLines();
@@ -2243,16 +2336,16 @@ const insertCbTemplate = () => {
             const method = methodLines.join('<br>');
             
             // --- Field (cells[0]) Logic ---
-            if (field && !cells[0].textContent.trim()) {
+            if (field && field !== '-- เลือกสาขา --' && !cells[0].textContent.trim()) {
                 cells[0].innerHTML = field;
             }
 
             // --- Parameter Column (cells[1]) Logic ---
             const parameterParts = [];
-            if (instrument) {
+            if (instrument && instrument !== '-- เลือกเครื่องมือ --') {
                 parameterParts.push(instrument);
             }
-            if (parameter) {
+            if (parameter && parameter !== '-- เลือกพารามิเตอร์ --') {
                 parameterParts.push('&nbsp;' + parameter);
             }
             if (condition) {

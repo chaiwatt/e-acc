@@ -367,9 +367,9 @@
         }
 
         .context-menu-item {
-            padding: 1px 16px;
+            padding: 4px 16px;
             cursor: pointer;
-            font-size: 20px;
+            font-size: 22px;
             white-space: nowrap; /* Prevent wrapping */
         }
 
@@ -380,50 +380,6 @@
             height: 1px;
             background-color: #e0e0e0;
             margin: 4px 0;
-        }
-
-        /* Input field styling */
-        .lab-test-modal input[type="text"],
-        .lab-test-modal .editable-div {
-            width: 250px;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-        }
-        /* Input field styling */
-        .lab-cal-modal input[type="text"] {
-            width: 200px;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-        }
-
-        /* Editable div styling */
-        .lab-cal-modal .editable-div {
-            width: 180px;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-        }
-
-        /* Specific styling for lab-cal-method-editor */
-        .lab-cal-modal #lab-cal-method-editor {
-            width: 200px;
-        }
-
-        /* Input field styling */
-        .ib-modal input[type="text"],
-        .ib-modal .editable-div,
-        .cb-modal .editable-div {
-            width: 250px ;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-            box-sizing: border-box;
-        }
-        
-        .cb-modal .code {
-            width: 200px;
-        }
-
-        .cb-modal .detail {
-            width: 540px;
         }
     </style>
 </head>
@@ -520,110 +476,79 @@
     </div>
 
     <!-- NEW: Modals for Adding Template Items -->
-    <!-- === START: REVISED CB Item Modal === -->
-    <div id="cb-item-modal" class="modal-overlay cb-modal">
-        <div class="modal-content" style="width: 750px">
+    <!-- CB Item Modal -->
+    <div id="cb-item-modal" class="modal-overlay">
+        <div class="modal-content">
             <h3>เพิ่มรายการ (CB)</h3>
-            
-
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="cb-code-editor">รหัส:</label>
-                    <div id="cb-code-editor" class="editable-div code" contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="cb-description-editor">รายละเอียด:</label>
-                    <div id="cb-description-editor" class="editable-div detail" contenteditable="true"></div>
-                </div>
+            <div class="modal-input-group">
+                <label for="cb-isic-code">รหัส ISIC:</label>
+                <input type="text" id="cb-isic-code">
             </div>
-
+            <div class="modal-input-group">
+                <label for="cb-description">กิจกรรม:</label>
+                <input type="text" id="cb-description">
+            </div>
             <div class="modal-buttons">
                 <button id="add-cb-item-btn" class="modal-btn-confirm">เพิ่ม</button>
                 <button class="modal-btn-cancel">ยกเลิก</button>
             </div>
         </div>
     </div>
-    <!-- === END: REVISED CB Item Modal === -->
 
-    <!-- === START: REVISED IB Item Modal === -->
-    <div id="ib-item-modal" class="modal-overlay ib-modal">
-        <div class="modal-content" style="width: 540px">
+    <!-- IB Item Modal -->
+    <div id="ib-item-modal" class="modal-overlay">
+        <div class="modal-content">
             <h3>เพิ่มรายการ (IB)</h3>
-            
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="ib-main-branch">สาขาการตรวจหลัก:</label>
-                    <input type="text" id="ib-main-branch">
-                </div>
-                <div style="flex: 1;">
-                    <label for="ib-sub-branch">สาขาการตรวจย่อย:</label>
-                    <div id="ib-sub-branch" class="editable-div" contenteditable="true"></div>
-                </div>
-            </div>
-
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="ib-main-scope">ขอบข่ายหลัก:</label>
-                    <div id="ib-main-scope" class="editable-div" contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="ib-sub-scope">ขอบข่ายย่อย:</label>
-                    <div id="ib-sub-scope" class="editable-div" contenteditable="true"></div>
-                </div>
-            </div>
-
             <div class="modal-input-group">
-                <label for="ib-requirements-editor">ข้อกำหนดที่ใช้:</label>
-                <div id="ib-requirements-editor" class="editable-div" contenteditable="true"></div>
+                <label for="ib-category">หมวดหมู่ / สาขาการตรวจ:</label>
+                <input type="text" id="ib-category">
             </div>
-
+            <div class="modal-input-group">
+                <label for="ib-procedure">ขั้นตอนและช่วงการตรวจ:</label>
+                <input type="text" id="ib-procedure">
+            </div>
+            <div class="modal-input-group">
+                <label for="ib-requirements">ข้อกำหนดที่ใช้:</label>
+                <input type="text" id="ib-requirements">
+            </div>
             <div class="modal-buttons">
                 <button id="add-ib-item-btn" class="modal-btn-confirm">เพิ่ม</button>
                 <button class="modal-btn-cancel">ยกเลิก</button>
             </div>
         </div>
     </div>
-    <!-- === END: REVISED IB Item Modal === -->
 
     <!-- MODIFIED: Lab Cal Item Modal -->
-    <div id="lab-cal-item-modal" class="modal-overlay lab-cal-modal">
+    <div id="lab-cal-item-modal" class="modal-overlay">
         <div class="modal-content">
             <h3>เพิ่มรายการ (Lab Cal)</h3>
-            <!-- === START: MODIFICATION === -->
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-cal-field">สาขาการสอบเทียบ:</label>
-                    <input type="text" id="lab-cal-field" >
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-cal-instrument">เครื่องมือ:</label>
-                    <input type="text" id="lab-cal-instrument">
-                </div>
+            <div class="modal-input-group">
+                <label for="lab-cal-field">สาขาการสอบเทียบ:</label>
+                <input type="text" id="lab-cal-field" style="font-family: 'thsarabunnew'; font-size:22px;">
             </div>
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-cal-parameter">พารามิเตอร์:</label>
-                    <input type="text" id="lab-cal-parameter" >
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-cal-condition">เงื่อนไขการวัด:</label>
-                    <input type="text" id="lab-cal-condition" >
-                </div>
+            <div class="modal-input-group">
+                <label for="lab-cal-instrument">เครื่องมือ:</label>
+                <input type="text" id="lab-cal-instrument" style="font-family: 'thsarabunnew'; font-size:22px;">
             </div>
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-cal-param-details-editor">รายละเอียดพารามิเตอร์:</label>
-                    <div id="lab-cal-param-details-editor" class="editable-div"  contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-cal-capability-editor">ขีดความสามารถฯ:</label>
-                    <div id="lab-cal-capability-editor" class="editable-div" contenteditable="true"></div>
-                </div>
+            <div class="modal-input-group">
+                <label for="lab-cal-parameter">พารามิเตอร์:</label>
+                <input type="text" id="lab-cal-parameter" style="font-family: 'thsarabunnew'; font-size:22px;">
             </div>
-            <!-- === END: MODIFICATION === -->
+            <div class="modal-input-group">
+                <label for="lab-cal-condition">เงื่อนไขการวัด:</label>
+                <input type="text" id="lab-cal-condition" style="font-family: 'thsarabunnew'; font-size:22px;">
+            </div>
+            <div class="modal-input-group">
+                <label for="lab-cal-param-details">รายละเอียดพารามิเตอร์:</label>
+                <input type="text" id="lab-cal-param-details" style="font-family: 'thsarabunnew'; font-size:22px;">
+            </div>
+            <div class="modal-input-group">
+                <label for="lab-cal-capability">ขีดความสามารถฯ:</label>
+                <input type="text" id="lab-cal-capability" style="font-family: 'thsarabunnew'; font-size:22px;">
+            </div>
             <div class="modal-input-group">
                 <label for="lab-cal-method-editor" style="display: block;">วิธีสอบเทียบ / มาตรฐานที่ใช้:</label>
-                <div id="lab-cal-method-editor" class="editable-div" contenteditable="true"></div>
+                <div id="lab-cal-method-editor" class="editable-div" style="font-family: 'thsarabunnew'; font-size:22px;width: 200px;" contenteditable="true"></div>
             </div>
             <div class="modal-buttons">
                 <button id="add-lab-cal-item-btn" class="modal-btn-confirm">เพิ่ม</button>
@@ -632,42 +557,21 @@
         </div>
     </div>
 
-    <!-- === START: MODIFICATION FOR LAB TEST MODAL === -->
-    <div id="lab-test-item-modal" class="modal-overlay lab-test-modal" >
-        <div class="modal-content" style="width: 540px">
+    <!-- Lab Test Item Modal -->
+    <div id="lab-test-item-modal" class="modal-overlay">
+        <div class="modal-content">
             <h3>เพิ่มรายการ (Lab Test)</h3>
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-test-field">สาขาการทดสอบ:</label>
-                    <input type="text" id="lab-test-field" >
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-test-category">หมวดหมู่การทดสอบ:</label>
-                    <input type="text" id="lab-test-category" >
-                </div>
+            <div class="modal-input-group">
+                <label for="lab-test-field">สาขาการทดสอบ:</label>
+                <input type="text" id="lab-test-field">
             </div>
-
-             <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-test-parameter">พารามิเตอร์:</label>
-                    <input type="text" id="lab-test-parameter" >
-                </div>
-                  <div style="flex: 1;">
-                    <label for="lab-test-description-editor">คำอธิบาย:</label>
-                
-                    <input type="text" id="lab-test-description-editor" >
-                </div>
-             </div>
-
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                     <label for="lab-test-param-details-editor">รายละเอียดพารามิเตอร์:</label>
-                    <div id="lab-test-param-details-editor" class="editable-div"  contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-test-method-editor">วิธีทดสอบ:</label>
-                    <div id="lab-test-method-editor" class="editable-div"  contenteditable="true"></div>
-                </div>
+            <div class="modal-input-group">
+                <label for="lab-test-parameter">รายการทดสอบ:</label>
+                <input type="text" id="lab-test-parameter">
+            </div>
+            <div class="modal-input-group">
+                <label for="lab-test-method">วิธีทดสอบ:</label>
+                <input type="text" id="lab-test-method">
             </div>
             <div class="modal-buttons">
                 <button id="add-lab-test-item-btn" class="modal-btn-confirm">เพิ่ม</button>
@@ -675,17 +579,14 @@
             </div>
         </div>
     </div>
-    <!-- === END: MODIFICATION FOR LAB TEST MODAL === -->
+    <!-- END: New Modals -->
 
 
-    <!-- === START: MODIFICATION === -->
     <div id="context-menu">
         <div class="context-menu-item" data-action="add-item">เพิ่มรายการ</div>
         <div class="context-menu-separator" data-action="separator-add"></div>
-        <div class="context-menu-item" data-action="insert-row-above">แทรกแถวด้านบน <span style="float: right; color: #888; margin-left: 20px;">Shift+F1</span></div>
-        <div class="context-menu-item" data-action="insert-row-above-no-border">แทรกแถวด้านบน (ไม่มีขอบ) <span style="float: right; color: #888; margin-left: 20px;">Shift+F2</span></div>
-        <div class="context-menu-item" data-action="insert-row-below">แทรกแถวด้านล่าง <span style="float: right; color: #888; margin-left: 20px;">Shift+F4</span></div>
-        <div class="context-menu-item" data-action="insert-row-below-no-border">แทรกแถวด้านล่าง (ไม่มีขอบ) <span style="float: right; color: #888; margin-left: 20px;">Shift+F5</span></div>
+        <div class="context-menu-item" data-action="insert-row-above">แทรกแถวด้านบน</div>
+        <div class="context-menu-item" data-action="insert-row-below">แทรกแถวด้านล่าง</div>
         <div class="context-menu-item" data-action="insert-column-left">แทรกคอลัมน์ด้านซ้าย</div>
         <div class="context-menu-item" data-action="insert-column-right">แทรกคอลัมน์ด้านขวา</div>
         <div class="context-menu-separator"></div>
@@ -694,7 +595,6 @@
         <div class="context-menu-separator" data-action="separator-merge"></div>
         <div class="context-menu-item" data-action="merge-columns">รวมคอลัมน์</div>
     </div>
-    <!-- === END: MODIFICATION === -->
 
     <script>
         document.execCommand('styleWithCSS', false, true);
@@ -761,7 +661,7 @@
 
             init() {
                 if (!this.editableDiv) {
-                    console.error('Element not found:', this.elementId);
+                    console.error('Element not found:', elementId);
                     return;
                 }
 
@@ -1125,7 +1025,7 @@ const insertCbTemplate = () => {
                 <table class="detail-table" style="width: 100%; margin-bottom: 1em;">
                     <thead>
                         <tr>
-                            <th style="width: 25%;">รหัส ISIC<br><span style="font-size: 15px">(ISIC Codes)</span></th>
+                            <th>รหัส ISIC<br><span style="font-size: 15px;">(ISIC Codes)</span></th>
                             <th>กิจกรรม<br><span style="font-size: 15px;">(Description)</span></th>
                         </tr>
                     </thead>
@@ -1650,69 +1550,30 @@ const insertCbTemplate = () => {
         
         // --- Table & Context Menu Functions ---
 
-        // === START: MODIFICATION ===
-        function insertTableRow(table, rowIndex, above, removeConnectingBorder) {
+        function insertTableRow(table, rowIndex, above = true) {
             const insertAt = above ? rowIndex : rowIndex + 1;
-            const newRow = table.insertRow(insertAt);
+            const row = table.insertRow(insertAt);
+            const colCount = table.rows[0].cells.length;
 
-            // Determine the correct number of columns to create
-            let colCount = 0;
-            const thead = table.querySelector('thead');
-            if (thead && thead.rows.length > 0 && thead.rows[0].cells.length > 0) {
-                colCount = thead.rows[0].cells.length;
-            } else if (table.rows.length > 1) {
-                // Find a row with the most cells to account for colspans
-                for(let i = 0; i < table.rows.length; i++) {
-                    let currentCellCount = 0;
-                    for(let j = 0; j < table.rows[i].cells.length; j++) {
-                        currentCellCount += table.rows[i].cells[j].colSpan;
-                    }
-                    if(currentCellCount > colCount) {
-                        colCount = currentCellCount;
-                    }
-                }
-            } else {
-                colCount = table.rows[rowIndex].cells.length;
-            }
-
-
-            // Create cells for the new row
             for (let i = 0; i < colCount; i++) {
-                const cell = newRow.insertCell();
+                const cell = row.insertCell();
                 cell.style.verticalAlign = 'top';
                 cell.style.textAlign = 'left';
+                cell.style.borderLeft = '0.1px solid black';
+                cell.style.borderRight = '0.1px solid black';
+                cell.style.borderTop = 'none';
+                cell.style.borderBottom = 'none';
                 cell.innerHTML = '<br>';
             }
-
-            // --- Conditional Border Logic ---
-            if (removeConnectingBorder) {
-                if (!above) { // Inserting BELOW
-                    const rowAbove = table.rows[rowIndex];
-                    for (const cell of newRow.cells) {
-                        cell.style.borderTop = 'none';
-                    }
-                    if (rowAbove) {
-                        for (const cell of rowAbove.cells) {
-                            cell.style.borderBottom = 'none';
-                        }
-                    }
-                } else { // Inserting ABOVE
-                    const rowBelow = table.rows[insertAt];
-                    for (const cell of newRow.cells) {
-                        cell.style.borderBottom = 'none';
-                    }
-                    if (rowBelow) {
-                        for (const cell of rowBelow.cells) {
-                            cell.style.borderTop = 'none';
-                        }
-                    }
+            
+            if (!above && table.rows[rowIndex]) {
+                const aboveRow = table.rows[rowIndex];
+                for (let i = 0; i < aboveRow.cells.length; i++) {
+                    aboveRow.cells[i].style.borderBottom = 'none';
                 }
             }
-            // If removeConnectingBorder is false, do nothing to the borders.
-
             managePages();
         }
-        // === END: MODIFICATION ===
 
         function insertTableColumn(table, colIndex, right = true) {
             const rows = table.rows;
@@ -1859,11 +1720,8 @@ const insertCbTemplate = () => {
         });
 
         // --- FIXED: Context Menu Click Logic ---
-        // === START: MODIFICATION ===
         contextMenu.addEventListener('click', (event) => {
-            const actionTarget = event.target.closest('.context-menu-item');
-            if (!actionTarget) return;
-            const action = actionTarget.dataset.action;
+            const action = event.target.dataset.action;
             if (!action) return;
 
             const table = contextMenuTarget?.closest('table');
@@ -1910,37 +1768,18 @@ const insertCbTemplate = () => {
             }
 
             switch (action) {
-                case 'insert-row-above':
-                    insertTableRow(table, rowIndex, true, false); // above, with border
-                    break;
-                case 'insert-row-above-no-border':
-                    insertTableRow(table, rowIndex, true, true); // above, no border
-                    break;
-                case 'insert-row-below':
-                    insertTableRow(table, rowIndex, false, false); // below, with border
-                    break;
-                case 'insert-row-below-no-border':
-                    insertTableRow(table, rowIndex, false, true); // below, no border
-                    break;
-                case 'insert-column-left':
-                    insertTableColumn(table, colIndex, false);
-                    break;
-                case 'insert-column-right':
-                    insertTableColumn(table, colIndex, true);
-                    break;
-                case 'delete-row':
-                    deleteTableRow(table, rowIndex);
-                    break;
-                case 'delete-column':
-                    deleteTableColumn(table, colIndex);
-                    break;
+                case 'insert-row-above':    insertTableRow(table, rowIndex, true); break;
+                case 'insert-row-below':    insertTableRow(table, rowIndex, false); break;
+                case 'insert-column-left':  insertTableColumn(table, colIndex, false); break;
+                case 'insert-column-right': insertTableColumn(table, colIndex, true); break;
+                case 'delete-row':          deleteTableRow(table, rowIndex); break;
+                case 'delete-column':       deleteTableColumn(table, colIndex); break;
             }
 
             hideContextMenu(); // Reset state fully after action
             const activePage = table?.closest('.page');
             activePage?.focus();
         });
-        // === END: MODIFICATION ===
 
 
         document.addEventListener('click', (event) => {
@@ -1987,51 +1826,6 @@ const insertCbTemplate = () => {
                 }
             }
         });
-        
-        // === START: NEW KEYBOARD SHORTCUTS FOR TABLE ROWS ===
-        document.addEventListener('keydown', (event) => {
-            // Check for Shift key and F1, F2, F4, F5 keys
-            if (event.shiftKey && ['F1', 'F2', 'F4', 'F5'].includes(event.key)) {
-                const selection = window.getSelection();
-                if (!selection.rangeCount) return;
-
-                const range = selection.getRangeAt(0);
-                const currentElement = range.startContainer;
-                // Find the closest cell (td or th) from the current cursor position
-                const cell = currentElement.nodeType === Node.ELEMENT_NODE 
-                             ? currentElement.closest('td, th') 
-                             : currentElement.parentElement.closest('td, th');
-
-                if (cell) {
-                    event.preventDefault(); // Prevent default browser actions (like opening help)
-
-                    const table = cell.closest('table');
-                    const row = cell.closest('tr');
-                    const rowIndex = Array.from(table.rows).indexOf(row);
-
-                    if (rowIndex === -1) return;
-
-                    switch (event.key) {
-                        case 'F1': // Shift+F1: Insert row above
-                            insertTableRow(table, rowIndex, true, false);
-                            break;
-                        case 'F2': // Shift+F2: Insert row above (no border)
-                            insertTableRow(table, rowIndex, true, true);
-                            break;
-                        case 'F4': // Shift+F4: Insert row below
-                            insertTableRow(table, rowIndex, false, false);
-                            break;
-                        case 'F5': // Shift+F5: Insert row below (no border)
-                            insertTableRow(table, rowIndex, false, true);
-                            break;
-                    }
-                     const activePage = table?.closest('.page');
-                     activePage?.focus();
-                }
-            }
-        });
-        // === END: NEW KEYBOARD SHORTCUTS FOR TABLE ROWS ===
-
 
         document.addEventListener('mousedown', (event) => {
             if (!event.target.closest('.image-container')) {
@@ -2119,96 +1913,53 @@ const insertCbTemplate = () => {
 
 
         // --- Add Item Button Logic for each Modal (Using activeModalTargetRow) ---
-        
-        // === START: REVISED CB Item Button Logic ===
         document.getElementById('add-cb-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
+            const code = document.getElementById('cb-isic-code').value;
+            const desc = document.getElementById('cb-description').value;
+            if (!code && !desc) {
                 closeModal(cbItemModal);
                 return;
+            };
+
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td style="width: 20%;">${code}</td>
+                <td>${desc}</td>
+            `;
+            const tbody = activeModalTargetRow?.parentElement;
+            if (tbody) {
+                tbody.appendChild(newRow);
+                managePages();
+            } else {
+                alert("ไม่สามารถหาตารางเป้าหมายได้");
             }
-
-            const cells = targetRow.cells;
-            if (cells.length < 2) {
-                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการอย่างน้อย 2 คอลัมน์)");
-                closeModal(cbItemModal);
-                return;
-            }
-
-            // Get values from editable divs using LineExtractor
-            const codeLines = cbCodeEditorExtractor.getLines();
-            const code = codeLines.join('<br>');
-
-            const descriptionLines = cbDescriptionEditorExtractor.getLines();
-            const description = descriptionLines.join('<br>');
-
-            // Append to the first cell
-            appendToCell(cells[0], code);
-
-            // Append to the second cell
-            appendToCell(cells[1], description);
-
-            managePages();
             closeModal(cbItemModal);
         });
-        // === END: REVISED CB Item Button Logic ===
 
-
-        // === START: REVISED IB Item Button Logic ===
         document.getElementById('add-ib-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
+            const category = document.getElementById('ib-category').value;
+            const procedure = document.getElementById('ib-procedure').value;
+            const requirements = document.getElementById('ib-requirements').value;
+            if (!category && !procedure && !requirements) {
                 closeModal(ibItemModal);
                 return;
             }
 
-            const cells = targetRow.cells;
-            if (cells.length < 3) {
-                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการ 3 คอลัมน์)");
-                closeModal(ibItemModal);
-                return;
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td>${category}</td>
+                <td>${procedure}</td>
+                <td>${requirements}</td>
+            `;
+            const tbody = activeModalTargetRow?.parentElement;
+            if (tbody) {
+                tbody.appendChild(newRow);
+                managePages();
+            } else {
+                 alert("ไม่สามารถหาตารางเป้าหมายได้");
             }
-
-            // Get values from modal
-            const mainBranch = document.getElementById('ib-main-branch').value.trim();
-
-            const subBranchLines = ibSubBranchExtractor.getLines();
-            const subBranch = subBranchLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const mainScopeLines = ibMainScopeExtractor.getLines();
-            const mainScope = mainScopeLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const subScopeLines = ibSubScopeExtractor.getLines();
-            const subScope = subScopeLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const requirementsLines = ibRequirementsExtractor.getLines();
-            const requirements = requirementsLines.join('<br>');
-
-            // --- Cell 1: Main/Sub Branch ---
-            const cell1Parts = [];
-            if (mainBranch) cell1Parts.push(mainBranch);
-            if (subBranch) cell1Parts.push(subBranch);
-            const cell1Content = cell1Parts.join('<br>');
-            appendToCell(cells[0], cell1Content);
-
-            // --- Cell 2: Main/Sub Scope ---
-            const cell2Parts = [];
-            if (mainScope) cell2Parts.push(mainScope);
-            if (subScope) cell2Parts.push(subScope);
-            const cell2Content = cell2Parts.join('<br>');
-            appendToCell(cells[1], cell2Content);
-
-            // --- Cell 3: Requirements ---
-            if (requirements) {
-                appendToCell(cells[2], requirements);
-            }
-
-            managePages();
             closeModal(ibItemModal);
         });
-        // === END: REVISED IB Item Button Logic ===
 
         // --- [MODIFIED] Logic for adding Lab Cal item ---
         document.getElementById('add-lab-cal-item-btn').addEventListener('click', () => {
@@ -2231,16 +1982,12 @@ const insertCbTemplate = () => {
             const instrument = document.getElementById('lab-cal-instrument').value.trim();
             const parameter = document.getElementById('lab-cal-parameter').value.trim();
             const condition = document.getElementById('lab-cal-condition').value.trim();
+            const paramDetails = document.getElementById('lab-cal-param-details').value.trim();
+            const capability = document.getElementById('lab-cal-capability').value.trim();
             
-            // Get values from editable divs using LineExtractor
-            const paramDetailsLines = labCalParamDetailsEditorExtractor.getLines();
-            const paramDetails = paramDetailsLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const capabilityLines = labCalCapabilityEditorExtractor.getLines();
-            const capability = capabilityLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-            
+            // --- NEW: Get method from the pre-existing LineExtractor instance ---
             const methodLines = labCalMethodEditorExtractor.getLines();
-            const method = methodLines.join('<br>');
+            const method = methodLines.join('<br>'); // Join lines with <br> for PDF
             
             // --- Field (cells[0]) Logic ---
             if (field && !cells[0].textContent.trim()) {
@@ -2259,14 +2006,20 @@ const insertCbTemplate = () => {
                 parameterParts.push('&nbsp;&nbsp;' + condition);
             }
             if (paramDetails) {
-                parameterParts.push(paramDetails);
+                parameterParts.push('&nbsp;&nbsp;&nbsp;' + paramDetails);
             }
             const parameterColumnContent = parameterParts.join('<br>');
             appendToCell(cells[1], parameterColumnContent);
 
             // --- Capability (cells[2]) Logic ---
             if (capability) {
-                appendToCell(cells[2], capability);
+                const formattedCapability = '&nbsp;&nbsp;&nbsp;' + capability;
+                if (cells[2].textContent.trim()) {
+                    const prefix = condition ? '<br><br><br>' : '<br><br>';
+                    cells[2].innerHTML += prefix + formattedCapability;
+                } else {
+                    cells[2].innerHTML = capability; 
+                }
             }
 
             // --- Method (cells[3]) Logic ---
@@ -2278,58 +2031,31 @@ const insertCbTemplate = () => {
             closeModal(labCalItemModal);
         });
 
-        // === START: MODIFICATION FOR LAB TEST LOGIC ===
         document.getElementById('add-lab-test-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
+            const field = document.getElementById('lab-test-field').value;
+            const parameter = document.getElementById('lab-test-parameter').value;
+            const method = document.getElementById('lab-test-method').value;
+            if (!field && !parameter && !method) {
                 closeModal(labTestItemModal);
                 return;
             }
 
-            const cells = targetRow.cells;
-            if (cells.length < 3) {
-                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการ 3 คอลัมน์)");
-                closeModal(labTestItemModal);
-                return;
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td style="text-align: left;">${field}</td>
+                <td style="text-align: left;">${parameter}</td>
+                <td style="text-align: left;">${method}</td>
+            `;
+            const tbody = activeModalTargetRow?.parentElement;
+            if (tbody) {
+                tbody.appendChild(newRow);
+                managePages();
+            } else {
+                 alert("ไม่สามารถหาตารางเป้าหมายได้");
             }
-
-            // Get values from modal inputs
-            const field = document.getElementById('lab-test-field').value.trim();
-            const category = document.getElementById('lab-test-category').value.trim();
-            const parameter = document.getElementById('lab-test-parameter').value.trim();
-            const description = document.getElementById('lab-test-description-editor').value.trim();
-
-            const paramDetailsLines = labTestParamDetailsEditorExtractor.getLines();
-            const paramDetails = paramDetailsLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-            
-            const methodLines = labTestMethodEditorExtractor.getLines();
-            const method = methodLines.join('<br>');
-            
-            // --- Cell 1 Logic: Field and Category ---
-            const cell1Parts = [];
-            if (field) cell1Parts.push(field);
-            if (category) cell1Parts.push(category);
-            const cell1Content = cell1Parts.join('<br>');
-            appendToCell(cells[0], cell1Content);
-
-            // --- Cell 2 Logic: Parameter, Description, and Details ---
-            const cell2Parts = [];
-            if (parameter) cell2Parts.push(parameter);
-            if (description) cell2Parts.push(description);
-            if (paramDetails) cell2Parts.push(paramDetails);
-            const cell2Content = cell2Parts.join('<br>');
-            appendToCell(cells[1], cell2Content);
-
-            // --- Cell 3 Logic: Method ---
-            if (method) {
-                appendToCell(cells[2], method);
-            }
-            
-            managePages();
             closeModal(labTestItemModal);
         });
-        // === END: MODIFICATION FOR LAB TEST LOGIC ===
+        // --- END: Add Item Logic ---
 
         function wrapSpecialCharactersInNode(node) {
             const specialChars = ['Ω', 'π', 'Σ', 'β', 'α', 'γ', 'µ', 'μ', '±', '∞', 'θ', 'δ', 'ξ', 'φ', 'χ', 'ψ', 'ω', 'ε', 'Δ', '√', '∮', '∫', '∂', '∇', '∑', '∏', '∆', 'λ', 'σ', 'ρ', '℃', '℉', 'Ξ','Ɛ'];
@@ -2531,22 +2257,8 @@ const insertCbTemplate = () => {
             });
         }
 
-        // === START: MODIFICATION FOR LineExtractor INSTANCES ===
-        // Instantiate LineExtractor for all editable divs in the modals
-        const cbCodeEditorExtractor = new LineExtractor('cb-code-editor');
-        const cbDescriptionEditorExtractor = new LineExtractor('cb-description-editor');
+        // --- FIXED: Instantiate LineExtractor on page load ---
         const labCalMethodEditorExtractor = new LineExtractor('lab-cal-method-editor');
-        const labCalParamDetailsEditorExtractor = new LineExtractor('lab-cal-param-details-editor');
-        const labCalCapabilityEditorExtractor = new LineExtractor('lab-cal-capability-editor');
-        const labTestParamDetailsEditorExtractor = new LineExtractor('lab-test-param-details-editor');
-        const labTestMethodEditorExtractor = new LineExtractor('lab-test-method-editor');
-        
-        // New extractors for the modified IB modal
-        const ibSubBranchExtractor = new LineExtractor('ib-sub-branch');
-        const ibMainScopeExtractor = new LineExtractor('ib-main-scope');
-        const ibSubScopeExtractor = new LineExtractor('ib-sub-scope');
-        const ibRequirementsExtractor = new LineExtractor('ib-requirements-editor');
-        // === END: MODIFICATION FOR LineExtractor INSTANCES ===
 
         if (editor.children.length === 0) {
             editor.appendChild(createNewPage());

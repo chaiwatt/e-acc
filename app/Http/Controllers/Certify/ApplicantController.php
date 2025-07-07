@@ -428,6 +428,195 @@ class ApplicantController extends Controller
         }
     }
 
+
+
+    function getLabCalibrationDate()
+    {
+        // Get current date as validFrom
+        $validFrom = Carbon::now();
+
+        // Calculate until as validFrom + 5 years
+        $until = $validFrom->copy()->addYears(5);
+
+        // Thai month names array
+        $thaiMonths = [
+            1 => 'มกราคม',
+            2 => 'กุมภาพันธ์',
+            3 => 'มีนาคม',
+            4 => 'เมษายน',
+            5 => 'พฤษภาคม',
+            6 => 'มิถุนายน',
+            7 => 'กรกฎาคม',
+            8 => 'สิงหาคม',
+            9 => 'กันยายน',
+            10 => 'ตุลาคม',
+            11 => 'พฤศจิกายน',
+            12 => 'ธันวาคม'
+        ];
+
+        // Format validFrom
+        $validFromThai = sprintf(
+            '%d %s %d',
+            $validFrom->day,
+            $thaiMonths[$validFrom->month],
+            $validFrom->year + 543
+        );
+        $validFromEnglish = sprintf(
+            '%d %s B.E.%d (%d)',
+            $validFrom->day,
+            $validFrom->format('F'),
+            $validFrom->year + 543,
+            $validFrom->year
+        );
+
+        // Format until
+        $untilThai = sprintf(
+            '%d %s %d',
+            $until->day,
+            $thaiMonths[$until->month],
+            $until->year + 543
+        );
+        $untilEnglish = sprintf(
+            '%d %s B.E.%d (%d)',
+            $until->day,
+            $until->format('F'),
+            $until->year + 543,
+            $until->year
+        );
+
+        return [
+            'validFrom' => [
+                'th' => $validFromThai,
+                'en' => $validFromEnglish
+            ],
+            'until' => [
+                'th' => $untilThai,
+                'en' => $untilEnglish
+            ]
+        ];
+    }
+
+    public function scopeEditor(Request $request)
+    {
+
+        // Retrieve query parameters
+        $accordingFormula = $request->query('according_formula');
+        $labAbility = $request->query('lab_ability');
+        $purpose = $request->query('purpose');
+        $labName=  $request->query('lab_name');
+        $labNameEn=  $request->query('lab_name_en');
+
+        $templateType = "";
+
+        $date = $this->getLabCalibrationDate();
+
+        if($labAbility == "calibrate")
+        {
+                $templateType = "lab_cal";
+                $labCalDetails = [
+                'title' => [
+                    'th' => "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
+                    'en' => "Scope of Accreditation for Calibration"
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-LB0000",
+                'labName' => [
+                    'th' => $labName,
+                    'en' => $labNameEn
+                ],
+                'accreditationNo' => [
+                    'th' => "สอบเทียบ 0000",
+                    'en' => "Calibration 0000"
+                ],
+                'issueNo' => "01",
+                'validFrom' => [
+                        'th' => $date['validFrom']['th'],
+                        'en' => $date['validFrom']['en']
+                ],
+                'until' => [
+                    'th' => $date['until']['th'],
+                    'en' => $date['until']['en']
+                ],
+
+                'laboratory_status' => [
+                    'is_permanent' => true,
+                    'is_site' => false,
+                    'is_temporary' => false,
+                    'is_mobile' => false,
+                    'is_multisite' => false,
+                ],
+                'calibrationData' => [ 
+                    [
+                        'field' => ['th' => "(ตัวอย่าง)ไฟฟ้า", 'en' => "Electrical"],
+                        'parameter' => "Measuring instrument<br>&nbsp;DC voltage<br>&nbsp;&nbsp;&nbsp;0 mV to < 220 mV",
+                        'capability' => "<br><br>&nbsp;&nbsp;&nbsp;8.0 &mu;V/V + 1.8 &mu;V",
+                        'method' => "<br>In-house method :<br>CP-01DCV by direct"
+                    ]
+                ]
+            ];
+        
+            return view('certify.applicant.scope-editor', [
+                'templateType' => $templateType,
+                'labCalDetails' => $labCalDetails,
+                'according_formula' => $accordingFormula,
+                'lab_ability' => $labAbility,
+                'purpose' => $purpose
+            ]);
+        }else if($labAbility == "test")
+        {
+            $templateType = "lab_test";
+
+            $labTestDetails = [
+                'title' => [
+                    'th' => "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
+                    'en' => "Scope of Accreditation for Testing" // เปลี่ยนเป็น Testing
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-LB0000",
+                'labName' => [
+                    'th' => "บริษัท เอ็นพีซีโซลูชั่นแอนด์เซอร์วิส จำกัด",
+                    'en' => "IRC Technologies Co.,Ltd."
+                ],
+                'accreditationNo' => [
+                    'th' => "ทดสอบ 0000", // หมายเลขการรับรองอาจจะต่างกัน
+                    'en' => "Testing 0000"
+                ],
+                'issueNo' => "01",
+                'validFrom' => [
+                        'th' => $date['validFrom']['th'],
+                        'en' => $date['validFrom']['en']
+                ],
+                'until' => [
+                    'th' => $date['until']['th'],
+                    'en' => $date['until']['en']
+                ],
+                'laboratory_status' => [
+                    'is_permanent' => true,
+                    'is_site' => false,
+                    'is_temporary' => false,
+                    'is_mobile' => false,
+                    'is_multisite' => false,
+                ],
+                'testLabData' => [
+                    [
+                        'field' => ['th' => "สาขาโยธา", 'en' => "Civil field"],
+                        'parameter' => "<br>ความละเอียดโดยเครื่องแอร์เพอร์มีอะบิลิตี<br>(Fineness by air-permeability)",
+                        'method' => "<br>มอก. 2752 เล่ม 6-2562 (วิธี A)<br>(TIS 2752 Part 6-2562 (2019) (Method A))"
+                    ]
+                ]
+            ];
+
+             return view('certify.applicant.scope-editor', [
+                'templateType' => $templateType,
+                'labTestDetails' => $labTestDetails,
+                 'according_formula' => $accordingFormula,
+                'lab_ability' => $labAbility,
+                'purpose' => $purpose
+            ]);
+
+        }
+
+ 
+    }
+
     function uploadCalLabCmc(Request $request)
     {
         $request->validate([
@@ -6294,5 +6483,10 @@ private function FormatAddressEn($request){
     return response()->json($notice);
   }
 
+
+  public function specialSign()
+  {
+    return view('certify.applicant.special-sign');
+  }
 
 }

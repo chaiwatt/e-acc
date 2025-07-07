@@ -9,6 +9,7 @@ use Mpdf\Mpdf;
 use Mpdf\Tag\P;
 use Carbon\Carbon;
 use App\AttachFile;
+use App\HtmlTemplate;
 use Mpdf\HTMLParserMode;
 use App\CertificateExport;
 use App\Models\Basic\Staff;
@@ -20,10 +21,12 @@ use App\Mail\Lab\LabScopeReview;
 use App\Services\CreateIbScopePdf;
 use Illuminate\Support\Facades\DB;
 use App\Services\CreateLabScopePdf;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Bcertify\LabCalRequest;
 use App\Services\CreateCbScopeBcmsPdf;
 use App\Services\CreateCbScopeIsicPdf;
+use Illuminate\Support\Facades\Response;
 use Spatie\Permission\Models\Permission;
 use App\Models\Bcertify\CalibrationGroup;
 use App\Models\Bcertify\CalibrationBranch;
@@ -39,25 +42,345 @@ use App\Models\Bcertify\LabCalInstrumentTransaction;
 use App\Models\Bcertify\LabCalParameterOneTransaction;
 use App\Models\Certify\Applicant\CertiLabExportMapreq;
 use App\Models\Bcertify\CalibrationBranchInstrumentGroup;
-use Illuminate\Support\Facades\Response;
+
 class MyTestController extends Controller
 {
 
    public function abTest()
    {
-     return view('abtest.html');
+    // lab_cal, lab_test, cb, ib
+    $templateType = "lab_cal";
+     return view('abtest.html',[
+      'templateType' => $templateType
+     ]);
    }
 
-    public function exportPdf(Request $request)
+
+   public function showLabCalDetails()
+    {
+        $templateType = "lab_cal"; // กำหนด templateType เป็น "lab_cal"
+
+        $labCalDetails = [
+            'title' => [
+                'th' => "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
+                'en' => "Scope of Accreditation for Calibration"
+            ],
+            'certificateNo' => "21-LB0036",
+            'labName' => [
+                'th' => "บริษัท เอ็นพีซีโซลูชั่นแอนด์เซอร์วิส จำกัด",
+                'en' => "IRC Technologies Co.,Ltd."
+            ],
+            'accreditationNo' => [
+                'th' => "สอบเทียบ 0203",
+                'en' => "Calibration 0203"
+            ],
+            'issueNo' => "01",
+            'validFrom' => [
+                'th' => "2 กันยายน 2564", 
+                'en' => "30 January B.E.2566 (2023)"
+            ],
+            'until' => [
+                'th' => "1 กันยายน 2569",
+                'en' => "29 January B.E. 2571 (2028)"
+            ],
+
+            'laboratory_status' => [
+                'is_permanent' => true,
+                'is_site' => false,
+                'is_temporary' => false,
+                'is_mobile' => false,
+                'is_multisite' => false,
+            ],
+            'calibrationData' => [ 
+                [
+                    'field' => ['th' => "ไฟฟ้า", 'en' => "Electrical"],
+                    'parameter' => "Measuring instrument<br>&nbsp;DC voltage<br>&nbsp;&nbsp;&nbsp;0 mV to < 220 mV<br>&nbsp;&nbsp;&nbsp;0.22 V to < 2.2 V<br>&nbsp;&nbsp;&nbsp;2.2 V to < 11 V",
+                    'capability' => "<br><br>&nbsp;&nbsp;&nbsp;8.0 &mu;V/V + 1.8 &mu;V<br>&nbsp;&nbsp;&nbsp;7.0 &mu;V/V + 7.3 &mu;V<br>&nbsp;&nbsp;&nbsp;7.0 &mu;V/V + 8.1 &mu;V",
+                    'method' => "<br>In-house method :<br>CP-01DCV by direct<br>measurement with<br>multifunction calibrator"
+                ]
+            ]
+        ];
+
+        return view('abtest.html', [
+            'templateType' => $templateType,
+            'labCalDetails' => $labCalDetails 
+        ]);
+    }
+    public function showLabTestDetails()
+    {
+        $templateType = "lab_test";
+
+        $labTestDetails = [
+            'title' => [
+                'th' => "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
+                'en' => "Scope of Accreditation for Testing" // เปลี่ยนเป็น Testing
+            ],
+            'certificateNo' => "21-LB0036", // อาจจะคนละเลขกับ Calibration ก็ได้
+            'labName' => [
+                'th' => "บริษัท เอ็นพีซีโซลูชั่นแอนด์เซอร์วิส จำกัด",
+                'en' => "IRC Technologies Co.,Ltd."
+            ],
+            'accreditationNo' => [
+                'th' => "ทดสอบ 0001", // หมายเลขการรับรองอาจจะต่างกัน
+                'en' => "Testing 0001"
+            ],
+            'issueNo' => "01",
+            'validFrom' => [
+                'th' => "2 กันยายน 2564",
+                'en' => "30 January B.E.2566 (2023)"
+            ],
+            'until' => [
+                'th' => "1 กันยายน 2569",
+                'en' => "29 January B.E. 2571 (2028)"
+            ],
+            'laboratory_status' => [
+                'is_permanent' => true,
+                'is_site' => false,
+                'is_temporary' => false,
+                'is_mobile' => false,
+                'is_multisite' => false,
+            ],
+            'testLabData' => [
+                [
+                    'field' => ['th' => "สาขาโยธา", 'en' => "Civil field"],
+                    'parameter' => "<br>ความละเอียดโดยเครื่องแอร์เพอร์มีอะบิลิตี<br>(Fineness by air-permeability)",
+                    'method' => "<br>มอก. 2752 เล่ม 6-2562 (วิธี A)<br>(TIS 2752 Part 6-2562 (2019) (Method A))"
+                ]
+            ]
+        ];
+
+        return view('abtest.html', [
+            'templateType' => $templateType,
+            'labTestDetails' => $labTestDetails // ส่งข้อมูล Lab Test Details เข้าไป
+        ]);
+    }
+
+    public function showCbDetails()
+    {
+        $templateType = "cb"; // กำหนด templateType เป็น "cb"
+
+        $cbDetails = [
+            'scopeOfAccreditation' => [
+                'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                'en' => "Scope of Accreditation"
+            ],
+            'attachmentToCertificate' => [
+                'th' => "แนบท้ายใบรับรองระบบงาน : หน่วยรับรองระบบงานการจัดการคุณภาพ",
+                'en' => "Attachment to Certificate of Quality Management System Certification Body Accreditation"
+            ],
+            'certificateNo' => "24-CB0003",
+            'certificationBody' => [
+                'th' => "บริษัท เอ็นพีซีโซลูชั่นแอนด์เซอร์วิส จำกัด",
+                'en' => "Thailand Institute of Scientific and Technological Research, Office of Certification Body"
+            ],
+            'premise' => [
+                'th' => "35 หมู่ 3 เทคโนธานี ตำบลคลองห้า อำเภอคลองหลวง จังหวัดปทุมธานี",
+                'en' => "35 Moo 3 Technopolis, Tambon Klong 5, Amphoe Khlong Luang, Pathum Thani"
+            ],
+            'accreditationCriteria' => [
+                [ 'th' => "ISO/IEC 17021-1:2015 (มอก. 17021-1-2559)", 'en' => "ISO 17021-3:2017 (มอก. 17021-3-2562)" ],
+            ],
+            'certificationMark' => [
+                'th' => "การรับรองระบบบริหารงานคุณภาพตามมาตรฐาน ISO 9001/มอก.9001 โดยมีสาขาและ<br>ขอบข่ายตามมาตรฐานการจัดประเภทอุตสาหกรรมตามกิจกรรมทางเศรษฐกิจทุกประเภท<br>ตามมาตรฐานสากล (ISIC) มอก.2000-2540 ดังต่อไปนี้",
+                'en' => "Quality Management system Certification according to ISO 9001/TIS 9001, covered by International Standard industrial classification of all economic activities (ISIC) according to TIS 2000-2540 as following"
+            ],
+            'isicCodes' => [
+                [ 'code' => "15", 'description_th' => "การผลิตผลิตภัณฑ์อาหารและเครื่องดื่ม", 'description_en' => "Manufacture of food products and beverages" ],
+                
+            ]
+        ];
+
+        return view('abtest.html', [
+            'templateType' => $templateType,
+            'cbDetails' => $cbDetails // ส่งข้อมูล CB Details เข้าไป
+        ]);
+    }
+
+    // เมธอดใหม่สำหรับแสดงรายละเอียด IB (Inspection Body)
+    public function showIbDetails()
+    {
+        $templateType = "ib"; // กำหนด templateType เป็น "ib"
+
+        $ibDetails = [
+            'title' => "รายละเอียดแนบท้ายใบรับรองระบบงานหน่วยตรวจ",
+            'certificateNo' => "23-IB0005",
+            'inspectionBodyName' => "บริษัท เอ็นพีซีโซลูชั่นแอนด์เซอร์วิส จำกัด",
+            'headOfficeAddress' => "เลขที่ 1285/5 ถนนประชาราษฎร์ แขวงวงศ์สว่าง เขตบางซื่อ<br>กรุงเทพมหานคร",
+            'branchOfficeAddress' => "เลขที่ 3 ซอยสาธุฯ 29 ถนนสุขสวัสดิ์ 105 แขวงบางนา<br>เขตบางนา กรุงเทพมหานคร",
+            'accreditationNo' => "หน่วยตรวจ 0057",
+            'inspectionBodyType' => "ประเภท A",
+            'inspectionItems' => [
+                [
+                    'category' => "1. สินค้าเกษตร:<br>ข้าวหอมมะลิไทย",
+                    'procedure' => "การตรวจในขั้นตอนก่อนปล่อยและขั้น<br>ตรวจปล่อย ในรายการต่อไปนี้",
+                    'requirements' => "1. ประกาศกระทรวงพาณิชย์ เรื่อง<br>หลักเกณฑ์และวิธีการจัดให้มีการ<br>ตรวจสอบมาตรฐานสินค้า และการ<br>ออกใบรับรองมาตรฐานสินค้า<br>สำหรับสินค้าข้าวหอมมะลิไทย<br>พ.ศ. 2559"
+                ]
+            ]
+        ];
+
+        return view('abtest.html', [
+            'templateType' => $templateType,
+            'ibDetails' => $ibDetails // ส่งข้อมูล IB Details เข้าไป
+        ]);
+    }
+
+     // เมธอดใหม่สำหรับบันทึก HTML template
+    public function saveHtmlTemplate(Request $request)
     {
         $htmlPages = $request->input('html_pages');
+        $templateType = $request->input('template_type');
 
         if (!is_array($htmlPages) || empty($htmlPages)) {
             return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
         }
 
-        $type = 'I'; 
-        $fontDirs = [public_path('pdf_fonts/')]; 
+        if (empty($templateType)) {
+            return response()->json(['message' => 'Template type is missing.'], 400);
+        }
+
+        try {
+            // ใช้ updateOrCreate:
+            // ถ้าพบ template_type ที่ตรงกันในฐานข้อมูล จะทำการอัปเดต record นั้น
+            // ถ้าไม่พบ จะทำการสร้าง record ใหม่
+            HtmlTemplate::updateOrCreate(
+                ['template_type' => $templateType], // เงื่อนไขในการค้นหา
+                ['html_pages' => json_encode($htmlPages)] // ข้อมูลที่จะอัปเดตหรือสร้าง
+            );
+
+            return response()->json(['message' => 'Template saved successfully!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error saving template: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadHtmlTemplate(Request $request)
+    {
+        $templateType = $request->input('template_type');
+
+        if (empty($templateType)) {
+            return response()->json(['message' => 'Template type is missing.'], 400);
+        }
+
+        try {
+            // Retrieve the first template that matches the type
+            $htmlTemplate = HtmlTemplate::where('template_type', $templateType)->first();
+
+            if (!$htmlTemplate) {
+                return response()->json(['message' => 'Template not found for the given type.'], 404);
+            }
+
+            // Decode the JSON string back into an array
+            $htmlPages = json_decode($htmlTemplate->html_pages, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['message' => 'Error decoding HTML pages from database.'], 500);
+            }
+
+            // dd($htmlPages);
+
+            return response()->json([
+                'message' => 'Template loaded successfully!',
+                'html_pages' => $htmlPages,
+                'template_type' => $htmlTemplate->template_type
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error loading template: ' . $e->getMessage()], 500);
+        }
+    }
+
+    // public function exportPdf(Request $request)
+    // {
+    //     $htmlPages = $request->input('html_pages');
+
+    //     if (!is_array($htmlPages) || empty($htmlPages)) {
+    //         return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+    //     }
+
+    //     $type = 'I'; 
+    //     $fontDirs = [public_path('pdf_fonts/')]; 
+
+    //     $fontData = [
+    //         'thsarabunnew' => [
+    //             'R' => "THSarabunNew.ttf",
+    //             'B' => "THSarabunNew-Bold.ttf",
+    //             'I' => "THSarabunNew-Italic.ttf",
+    //             'BI' => "THSarabunNew-BoldItalic.ttf",
+    //         ],
+    //         'dejavusans' => [ // เพิ่มฟอนต์ DejaVu Sans
+    //             'R' => "DejaVuSans.ttf",
+    //             'B' => "DejaVuSans-Bold.ttf",
+    //             'I' => "DejaVuSerif-Italic.ttf",
+    //             'BI' => "DejaVuSerif-BoldItalic.ttf",
+    //         ],
+  
+    //     ];
+
+    //     $mpdf = new Mpdf([
+    //         'PDFA'              => $type == 'F' ? true : false,
+    //         'PDFAauto'          => $type == 'F' ? true : false,
+    //         'format'            => 'A4',
+    //         'mode'              => 'utf-8',
+    //         'default_font_size' => 15,
+    //         'fontDir'           => array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], $fontDirs),
+    //         'fontdata'          => array_merge((new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'], $fontData),
+    //         'default_font'      => 'thsarabunnew',
+    //         'fontdata_fallback' => ['dejavusans', 'freesans', 'arial'], 
+    //         'margin_left'       => 13,
+    //         'margin_right'      => 13,
+    //         'margin_top'        => 10,
+    //         'margin_bottom'     => -1,
+    //         'tempDir'           => sys_get_temp_dir(),
+    //     ]);
+
+    //     $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
+    //     $mpdf->WriteHTML($stylesheet, 1);
+
+    //      $mpdf->SetWatermarkImage(public_path('images/nc_hq.png'), 1, [23, 23], [170, 12]);
+   
+    //        $mpdf->showWatermarkImage = true; // เปิดใช้งาน watermark
+    //     // dd(count($htmlPages));
+    //     foreach ($htmlPages as $index => $pageHtml) {
+    //         if ($index > 0) {
+    //             $mpdf->AddPage(); 
+    //         }
+    //         // ใช้ HTMLParserMode::HTML_BODY เพื่อให้ mPDF จัดการโครงสร้าง body สำหรับแต่ละหน้า
+    //         $mpdf->WriteHTML($pageHtml,HTMLParserMode::HTML_BODY); 
+    //     }
+
+    //     // *** เปลี่ยนบรรทัดนี้เพื่อส่ง PDF Output พร้อม Header ที่ชัดเจน ***
+    //     return Response::make($mpdf->Output(), 200, [
+    //         'Content-Type'        => 'application/pdf',
+    //         'Content-Disposition' => ($type === 'D' ? 'attachment' : 'inline') . '; filename="document.pdf"',
+    //     ]);
+    // }
+   
+    public function exportPdf(Request $request)
+    {
+        $htmlPages = $request->input('html_pages');
+
+       
+
+        if (!is_array($htmlPages) || empty($htmlPages)) {
+            return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+        }
+
+        // กรองหน้าเปล่าออก (โค้ดเดิมที่เพิ่มไป)
+        $filteredHtmlPages = [];
+        foreach ($htmlPages as $pageHtml) {
+            $trimmedPageHtml = trim(strip_tags($pageHtml, '<img>'));
+            if (!empty($trimmedPageHtml)) {
+                $filteredHtmlPages[] = $pageHtml;
+            }
+        }
+
+        if (empty($filteredHtmlPages)) {
+            return response()->json(['message' => 'No valid HTML content to export after filtering empty pages.'], 400);
+        }
+        $htmlPages = $filteredHtmlPages;
+
+        $type = 'I';
+        $fontDirs = [public_path('pdf_fonts/')];
 
         $fontData = [
             'thsarabunnew' => [
@@ -65,7 +388,13 @@ class MyTestController extends Controller
                 'B' => "THSarabunNew-Bold.ttf",
                 'I' => "THSarabunNew-Italic.ttf",
                 'BI' => "THSarabunNew-BoldItalic.ttf",
-            ]
+            ],
+            'dejavusans' => [
+                'R' => "DejaVuSans.ttf",
+                'B' => "DejaVuSans-Bold.ttf",
+                'I' => "DejaVuSerif-Italic.ttf",
+                'BI' => "DejaVuSerif-BoldItalic.ttf",
+            ],
         ];
 
         $mpdf = new Mpdf([
@@ -77,33 +406,57 @@ class MyTestController extends Controller
             'fontDir'           => array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], $fontDirs),
             'fontdata'          => array_merge((new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'], $fontData),
             'default_font'      => 'thsarabunnew',
-            'fontdata_fallback' => ['dejavusans', 'freesans', 'arial'], 
+            'fontdata_fallback' => ['dejavusans', 'freesans', 'arial'],
             'margin_left'       => 13,
             'margin_right'      => 13,
             'margin_top'        => 10,
-            'margin_bottom'     => 10,
-            'tempDir'           => sys_get_temp_dir(),
+            'margin_bottom'     => 0,
+            // 'tempDir'           => sys_get_temp_dir(),
         ]);
 
         $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
         $mpdf->WriteHTML($stylesheet, 1);
-        // dd(count($htmlPages));
+
+        $mpdf->SetWatermarkImage(public_path('images/nc_hq.png'), 1, [23, 23], [170, 12]);
+        $mpdf->showWatermarkImage = true;
+
+        // --- เพิ่ม Watermark Text "DRAFT" ตรงนี้ ---
+        $mpdf->SetWatermarkText('DRAFT');
+        $mpdf->showWatermarkText = true; // เปิดใช้งาน watermark text
+        $mpdf->watermark_font = 'thsarabunnew'; // กำหนด font (ควรใช้ font ที่โหลดไว้แล้ว)
+        $mpdf->watermarkTextAlpha = 0.1;
+$footerHtml = '
+<div width="100%" style="display:inline;line-height:12px">
+
+    <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+      <span style="font-size:20px;">กระทรวงอุตสาหกรรม สํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span><br>
+      <span style="font-size: 16px">(Ministry of Industry, Thai Industrial Standards Institute)</span>
+    </div>
+
+    <div style="display: inline-block; width: 15%;float:right;width:25%">
+  
+    </div>
+
+    <div width="100%" style="display:inline;text-align:center">
+      <span>หน้าที่ {PAGENO}/{nbpg}</span>
+    </div>
+</div>';
+
+// แล้วนำไปกำหนดให้ mPDF เป็น Footer
+$mpdf->SetHTMLFooter($footerHtml);
+
         foreach ($htmlPages as $index => $pageHtml) {
             if ($index > 0) {
-                $mpdf->AddPage(); 
+                $mpdf->AddPage();
             }
-            // ใช้ HTMLParserMode::HTML_BODY เพื่อให้ mPDF จัดการโครงสร้าง body สำหรับแต่ละหน้า
-            $mpdf->WriteHTML($pageHtml,HTMLParserMode::HTML_BODY); 
+            $mpdf->WriteHTML($pageHtml,HTMLParserMode::HTML_BODY);
         }
 
-        // *** เปลี่ยนบรรทัดนี้เพื่อส่ง PDF Output พร้อม Header ที่ชัดเจน ***
         return Response::make($mpdf->Output(), 200, [
-            'Content-Type'        => 'application/pdf',
+            'Content-Type'      => 'application/pdf',
             'Content-Disposition' => ($type === 'D' ? 'attachment' : 'inline') . '; filename="document.pdf"',
         ]);
     }
-   
-
 
     public function index()
     {
@@ -8767,10 +9120,10 @@ class MyTestController extends Controller
 
      public function generateScopePDF()
      {
-      $certilab = CertiLab::find(2085);
+      // $certilab = CertiLab::find(2085);
     
 
-      // dd($certilab);
+      $certilab = CertiLab::orderBy('id', 'desc')->first();
 
       $pdfService = new CreateLabScopePdf($certilab);
       $pdfContent = $pdfService->generatePdf();

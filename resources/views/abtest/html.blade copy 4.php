@@ -7,6 +7,7 @@
       <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {{-- <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet"> --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
 
@@ -164,9 +165,9 @@
 
         .page {
             background-color: white;
-            height: 29.5cm;
-            padding: 1cm 1cm 0 1cm;
-            margin-bottom: 0.5cm;
+            height: 30.5cm;
+            padding: 1cm;
+            margin-bottom: 1cm;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
             line-height: 1.1;
@@ -181,7 +182,7 @@
         }
 
         .page:empty::before {
-            /* content: "พิมพ์ที่นี่..."; */
+            content: "พิมพ์ที่นี่...";
             color: #aaa;
             pointer-events: none;
         }
@@ -190,26 +191,19 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 0.5em 0;
+            margin: 1em 0;
             table-layout: fixed; /* This is key to prevent tables from expanding. */
         }
 
         table.borderless {
             width: 100%;
             border-collapse: collapse;
-            /* margin: 1em 0; */
+            margin: 1em 0;
         }
         
-        th {
+        td, th {
             border: 0.1px solid #050505;
-            padding: 0px;
-            vertical-align: top;
-            word-wrap: break-word; /* Ensures text wraps within the cell. */
-        }
-
-        td {
-            border: 0.1px solid #050505;
-            padding: 5px;
+            padding: 8px;
             vertical-align: top;
             word-wrap: break-word; /* Ensures text wraps within the cell. */
         }
@@ -277,10 +271,8 @@
             padding: 20px 30px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            width: 450px; /* Increased width for more complex modals */
+            width: 300px;
             font-size: 22px;
-            max-height: 90vh; /* Added for scrollability */
-            overflow-y: auto;   /* Added for scrollability */
         }
         
         .modal-content h3 {
@@ -299,31 +291,14 @@
             color: #555;
         }
         
-        .modal-input-group input[type="number"],
-        .modal-input-group input[type="text"] {
+        .modal-input-group input[type="number"] {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 4px;
-            font-size: 18px; /* Added for better readability */
-            font-family: inherit; /* Ensure consistent font */
         }
         
-        /* NEW: Styling for contenteditable div in modal */
-        .modal-content .editable-div {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-family: inherit;
-            min-height: 100px;
-            background-color: #fff;
-            line-height: 1.4;
-            cursor: text;
-        }
-
         .modal-buttons {
             display: flex;
             justify-content: flex-end;
@@ -363,67 +338,16 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             z-index: 3000;
             display: none;
-            padding: 4px 0; /* Added padding */
         }
 
         .context-menu-item {
-            padding: 1px 16px;
+            padding: 4px 16px;
             cursor: pointer;
-            font-size: 20px;
-            white-space: nowrap; /* Prevent wrapping */
+            font-size: 22px;
         }
 
         .context-menu-item:hover {
             background-color: #f0f0f0;
-        }
-        .context-menu-separator {
-            height: 1px;
-            background-color: #e0e0e0;
-            margin: 4px 0;
-        }
-
-        /* Input field styling */
-        .lab-test-modal input[type="text"],
-        .lab-test-modal .editable-div {
-            width: 250px;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-        }
-        /* Input field styling */
-        .lab-cal-modal input[type="text"] {
-            width: 200px;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-        }
-
-        /* Editable div styling */
-        .lab-cal-modal .editable-div {
-            width: 180px;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-        }
-
-        /* Specific styling for lab-cal-method-editor */
-        .lab-cal-modal #lab-cal-method-editor {
-            width: 200px;
-        }
-
-        /* Input field styling */
-        .ib-modal input[type="text"],
-        .ib-modal .editable-div,
-        .cb-modal .editable-div {
-            width: 250px ;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-            box-sizing: border-box;
-        }
-        
-        .cb-modal .code {
-            width: 200px;
-        }
-
-        .cb-modal .detail {
-            width: 540px;
         }
     </style>
 </head>
@@ -469,23 +393,14 @@
         <div class="dropdown">
             <button class="menu-button" id="template-dropdown-button" title="แทรกเทมเพลต"><i class="fas fa-file-alt"></i></button>
             <div class="dropdown-content">
-                @if ($templateType == "cb")
-                       <a href="#" data-template="cb-template" >CB template</a>
-                @elseif($templateType == "ib")
-                        <a href="#" data-template="ib-template" >IB template</a>
-                @elseif($templateType == "lab_cal")
-                        <a href="#" data-template="lab-cal-template" >Cal Lab template</a>
-                @elseif($templateType == "lab_test")
-                        <a href="#" data-template="lab-test-template" >Test Lab template</a>
-                @endif
+                <a href="#" data-template="cb-template" >CB template</a>
+                <a href="#" data-template="ib-template" >IB template</a>
+                <a href="#" data-template="lab-cal-template" >Cal Lab template</a>
+                <a href="#" data-template="lab-test-template" >Test Lab template</a>
             </div>
         </div>
         
         <button class="menu-button" id="export-pdf-button" title="ส่งออกเป็น PDF"><i class="fas fa-file-pdf"></i></button>
-        <button class="menu-button" id="save-template-button"><i class="fas fa-save"></i></button>
-        <button class="menu-button" id="load-template-button"><i class="fa fa-cloud-download" aria-hidden="true"></i></button>
-
-        
     </div>
 
     <input type="file" id="image-input" accept="image/*" style="display: none;">
@@ -496,7 +411,6 @@
         </div>
     </div>
 
-    <!-- Table Creation Modal -->
     <div id="table-modal-overlay" class="modal-overlay">
         <div class="modal-content">
             <h3>แทรกตาราง</h3>
@@ -514,187 +428,19 @@
             </div>
             <div class="modal-buttons">
                 <button id="insert-table-btn" class="modal-btn-confirm">แทรก</button>
-                <button class="modal-btn-cancel">ยกเลิก</button>
+                <button id="cancel-table-btn" class="modal-btn-cancel">ยกเลิก</button>
             </div>
         </div>
     </div>
 
-    <!-- NEW: Modals for Adding Template Items -->
-    <!-- === START: REVISED CB Item Modal === -->
-    <div id="cb-item-modal" class="modal-overlay cb-modal">
-        <div class="modal-content" style="width: 750px">
-            <h3>เพิ่มรายการ (CB)</h3>
-            
-
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="cb-code-editor">รหัส:</label>
-                    <div id="cb-code-editor" class="editable-div code" contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="cb-description-editor">รายละเอียด:</label>
-                    <div id="cb-description-editor" class="editable-div detail" contenteditable="true"></div>
-                </div>
-            </div>
-
-            <div class="modal-buttons">
-                <button id="add-cb-item-btn" class="modal-btn-confirm">เพิ่ม</button>
-                <button class="modal-btn-cancel">ยกเลิก</button>
-            </div>
-        </div>
-    </div>
-    <!-- === END: REVISED CB Item Modal === -->
-
-    <!-- === START: REVISED IB Item Modal === -->
-    <div id="ib-item-modal" class="modal-overlay ib-modal">
-        <div class="modal-content" style="width: 540px">
-            <h3>เพิ่มรายการ (IB)</h3>
-            
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="ib-main-branch">สาขาการตรวจหลัก:</label>
-                    <input type="text" id="ib-main-branch">
-                </div>
-                <div style="flex: 1;">
-                    <label for="ib-sub-branch">สาขาการตรวจย่อย:</label>
-                    <div id="ib-sub-branch" class="editable-div" contenteditable="true"></div>
-                </div>
-            </div>
-
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="ib-main-scope">ขอบข่ายหลัก:</label>
-                    <div id="ib-main-scope" class="editable-div" contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="ib-sub-scope">ขอบข่ายย่อย:</label>
-                    <div id="ib-sub-scope" class="editable-div" contenteditable="true"></div>
-                </div>
-            </div>
-
-            <div class="modal-input-group">
-                <label for="ib-requirements-editor">ข้อกำหนดที่ใช้:</label>
-                <div id="ib-requirements-editor" class="editable-div" contenteditable="true"></div>
-            </div>
-
-            <div class="modal-buttons">
-                <button id="add-ib-item-btn" class="modal-btn-confirm">เพิ่ม</button>
-                <button class="modal-btn-cancel">ยกเลิก</button>
-            </div>
-        </div>
-    </div>
-    <!-- === END: REVISED IB Item Modal === -->
-
-    <!-- MODIFIED: Lab Cal Item Modal -->
-    <div id="lab-cal-item-modal" class="modal-overlay lab-cal-modal">
-        <div class="modal-content">
-            <h3>เพิ่มรายการ (Lab Cal)</h3>
-            <!-- === START: MODIFICATION === -->
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-cal-field">สาขาการสอบเทียบ:</label>
-                    <input type="text" id="lab-cal-field" >
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-cal-instrument">เครื่องมือ:</label>
-                    <input type="text" id="lab-cal-instrument">
-                </div>
-            </div>
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-cal-parameter">พารามิเตอร์:</label>
-                    <input type="text" id="lab-cal-parameter" >
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-cal-condition">เงื่อนไขการวัด:</label>
-                    <input type="text" id="lab-cal-condition" >
-                </div>
-            </div>
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-cal-param-details-editor">รายละเอียดพารามิเตอร์:</label>
-                    <div id="lab-cal-param-details-editor" class="editable-div"  contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-cal-capability-editor">ขีดความสามารถฯ:</label>
-                    <div id="lab-cal-capability-editor" class="editable-div" contenteditable="true"></div>
-                </div>
-            </div>
-            <!-- === END: MODIFICATION === -->
-            <div class="modal-input-group">
-                <label for="lab-cal-method-editor" style="display: block;">วิธีสอบเทียบ / มาตรฐานที่ใช้:</label>
-                <div id="lab-cal-method-editor" class="editable-div" contenteditable="true"></div>
-            </div>
-            <div class="modal-buttons">
-                <button id="add-lab-cal-item-btn" class="modal-btn-confirm">เพิ่ม</button>
-                <button class="modal-btn-cancel">ยกเลิก</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- === START: MODIFICATION FOR LAB TEST MODAL === -->
-    <div id="lab-test-item-modal" class="modal-overlay lab-test-modal" >
-        <div class="modal-content" style="width: 540px">
-            <h3>เพิ่มรายการ (Lab Test)</h3>
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-test-field">สาขาการทดสอบ:</label>
-                    <input type="text" id="lab-test-field" >
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-test-category">หมวดหมู่การทดสอบ:</label>
-                    <input type="text" id="lab-test-category" >
-                </div>
-            </div>
-
-             <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-test-parameter">พารามิเตอร์:</label>
-                    <input type="text" id="lab-test-parameter" >
-                </div>
-                  <div style="flex: 1;">
-                    <label for="lab-test-description-editor">คำอธิบาย:</label>
-                
-                    <input type="text" id="lab-test-description-editor" >
-                </div>
-             </div>
-
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                     <label for="lab-test-param-details-editor">รายละเอียดพารามิเตอร์:</label>
-                    <div id="lab-test-param-details-editor" class="editable-div"  contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-test-method-editor">วิธีทดสอบ:</label>
-                    <div id="lab-test-method-editor" class="editable-div"  contenteditable="true"></div>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button id="add-lab-test-item-btn" class="modal-btn-confirm">เพิ่ม</button>
-                <button class="modal-btn-cancel">ยกเลิก</button>
-            </div>
-        </div>
-    </div>
-    <!-- === END: MODIFICATION FOR LAB TEST MODAL === -->
-
-
-    <!-- === START: MODIFICATION === -->
     <div id="context-menu">
-        <div class="context-menu-item" data-action="add-item">เพิ่มรายการ</div>
-        <div class="context-menu-separator" data-action="separator-add"></div>
-        <div class="context-menu-item" data-action="insert-row-above">แทรกแถวด้านบน <span style="float: right; color: #888; margin-left: 20px;">Shift+F1</span></div>
-        <div class="context-menu-item" data-action="insert-row-above-no-border">แทรกแถวด้านบน (ไม่มีขอบ) <span style="float: right; color: #888; margin-left: 20px;">Shift+F2</span></div>
-        <div class="context-menu-item" data-action="insert-row-below">แทรกแถวด้านล่าง <span style="float: right; color: #888; margin-left: 20px;">Shift+F4</span></div>
-        <div class="context-menu-item" data-action="insert-row-below-no-border">แทรกแถวด้านล่าง (ไม่มีขอบ) <span style="float: right; color: #888; margin-left: 20px;">Shift+F5</span></div>
+        <div class="context-menu-item" data-action="insert-row-above">แทรกแถวด้านบน</div>
+        <div class="context-menu-item" data-action="insert-row-below">แทรกแถวด้านล่าง</div>
         <div class="context-menu-item" data-action="insert-column-left">แทรกคอลัมน์ด้านซ้าย</div>
         <div class="context-menu-item" data-action="insert-column-right">แทรกคอลัมน์ด้านขวา</div>
-        <div class="context-menu-separator"></div>
         <div class="context-menu-item" data-action="delete-row">ลบแถว</div>
         <div class="context-menu-item" data-action="delete-column">ลบคอลัมน์</div>
-        <div class="context-menu-separator" data-action="separator-merge"></div>
-        <div class="context-menu-item" data-action="merge-columns">รวมคอลัมน์</div>
     </div>
-    <!-- === END: MODIFICATION === -->
 
     <script>
         document.execCommand('styleWithCSS', false, true);
@@ -704,6 +450,7 @@
         const menubar = document.getElementById('menubar');
         const tableModalOverlay = document.getElementById('table-modal-overlay');
         const insertTableBtn = document.getElementById('insert-table-btn');
+        const cancelTableBtn = document.getElementById('cancel-table-btn');
         const tableRowsInput = document.getElementById('table-rows');
         const tableColsInput = document.getElementById('table-cols');
         const tableBorderToggle = document.getElementById('table-border-toggle');
@@ -713,153 +460,16 @@
         const templateDropdownContent = document.querySelector('.dropdown-content');
         const exportPdfButton = document.getElementById('export-pdf-button');
         const fontSizeSelector = document.getElementById('font-size-selector');
-        const saveTemplateButton = document.getElementById('save-template-button'); 
-        const loadTemplateButton = document.getElementById('load-template-button');
 
-        // --- NEW: Template Item Modals ---
-        const cbItemModal = document.getElementById('cb-item-modal');
-        const ibItemModal = document.getElementById('ib-item-modal');
-        const labCalItemModal = document.getElementById('lab-cal-item-modal');
-        const labTestItemModal = document.getElementById('lab-test-item-modal');
-
-        // 1. รับข้อมูลจาก Blade ที่ PHP ส่งมา
-        const templateType = "{{ $templateType ?? '' }}"; 
-        const labCalDetailsFromBlade = @json($labCalDetails ?? null); 
-        const labTestDetailsFromBlade = @json($labTestDetails ?? null);
-        const cbDetailsFromBlade = @json($cbDetails ?? null);
-        const ibDetailsFromBlade = @json($ibDetails ?? null);
-
-                                                                
         let savedRange = null; // Used for image insertion
         let contextMenuTarget = null;
-        let contextMenuTargetRow = null; // To store the target TR element for immediate context menu actions
-        let selectedTableCellsForMerge = []; // Holds cells selected for merging
-        let activeModalTargetRow = null; // **NEW**: Persists the target row for modal operations
 
-        // --- Global Paste Handler for Main Editor ---
-        // This listener is attached to the main editor container (#document-editor).
-        // It catches all paste events within any ".page" element.
-        // Its purpose is to strip all formatting and paste as plain text.
+        // --- Paste as Plain Text Handler ---
         editor.addEventListener('paste', (event) => {
-            // Prevent the default paste action which might include rich text formatting.
             event.preventDefault();
-
-            // Get the pasted content as plain text from the clipboard.
             const text = (event.clipboardData || window.clipboardData).getData('text/plain');
-
-            // Insert the plain text at the current cursor position.
             document.execCommand('insertText', false, text);
         });
-        
-        // --- LineExtractor Class ---
-        // This class is specifically for the contenteditable div in the Lab Cal modal.
-        class LineExtractor {
-            constructor(elementId) {
-                this.editableDiv = document.getElementById(elementId);
-                this.init();
-            }
-
-            init() {
-                if (!this.editableDiv) {
-                    console.error('Element not found:', this.elementId);
-                    return;
-                }
-
-                // --- Specific Paste Handler for Modal's Div ---
-                // This listener ONLY applies to the div managed by this class instance
-                // (e.g., #lab-cal-method-editor).
-                // Its purpose is to paste as plain text BUT apply specific styles.
-                this.editableDiv.addEventListener('paste', (event) => {
-                    // Prevent the default paste action
-                    event.preventDefault();
-                    console.log("Paste event fired in modal's editableDiv!");
-                    
-                    // Get pasted text as plain text
-                    const text = (event.clipboardData || window.clipboardData).getData('text/plain');
-
-                    // Insert the plain text. The browser will handle wrapping it in the current context.
-                    // For a contenteditable div, this is usually sufficient.
-                    document.execCommand('insertText', false, text);
-                });
-            }
-
-            getLines() {
-                if (!this.editableDiv) return [];
-                
-                const tempDiv = document.createElement('div');
-                const computedStyle = window.getComputedStyle(this.editableDiv);
-                
-                tempDiv.style.width = computedStyle.width;
-                tempDiv.style.position = 'absolute';
-                tempDiv.style.visibility = 'hidden';
-                tempDiv.style.whiteSpace = 'pre-wrap';
-                tempDiv.style.overflowWrap = 'break-word';
-                tempDiv.style.fontFamily = computedStyle.fontFamily;
-                tempDiv.style.fontSize = computedStyle.fontSize;
-                tempDiv.style.lineHeight = computedStyle.lineHeight;
-                tempDiv.style.padding = computedStyle.padding;
-                tempDiv.style.border = computedStyle.border;
-                tempDiv.style.boxSizing = computedStyle.boxSizing;
-
-                // Use innerText to respect user-entered newlines
-                let text = this.editableDiv.innerText;
-                document.body.appendChild(tempDiv);
-            
-                const lines = [];
-                const range = document.createRange();
-                let lastTop = null;
-            
-                // Split text by newlines first to handle manual line breaks
-                const textLines = text.split('\n');
-            
-                for (let line of textLines) {
-                    if (line.trim() === '') {
-                        // Add empty lines from newlines
-                        lines.push('');
-                        continue;
-                    }
-            
-                    // Put the text of this line into tempDiv to check for wrapping
-                    tempDiv.textContent = line;
-            
-                    let subCurrentLine = '';
-                    let tempNode = tempDiv.firstChild;
-                    if (!tempNode || tempNode.nodeType !== Node.TEXT_NODE) {
-                         if (line) lines.push(line);
-                         continue;
-                    }
-
-                    for (let i = 0; i < line.length; i++) {
-                        range.setStart(tempNode, i);
-                        range.setEnd(tempNode, i + 1);
-                        const rects = range.getClientRects();
-                        
-                        if (rects.length > 0) {
-                            const rect = rects[0];
-                            // If the top position changes, it's a new line
-                            if (lastTop !== null && rect.top > lastTop) {
-                                lines.push(subCurrentLine.trim());
-                                subCurrentLine = line[i];
-                            } else {
-                                subCurrentLine += line[i];
-                            }
-                            lastTop = rect.top;
-                        }
-            
-                        // Push the last part of the line
-                        if (i === line.length - 1) {
-                            lines.push(subCurrentLine.trim());
-                        }
-                    }
-                    lastTop = null; // Reset for the next line from text.split('\n')
-                }
-            
-                document.body.removeChild(tempDiv);
-            
-                return lines;
-            }
-        }
-
 
         // --- Core Styling Functions ---
         const applyStyleToSelectedSpans = (styleCallback) => {
@@ -960,14 +570,14 @@
             const templateItem = event.target.closest('a[data-template]');
             if (templateItem) {
                 event.preventDefault();
-                const templateId = templateItem.dataset.template;
-                if (templateId === 'cb-template') {
+                const templateType = templateItem.dataset.template;
+                if (templateType === 'cb-template') {
                     insertCbTemplate();
-                } else if (templateId === 'ib-template') {
+                } else if (templateType === 'ib-template') {
                     insertIbTemplate();
-                } else if (templateId === 'lab-cal-template') {
+                } else if (templateType === 'lab-cal-template') {
                     insertLabCalTemplate();
-                } else if (templateId === 'lab-test-template') {
+                } else if (templateType === 'lab-test-template') {
                     insertLabTestTemplate();
                 }
                 templateDropdownContent.parentElement.classList.remove('show');
@@ -1039,8 +649,11 @@
         const insertTemplateAtCurrentOrLastPage = (templateHTML) => {
             let targetPage = editor.querySelector('.page:focus');
 
+            // If no page is focused, or if the focused page is empty and there are other pages,
+            // try to find the last non-empty page or the very last page.
             if (!targetPage || (targetPage.textContent.trim() === '' && editor.children.length > 1)) {
                 const pages = Array.from(editor.querySelectorAll('.page'));
+                // Find the last page that has some content or is the very last page
                 for (let i = pages.length - 1; i >= 0; i--) {
                     if (pages[i].textContent.trim() !== '' || i === pages.length - 1) {
                         targetPage = pages[i];
@@ -1049,34 +662,65 @@
                 }
             }
 
+            // Fallback to the first page if for some reason no targetPage is found
             if (!targetPage) {
                 targetPage = editor.querySelector('.page');
             }
 
             if (targetPage) {
+                // Focus the target page
                 targetPage.focus();
+
+                // Move cursor to the end of the target page
                 const range = document.createRange();
                 const selection = window.getSelection();
                 range.selectNodeContents(targetPage);
-                range.collapse(false);
+                range.collapse(false); // Collapse to the end
                 selection.removeAllRanges();
                 selection.addRange(range);
+
+                // Insert the template HTML
                 document.execCommand('insertHTML', false, templateHTML);
             }
+            // After insertion, ensure page management runs to handle any new overflows
             setTimeout(managePages, 10);
         };
         
-const insertCbTemplate = () => {
-            const templateData = cbDetailsFromBlade;
-
-            if (!templateData) {
-                console.error("No cbDetails data available to render.");
-                return;
-            }
+        const insertCbTemplate = () => {
+            const templateData = {
+                scopeOfAccreditation: {
+                    th: "สาขาและขอบข่ายการรับรองระบบงาน",
+                    en: "Scope of Accreditation"
+                },
+                attachmentToCertificate: {
+                    th: "แนบท้ายใบรับรองระบบงาน : หน่วยรับรองระบบงานการจัดการคุณภาพ",
+                    en: "Attachment to Certificate of Quality Management System Certification Body Accreditation"
+                },
+                certificateNo: "24-CB0003",
+                certificationBody: {
+                    th: "สถาบันวิจัยวิทยาศาสตร์และเทคโนโลยีแห่งประเทศไทย สำนักรับรองระบบคุณภาพ",
+                    en: "Thailand Institute of Scientific and Technological Research, Office of Certification Body"
+                },
+                premise: {
+                    th: "35 หมู่ 3 เทคโนธานี ตำบลคลองห้า อำเภอคลองหลวง จังหวัดปทุมธานี",
+                    en: "35 Moo 3 Technopolis, Tambon Klong 5, Amphoe Khlong Luang, Pathum Thani"
+                },
+                accreditationCriteria: [
+                    { th: "ISO/IEC 17021-1:2015 (มอก. 17021-1-2559)", en: "ISO 17021-3:2017 (มอก. 17021-3-2562)" },
+                ],
+                certificationMark: {
+                    th: "การรับรองระบบบริหารงานคุณภาพตามมาตรฐาน ISO 9001/มอก.9001 โดยมีสาขาและ<br>ขอบข่ายตามมาตรฐานการจัดประเภทอุตสาหกรรมตามกิจกรรมทางเศรษฐกิจทุกประเภท<br>ตามมาตรฐานสากล (ISIC) มอก.2000-2540 ดังต่อไปนี้",
+                    en: "Quality Management system Certification according to ISO 9001/TIS 9001, covered by International Standard industrial classification of all economic activities (ISIC) according to TIS 2000-2540 as following"
+                },
+                isicCodes: [
+                    { code: "15", description_th: "การผลิตผลิตภัณฑ์อาหารและเครื่องดื่ม", description_en: "Manufacture of food products and beverages" },
+                    { code: "24(ยกเว้น 2423)", description_th: "การผลิตสารเคมีและผลิตภัณฑ์เคมี", description_en: "Manufacture of chemicals and chemical products" }
+                ]
+            };
 
             let accreditationCriteriaHTML = '';
             if (templateData.accreditationCriteria && Array.isArray(templateData.accreditationCriteria)) {
-                accreditationCriteriaHTML = templateData.accreditationCriteria.map(item =>
+                accreditationCriteriaHTML = templateData.accreditationCriteria.map(item => 
                     `${item.th}<br><span style="font-size: 15px;">${item.en}</span>`
                 ).join('<br>');
             }
@@ -1122,10 +766,10 @@ const insertCbTemplate = () => {
                         </tr>
                     </tbody>
                 </table>
-                <table class="detail-table" style="width: 100%; margin-bottom: 1em;">
+                <table style="width: 100%; margin-bottom: 1em;">
                     <thead>
                         <tr>
-                            <th style="width: 25%;">รหัส ISIC<br><span style="font-size: 15px">(ISIC Codes)</span></th>
+                            <th>รหัส ISIC<br><span style="font-size: 15px;">(ISIC Codes)</span></th>
                             <th>กิจกรรม<br><span style="font-size: 15px;">(Description)</span></th>
                         </tr>
                     </thead>
@@ -1138,13 +782,23 @@ const insertCbTemplate = () => {
             insertTemplateAtCurrentOrLastPage(templateHTML);
         };
 
-   const insertIbTemplate = () => {
-            const templateData = ibDetailsFromBlade;
-
-            if (!templateData) {
-                console.error("No ibDetails data available to render.");
-                return;
-            }
+        const insertIbTemplate = () => {
+            const templateData = {
+                title: "รายละเอียดแนบท้ายใบรับรองระบบงานหน่วยตรวจ",
+                certificateNo: "23-IB0005",
+                inspectionBodyName: "บริษัท อินเตอร์เทค เทสติ้ง เซอร์วิสเซส (ประเทศไทย) จำกัด<br>สายธุรกิจ การค้าสินค้าเกษตร",
+                headOfficeAddress: "เลขที่ 1285/5 ถนนประชาราษฎร์ แขวงวงศ์สว่าง เขตบางซื่อ<br>กรุงเทพมหานคร",
+                branchOfficeAddress: "เลขที่ 3 ซอยสาธุฯ 29 ถนนสุขสวัสดิ์ 105 แขวงบางนา<br>เขตบางนา กรุงเทพมหานคร",
+                accreditationNo: "หน่วยตรวจ 0057",
+                inspectionBodyType: "ประเภท A",
+                inspectionItems: [
+                    {
+                        category: "1. สินค้าเกษตร:<br>ข้าวหอมมะลิไทย",
+                        procedure: "การตรวจในขั้นตอนก่อนปล่อยและขั้น<br>ตรวจปล่อย ในรายการต่อไปนี้",
+                        requirements: "1. ประกาศกระทรวงพาณิชย์ เรื่อง<br>หลักเกณฑ์และวิธีการจัดให้มีการ<br>ตรวจสอบมาตรฐานสินค้า และการ<br>ออกใบรับรองมาตรฐานสินค้า<br>สำหรับสินค้าข้าวหอมมะลิไทย<br>พ.ศ. 2559"
+                    }
+                ]
+            };
 
             let inspectionTableRows = '';
             templateData.inspectionItems.forEach(item => {
@@ -1196,7 +850,7 @@ const insertCbTemplate = () => {
                         </tr>
                     </tbody>
                 </table>
-                <table class="detail-table" style="width: 100%; margin-bottom: 1em;">
+                <table style="width: 100%; margin-bottom: 1em;">
                     <thead>
                         <tr>
                             <th style="text-align: center;">หมวดหมู่ / สาขาการตรวจ</th>
@@ -1214,14 +868,39 @@ const insertCbTemplate = () => {
             insertTemplateAtCurrentOrLastPage(templateHTML);
         };
         
-
         const insertLabCalTemplate = () => {
-            const templateData = labCalDetailsFromBlade;
-
-            if (!templateData) {
-                console.error("No labCalDetails data available to render.");
-                return;
-            }
+            const templateData = {
+                title: {
+                    th: "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
+                    en: "Scope of Accreditation for Calibration"
+                },
+                certificateNo: "21-LB0036",
+                labName: {
+                    th: "บริษัท ไออาร์ซี เทคโนโลยีส์ จำกัด",
+                    en: "IRC Technologies Co.,Ltd."
+                },
+                accreditationNo: {
+                    th: "สอบเทียบ 0203",
+                    en: "Calibration 0203"
+                },
+                issueNo: "01",
+                validFrom: {
+                    th: "2 กันยายน 2564",
+                    en: "30 January B.E.2566 (2023)"
+                },
+                until: {
+                    th: "1 กันยายน 2569",
+                    en: "29 January B.E. 2571 (2028)"
+                },
+                calibrationData: [
+                    {
+                        field: { th: "ไฟฟ้า", en: "Electrical" },
+                        parameter: "Measuring instrument<br>DC voltage<br>0 mV to < 220 mV<br>0.22 V to < 2.2 V<br>2.2 V to < 11 V",
+                        capability: "8.0 &mu;V/V + 1.8 &mu;V<br>7.0 &mu;V/V + 7.3 &mu;V<br>7.0 &mu;V/V + 8.1 &mu;V",
+                        method: "In-house method :<br>CP-01DCV by direct<br>measurement with<br>multifunction calibrator"
+                    }
+                ]
+            };
 
             let calibrationTableRows = '';
             templateData.calibrationData.forEach(item => {
@@ -1234,23 +913,6 @@ const insertCbTemplate = () => {
                     </tr>
                 `;
             });
-            calibrationTableRows +=`
-            <tr>
-                <td style="text-align: center; line-height: 1; padding: 5px 0 0 0;" colspan="4">
-                    <span>* ค่าความไม่แน่นอน (±) ที่ระดับความเชื่อมั่นประมาณ 95 %</span><br>
-                    <span>และมีความหมายเป็นไปตามเอกสารวิชาการเรื่อง ขีดความสามารถของการสอบเทียบและการวัด (TLA-03)</span><br>
-                    <span style="font-size:16px">(* Expressed as an uncertainty (±) providing a level of confidence of approximately 95%</span><br>
-                    <span style="font-size:16px">and the term “CMCs” has been expressed in the technical document (TLA-03))</span><br>
-                </td>
-            </tr>
-            `;
-
-            const isPermanentChecked = templateData.laboratory_status.is_permanent ? 'checked="checked"' : '';
-            const isSiteChecked = templateData.laboratory_status.is_site ? 'checked="checked"' : '';
-            const isTemporaryChecked = templateData.laboratory_status.is_temporary ? 'checked="checked"' : '';
-            const isMobileChecked = templateData.laboratory_status.is_mobile ? 'checked="checked"' : '';
-            const isMultisiteChecked = templateData.laboratory_status.is_multisite ? 'checked="checked"' : '';
-
 
             const templateHTML = `
                 <div style="text-align: center; line-height: 1.1; position: relative;  margin-bottom: 0em;">
@@ -1269,7 +931,7 @@ const insertCbTemplate = () => {
                             <td class="vertical-align-top"><b>หมายเลขการรับรองที่</b><br><span style="font-size: 15px;">(Accreditation No.)</span></td>
                             <td class="vertical-align-top" colspan="3">${templateData.accreditationNo.th}<br><span style="font-size: 15px;">(${templateData.accreditationNo.en})</span></td>
                         </tr>
-
+                   
                         <tr>
                             <td class="vertical-align-top"><b>ฉบับที่</b> ${templateData.issueNo}<br><span style="font-size: 15px;">(Issue No.)</span></td>
                             <td class="vertical-align-top" colspan="2">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}<br><span style="font-size: 15px;">(Valid from ${templateData.validFrom.en})</span></td>
@@ -1282,23 +944,23 @@ const insertCbTemplate = () => {
                                     <tbody>
                                         <tr>
                                             <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isPermanentChecked} style="vertical-align: middle;">
+                                                <input type="checkbox" checked="checked" style="vertical-align: middle;">
                                                 <span style="line-height: 1.2;font-size:20px">ถาวร<br><span style="font-size: 15px;">(Permanent)</span></span>
                                             </td>
                                             <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isSiteChecked} style="vertical-align: middle; ">
+                                                <input type="checkbox" style="vertical-align: middle; ">
                                                 <span style="line-height: 1.2;font-size:20px">นอกสถานที่<br><span style="font-size: 15px;">(Site)</span></span>
                                             </td>
                                             <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isTemporaryChecked} style="vertical-align: middle; ">
+                                                <input type="checkbox" style="vertical-align: middle; ">
                                                 <span style="line-height: 1.2;font-size:20px">ชั่วคราว<br><span style="font-size: 15px;">(Temporary)</span></span>
                                             </td>
                                             <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isMobileChecked} style="vertical-align: middle; ">
+                                                <input type="checkbox" style="vertical-align: middle; ">
                                                 <span style="line-height: 1.2;font-size:20px">เคลื่อนที่<br><span style="font-size: 15px;">(Mobile)</span></span>
                                             </td>
                                             <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isMultisiteChecked} style="vertical-align: middle; ">
+                                                <input type="checkbox" style="vertical-align: middle; ">
                                                 <span style="line-height: 1.2;font-size:20px">หลายสาขา<br><span style="font-size: 15px;">(Multisite)</span></span>
                                             </td>
                                         </tr>
@@ -1308,8 +970,8 @@ const insertCbTemplate = () => {
                         </tr>
                     </tbody>
                 </table>
-                <table class="detail-table" style="width: 100%; margin-bottom: 1em; line-height: 1.1; ">
-                    <thead>
+                <table style="width: 100%; margin-bottom: 1em;">
+                     <thead>
                         <tr>
                             <th style="width: 22%; text-align: center;">สาขาการสอบเทียบ<br><span style="font-size: 15px;">(Field of Calibration)</span></th>
                             <th style="width: 26%; text-align: center;">รายการสอบเทียบ<br><span style="font-size: 15px;">(Parameter)</span></th>
@@ -1328,12 +990,37 @@ const insertCbTemplate = () => {
         };
 
         const insertLabTestTemplate = () => {
-            const templateData = labTestDetailsFromBlade;
-
-            if (!templateData) {
-                console.error("No labTestDetails data available to render.");
-                return;
-            }
+            const templateData = {
+                title: {
+                    th: "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
+                    en: "Scope of Accreditation for Calibration"
+                },
+                certificateNo: "21-LB0036",
+                labName: {
+                    th: "บริษัท ไออาร์ซี เทคโนโลยีส์ จำกัด",
+                    en: "IRC Technologies Co.,Ltd."
+                },
+                accreditationNo: {
+                    th: "สอบเทียบ 0203",
+                    en: "Calibration 0203"
+                },
+                issueNo: "01",
+                validFrom: {
+                    th: "2 กันยายน 2564",
+                    en: "30 January B.E.2566 (2023)"
+                },
+                until: {
+                    th: "1 กันยายน 2569",
+                    en: "29 January B.E. 2571 (2028)"
+                },
+                testLabData: [
+                    {
+                        field: { th: "สาขาโยธา", en: "Civil field" },
+                        parameter: "ความละเอียดโดยเครื่องแอร์เพอร์มีอะบิลิตี<br>(Fineness by air-permeability)",
+                        method: "มอก. 2752 เล่ม 6-2562 (วิธี A)<br>(TIS 2752 Part 6-2562 (2019) (Method A))"
+                    }
+                ]
+            };
 
             let testTableRows = '';
             templateData.testLabData.forEach(item => {
@@ -1345,12 +1032,6 @@ const insertCbTemplate = () => {
                     </tr>
                 `;
             });
-
-            const isPermanentChecked = templateData.laboratory_status.is_permanent ? 'checked="checked"' : '';
-            const isSiteChecked = templateData.laboratory_status.is_site ? 'checked="checked"' : '';
-            const isTemporaryChecked = templateData.laboratory_status.is_temporary ? 'checked="checked"' : '';
-            const isMobileChecked = templateData.laboratory_status.is_mobile ? 'checked="checked"' : '';
-            const isMultisiteChecked = templateData.laboratory_status.is_multisite ? 'checked="checked"' : '';
 
             const templateHTML = `
                 <div style="text-align: center; line-height: 1.1; position: relative; margin-bottom: 0em;">
@@ -1382,23 +1063,23 @@ const insertCbTemplate = () => {
                                     <tbody>
                                         <tr>
                                             <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isPermanentChecked} style="vertical-align: middle; margin-right: 5px;">
+                                                <input type="checkbox" checked="checked" style="vertical-align: middle; margin-right: 5px;">
                                                 <span style="line-height: 1.2;font-size:20px">ถาวร<br><span style="font-size: 15px;">(Permanent)</span></span>
                                             </td>
                                             <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isSiteChecked} style="vertical-align: middle; margin-right: 5px;">
+                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
                                                 <span style="line-height: 1.2;font-size:20px">นอกสถานที่<br><span style="font-size: 15px;">(Site)</span></span>
                                             </td>
                                             <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isTemporaryChecked} style="vertical-align: middle; margin-right: 5px;">
+                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
                                                 <span style="line-height: 1.2;font-size:20px">ชั่วคราว<br><span style="font-size: 15px;">(Temporary)</span></span>
                                             </td>
                                             <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isMobileChecked} style="vertical-align: middle; margin-right: 5px;">
+                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
                                                 <span style="line-height: 1.2;font-size:20px">เคลื่อนที่<br><span style="font-size: 15px;">(Mobile)</span></span>
                                             </td>
                                             <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isMultisiteChecked} style="vertical-align: middle; margin-right: 5px;">
+                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
                                                 <span style="line-height: 1.2;font-size:20px">หลายสาขา<br><span style="font-size: 15px;">(Multisite)</span></span>
                                             </td>
                                         </tr>
@@ -1408,8 +1089,8 @@ const insertCbTemplate = () => {
                         </tr>
                     </tbody>
                 </table>
-                <table class="detail-table" style="width: 100%; margin-bottom: 1em; line-height: 1.1;">
-                    <thead>
+                <table style="width: 100%; margin-bottom: 1em;">
+                     <thead>
                         <tr>
                             <th style="width: 30%; text-align: center;">สาขาการทดสอบ<br><span style="font-size: 15px;">(Field of Testing)</span></th>
                             <th style="width: 35%; text-align: center;">รายการทดสอบ<br><span style="font-size: 15px;">(Parameter)</span></th>
@@ -1647,72 +1328,18 @@ const insertCbTemplate = () => {
 
             element.addEventListener('mousedown', onMouseDown);
         }
-        
-        // --- Table & Context Menu Functions ---
 
-        // === START: MODIFICATION ===
-        function insertTableRow(table, rowIndex, above, removeConnectingBorder) {
-            const insertAt = above ? rowIndex : rowIndex + 1;
-            const newRow = table.insertRow(insertAt);
-
-            // Determine the correct number of columns to create
-            let colCount = 0;
-            const thead = table.querySelector('thead');
-            if (thead && thead.rows.length > 0 && thead.rows[0].cells.length > 0) {
-                colCount = thead.rows[0].cells.length;
-            } else if (table.rows.length > 1) {
-                // Find a row with the most cells to account for colspans
-                for(let i = 0; i < table.rows.length; i++) {
-                    let currentCellCount = 0;
-                    for(let j = 0; j < table.rows[i].cells.length; j++) {
-                        currentCellCount += table.rows[i].cells[j].colSpan;
-                    }
-                    if(currentCellCount > colCount) {
-                        colCount = currentCellCount;
-                    }
-                }
-            } else {
-                colCount = table.rows[rowIndex].cells.length;
-            }
-
-
-            // Create cells for the new row
+        function insertTableRow(table, rowIndex, above = true) {
+            const row = table.insertRow(above ? rowIndex : rowIndex + 1);
+            const colCount = table.rows[0].cells.length;
             for (let i = 0; i < colCount; i++) {
-                const cell = newRow.insertCell();
+                const cell = row.insertCell();
                 cell.style.verticalAlign = 'top';
                 cell.style.textAlign = 'left';
                 cell.innerHTML = '<br>';
             }
-
-            // --- Conditional Border Logic ---
-            if (removeConnectingBorder) {
-                if (!above) { // Inserting BELOW
-                    const rowAbove = table.rows[rowIndex];
-                    for (const cell of newRow.cells) {
-                        cell.style.borderTop = 'none';
-                    }
-                    if (rowAbove) {
-                        for (const cell of rowAbove.cells) {
-                            cell.style.borderBottom = 'none';
-                        }
-                    }
-                } else { // Inserting ABOVE
-                    const rowBelow = table.rows[insertAt];
-                    for (const cell of newRow.cells) {
-                        cell.style.borderBottom = 'none';
-                    }
-                    if (rowBelow) {
-                        for (const cell of rowBelow.cells) {
-                            cell.style.borderTop = 'none';
-                        }
-                    }
-                }
-            }
-            // If removeConnectingBorder is false, do nothing to the borders.
-
             managePages();
         }
-        // === END: MODIFICATION ===
 
         function insertTableColumn(table, colIndex, right = true) {
             const rows = table.rows;
@@ -1740,103 +1367,10 @@ const insertCbTemplate = () => {
                 managePages();
             }
         }
-        
-        function getSelectedTableCells() {
-            const selection = window.getSelection();
-            if (!selection.rangeCount || selection.isCollapsed) return [];
-
-            const range = selection.getRangeAt(0);
-            let startCell = range.startContainer.closest('td, th');
-            let endCell = range.endContainer.closest('td, th');
-
-            if (!startCell || !endCell || startCell.closest('table') !== endCell.closest('table')) {
-                return [];
-            }
-            
-            if (startCell.compareDocumentPosition(endCell) & Node.DOCUMENT_POSITION_FOLLOWING) {
-                // Correct order
-            } else {
-                [startCell, endCell] = [endCell, startCell]; // Swap
-            }
-
-            const row = startCell.closest('tr');
-            if (!row || endCell.closest('tr') !== row) {
-                return [];
-            }
-
-            const cellsInRow = Array.from(row.cells);
-            const startIndex = cellsInRow.indexOf(startCell);
-            const endIndex = cellsInRow.indexOf(endCell);
-
-            if (startIndex === -1 || endIndex === -1) return [];
-
-            return cellsInRow.slice(startIndex, endIndex + 1);
-        }
-
-        function mergeTableColumns(cellsToMerge) {
-            if (cellsToMerge.length <= 1) return;
-
-            const firstCell = cellsToMerge[0];
-            const parentRow = firstCell.closest('tr');
-            if (!parentRow) return;
-
-            let totalColspan = 0;
-            let combinedContent = '';
-
-            cellsToMerge.forEach(cell => {
-                const cellContent = cell.innerHTML.trim();
-                if (cellContent !== '<br>' && cellContent !== '') {
-                    if (combinedContent !== '') combinedContent += ' ';
-                    combinedContent += cellContent;
-                }
-                totalColspan += cell.colSpan || 1;
-            });
-
-            firstCell.colSpan = totalColspan;
-            firstCell.innerHTML = combinedContent || '<br>';
-
-            for (let i = 1; i < cellsToMerge.length; i++) {
-                parentRow.removeChild(cellsToMerge[i]);
-            }
-            
-            const activePage = firstCell.closest('.page');
-            activePage?.focus();
-            managePages();
-        }
-
 
         function showContextMenu(event, cell) {
             event.preventDefault();
             contextMenuTarget = cell;
-            contextMenuTargetRow = cell.closest('tr'); // Store the target row immediately
-            
-            const addItemMenu = contextMenu.querySelector('[data-action="add-item"]');
-            const addItemSeparator = contextMenu.querySelector('[data-action="separator-add"]');
-            const mergeMenuItem = contextMenu.querySelector('[data-action="merge-columns"]');
-            const mergeSeparator = contextMenu.querySelector('[data-action="separator-merge"]');
-
-            const table = cell.closest('table');
-            const isInTbody = cell.closest('tbody');
-
-            // Show "Add Item" only for tables with 'detail-table' class and inside tbody
-            if (table && table.classList.contains('detail-table') && isInTbody) {
-                addItemMenu.style.display = 'block';
-                addItemSeparator.style.display = 'block';
-            } else {
-                addItemMenu.style.display = 'none';
-                addItemSeparator.style.display = 'none';
-            }
-
-            const selectedCells = getSelectedTableCells();
-            if (selectedCells.length > 1) {
-                selectedTableCellsForMerge = selectedCells;
-                mergeMenuItem.style.display = 'block';
-                mergeSeparator.style.display = 'block';
-            } else {
-                mergeMenuItem.style.display = 'none';
-                mergeSeparator.style.display = 'none';
-            }
-
             contextMenu.style.display = 'block';
             contextMenu.style.left = `${event.pageX}px`;
             contextMenu.style.top = `${event.pageY}px`;
@@ -1845,8 +1379,6 @@ const insertCbTemplate = () => {
         function hideContextMenu() {
             contextMenu.style.display = 'none';
             contextMenuTarget = null;
-            contextMenuTargetRow = null; // Reset the target row
-            selectedTableCellsForMerge = [];
         }
 
         editor.addEventListener('contextmenu', (event) => {
@@ -1858,69 +1390,21 @@ const insertCbTemplate = () => {
             }
         });
 
-        // --- FIXED: Context Menu Click Logic ---
-        // === START: MODIFICATION ===
         contextMenu.addEventListener('click', (event) => {
-            const actionTarget = event.target.closest('.context-menu-item');
-            if (!actionTarget) return;
-            const action = actionTarget.dataset.action;
-            if (!action) return;
+            const action = event.target.dataset.action;
+            if (!action || !contextMenuTarget) return;
 
-            const table = contextMenuTarget?.closest('table');
-
-            // Special handling for actions that open modals
-            if (action === 'add-item') {
-                activeModalTargetRow = contextMenuTargetRow; // Persist the row for the modal
-                contextMenu.style.display = 'none'; // Hide menu visually, but keep state
-                switch (templateType) {
-                    case 'cb':      cbItemModal.style.display = 'flex'; break;
-                    case 'ib':      ibItemModal.style.display = 'flex'; break;
-                    case 'lab_cal': labCalItemModal.style.display = 'flex'; break;
-                    case 'lab_test':labTestItemModal.style.display = 'flex'; break;
-                    default:
-                        alert('ไม่พบ Template ที่ใช้งานอยู่เพื่อเพิ่มรายการ');
-                        hideContextMenu(); // Reset state fully if no template
-                        activeModalTargetRow = null; // Clear persisted row if no modal shown
-                }
-                return; // Exit to prevent hideContextMenu() below
-            }
-
-            // Handle merge action
-            if (action === 'merge-columns') {
-                if (selectedTableCellsForMerge.length > 1) {
-                    mergeTableColumns(selectedTableCellsForMerge);
-                }
-                hideContextMenu(); // Reset state fully
-                return;
-            }
-
-            // For direct table manipulation actions
-            if (!contextMenuTarget || !table) {
-                hideContextMenu();
-                return;
-            }
-
-            const row = contextMenuTargetRow;
-            const rowIndex = row ? Array.from(table.rows).indexOf(row) : -1;
-            const colIndex = row ? Array.from(row.cells).indexOf(contextMenuTarget) : -1;
-
-            if (rowIndex === -1 || colIndex === -1) {
-                hideContextMenu();
-                return;
-            }
+            const table = contextMenuTarget.closest('table');
+            const row = contextMenuTarget.closest('tr');
+            const rowIndex = Array.from(table.rows).indexOf(row);
+            const colIndex = Array.from(row.cells).indexOf(contextMenuTarget);
 
             switch (action) {
                 case 'insert-row-above':
-                    insertTableRow(table, rowIndex, true, false); // above, with border
-                    break;
-                case 'insert-row-above-no-border':
-                    insertTableRow(table, rowIndex, true, true); // above, no border
+                    insertTableRow(table, rowIndex, true);
                     break;
                 case 'insert-row-below':
-                    insertTableRow(table, rowIndex, false, false); // below, with border
-                    break;
-                case 'insert-row-below-no-border':
-                    insertTableRow(table, rowIndex, false, true); // below, no border
+                    insertTableRow(table, rowIndex, false);
                     break;
                 case 'insert-column-left':
                     insertTableColumn(table, colIndex, false);
@@ -1936,16 +1420,13 @@ const insertCbTemplate = () => {
                     break;
             }
 
-            hideContextMenu(); // Reset state fully after action
-            const activePage = table?.closest('.page');
-            activePage?.focus();
+            hideContextMenu();
+            const activePage = table.closest('.page');
+            activePage.focus();
         });
-        // === END: MODIFICATION ===
-
 
         document.addEventListener('click', (event) => {
-            // Hide context menu if the click is outside of it AND not inside a modal overlay
-            if (!contextMenu.contains(event.target) && !event.target.closest('.modal-overlay')) {
+            if (!contextMenu.contains(event.target)) {
                 hideContextMenu();
             }
         });
@@ -1987,51 +1468,6 @@ const insertCbTemplate = () => {
                 }
             }
         });
-        
-        // === START: NEW KEYBOARD SHORTCUTS FOR TABLE ROWS ===
-        document.addEventListener('keydown', (event) => {
-            // Check for Shift key and F1, F2, F4, F5 keys
-            if (event.shiftKey && ['F1', 'F2', 'F4', 'F5'].includes(event.key)) {
-                const selection = window.getSelection();
-                if (!selection.rangeCount) return;
-
-                const range = selection.getRangeAt(0);
-                const currentElement = range.startContainer;
-                // Find the closest cell (td or th) from the current cursor position
-                const cell = currentElement.nodeType === Node.ELEMENT_NODE 
-                             ? currentElement.closest('td, th') 
-                             : currentElement.parentElement.closest('td, th');
-
-                if (cell) {
-                    event.preventDefault(); // Prevent default browser actions (like opening help)
-
-                    const table = cell.closest('table');
-                    const row = cell.closest('tr');
-                    const rowIndex = Array.from(table.rows).indexOf(row);
-
-                    if (rowIndex === -1) return;
-
-                    switch (event.key) {
-                        case 'F1': // Shift+F1: Insert row above
-                            insertTableRow(table, rowIndex, true, false);
-                            break;
-                        case 'F2': // Shift+F2: Insert row above (no border)
-                            insertTableRow(table, rowIndex, true, true);
-                            break;
-                        case 'F4': // Shift+F4: Insert row below
-                            insertTableRow(table, rowIndex, false, false);
-                            break;
-                        case 'F5': // Shift+F5: Insert row below (no border)
-                            insertTableRow(table, rowIndex, false, true);
-                            break;
-                    }
-                     const activePage = table?.closest('.page');
-                     activePage?.focus();
-                }
-            }
-        });
-        // === END: NEW KEYBOARD SHORTCUTS FOR TABLE ROWS ===
-
 
         document.addEventListener('mousedown', (event) => {
             if (!event.target.closest('.image-container')) {
@@ -2074,262 +1510,16 @@ const insertCbTemplate = () => {
             tableBorderToggle.checked = true;
         });
 
-        // --- FIXED: Modal Cancel/Close Logic ---
-        function closeModal(modal) {
-            modal.style.display = 'none';
-            // Clear inputs
-            modal.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.value = '');
-            // MODIFIED: Also clear contenteditable divs
-            modal.querySelectorAll('.editable-div').forEach(div => div.innerHTML = '');
-            // Also reset the context menu state since the modal action is complete.
-            hideContextMenu();
-            activeModalTargetRow = null; // **NEW**: Clear the persisted row
+        const closeTableModal = () => {
+            tableModalOverlay.style.display = 'none';
+            savedRange = null;
+            tableBorderToggle.checked = true;
         }
 
-        document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', (event) => {
-                if (event.target === modal) {
-                    closeModal(modal);
-                }
-            });
-            modal.querySelector('.modal-btn-cancel')?.addEventListener('click', () => {
-                closeModal(modal);
-            });
+        cancelTableBtn.addEventListener('click', closeTableModal);
+        tableModalOverlay.addEventListener('click', (event) => {
+            if (event.target === tableModalOverlay) closeTableModal();
         });
-        
-        // --- [แก้ไข] Helper function to append text to a cell ---
-        function appendToCell(cell, text) {
-            // Do nothing if text is null, undefined, or empty
-            if (!text) {
-                return;
-            }
-
-            // Check if the cell has any visible content using textContent.
-            // This is more reliable than manipulating innerHTML with regex.
-            const hasContent = cell.textContent.trim() !== '';
-
-            if (hasContent) {
-                // If there's existing content, add a line break before the new text.
-                cell.innerHTML += '<br>' + text;
-            } else {
-                // If the cell is empty, just set the new text, replacing any placeholder <br>.
-                cell.innerHTML = text;
-            }
-        }
-
-
-        // --- Add Item Button Logic for each Modal (Using activeModalTargetRow) ---
-        
-        // === START: REVISED CB Item Button Logic ===
-        document.getElementById('add-cb-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
-                closeModal(cbItemModal);
-                return;
-            }
-
-            const cells = targetRow.cells;
-            if (cells.length < 2) {
-                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการอย่างน้อย 2 คอลัมน์)");
-                closeModal(cbItemModal);
-                return;
-            }
-
-            // Get values from editable divs using LineExtractor
-            const codeLines = cbCodeEditorExtractor.getLines();
-            const code = codeLines.join('<br>');
-
-            const descriptionLines = cbDescriptionEditorExtractor.getLines();
-            const description = descriptionLines.join('<br>');
-
-            // Append to the first cell
-            appendToCell(cells[0], code);
-
-            // Append to the second cell
-            appendToCell(cells[1], description);
-
-            managePages();
-            closeModal(cbItemModal);
-        });
-        // === END: REVISED CB Item Button Logic ===
-
-
-        // === START: REVISED IB Item Button Logic ===
-        document.getElementById('add-ib-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
-                closeModal(ibItemModal);
-                return;
-            }
-
-            const cells = targetRow.cells;
-            if (cells.length < 3) {
-                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการ 3 คอลัมน์)");
-                closeModal(ibItemModal);
-                return;
-            }
-
-            // Get values from modal
-            const mainBranch = document.getElementById('ib-main-branch').value.trim();
-
-            const subBranchLines = ibSubBranchExtractor.getLines();
-            const subBranch = subBranchLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const mainScopeLines = ibMainScopeExtractor.getLines();
-            const mainScope = mainScopeLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const subScopeLines = ibSubScopeExtractor.getLines();
-            const subScope = subScopeLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const requirementsLines = ibRequirementsExtractor.getLines();
-            const requirements = requirementsLines.join('<br>');
-
-            // --- Cell 1: Main/Sub Branch ---
-            const cell1Parts = [];
-            if (mainBranch) cell1Parts.push(mainBranch);
-            if (subBranch) cell1Parts.push(subBranch);
-            const cell1Content = cell1Parts.join('<br>');
-            appendToCell(cells[0], cell1Content);
-
-            // --- Cell 2: Main/Sub Scope ---
-            const cell2Parts = [];
-            if (mainScope) cell2Parts.push(mainScope);
-            if (subScope) cell2Parts.push(subScope);
-            const cell2Content = cell2Parts.join('<br>');
-            appendToCell(cells[1], cell2Content);
-
-            // --- Cell 3: Requirements ---
-            if (requirements) {
-                appendToCell(cells[2], requirements);
-            }
-
-            managePages();
-            closeModal(ibItemModal);
-        });
-        // === END: REVISED IB Item Button Logic ===
-
-        // --- [MODIFIED] Logic for adding Lab Cal item ---
-        document.getElementById('add-lab-cal-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
-                closeModal(labCalItemModal);
-                return;
-            }
-
-            const cells = targetRow.cells;
-            if (cells.length < 4) {
-                 alert("โครงสร้างตารางไม่ถูกต้อง");
-                 closeModal(labCalItemModal);
-                 return;
-            }
-
-            // Get values from modal and trim them
-            const field = document.getElementById('lab-cal-field').value.trim();
-            const instrument = document.getElementById('lab-cal-instrument').value.trim();
-            const parameter = document.getElementById('lab-cal-parameter').value.trim();
-            const condition = document.getElementById('lab-cal-condition').value.trim();
-            
-            // Get values from editable divs using LineExtractor
-            const paramDetailsLines = labCalParamDetailsEditorExtractor.getLines();
-            const paramDetails = paramDetailsLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const capabilityLines = labCalCapabilityEditorExtractor.getLines();
-            const capability = capabilityLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-            
-            const methodLines = labCalMethodEditorExtractor.getLines();
-            const method = methodLines.join('<br>');
-            
-            // --- Field (cells[0]) Logic ---
-            if (field && !cells[0].textContent.trim()) {
-                cells[0].innerHTML = field;
-            }
-
-            // --- Parameter Column (cells[1]) Logic ---
-            const parameterParts = [];
-            if (instrument) {
-                parameterParts.push(instrument);
-            }
-            if (parameter) {
-                parameterParts.push('&nbsp;' + parameter);
-            }
-            if (condition) {
-                parameterParts.push('&nbsp;&nbsp;' + condition);
-            }
-            if (paramDetails) {
-                parameterParts.push(paramDetails);
-            }
-            const parameterColumnContent = parameterParts.join('<br>');
-            appendToCell(cells[1], parameterColumnContent);
-
-            // --- Capability (cells[2]) Logic ---
-            if (capability) {
-                appendToCell(cells[2], capability);
-            }
-
-            // --- Method (cells[3]) Logic ---
-            if (method) {
-                appendToCell(cells[3], method);
-            }
-            
-            managePages();
-            closeModal(labCalItemModal);
-        });
-
-        // === START: MODIFICATION FOR LAB TEST LOGIC ===
-        document.getElementById('add-lab-test-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
-                closeModal(labTestItemModal);
-                return;
-            }
-
-            const cells = targetRow.cells;
-            if (cells.length < 3) {
-                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการ 3 คอลัมน์)");
-                closeModal(labTestItemModal);
-                return;
-            }
-
-            // Get values from modal inputs
-            const field = document.getElementById('lab-test-field').value.trim();
-            const category = document.getElementById('lab-test-category').value.trim();
-            const parameter = document.getElementById('lab-test-parameter').value.trim();
-            const description = document.getElementById('lab-test-description-editor').value.trim();
-
-            const paramDetailsLines = labTestParamDetailsEditorExtractor.getLines();
-            const paramDetails = paramDetailsLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-            
-            const methodLines = labTestMethodEditorExtractor.getLines();
-            const method = methodLines.join('<br>');
-            
-            // --- Cell 1 Logic: Field and Category ---
-            const cell1Parts = [];
-            if (field) cell1Parts.push(field);
-            if (category) cell1Parts.push(category);
-            const cell1Content = cell1Parts.join('<br>');
-            appendToCell(cells[0], cell1Content);
-
-            // --- Cell 2 Logic: Parameter, Description, and Details ---
-            const cell2Parts = [];
-            if (parameter) cell2Parts.push(parameter);
-            if (description) cell2Parts.push(description);
-            if (paramDetails) cell2Parts.push(paramDetails);
-            const cell2Content = cell2Parts.join('<br>');
-            appendToCell(cells[1], cell2Content);
-
-            // --- Cell 3 Logic: Method ---
-            if (method) {
-                appendToCell(cells[2], method);
-            }
-            
-            managePages();
-            closeModal(labTestItemModal);
-        });
-        // === END: MODIFICATION FOR LAB TEST LOGIC ===
 
         function wrapSpecialCharactersInNode(node) {
             const specialChars = ['Ω', 'π', 'Σ', 'β', 'α', 'γ', 'µ', 'μ', '±', '∞', 'θ', 'δ', 'ξ', 'φ', 'χ', 'ψ', 'ω', 'ε', 'Δ', '√', '∮', '∫', '∂', '∇', '∑', '∏', '∆', 'λ', 'σ', 'ρ', '℃', '℉', 'Ξ','Ɛ'];
@@ -2413,140 +1603,6 @@ const insertCbTemplate = () => {
                 alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + error.message);
             });
         });
-
-        if (saveTemplateButton) {
-            saveTemplateButton.addEventListener('click', () => {
-
-                const editorClone = editor.cloneNode(true);
-                const pagesContent = [];
-
-                editorClone.querySelectorAll('.page').forEach(page => {
-                    page.removeAttribute('contenteditable');
-
-                    page.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                        if (checkbox.checked) {
-                            checkbox.setAttribute('checked', 'checked');
-                        } else {
-                            checkbox.removeAttribute('checked');
-                        }
-                    });
-
-                    page.querySelectorAll('.image-container').forEach(container => {
-                        const containerWidth = container.style.width;
-                        const img = container.querySelector('img');
-                        if (img && containerWidth) {
-                            img.style.width = containerWidth;
-                            img.style.height = 'auto';
-                        }
-                        container.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
-                        container.classList.remove('active');
-                        container.style.border = 'none';
-                    });
-
-                    wrapSpecialCharactersInNode(page);
-
-                    pagesContent.push(page.innerHTML);
-                });
-
-
-                console.log(pagesContent);
-
-                fetch('/save-html-template', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        html_pages: pagesContent,
-                        template_type: templateType
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(errorData => {
-                            throw new Error(errorData.message || 'Network response was not ok');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    alert(data.message);
-                    console.log('Save successful:', data);
-                })
-                .catch(error => {
-                    console.error('There was a problem with the save operation:', error);
-                    alert('เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
-                });
-            });
-        }
-        
-        if (loadTemplateButton) {
-            loadTemplateButton.addEventListener('click', () => {
-                const templateIdentifier = prompt("โปรดระบุประเภทของเทมเพลตที่ต้องการโหลด (เช่น 'cb', 'ib', 'lab_cal', 'lab_test'):");
-                if (!templateIdentifier) {
-                    alert("ไม่ได้ระบุประเภทของเทมเพลต");
-                    return;
-                }
-
-                fetch('/download-html-template', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({
-                        template_type: templateIdentifier
-                    })
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.json().then(errorData => {
-                            throw new Error(errorData.message || 'Network response was not ok');
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.html_pages && Array.isArray(data.html_pages)) {
-                        while (editor.firstChild) {
-                            editor.removeChild(editor.firstChild);
-                        }
-
-                        console.log(data.html_pages)
-                        data.html_pages.forEach(pageHtml => {
-                            const newPage = createNewPage();
-                            newPage.innerHTML = pageHtml;
-                            editor.appendChild(newPage);
-                        });
-                        console.log('Load successful:', data);
-                    } else {
-                        throw new Error(data.message || 'ไม่พบข้อมูลเทมเพลต หรือข้อมูลไม่ถูกต้อง');
-                    }
-                })
-                .catch(error => {
-                    console.error('มีปัญหาในการโหลดเทมเพลต:', error);
-                    alert('เกิดข้อผิดพลาดในการโหลด: ' + error.message);
-                });
-            });
-        }
-
-        // === START: MODIFICATION FOR LineExtractor INSTANCES ===
-        // Instantiate LineExtractor for all editable divs in the modals
-        const cbCodeEditorExtractor = new LineExtractor('cb-code-editor');
-        const cbDescriptionEditorExtractor = new LineExtractor('cb-description-editor');
-        const labCalMethodEditorExtractor = new LineExtractor('lab-cal-method-editor');
-        const labCalParamDetailsEditorExtractor = new LineExtractor('lab-cal-param-details-editor');
-        const labCalCapabilityEditorExtractor = new LineExtractor('lab-cal-capability-editor');
-        const labTestParamDetailsEditorExtractor = new LineExtractor('lab-test-param-details-editor');
-        const labTestMethodEditorExtractor = new LineExtractor('lab-test-method-editor');
-        
-        // New extractors for the modified IB modal
-        const ibSubBranchExtractor = new LineExtractor('ib-sub-branch');
-        const ibMainScopeExtractor = new LineExtractor('ib-main-scope');
-        const ibSubScopeExtractor = new LineExtractor('ib-sub-scope');
-        const ibRequirementsExtractor = new LineExtractor('ib-requirements-editor');
-        // === END: MODIFICATION FOR LineExtractor INSTANCES ===
 
         if (editor.children.length === 0) {
             editor.appendChild(createNewPage());

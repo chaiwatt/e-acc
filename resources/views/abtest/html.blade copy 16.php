@@ -407,24 +407,6 @@
         .lab-cal-modal #lab-cal-method-editor {
             width: 200px;
         }
-
-        /* Input field styling */
-        .ib-modal input[type="text"],
-        .ib-modal .editable-div,
-        .cb-modal .editable-div {
-            width: 250px ;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-            box-sizing: border-box;
-        }
-        
-        .cb-modal .code {
-            width: 200px;
-        }
-
-        .cb-modal .detail {
-            width: 540px;
-        }
     </style>
 </head>
 <body>
@@ -520,70 +502,47 @@
     </div>
 
     <!-- NEW: Modals for Adding Template Items -->
-    <!-- === START: REVISED CB Item Modal === -->
-    <div id="cb-item-modal" class="modal-overlay cb-modal">
-        <div class="modal-content" style="width: 750px">
+    <!-- CB Item Modal -->
+    <div id="cb-item-modal" class="modal-overlay">
+        <div class="modal-content">
             <h3>เพิ่มรายการ (CB)</h3>
-            
-
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="cb-code-editor">รหัส:</label>
-                    <div id="cb-code-editor" class="editable-div code" contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="cb-description-editor">รายละเอียด:</label>
-                    <div id="cb-description-editor" class="editable-div detail" contenteditable="true"></div>
-                </div>
+            <div class="modal-input-group">
+                <label for="cb-isic-code">รหัส ISIC:</label>
+                <input type="text" id="cb-isic-code">
             </div>
-
+            <div class="modal-input-group">
+                <label for="cb-description">กิจกรรม:</label>
+                <input type="text" id="cb-description">
+            </div>
             <div class="modal-buttons">
                 <button id="add-cb-item-btn" class="modal-btn-confirm">เพิ่ม</button>
                 <button class="modal-btn-cancel">ยกเลิก</button>
             </div>
         </div>
     </div>
-    <!-- === END: REVISED CB Item Modal === -->
 
-    <!-- === START: REVISED IB Item Modal === -->
-    <div id="ib-item-modal" class="modal-overlay ib-modal">
-        <div class="modal-content" style="width: 540px">
+    <!-- IB Item Modal -->
+    <div id="ib-item-modal" class="modal-overlay">
+        <div class="modal-content">
             <h3>เพิ่มรายการ (IB)</h3>
-            
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="ib-main-branch">สาขาการตรวจหลัก:</label>
-                    <input type="text" id="ib-main-branch">
-                </div>
-                <div style="flex: 1;">
-                    <label for="ib-sub-branch">สาขาการตรวจย่อย:</label>
-                    <div id="ib-sub-branch" class="editable-div" contenteditable="true"></div>
-                </div>
-            </div>
-
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="ib-main-scope">ขอบข่ายหลัก:</label>
-                    <div id="ib-main-scope" class="editable-div" contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="ib-sub-scope">ขอบข่ายย่อย:</label>
-                    <div id="ib-sub-scope" class="editable-div" contenteditable="true"></div>
-                </div>
-            </div>
-
             <div class="modal-input-group">
-                <label for="ib-requirements-editor">ข้อกำหนดที่ใช้:</label>
-                <div id="ib-requirements-editor" class="editable-div" contenteditable="true"></div>
+                <label for="ib-category">หมวดหมู่ / สาขาการตรวจ:</label>
+                <input type="text" id="ib-category">
             </div>
-
+            <div class="modal-input-group">
+                <label for="ib-procedure">ขั้นตอนและช่วงการตรวจ:</label>
+                <input type="text" id="ib-procedure">
+            </div>
+            <div class="modal-input-group">
+                <label for="ib-requirements">ข้อกำหนดที่ใช้:</label>
+                <input type="text" id="ib-requirements">
+            </div>
             <div class="modal-buttons">
                 <button id="add-ib-item-btn" class="modal-btn-confirm">เพิ่ม</button>
                 <button class="modal-btn-cancel">ยกเลิก</button>
             </div>
         </div>
     </div>
-    <!-- === END: REVISED IB Item Modal === -->
 
     <!-- MODIFIED: Lab Cal Item Modal -->
     <div id="lab-cal-item-modal" class="modal-overlay lab-cal-modal">
@@ -682,10 +641,10 @@
     <div id="context-menu">
         <div class="context-menu-item" data-action="add-item">เพิ่มรายการ</div>
         <div class="context-menu-separator" data-action="separator-add"></div>
-        <div class="context-menu-item" data-action="insert-row-above">แทรกแถวด้านบน <span style="float: right; color: #888; margin-left: 20px;">Shift+F1</span></div>
-        <div class="context-menu-item" data-action="insert-row-above-no-border">แทรกแถวด้านบน (ไม่มีขอบ) <span style="float: right; color: #888; margin-left: 20px;">Shift+F2</span></div>
-        <div class="context-menu-item" data-action="insert-row-below">แทรกแถวด้านล่าง <span style="float: right; color: #888; margin-left: 20px;">Shift+F4</span></div>
-        <div class="context-menu-item" data-action="insert-row-below-no-border">แทรกแถวด้านล่าง (ไม่มีขอบ) <span style="float: right; color: #888; margin-left: 20px;">Shift+F5</span></div>
+        <div class="context-menu-item" data-action="insert-row-above">แทรกแถวด้านบน</div>
+        <div class="context-menu-item" data-action="insert-row-above-no-border">แทรกแถวด้านบน (ไม่มีขอบ)</div>
+        <div class="context-menu-item" data-action="insert-row-below">แทรกแถวด้านล่าง</div>
+        <div class="context-menu-item" data-action="insert-row-below-no-border">แทรกแถวด้านล่าง (ไม่มีขอบ)</div>
         <div class="context-menu-item" data-action="insert-column-left">แทรกคอลัมน์ด้านซ้าย</div>
         <div class="context-menu-item" data-action="insert-column-right">แทรกคอลัมน์ด้านขวา</div>
         <div class="context-menu-separator"></div>
@@ -761,7 +720,7 @@
 
             init() {
                 if (!this.editableDiv) {
-                    console.error('Element not found:', this.elementId);
+                    console.error('Element not found:', elementId);
                     return;
                 }
 
@@ -1125,7 +1084,7 @@ const insertCbTemplate = () => {
                 <table class="detail-table" style="width: 100%; margin-bottom: 1em;">
                     <thead>
                         <tr>
-                            <th style="width: 25%;">รหัส ISIC<br><span style="font-size: 15px">(ISIC Codes)</span></th>
+                            <th>รหัส ISIC<br><span style="font-size: 15px;">(ISIC Codes)</span></th>
                             <th>กิจกรรม<br><span style="font-size: 15px;">(Description)</span></th>
                         </tr>
                     </thead>
@@ -1661,20 +1620,10 @@ const insertCbTemplate = () => {
             if (thead && thead.rows.length > 0 && thead.rows[0].cells.length > 0) {
                 colCount = thead.rows[0].cells.length;
             } else if (table.rows.length > 1) {
-                // Find a row with the most cells to account for colspans
-                for(let i = 0; i < table.rows.length; i++) {
-                    let currentCellCount = 0;
-                    for(let j = 0; j < table.rows[i].cells.length; j++) {
-                        currentCellCount += table.rows[i].cells[j].colSpan;
-                    }
-                    if(currentCellCount > colCount) {
-                        colCount = currentCellCount;
-                    }
-                }
+                colCount = table.rows[0].cells.length;
             } else {
                 colCount = table.rows[rowIndex].cells.length;
             }
-
 
             // Create cells for the new row
             for (let i = 0; i < colCount; i++) {
@@ -1861,9 +1810,7 @@ const insertCbTemplate = () => {
         // --- FIXED: Context Menu Click Logic ---
         // === START: MODIFICATION ===
         contextMenu.addEventListener('click', (event) => {
-            const actionTarget = event.target.closest('.context-menu-item');
-            if (!actionTarget) return;
-            const action = actionTarget.dataset.action;
+            const action = event.target.dataset.action;
             if (!action) return;
 
             const table = contextMenuTarget?.closest('table');
@@ -1987,51 +1934,6 @@ const insertCbTemplate = () => {
                 }
             }
         });
-        
-        // === START: NEW KEYBOARD SHORTCUTS FOR TABLE ROWS ===
-        document.addEventListener('keydown', (event) => {
-            // Check for Shift key and F1, F2, F4, F5 keys
-            if (event.shiftKey && ['F1', 'F2', 'F4', 'F5'].includes(event.key)) {
-                const selection = window.getSelection();
-                if (!selection.rangeCount) return;
-
-                const range = selection.getRangeAt(0);
-                const currentElement = range.startContainer;
-                // Find the closest cell (td or th) from the current cursor position
-                const cell = currentElement.nodeType === Node.ELEMENT_NODE 
-                             ? currentElement.closest('td, th') 
-                             : currentElement.parentElement.closest('td, th');
-
-                if (cell) {
-                    event.preventDefault(); // Prevent default browser actions (like opening help)
-
-                    const table = cell.closest('table');
-                    const row = cell.closest('tr');
-                    const rowIndex = Array.from(table.rows).indexOf(row);
-
-                    if (rowIndex === -1) return;
-
-                    switch (event.key) {
-                        case 'F1': // Shift+F1: Insert row above
-                            insertTableRow(table, rowIndex, true, false);
-                            break;
-                        case 'F2': // Shift+F2: Insert row above (no border)
-                            insertTableRow(table, rowIndex, true, true);
-                            break;
-                        case 'F4': // Shift+F4: Insert row below
-                            insertTableRow(table, rowIndex, false, false);
-                            break;
-                        case 'F5': // Shift+F5: Insert row below (no border)
-                            insertTableRow(table, rowIndex, false, true);
-                            break;
-                    }
-                     const activePage = table?.closest('.page');
-                     activePage?.focus();
-                }
-            }
-        });
-        // === END: NEW KEYBOARD SHORTCUTS FOR TABLE ROWS ===
-
 
         document.addEventListener('mousedown', (event) => {
             if (!event.target.closest('.image-container')) {
@@ -2119,96 +2021,69 @@ const insertCbTemplate = () => {
 
 
         // --- Add Item Button Logic for each Modal (Using activeModalTargetRow) ---
-        
-        // === START: REVISED CB Item Button Logic ===
+        // === START: MODIFICATION ===
         document.getElementById('add-cb-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
-                closeModal(cbItemModal);
-                return;
+            const code = document.getElementById('cb-isic-code').value;
+            const desc = document.getElementById('cb-description').value;
+            if (!code && !desc) { closeModal(cbItemModal); return; };
+
+            const tbody = activeModalTargetRow?.parentElement;
+            if (!tbody) { alert("ไม่สามารถหาตารางเป้าหมายได้"); closeModal(cbItemModal); return; }
+
+            // BORDER FIX: Remove bottom border from the current last row
+            const lastRow = tbody.rows.length > 0 ? tbody.rows[tbody.rows.length - 1] : null;
+            if (lastRow) {
+                for (const cell of lastRow.cells) { cell.style.borderBottom = 'none'; }
             }
+            
+            const newRow = tbody.insertRow(); // Append to the end
+            
+            const cell1 = newRow.insertCell();
+            cell1.style.width = '20%';
+            cell1.style.borderTop = 'none';
+            cell1.innerHTML = code;
 
-            const cells = targetRow.cells;
-            if (cells.length < 2) {
-                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการอย่างน้อย 2 คอลัมน์)");
-                closeModal(cbItemModal);
-                return;
-            }
-
-            // Get values from editable divs using LineExtractor
-            const codeLines = cbCodeEditorExtractor.getLines();
-            const code = codeLines.join('<br>');
-
-            const descriptionLines = cbDescriptionEditorExtractor.getLines();
-            const description = descriptionLines.join('<br>');
-
-            // Append to the first cell
-            appendToCell(cells[0], code);
-
-            // Append to the second cell
-            appendToCell(cells[1], description);
+            const cell2 = newRow.insertCell();
+            cell2.style.borderTop = 'none';
+            cell2.innerHTML = desc;
 
             managePages();
             closeModal(cbItemModal);
         });
-        // === END: REVISED CB Item Button Logic ===
 
-
-        // === START: REVISED IB Item Button Logic ===
         document.getElementById('add-ib-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
-                closeModal(ibItemModal);
-                return;
+            const category = document.getElementById('ib-category').value;
+            const procedure = document.getElementById('ib-procedure').value;
+            const requirements = document.getElementById('ib-requirements').value;
+            if (!category && !procedure && !requirements) { closeModal(ibItemModal); return; }
+            
+            const tbody = activeModalTargetRow?.parentElement;
+            if (!tbody) { alert("ไม่สามารถหาตารางเป้าหมายได้"); closeModal(ibItemModal); return; }
+
+            // BORDER FIX: Remove bottom border from the current last row
+            const lastRow = tbody.rows.length > 0 ? tbody.rows[tbody.rows.length - 1] : null;
+            if (lastRow) {
+                for (const cell of lastRow.cells) { cell.style.borderBottom = 'none'; }
             }
 
-            const cells = targetRow.cells;
-            if (cells.length < 3) {
-                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการ 3 คอลัมน์)");
-                closeModal(ibItemModal);
-                return;
-            }
+            const newRow = tbody.insertRow();
+            
+            const cell1 = newRow.insertCell();
+            cell1.style.borderTop = 'none';
+            cell1.innerHTML = category;
 
-            // Get values from modal
-            const mainBranch = document.getElementById('ib-main-branch').value.trim();
+            const cell2 = newRow.insertCell();
+            cell2.style.borderTop = 'none';
+            cell2.innerHTML = procedure;
 
-            const subBranchLines = ibSubBranchExtractor.getLines();
-            const subBranch = subBranchLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const mainScopeLines = ibMainScopeExtractor.getLines();
-            const mainScope = mainScopeLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const subScopeLines = ibSubScopeExtractor.getLines();
-            const subScope = subScopeLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const requirementsLines = ibRequirementsExtractor.getLines();
-            const requirements = requirementsLines.join('<br>');
-
-            // --- Cell 1: Main/Sub Branch ---
-            const cell1Parts = [];
-            if (mainBranch) cell1Parts.push(mainBranch);
-            if (subBranch) cell1Parts.push(subBranch);
-            const cell1Content = cell1Parts.join('<br>');
-            appendToCell(cells[0], cell1Content);
-
-            // --- Cell 2: Main/Sub Scope ---
-            const cell2Parts = [];
-            if (mainScope) cell2Parts.push(mainScope);
-            if (subScope) cell2Parts.push(subScope);
-            const cell2Content = cell2Parts.join('<br>');
-            appendToCell(cells[1], cell2Content);
-
-            // --- Cell 3: Requirements ---
-            if (requirements) {
-                appendToCell(cells[2], requirements);
-            }
+            const cell3 = newRow.insertCell();
+            cell3.style.borderTop = 'none';
+            cell3.innerHTML = requirements;
 
             managePages();
             closeModal(ibItemModal);
         });
-        // === END: REVISED IB Item Button Logic ===
+        // === END: MODIFICATION ===
 
         // --- [MODIFIED] Logic for adding Lab Cal item ---
         document.getElementById('add-lab-cal-item-btn').addEventListener('click', () => {
@@ -2533,19 +2408,11 @@ const insertCbTemplate = () => {
 
         // === START: MODIFICATION FOR LineExtractor INSTANCES ===
         // Instantiate LineExtractor for all editable divs in the modals
-        const cbCodeEditorExtractor = new LineExtractor('cb-code-editor');
-        const cbDescriptionEditorExtractor = new LineExtractor('cb-description-editor');
         const labCalMethodEditorExtractor = new LineExtractor('lab-cal-method-editor');
         const labCalParamDetailsEditorExtractor = new LineExtractor('lab-cal-param-details-editor');
         const labCalCapabilityEditorExtractor = new LineExtractor('lab-cal-capability-editor');
         const labTestParamDetailsEditorExtractor = new LineExtractor('lab-test-param-details-editor');
         const labTestMethodEditorExtractor = new LineExtractor('lab-test-method-editor');
-        
-        // New extractors for the modified IB modal
-        const ibSubBranchExtractor = new LineExtractor('ib-sub-branch');
-        const ibMainScopeExtractor = new LineExtractor('ib-main-scope');
-        const ibSubScopeExtractor = new LineExtractor('ib-sub-scope');
-        const ibRequirementsExtractor = new LineExtractor('ib-requirements-editor');
         // === END: MODIFICATION FOR LineExtractor INSTANCES ===
 
         if (editor.children.length === 0) {
