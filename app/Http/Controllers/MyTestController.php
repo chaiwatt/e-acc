@@ -396,7 +396,8 @@ class MyTestController extends Controller
                 'BI' => "DejaVuSerif-BoldItalic.ttf",
             ],
         ];
-
+    $tempDirPath = sys_get_temp_dir();
+        dd($tempDirPath);
         $mpdf = new Mpdf([
             'PDFA'              => $type == 'F' ? true : false,
             'PDFAauto'          => $type == 'F' ? true : false,
@@ -414,7 +415,7 @@ class MyTestController extends Controller
             'tempDir'           => sys_get_temp_dir(),
         ]);
 
-        $tempDirPath = sys_get_temp_dir();
+    
         Log::info('MPDF Temp Dir: ' . $tempDirPath);
 
         $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
