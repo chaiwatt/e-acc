@@ -396,8 +396,8 @@ class MyTestController extends Controller
                 'BI' => "DejaVuSerif-BoldItalic.ttf",
             ],
         ];
-    $tempDirPath = sys_get_temp_dir();
-        dd($tempDirPath);
+    // $tempDirPath = sys_get_temp_dir();
+    //     dd($tempDirPath);
         $mpdf = new Mpdf([
             'PDFA'              => $type == 'F' ? true : false,
             'PDFAauto'          => $type == 'F' ? true : false,
