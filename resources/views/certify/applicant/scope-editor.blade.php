@@ -1920,7 +1920,7 @@ const insertCbTemplate = () => {
                     case 'lab_cal': 
                     
                      $.ajax({
-                            url: "/certify/applicant/api/calibrate", // As requested
+                            url: "{!! url('/certify/applicant/api/calibrate') !!}", // As requested
                             method: "POST",
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -2010,7 +2010,7 @@ const insertCbTemplate = () => {
             const fieldId = $(this).val();
             if (fieldId) {
                 $.ajax({
-                    url: "/certify/applicant/api/instrumentgroup",
+                    url:  "{!! url('/certify/applicant/api/instrumentgroup') !!}" ,
                     method: "POST",
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -2035,7 +2035,7 @@ const insertCbTemplate = () => {
             const fieldId = $(this).val();
             if (fieldId) {
                 $.ajax({
-                    url: "/certify/applicant/api/instrument",
+                    url: "{!! url('/certify/applicant/api/instrument') !!}",
                     method: "POST",
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -2504,7 +2504,7 @@ const insertCbTemplate = () => {
                 pagesContent.push(page.innerHTML); 
             });
 
-            fetch('/export-pdf', {
+            fetch("{!! url('/export-pdf') !!}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2567,7 +2567,7 @@ const insertCbTemplate = () => {
 
                 console.log(pagesContent);
 
-                fetch('/save-html-template', {
+                fetch("{!! url('/save-html-template') !!}" , {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2604,8 +2604,7 @@ const insertCbTemplate = () => {
                     alert("ไม่ได้ระบุประเภทของเทมเพลต");
                     return;
                 }
-
-                fetch('/download-html-template', {
+                fetch("{!! url('/download-html-template') !!}" , {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
