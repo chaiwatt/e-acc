@@ -416,7 +416,7 @@ class MyTestController extends Controller
         ]);
 
     
-        Log::info('MPDF Temp Dir: ' . $tempDirPath);
+        // Log::info('MPDF Temp Dir: ' . $tempDirPath);
 
         $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
         $mpdf->WriteHTML($stylesheet, 1);
