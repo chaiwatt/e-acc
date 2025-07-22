@@ -943,7 +943,7 @@
         </div>
     </div>
     <hr>
-    @include ('certify.applicant.forms.extend-form.form_request_extend')
+    {{-- @include ('certify.applicant.forms.extend-form.form_request_extend') --}}
 
 </fieldset>
 
@@ -1550,6 +1550,8 @@
     }
     
     function use_address_offices(){
+
+        console.log("use address");
        
         $('.input_address').val('');
         $('#address_city').val('').select2();
@@ -1674,8 +1676,10 @@
     // }
 
     function box_ref_application_no(){
+       
         let purpose = $('input[name="purpose"]:checked').val();
   
+    
         
         if(purpose !== undefined){
             if(purpose >= 2 && purpose < 6){

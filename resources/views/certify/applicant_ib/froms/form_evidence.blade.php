@@ -276,39 +276,54 @@
                     <span class="text-danger">*</span> 4. ขอบข่ายที่ยื่นขอรับการรับรอง (Scope of Accreditation Sought)
                 </h4>
             </legend>
+            {{-- {{$methodType}} --}}
             <div class="row repeater-form-file">
+           
               
-                <div class="col-md-12 box_section3" >
-                    {{-- <div class="col-md-12 box_section3" data-repeater-list="repeater-section3" id="repeater_section3_wrapper"> --}}
 
-
-                    <div class="col-md-12">
-                        <table class="table" style="border: none; background-color: inherit;">
-                            <tr>
-                                <th>หมวดหมู่ / สาขาการตรวจ </th>
-                                <th>ขั้นตอนและช่วงการตรวจ </th>
-                                <th>ข้อกำหนดที่ใช้ </th>
-                            </tr>
-                            <tbody id="ib_scope_wrapper"></tbody>
-                            
-                        </table>
-                    </div>
-                </div>
 
                 @if ($methodType != 'show')
-                <div class="row repeater-form-file">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <div class="col-md-10"></div>
-                            <div class="col-md-2">
-                                <button type="button" id="btn_add_ib_scope" class="btn btn-success">
-                                    <i class="icon-plus"></i>เพิ่มขอบข่าย
-                                </button>
-                            </div>
-                        </div> 
+                    <a href="{{route('certify.applicant-ib.ib-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm" style="margin-bottom:5px">เพิ่มขอบข่าย</a> 
+                    <div class="row repeater-form-file">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="col-md-10"></div>
+                                <div class="col-md-2">
+                                    {{-- <button type="button" id="btn_add_ib_scope" class="btn btn-success">
+                                        <i class="icon-plus"></i>เพิ่มขอบข่าย
+                                    </button> --}}
+                                </div>
+                            </div> 
+                        </div>
                     </div>
-                </div>
-            @endif
+                @endif
+
+                @if (!empty($certi_ib->FileAttach3))
+                    <div class="col-md-12 box_section3" >
+                        <div class="col-md-12">
+                            @php
+                                $lastFile = is_array($certi_ib->FileAttach3) ? end($certi_ib->FileAttach3) : $certi_ib->FileAttach3->last();
+                            @endphp
+
+                            @if ($lastFile && !empty($lastFile->file))
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <div class="col-md-4 text-light"></div>
+                                        <div class="col-md-6 text-light">
+                                            <a href="{{ url('certify/check/file_ib_client/' . $lastFile->file . '/' . (!empty($lastFile->file_client_name) ? $lastFile->file_client_name : basename($lastFile->file))) }}" target="_blank">
+                                                {!! HP::FileExtension($lastFile->file) ?? '' !!}
+                                                {{ !empty($lastFile->file_client_name) ? $lastFile->file_client_name : basename($lastFile->file) }}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+                        
+                        </div>
+                    </div> 
+                @endif
+
+
             </div>
 
         </fieldset>

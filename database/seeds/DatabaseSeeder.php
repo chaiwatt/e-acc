@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(CalibrationBranchParam2TableSeeder::class);
         // $this->call(IbBranchesTableSeeder::class);
         
-        $this->call(PurposeTypesTableSeeder::class);
+        // $this->call(PurposeTypesTableSeeder::class);
         // $this->call(CbScopeIsicIsicsTableSeeder::class);
         // $this->call(CbScopeIsicCategoriesTableSeeder::class);
         // $this->call(CbScopeIsicSubCategoriesTableSeeder::class);
@@ -47,6 +47,9 @@ class DatabaseSeeder extends Seeder
         //  $this->call(IbSubCategoryScopesTableSeeder::class);
         //  $this->call(IbScopeTopicsTableSeeder::class);
         //  $this->call(IbScopeDetailsTableSeeder::class);
+        
+        // $this->call(CbScopeCorsiaTableSeeder::class);
+        // $this->call(CbScopeMdmsTableSeeder::class);
         
         
         

@@ -69,4 +69,12 @@ class Formula extends Model
     public function certificationBranchs(){
       return $this->hasMany(CertificationBranch::class, 'formula_id');
     }
+
+    public function getCertificationInitialsStringAttribute(): string
+    {
+        // 1. ดึงข้อมูล relationship `certificationBranchs`
+        // 2. ใช้ `pluck()` เพื่อเอาเฉพาะคอลัมน์ `certificate_initial`
+        // 3. ใช้ `implode()` เพื่อรวมค่าทั้งหมดเป็น string คั่นด้วย ', '
+        return $this->certificationBranchs->pluck('certificate_initial')->implode(', ');
+    }
 }

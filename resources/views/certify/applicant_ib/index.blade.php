@@ -389,7 +389,7 @@
                                           
                                             @if ($item->require_scope_update == 1)
                                                 <a href="{{ url('/certify/applicant-ib/' . $item->token . '/edit_scope') }}"
-                                                    title="Edit ApplicantCB" class="btn btn-primary btn-xs">
+                                                    title="Edit ApplicantCB" class="btn btn-warning btn-xs">
                                                         <i class="fa fa-pencil-square-o" aria-hidden="true"> </i>
                                                 </a>
                                             @endif

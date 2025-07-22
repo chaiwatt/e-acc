@@ -5,7 +5,7 @@
 }
 </style>
 
-<fieldset class="white-box">
+<fieldset class="white-box" hidden>
     <legend><h4>ข้อมูลขอรับบริการ</h4></legend>
 
     <div class="row">
@@ -93,7 +93,7 @@
                         @foreach($Formula_Arr as $key => $value)
                             <option value="{{ $key }}" 
                                 {{ !empty($certi_cb->type_standard) && $certi_cb->type_standard == $key ? 'selected' : '' }}>
-                                {{ $value }}
+                                ({{$key}}) {{ $value }}
                             </option>
                         @endforeach
                     </select>

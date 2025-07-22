@@ -127,6 +127,7 @@
 
 @include ('certify.applicant_cb/froms.form_modal_map')
 
+@include ('certify.applicant_cb/froms.form_request_edit_scope')
 @include ('certify.applicant_cb/froms.form_evidence_edit_scope')
 
 @if (isset($certi_cb->id) && !is_null($certi_cb->desc_delete))
@@ -362,30 +363,30 @@ let selectedModel = null;
 
         function submit_form(status) {
             
-            var cbScopeJson = null;
-            if(selectedModel == "CbScopeIsicIsic")
-            {
-                cbScopeJson = selectedIsicData;
-            }else if(selectedModel == "CbScopeBcms")
-            {
-                cbScopeJson = selectedBcmsData;
-            }
+            // var cbScopeJson = null;
+            // if(selectedModel == "CbScopeIsicIsic")
+            // {
+            //     cbScopeJson = selectedIsicData;
+            // }else if(selectedModel == "CbScopeBcms")
+            // {
+            //     cbScopeJson = selectedBcmsData;
+            // }
 
             // ตรวจสอบว่ามีข้อมูล JSON หรือไม่
-            if (cbScopeJson !== null) {
-                // ลบ input hidden เดิมหากมีอยู่
-                $('#cbScopeJsonInput').remove();
+            // if (cbScopeJson !== null) {
+            //     // ลบ input hidden เดิมหากมีอยู่
+            //     $('#cbScopeJsonInput').remove();
 
-                // สร้าง input hidden ใหม่สำหรับ JSON ข้อมูล
-                $('<input>')
-                    .attr({
-                        type: 'hidden',
-                        id: 'cbScopeJsonInput',
-                        name: 'cbScopeJson', // ชื่อตัวแปรที่จะถูกส่งไปกับฟอร์ม
-                    })
-                    .val(JSON.stringify(cbScopeJson)) // แปลง JSON เป็น String
-                    .appendTo('#app_certi_form');
-            }
+            //     // สร้าง input hidden ใหม่สำหรับ JSON ข้อมูล
+            //     $('<input>')
+            //         .attr({
+            //             type: 'hidden',
+            //             id: 'cbScopeJsonInput',
+            //             name: 'cbScopeJson', // ชื่อตัวแปรที่จะถูกส่งไปกับฟอร์ม
+            //         })
+            //         .val(JSON.stringify(cbScopeJson)) // แปลง JSON เป็น String
+            //         .appendTo('#app_certi_form');
+            // }
 
             if ($('#type_standard').val() === '' || $('#petitioner').val() === '' || $('#trust_mark').val() === '') {
                 alert('โปรดเลือกข้อกำหนดที่ใช้ในการรับรอง สาขาการรับรอง มาตรฐานที่ใช้รับรอง');
@@ -393,26 +394,26 @@ let selectedModel = null;
             }
 
                // ลบ input hidden ของ selectedModel หากมีอยู่
-            $('#selectedModelInput').remove();
+            // $('#selectedModelInput').remove();
 
             // สร้าง input hidden ใหม่สำหรับ selectedModel
-            $('<input>')
-                .attr({
-                    type: 'hidden',
-                    id: 'selectedModelInput',
-                    name: 'selectedModel',
-                })
-                .val(selectedModel)
-                .appendTo('#app_certi_form');
+            // $('<input>')
+            //     .attr({
+            //         type: 'hidden',
+            //         id: 'selectedModelInput',
+            //         name: 'selectedModel',
+            //     })
+            //     .val(selectedModel)
+            //     .appendTo('#app_certi_form');
 
         
-            if(cbScopeJson.length == 0)
-            {
-                alert('โปรดเลือกสร้างขอบข่ายให้ถูกต้อง');
-                return;
-            }
+            // if(cbScopeJson.length == 0)
+            // {
+            //     alert('โปรดเลือกสร้างขอบข่ายให้ถูกต้อง');
+            //     return;
+            // }
 
-
+// alert("oo");
             var  number =  1;
             var max_size = "{{ ini_get('post_max_size') }}";
             var res = max_size.replace("M", "");

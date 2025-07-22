@@ -6,39 +6,44 @@ use HP;
 use App\User;
 
 use stdClass;
+use Mpdf\Mpdf;
 use Carbon\Carbon;
 use App\applicantIB;
+
 use App\Http\Requests;
+use App\IbHtmlTemplate;
+use Mpdf\HTMLParserMode;
 use App\Mail\IB\IBCostMail; 
 use App\Models\Basic\Amphur;
+
 use App\Models\Esurv\Trader;
 use Illuminate\Http\Request;
+
 use App\Models\Basic\Zipcode;
 use App\Mail\IB\IBReportMail; 
 
 use App\Models\Basic\District;
 use App\Models\Basic\Province;
-
 use App\Mail\IB\IBAuditorsMail; 
-use App\Mail\IB\IBPayInOneMail; 
 
+use App\Mail\IB\IBPayInOneMail; 
 use App\Mail\IB\IBPayInTwoMail; 
 use App\Models\Bcertify\Formula;
+use App\Mail\IB\EditScopeRequest;
 use App\Mail\IB\IBApplicantMail; 
-
 use App\Mail\Lab\NotifyTransferer;
 use App\Services\CreateIbScopePdf;
 use Illuminate\Support\Facades\DB;
 use App\Mail\IB\IBInspectiontMail; 
+
 use App\Http\Controllers\Controller;
 use App\Mail\Lab\NotifyIBTransferer;
+
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail; 
 use App\Mail\IB\IBSaveAssessmentMail; 
-
 use Illuminate\Support\Facades\Storage;
 use App\Mail\IB\IBConFirmAuditorsMail;  
-
 use App\Mail\IB\IBRequestDocumentsMail; 
 use App\Models\Certificate\IbScopeTopic;
 use App\Models\Certificate\IbScopeDetail;
@@ -46,12 +51,12 @@ use niklasravnsborg\LaravelPdf\Facades\Pdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\Certify\ApplicantIB\CertiIb; 
 use App\Models\Certify\SendCertificateLists;
+
 use App\Models\Certificate\IbDocReviewAuditor;
 use App\Models\Certificate\IbScopeTransaction;
 use App\Models\Certificate\IbSubCategoryScope;
 use App\Models\Certificate\IbMainCategoryScope;
 use App\Models\Certify\ApplicantIB\CertiIBCost; 
-
 use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantIB\CertiIBExport;
 use App\Models\Certify\ApplicantIB\CertiIBReview;
@@ -340,7 +345,7 @@ class ApplicantIBController extends Controller
             $certi_ib->update($requestApp);
         }
 
-        $this->storeIbScope($request,$certi_ib->id);
+        // $this->storeIbScope($request,$certi_ib->id);
 
         return $certi_ib;
     }
@@ -378,8 +383,18 @@ class ApplicantIBController extends Controller
     public function store(Request $request)
     {
         // dd($request->all());
+        $user = auth()->user();
         $model = str_slug('applicantibs','-');
         $data_session     =    HP::CheckSession();
+
+        $ibHtmlTemplate = IbHtmlTemplate::where('user_id',$user->id)
+                ->where('type_standard',$request->type_standard)
+                // ->where('standard_change',$request->standard_change)
+                ->where('type_unit',$request->type_unit)
+                ->first();
+
+                // dd($ibHtmlTemplate);
+
         if(!empty($data_session)){
             if(HP::CheckPermission('add-'.$model)){
 
@@ -388,7 +403,22 @@ class ApplicantIBController extends Controller
 
                 // add ceti ib
                 $certi_ib = $this->SaveCertiIb($request, $data_session , null );
-                
+
+
+                if($ibHtmlTemplate !== null)
+                {
+                    $ibHtmlTemplate->update([
+                        'app_certi_ib_id' => $certi_ib->id
+                    ]);
+                }else{
+                    $ibHtmlTemplate = ibHtmlTemplate::create([
+                        'user_id' => $user->id,
+                        'type_standard' => $request->typeStandard,
+                        // 'standard_change' => $request->standardChange,
+                        'type_unit' => $request->typeUnit,
+                        'app_certi_ib_id' => $certi_ib->id
+                    ]);
+                }
 
                 //  2. การปฏิบัติของหน่วยงานตรวจสอบที่สอดคล้องตามข้อกำหนดฐานฐานเลขที่ มอก.17020 (Inspection body implementations which are conformed with TIS 17020)
                 if ( isset($requestData['repeater-section1'] ) ){
@@ -429,9 +459,13 @@ class ApplicantIBController extends Controller
                     $this->SaveFileSection($request, 'repeater-section8', 'attachs_sec8', 8 , $certi_ib );
                 }
 
+                
+                if($certi_ib->status != 0){
+                    $this->exportScopePdf($certi_ib->id,$ibHtmlTemplate);
+                }
 
-                $pdfService = new CreateIbScopePdf($certi_ib);
-                $pdfContent = $pdfService->generatePdf();
+                // $pdfService = new CreateIbScopePdf($certi_ib);
+                // $pdfContent = $pdfService->generatePdf();
 
                 // dd($this->checkCertiIbExport($certi_ib));
                 // เงื่อนไขเช็คมีใบรับรอง 
@@ -517,6 +551,7 @@ class ApplicantIBController extends Controller
      */
     public function show($token)
     {
+        // dd("ok");
         $model = str_slug('applicantibs','-');
         $data_session     =    HP::CheckSession();
      if(!empty($data_session)){
@@ -529,7 +564,24 @@ class ApplicantIBController extends Controller
             $app_certi_ib = DB::table('app_certi_ib')->where('tax_id',$data_session->tax_number)->select('id');
             $certificate_exports = DB::table('app_certi_ib_export')->whereIn('app_certi_ib_id',$app_certi_ib)->where('status',3)->pluck('certificate','id');
             $certificate_no = DB::table('app_certi_ib_export')->select('id')->whereIn('app_certi_ib_id',$app_certi_ib)->where('status',3)->get();
+            $certifieds = collect() ;
 
+            $Query = CertiIb::with(['app_certi_ib_export' => function($q){
+                $q->where('status', 4);
+            }]);
+
+            if(!is_null($data_session->agent_id)){  // ตัวแทน
+                $certiIbs = $Query->where('agent_id',  $data_session->agent_id ) ;
+            }else{
+                if($data_session->branch_type == 1){  // สำนักงานใหญ่
+                    $certiIbs = $Query->where('tax_id',  $data_session->tax_number ) ;
+                }else{   // ผู้บันทึก
+                    $certiIbs = $Query->where('created_by',   auth()->user()->getKey()) ;
+                }
+            }
+
+     
+            $certifieds = CertiIBExport::whereIn('app_no',$certiIbs->get()->pluck('app_no')->toArray())->get();
 
             $tis_data = $data_session;
             $methodType = "show";
@@ -539,7 +591,8 @@ class ApplicantIBController extends Controller
                                                              'formulas',
                                                              'certificate_exports',
                                                              'certificate_no' ,
-                                                             'methodType'
+                                                             'methodType',
+                                                             'certifieds'
                                                         ));
         }
         abort(403);
@@ -557,7 +610,7 @@ class ApplicantIBController extends Controller
      */
     public function edit($token)
     {
-       
+    //    dd('ok');
         $model = str_slug('applicantibs','-');
         $data_session     =    HP::CheckSession();
         if(!empty($data_session)){
@@ -635,7 +688,16 @@ class ApplicantIBController extends Controller
      */
     public function update(Request $request, $token)
     {
+        
         $model = str_slug('applicantibs','-');
+
+        $user = auth()->user();
+
+        $ibHtmlTemplate = IbHtmlTemplate::where('user_id',$user->id)
+        ->where('type_standard',$request->type_standard)
+        // ->where('standard_change',$request->standard_change)
+        ->where('type_unit',$request->type_unit)
+        ->first();
         $data_session     =    HP::CheckSession();
         if(!empty($data_session)){
             if(HP::CheckPermission('edit-'.$model)){
@@ -646,13 +708,18 @@ class ApplicantIBController extends Controller
 
                     $certi_ib =  CertiIb::where('token',$token)->first();
 
+                    
+
                     if($certi_ib->require_scope_update != "1")
                     {
-                        
+                       
                         if($certi_ib->tracking == null)
                         {
+
+                             
                             if($certi_ib->status == 9 && $certi_ib->doc_review_reject !== null)
                             {
+                                // dd($certi_ib->status);
                                 // dd($certi_ib->status,$certi_ib->doc_review_reject);
                                 $this->docUpdate($request, $token);
                                 $certi_ib->update([
@@ -708,8 +775,10 @@ class ApplicantIBController extends Controller
                                 // เงื่อนไขเช็คมีใบรับรอง 
                                 $this->save_certiib_export_mapreq( $certi_ib );
             
-                                $pdfService = new CreateIbScopePdf($certi_ib);
-                                $pdfContent = $pdfService->generatePdf();
+                                // $pdfService = new CreateIbScopePdf($certi_ib);
+                                // $pdfContent = $pdfService->generatePdf();
+
+                                $this->exportScopePdf($certi_ib->id,$ibHtmlTemplate);
             
             
                                 $status = $certi_ib->status ?? 1;
@@ -822,21 +891,72 @@ class ApplicantIBController extends Controller
 
     public function updateScope(Request $request, $token)
     {
-        // dd("ok");
+        // dd($request->all());
         CertiIb::where('token',$token)->update([
             'require_scope_update' => null
          ]);
+
         $certi_ib =  CertiIb::where('token',$token)->first();
-        $this->storeIbScope($request,$certi_ib->id);
-        $pdfService = new CreateIbScopePdf($certi_ib);
-        $pdfContent = $pdfService->generatePdf();
+        $ibHtmlTemplate = IbHtmlTemplate::where('user_id',auth()->user()->id)
+                ->where('type_standard',$request->type_standard)
+                ->where('app_certi_ib_id',$certi_ib->id)
+                ->where('type_unit',$request->type_unit)
+                ->first();
+
+       
+        $this->exportScopePdf($certi_ib->id,$ibHtmlTemplate);
+         $this->updateScopeEmail( $certi_ib);
+
 
         return redirect('certify/applicant-ib')->with('flash_message', 'แก้ไข applicantIB เรียบร้อยแล้ว!');
     }
 
+    function updateScopeEmail( $certi_ib)
+    {
+            $config =   HP::getConfig();
+                $url    =   !empty($config->url_center) ? $config->url_center : url('');    
+          
+
+             $data_app = [
+                'email'        =>  $certi_ib->email,
+                        'certi_ib'      =>  $certi_ib,
+                        'url'           =>  $url.'/certify/check_certificate-ib/'.$certi_ib->token ?? '-',
+                        'email_cc'      =>  (count($certi_ib->DataEmailDirectorIBCC) > 0 ) ? $certi_ib->DataEmailDirectorIBCC : 'ib@tisi.mail.go.th'
+                        ];
+
+
+              $email_cc =    (count($certi_ib->DataEmailDirectorIBCC) > 0 ) ? implode(',', $certi_ib->DataEmailDirectorIBCC): 'ib@tisi.mail.go.th' ;
+
+             $log_email =  HP::getInsertCertifyLogEmail( $certi_ib->app_no,
+                                                    $certi_ib->id,
+                                                    (new CertiIb)->getTable(),
+                                                    $certi_ib->id,
+                                                    (new CertiIb)->getTable(),
+                                                    2,
+                                                    'แจ้งการแก้ใขขอบข่ายเรียบร้อยแล้ว',
+                                                    view('mail.IB.mail_request_edit_ib_scope', $data_app),
+                                                    $certi_ib->created_by,
+                                                    $certi_ib->agent_id,
+                                                    null,
+                                                    $certi_ib->email,
+                                                    implode(',',(array)$certi_ib->DataEmailDirectorIB),
+                                                    $email_cc,
+                                                    null,
+                                                    null
+                                                 );
+
+               $html = new EditScopeRequest($data_app);
+               $mail =  Mail::to($certi_ib->DataEmailDirectorIB)->send($html);
+            
+                if(is_null($mail) && !empty($log_email)){
+                    HP::getUpdateCertifyLogEmail($log_email->id);
+                }
+    }
+
     public function docUpdate($request, $token)
     {
-        // dd('doc update');
+        $requestData = $request->all();
+        // dd('doc update',$requestData['repeater-section8']);
         $certi_ib =  CertiIb::where('token',$token)->first();
         
         //  2. การปฏิบัติของหน่วยงานตรวจสอบที่สอดคล้องตามข้อกำหนดฐานฐานเลขที่ มอก.17020 (Inspection body implementations which are conformed with TIS 17020)
@@ -2842,23 +2962,482 @@ class ApplicantIBController extends Controller
 
    }
 
+    public function scopeEditor(Request $request)
+    {
+        
+        // Define the mapping for type_unit
+        $datas = ['1' => 'A', '2' => 'B', '3' => 'C', '4' => 'Other'];
+
+        // Retrieve query parameters from the request
+        $typeStandard = $request->query('type_standard');
+        $typeUnit = $request->query('type_unit');
+        $standardChange = $request->query('standard_change');
+        $nameUnit = $request->query('name_unit');
+        $nameEnUnit = $request->query('name_en_unit');
+        $addressNo = $request->query('address');
+        $allay = $request->query('allay');
+        $villageNo = $request->query('village_no');
+        $road = $request->query('road');
+        $province = $request->query('province');
+        $amphurId = $request->query('amphur_id');
+        $districtId = $request->query('district_id');
+        $postcode = $request->query('postcode');
+
+        $address = "เลขที่ " .  $addressNo;
+        if($allay!=''){
+           $address .=  " หมู่ที่ " . $allay;
+        }
+
+         if($villageNo!='' && $villageNo !='-'  && $villageNo !='--'){
+           $address .=  " ซอย "  . $villageNo;
+         }
+
+         if($road!='' && $road !='-'  && $road !='--'){
+           $address .=  " ถนน".$road;
+         }
+
+        if($districtId!=''){
+             if(trim($province)=='กรุงเทพมหานคร'){
+                 $address .= " แขวง".$districtId;
+             }else{
+                 $address .= " ตำบล".$districtId;
+ 
+             }
+         }
+
+        if($amphurId!=''){
+             if(trim($province)=='กรุงเทพมหานคร'){
+                 $address .= " เขต".$amphurId;
+             }else{
+                 $address .= " อำเภอ".$amphurId;
+             }
+         }
+
+          if($province!=''){
+             if(trim($province)=='กรุงเทพมหานคร'){
+                 $address .=  " ".trim($province);
+             }else{
+                 $address .=  " จังหวัด".trim($province);
+             }
+         }
+         $address .= " ". $postcode;
+ 
+     $user = Auth::user();
+
+        // Format address based on user data
+        $headAddress = "เลขที่ " . $user->address_no;
+        if ($user->moo && $user->moo !== '-' && $user->moo !== '--') {
+            $headAddress .= " หมู่ที่ " . $user->moo;
+        }
+        if ($user->soi && $user->soi !== '-' && $user->soi !== '--') {
+            $headAddress .= " ซอย " . $user->soi;
+        }
+        if ($user->street && $user->street !== '-' && $user->street !== '--') {
+            $headAddress .= " ถนน" . $user->street;
+        }
+        if ($user->subdistrict) {
+            if (trim($user->province) === 'กรุงเทพมหานคร') {
+                $headAddress .= " แขวง" . $user->subdistrict;
+            } else {
+                $headAddress .= " ตำบล" . $user->subdistrict;
+            }
+        }
+        if ($user->district) {
+            if (trim($user->province) === 'กรุงเทพมหานคร') {
+                $headAddress .= " เขต" . $user->district;
+            } else {
+                $headAddress .= " อำเภอ" . $user->district;
+            }
+        }
+        if ($user->province) {
+            if (trim($user->province) === 'กรุงเทพมหานคร') {
+                $headAddress .= " " . trim($user->province);
+            } else {
+                $headAddress .= " จังหวัด" . trim($user->province);
+            }
+        }
+        $headAddress .= " " . $user->zipcode;
+
+
+
+        $typeUnitLabel = isset($datas[$typeUnit]) ? $datas[$typeUnit] : $typeUnit;
+
+        $templateType = "ib"; // กำหนด templateType เป็น "ib"
+
+        $ibDetails = [
+            'title' => "รายละเอียดแนบท้ายใบรับรองระบบงานหน่วยตรวจ",
+            'certificateNo' => Carbon::now()->format('y')."-IB0000",
+            'inspectionBodyName' => $nameUnit,
+            'headOfficeAddress' => $headAddress,
+            'branchOfficeAddress' => $address,
+            'accreditationNo' => "หน่วยตรวจ 0000",
+            'inspectionBodyType' => "ประเภท " . $typeUnitLabel,
+            'inspectionItems' => [
+                [
+                    'category' => "<br>",
+                    'procedure' => "",
+                    'requirements' => ""
+                ]
+            ]
+        ];
+
+        return view('certify.applicant_ib.scope-editor', [
+            'templateType' => $templateType,
+            'ibDetails' => $ibDetails,
+            'standardChange' => $standardChange,
+            'typeStandard' => $typeStandard,
+            'typeUnit' => $typeUnit
+        ]);
+    }
+
+               // เมธอดใหม่สำหรับบันทึก HTML template
+    public function saveHtmlTemplate(Request $request)
+    {
+      
+
+        $user =auth()->user();
+        $htmlPages = $request->input('html_pages');
+        $templateType = $request->input('template_type');
+        $type_standard = $request->input('typeStandard');
+        $standard_change = $request->input('standardChange');
+        $type_unit = $request->input('typeUnit');
+
+        $ibItems = $request->input('ibItems'); 
+
+        if (!is_array($htmlPages) || empty($htmlPages)) {
+            return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+        }
+
+        if (empty($templateType)) {
+            return response()->json(['message' => 'Template type is missing.'], 400);
+        }
+
+        try {
+            IbHtmlTemplate::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'type_standard' => $type_standard,
+                    'standard_change' => $standard_change,
+                    'type_unit' => $type_unit,
+                    'template_type' => $templateType,
+                ],
+                [
+                    'html_pages' => json_encode($htmlPages),
+                    'json_data' => json_encode($ibItems)
+                ]
+            );
+
+
+            return response()->json(['message' => 'Template saved successfully!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error saving template: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadHtmlTemplate(Request $request)
+    {
+        try {
+
+            $user = auth()->user();
+            $htmlTemplate = IbHtmlTemplate::where('user_id',$user->id)
+            ->where('type_standard',$request->typeStandard)
+            // ->where('standard_change',$request->standardChange)
+            ->where('type_unit',$request->typeUnit)
+            ->first();
+
+            if (!$htmlTemplate) {
+                return response()->json(['message' => 'Template not found for the given type.'], 404);
+            }
+
+            // Decode the JSON string back into an array
+            $htmlPages = json_decode($htmlTemplate->html_pages, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['message' => 'Error decoding HTML pages from database.'], 500);
+            }
+
+            return response()->json([
+                'message' => 'Template loaded successfully!',
+                'html_pages' => $htmlPages,
+                'template_type' => $htmlTemplate->template_type,
+                'htmlTemplate' => $htmlTemplate
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error loading template: ' . $e->getMessage()], 500);
+        }
+    }
+
+function ordinal($number) {
+    $ends = array('th','st','nd','rd','th','th','th','th','th','th');
+    if (((int)($number % 100) >= 11) && ((int)($number % 100) <= 13))
+        return $number . 'th';
+    else
+        return $number . $ends[$number % 10];
+}
+
+    
+ public function exportScopePdf($id,$ibHtmlTemplate)
+    {
+
+        $htmlPages = json_decode($ibHtmlTemplate->html_pages);
+
+        // dd($htmlPages);
+
+        if (!is_array($htmlPages)) {
+          
+            return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+        }
+        // กรองหน้าเปล่าออก (โค้ดเดิมที่เพิ่มไป)
+        $filteredHtmlPages = [];
+        foreach ($htmlPages as $pageHtml) {
+            $trimmedPageHtml = trim(strip_tags($pageHtml, '<img>'));
+            if (!empty($trimmedPageHtml)) {
+                $filteredHtmlPages[] = $pageHtml;
+            }
+        }
+  
+        if (empty($filteredHtmlPages)) {
+            return response()->json(['message' => 'No valid HTML content to export after filtering empty pages.'], 400);
+        }
+        $htmlPages = $filteredHtmlPages;
+
+        $type = 'I';
+        $fontDirs = [public_path('pdf_fonts/')];
+
+        $fontData = [
+            'thsarabunnew' => [
+                'R' => "THSarabunNew.ttf",
+                'B' => "THSarabunNew-Bold.ttf",
+                'I' => "THSarabunNew-Italic.ttf",
+                'BI' => "THSarabunNew-BoldItalic.ttf",
+            ],
+            'dejavusans' => [
+                'R' => "DejaVuSans.ttf",
+                'B' => "DejaVuSans-Bold.ttf",
+                'I' => "DejaVuSerif-Italic.ttf",
+                'BI' => "DejaVuSerif-BoldItalic.ttf",
+            ],
+        ];
+
+        $mpdf = new Mpdf([
+            'PDFA'              => $type == 'F' ? true : false,
+            'PDFAauto'          => $type == 'F' ? true : false,
+            'format'            => 'A4',
+            'mode'              => 'utf-8',
+            'default_font_size' => 15,
+            'fontDir'           => array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], $fontDirs),
+            'fontdata'          => array_merge((new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'], $fontData),
+            'default_font'      => 'thsarabunnew',
+            'fontdata_fallback' => ['dejavusans', 'freesans', 'arial'],
+            'margin_left'       => 13,
+            'margin_right'      => 13,
+            'margin_top'        => 10,
+            'margin_bottom'     => 0,
+            // 'tempDir'           => sys_get_temp_dir(),
+        ]);
+
+    
+        // Log::info('MPDF Temp Dir: ' . $tempDirPath);
+
+        $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
+        $mpdf->WriteHTML($stylesheet, 1);
+
+        $mpdf->SetWatermarkImage(public_path('images/nc_hq.png'), 1, [23, 23], [170, 12]);
+        $mpdf->showWatermarkImage = true;
+
+        // --- เพิ่ม Watermark Text "DRAFT" ตรงนี้ ---
+        $mpdf->SetWatermarkText('DRAFT');
+        $mpdf->showWatermarkText = true; // เปิดใช้งาน watermark text
+        $mpdf->watermark_font = 'thsarabunnew'; // กำหนด font (ควรใช้ font ที่โหลดไว้แล้ว)
+        $mpdf->watermarkTextAlpha = 0.1;
+
+$footerHtml = '';
+$foundScope = false;
+
+// ตรวจสอบว่า $htmlPages เป็น array และไม่เป็นค่าว่าง
+// if (is_array($htmlPages) && !empty($htmlPages)) {
+//     foreach ($htmlPages as $pageContent) {
+//         // ตรวจสอบว่า $pageContent เป็น string และมีข้อความที่ต้องการ
+//         if (is_string($pageContent) && str_contains($pageContent, 'Scope of Accreditation for Inspection Body')) {
+//             $foundScope = true;
+//             break; // พบแล้ว ไม่จำเป็นต้องตรวจสอบต่อ
+//         }
+//     }
+// }
+
+$footerHtml = '';
+$foundScope = false;
+
+
+// $initialIssueDateEn = $this->ordinal(Carbon::now()->day) . ' ' . Carbon::now()->format('F Y');
+$initialIssueDateTh = HP::formatDateThaiFull(Carbon::now());
+
+// // ตรวจสอบว่า $htmlPages เป็น array และไม่เป็นค่าว่าง
+// if (is_array($htmlPages) && !empty($htmlPages)) {
+//     foreach ($htmlPages as $pageContent) {
+//         // ตรวจสอบว่า $pageContent เป็น string และมีข้อความที่ต้องการ
+//         if (is_string($pageContent) && str_contains($pageContent, 'Scope of Accreditation for Inspection Body')) {
+//             $foundScope = true;
+//             break; // พบแล้ว ไม่จำเป็นต้องตรวจสอบต่อ
+//         }
+//     }
+// }
+
+// if ($foundScope) {
+//     $footerHtml = '
+// <div width="100%" style="display:inline;line-height:12px">
+
+//     <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+//       <span style="font-size:20px;">Date of Initial Issue: ' . $initialIssueDateEn . '</span><br>
+//       <span style="font-size: 16px">Ministry of Industry Thailand, Thai Industrial Standards Institute</span>
+//     </div>
+
+//     <div style="display: inline-block; width: 15%;float:right;width:25%">
+//       </div>
+
+//     <div width="100%" style="display:inline;text-align:center">
+//       <span>หน้าที่ {PAGENO}/{nbpg}</span>
+//     </div>
+// </div>';
+// } else {
+//     $footerHtml = '
+// <div width="100%" style="display:inline;line-height:12px">
+
+//     <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+//       <span style="font-size:20px;">ออกให้ครั้งแรกเมื่อวันที่ ' . $initialIssueDateTh . '</span><br>
+//       <span style="font-size: 16px">กระทรวงอุตสาหกรรม สำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span>
+//     </div>
+
+//     <div style="display: inline-block; width: 15%;float:right;width:25%">
+//       </div>
+
+//     <div width="100%" style="display:inline;text-align:center">
+//       <span>หน้าที่ {PAGENO}/{nbpg}</span>
+//     </div>
+// </div>';
+// }
+
+
+$footerHtml = '
+<div width="100%" style="display:inline;line-height:12px">
+
+    <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+      <span style="font-size:20px;">ออกให้ครั้งแรกเมื่อวันที่ ' . $initialIssueDateTh . '</span><br>
+      <span style="font-size: 16px">กระทรวงอุตสาหกรรม สำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span>
+    </div>
+
+    <div style="display: inline-block; width: 15%;float:right;width:25%">
+  
+    </div>
+
+    <div width="100%" style="display:inline;text-align:center">
+      <span>หน้าที่ {PAGENO}/{nbpg}</span>
+    </div>
+</div>';
+
+// แล้วนำไปกำหนดให้ mPDF เป็น Footer
+$mpdf->SetHTMLFooter($footerHtml);
+
+        foreach ($htmlPages as $index => $pageHtml) {
+            if ($index > 0) {
+                $mpdf->AddPage();
+            }
+            $mpdf->WriteHTML($pageHtml,HTMLParserMode::HTML_BODY);
+        }
+
+    //  $mpdf->Output('', 'S');
+    //  $title = "mypdf.pdf";
+    //  $mpdf->Output($title, "I");  
+
+  
+
+        $tbx = new CertiIBSaveAssessment;
+        $tb = new CertiIBReport;
+
+
+
+        // $combinedPdf->Output('combined.pdf', \Mpdf\Output\Destination::INLINE);
+        $app_certi_ib = CertiIb::find($id);
+        $no = str_replace("RQ-", "", $app_certi_ib->app_no);
+        $no = str_replace("-", "_", $no);
+
+
+        $attachPath = '/files/applicants/check_files_ib/' . $no . '/';
+        $fullFileName = uniqid() . '_' . now()->format('Ymd_His') . '.pdf';
+    
+        // สร้างไฟล์ชั่วคราว
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'pdf_') . '.pdf';
+        // บันทึก PDF ไปยังไฟล์ชั่วคราว
+        $mpdf->Output($tempFilePath, \Mpdf\Output\Destination::FILE);
+        // ใช้ Storage::putFileAs เพื่อย้ายไฟล์
+        Storage::putFileAs($attachPath, new \Illuminate\Http\File($tempFilePath), $fullFileName);
+    
+        $storePath = $no  . '/' . $fullFileName;
+    
+        $tb = new CertiIb;
+        $certi_ib_attach                   = new CertiIBAttachAll();
+        $certi_ib_attach->app_certi_ib_id = $app_certi_ib->id;
+        $certi_ib_attach->table_name       = $tb->getTable();
+        $certi_ib_attach->file_section     = '3';
+        $certi_ib_attach->file_desc        = null;
+        $certi_ib_attach->file             = $storePath;
+        $certi_ib_attach->file_client_name = $no . '_scope_'.now()->format('Ymd_His').'.pdf';
+        $certi_ib_attach->token            = str_random(16);
+        $certi_ib_attach->save();
+
+        $checkScopeCertiIBSaveAssessment = CertiIBAttachAll::where('app_certi_ib_id',$id)
+        ->where('table_name', (new CertiIBSaveAssessment)->getTable())
+        ->where('file_section', 2)
+        ->latest() // ใช้ latest() เพื่อให้เรียงตาม created_at โดยอัตโนมัติ
+        ->first(); // ดึง record ล่าสุดเพียงตัวเดียว
+
+
+        if($checkScopeCertiIBSaveAssessment != null)
+        {
+            $assessment = CertiIBSaveAssessment::find($checkScopeCertiIBSaveAssessment->ref_id);
+            $json = $this->copyScopeIbFromAttachement($assessment->app_certi_ib_id);
+            $copiedScopes = json_decode($json, true);
+            $tbx = new CertiIBSaveAssessment;
+            $certi_ib_attach_more = new CertiIBAttachAll();
+            $certi_ib_attach_more->app_certi_ib_id      = $assessment->app_certi_ib_id ?? null;
+            $certi_ib_attach_more->ref_id               = $assessment->id;
+            $certi_ib_attach_more->table_name           = $tbx->getTable();
+            $certi_ib_attach_more->file_section         = '2';
+            $certi_ib_attach_more->file                 = $copiedScopes[0]['attachs'];
+            $certi_ib_attach_more->file_client_name     = $copiedScopes[0]['file_client_name'];
+            $certi_ib_attach_more->token                = str_random(16);
+            $certi_ib_attach_more->save();
+        }
+
+        $checkScopeCertiIBReport= CertiIBAttachAll::where('app_certi_ib_id',$id)
+        ->where('table_name',(new CertiIBReport)->getTable())
+        ->where('file_section',1)
+        ->latest() // ใช้ latest() เพื่อให้เรียงตาม created_at โดยอัตโนมัติ
+        ->first(); // ดึง record ล่าสุดเพียงตัวเดียว
+
+        if($checkScopeCertiIBReport != null)
+        {
+            $report = CertiIBReport::find($checkScopeCertiIBReport->ref_id);
+            $json = $this->copyScopeIbFromAttachement($report->app_certi_ib_id);
+            $copiedScopes = json_decode($json, true);
+            $tb = new CertiIBReport;
+            $certi_ib_attach_more = new CertiIBAttachAll();
+            $certi_ib_attach_more->app_certi_ib_id      = $report->app_certi_ib_id ?? null;
+            $certi_ib_attach_more->ref_id               = $report->id;
+            $certi_ib_attach_more->table_name           = $tb->getTable();
+            $certi_ib_attach_more->file_section         = '1';
+            $certi_ib_attach_more->file                 = $copiedScopes[0]['attachs'];
+            $certi_ib_attach_more->file_client_name     = $copiedScopes[0]['file_client_name'];
+            $certi_ib_attach_more->token                = str_random(16);
+            $certi_ib_attach_more->save();
+        }
+
+
+
+
+    }
+
 }
 
 
-
-
-
-
-                // if( isset($item[ $input_name ]) ){
-
-                //     $certi_ib_attach                   = new CertiIBAttachAll();
-                //     $certi_ib_attach->app_certi_ib_id  = $certi_ib->id;
-                //     $certi_ib_attach->table_name       = $tb->getTable();
-                //     $certi_ib_attach->file_section     = (string)$section;
-                //     $certi_ib_attach->file_desc        = !empty($item[ 'attachs_txt' ])?$item[ 'attachs_txt' ]:null;
-                //     $certi_ib_attach->file             = $this->storeFile( $item[ $input_name ] ,$certi_ib->app_no);
-                //     $certi_ib_attach->file_client_name = HP::ConvertCertifyFileName( $item[ $input_name ]->getClientOriginalName());
-                //     $certi_ib_attach->token            = str_random(16);
-                //     $certi_ib_attach->save();
-
-                // }

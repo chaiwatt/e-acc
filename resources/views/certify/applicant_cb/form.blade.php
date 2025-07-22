@@ -362,183 +362,142 @@ let selectedModel = null;
         }
 
 
-        function submit_form(status) {
-            
-            var cbScopeJson = null;
-            if(selectedModel == "CbScopeIsicIsic")
-            {
-                cbScopeJson = selectedIsicData;
-            }else if(selectedModel == "CbScopeBcms")
-            {
-                cbScopeJson = selectedBcmsData;
-            }
+        function submit_form(status) 
+        {
 
-            // ตรวจสอบว่ามีข้อมูล JSON หรือไม่
-            if (cbScopeJson !== null) {
-                // ลบ input hidden เดิมหากมีอยู่
-                $('#cbScopeJsonInput').remove();
+            var typeStandardData = $('#type_standard').val();
+            var petitionerData = $('#petitioner').val();
+            var trustMarkData = $('#trust_mark').val();
 
-                // สร้าง input hidden ใหม่สำหรับ JSON ข้อมูล
-                $('<input>')
-                    .attr({
-                        type: 'hidden',
-                        id: 'cbScopeJsonInput',
-                        name: 'cbScopeJson', // ชื่อตัวแปรที่จะถูกส่งไปกับฟอร์ม
+
+
+            fetch("{!! route('certi_cb.download-html-template') !!}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                         typeStandard: typeStandardData,
+                        petitioner: petitionerData,
+                        trustMark: trustMarkData
                     })
-                    .val(JSON.stringify(cbScopeJson)) // แปลง JSON เป็น String
-                    .appendTo('#app_certi_form');
-            }
-
-            if ($('#type_standard').val() === '' || $('#petitioner').val() === '' || $('#trust_mark').val() === '') {
-                alert('โปรดเลือกข้อกำหนดที่ใช้ในการรับรอง สาขาการรับรอง มาตรฐานที่ใช้รับรอง');
-                return;
-            }
-
-               // ลบ input hidden ของ selectedModel หากมีอยู่
-            $('#selectedModelInput').remove();
-
-            // สร้าง input hidden ใหม่สำหรับ selectedModel
-            $('<input>')
-                .attr({
-                    type: 'hidden',
-                    id: 'selectedModelInput',
-                    name: 'selectedModel',
                 })
-                .val(selectedModel)
-                .appendTo('#app_certi_form');
+                .then(response => {
+                    if (response.ok) 
+                    {     
+                        if ($('#type_standard').val() === '' || $('#petitioner').val() === '' || $('#trust_mark').val() === '') {
+                            alert('โปรดเลือกข้อกำหนดที่ใช้ในการรับรอง สาขาการรับรอง มาตรฐานที่ใช้รับรอง');
+                            return;
+                        }
 
-        
-            if(cbScopeJson.length == 0)
-            {
-                alert('โปรดเลือกสร้างขอบข่ายให้ถูกต้อง');
-                return;
-            }
-
-
-            var  number =  1;
-            var max_size = "{{ ini_get('post_max_size') }}";
-            var res = max_size.replace("M", "");
-            $('#app_certi_form').find('input[type="file"]').each(function(index, el) {
-                if(checkNone($(el).val()) && $(el).prop("tagName")=="INPUT" && $(el).prop("type")=="file"   ){
-                    number +=  (el.files[0].size /1024/1024);
-                }
-            });
-
-
-
-
-            Swal.fire({
-                title: 'ยืนยันการทำรายงาน !',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.value) {
-                    if(number < res){
-                        $('#status_btn').html('<input type="text" name="status" value="' + status + '" hidden>');
-                        $('#app_certi_form').submit();
+                        var  number =  1;
+                        var max_size = "{{ ini_get('post_max_size') }}";
+                        var res = max_size.replace("M", "");
+                        $('#app_certi_form').find('input[type="file"]').each(function(index, el) {
+                            if(checkNone($(el).val()) && $(el).prop("tagName")=="INPUT" && $(el).prop("type")=="file"   ){
+                                number +=  (el.files[0].size /1024/1024);
+                            }
+                        });
+                        Swal.fire({
+                            title: 'ยืนยันการทำรายงาน !',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'บันทึก',
+                            cancelButtonText: 'ยกเลิก'
+                        }).then((result) => {
+                            if (result.value) {
+                                if(number < res){
+                                    $('#status_btn').html('<input type="text" name="status" value="' + status + '" hidden>');
+                                    $('#app_certi_form').submit();
+                                }else{
+                                    Swal.fire(
+                                        'ขนาดไฟล์รวม '+number.toFixed(2)+' MB ไม่สามารถบันทึกได้ ต้องไม่เกิน ' + res + ' MB',
+                                        '',
+                                        'warning'
+                                    );
+                                }   
+                            }
+                        });
                     }else{
-                        Swal.fire(
-                            'ขนาดไฟล์รวม '+number.toFixed(2)+' MB ไม่สามารถบันทึกได้ ต้องไม่เกิน ' + res + ' MB',
-                            '',
-                            'warning'
-                        );
+                        alert("ยังไม่ได้เพิ่มขอบข่าย");
                     }
-                          
-                }
-            });
-
+                });
         }
 
         //ฉบับร่าง
         function  submit_form_draft(status){
 
+            var typeStandardData = $('#type_standard').val();
+            var petitionerData = $('#petitioner').val();
+            var trustMarkData = $('#trust_mark').val();
 
 
-            var cbScopeJson = null;
-            if(selectedModel == "CbScopeIsicIsic")
-            {
-                cbScopeJson = selectedIsicData;
-            }else if(selectedModel == "CbScopeBcms")
-            {
-                cbScopeJson = selectedBcmsData;
-            }
-
-            // ตรวจสอบว่ามีข้อมูล JSON หรือไม่
-            if (cbScopeJson !== null) {
-                // ลบ input hidden เดิมหากมีอยู่
-                $('#cbScopeJsonInput').remove();
-
-                // สร้าง input hidden ใหม่สำหรับ JSON ข้อมูล
-                $('<input>')
-                    .attr({
-                        type: 'hidden',
-                        id: 'cbScopeJsonInput',
-                        name: 'cbScopeJson', // ชื่อตัวแปรที่จะถูกส่งไปกับฟอร์ม
+            
+            fetch("{!! route('certi_cb.download-html-template') !!}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                         typeStandard: typeStandardData,
+                        petitioner: petitionerData,
+                        trustMark: trustMarkData
                     })
-                    .val(JSON.stringify(cbScopeJson)) // แปลง JSON เป็น String
-                    .appendTo('#app_certi_form');
-            }
-
-            if ($('#type_standard').val() === '' || $('#petitioner').val() === '' || $('#trust_mark').val() === '') {
-                alert('โปรดเลือกข้อกำหนดที่ใช้ในการรับรอง สาขาการรับรอง มาตรฐานที่ใช้รับรอง');
-                return;
-            }
-
-               // ลบ input hidden ของ selectedModel หากมีอยู่
-            $('#selectedModelInput').remove();
-
-            // สร้าง input hidden ใหม่สำหรับ selectedModel
-            $('<input>')
-                .attr({
-                    type: 'hidden',
-                    id: 'selectedModelInput',
-                    name: 'selectedModel',
                 })
-                .val(selectedModel)
-                .appendTo('#app_certi_form');
+                .then(response => {
+                    if (response.ok) 
+                    {     
+                        if ($('#type_standard').val() === '' || $('#petitioner').val() === '' || $('#trust_mark').val() === '') {
+                            alert('โปรดเลือกข้อกำหนดที่ใช้ในการรับรอง สาขาการรับรอง มาตรฐานที่ใช้รับรอง');
+                            return;
+                        }
 
-            if(cbScopeJson.length == 0)
-            {
-                alert('โปรดเลือกสร้างขอบข่ายให้ถูกต้อง');
-                return;
-            }
 
-            var number =  1;
-            var max_size = "{{ ini_get('post_max_size') }}";
-            var res = max_size.replace("M", "");
-            $('#app_certi_form').find('input[type="file"]').each(function(index, el) {
-                if(checkNone($(el).val()) && $(el).prop("tagName")=="INPUT" && $(el).prop("type")=="file"   ){
-                    number +=  (el.files[0].size /1024/1024);
-                }
-            });
+                        var number =  1;
+                        var max_size = "{{ ini_get('post_max_size') }}";
+                        var res = max_size.replace("M", "");
+                        $('#app_certi_form').find('input[type="file"]').each(function(index, el) {
+                            if(checkNone($(el).val()) && $(el).prop("tagName")=="INPUT" && $(el).prop("type")=="file"   ){
+                                number +=  (el.files[0].size /1024/1024);
+                            }
+                        });
 
-            Swal.fire({
-                title: 'ยืนยันการทำรายงาน ฉบับร่าง!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                if (result.value) {
-                    if(number < res){
-                        $('#checkbox_confirm').attr('required',false);
-                        $('#status_btn').html('<input type="text" name="status" value="' + status + '" hidden>');
-                        $('#app_certi_form').submit();
+                        Swal.fire({
+                            title: 'ยืนยันการทำรายงาน ฉบับร่าง!',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'บันทึก',
+                            cancelButtonText: 'ยกเลิก'
+                        }).then((result) => {
+                            if (result.value) {
+                                if(number < res){
+                                    $('#checkbox_confirm').attr('required',false);
+                                    $('#status_btn').html('<input type="text" name="status" value="' + status + '" hidden>');
+                                    $('#app_certi_form').submit();
+                                }else{
+                                    Swal.fire(
+                                        'ขนาดไฟล์รวม '+number.toFixed(2)+' MB ไม่สามารถบันทึกได้ ต้องไม่เกิน ' + res + ' MB',
+                                        '',
+                                        'warning'
+                                    )
+                                }
+                            }
+                        });
+                       
                     }else{
-                        Swal.fire(
-                            'ขนาดไฟล์รวม '+number.toFixed(2)+' MB ไม่สามารถบันทึกได้ ต้องไม่เกิน ' + res + ' MB',
-                            '',
-                            'warning'
-                        )
+                        alert("ยังไม่ได้เพิ่มขอบข่าย");
                     }
-                }
-            });
+                });
+      
+
+   
+          
         }
         
         function filterEngAndNumberOnlyCustomForPage(obj){

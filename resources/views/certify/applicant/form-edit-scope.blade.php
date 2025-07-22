@@ -924,9 +924,9 @@
            
 
             // ตรวจสอบข้อมูลก่อนส่ง
-            if (!validateLabData()) { 
-                return; // หยุดการทำงานถ้าไม่ผ่านการตรวจสอบ
-            }
+            // if (!validateLabData()) { 
+            //     return; // หยุดการทำงานถ้าไม่ผ่านการตรวจสอบ
+            // }
 
             let purpose = $('input[name="purpose"]:checked').val();
 

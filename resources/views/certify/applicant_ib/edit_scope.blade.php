@@ -57,11 +57,11 @@
                                         onclick="submit_form('1');return false">
                                         ส่งข้อมูล
                             </button>
-                                <button  type="button"
+                                {{-- <button  type="button"
                                         class="btn btn-warning text-white m-l-5 "
                                         onclick="submit_form_draft('0');return false">
                                         ฉบับร่าง
-                                </button>
+                                </button> --}}
                                 <a href="{{ url("certify/applicant-ib") }}"  class="btn btn-danger text-white m-l-5 " id="cancel_edit_calibrate">ยกเลิก</a>
                             </div>
                         </div>

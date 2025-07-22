@@ -9,25 +9,13 @@ use App\User;
 class CertificationBranch extends Model
 {
     use Sortable;
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
+
     protected $table = 'bcertify_certification_branches';
 
-    /**
-    * The database primary key value.
-    *
-    * @var string
-    */
+
     protected $primaryKey = 'id';
 
-    /**
-     * Attributes that should be mass-assignable.
-     *
-     * @var array
-     */
+
     protected $fillable = ['title', 'title_en', 'initial', 'certificate_initial', 'formula_id', 'state', 'created_by', 'updated_by','model_name'];
 
     /*

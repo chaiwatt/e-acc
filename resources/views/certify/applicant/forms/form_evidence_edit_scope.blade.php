@@ -79,16 +79,16 @@
     {{-- {{$labTestRequest->count()}}
     {{$labCalRequest->count()}} --}}
     <div class="clearfix"></div>
-    <legend><h4><span class="text-danger">*</span> 5. ขอบข่ายที่ยื่นขอรับการรับรอง
+    <legend><h4><span class="text-danger">*</span> 5. ขอบข่ายที่ยื่นขอรับการรับรอง 
         (<span class="text-warning">ห้องปฏิบัติการสอบเทียบ</span>) (Scope of Accreditation Sought (<span class="text-warning">For calibration laboratory</span>)) </h4></legend>
             <div class="clearfix"></div>
+            <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">แก้ไขขอบข่าย</a> 
             @if ($urlType == 'create')
                 <table class="table table-bordered" id="myTable_labScope">
                     <thead class="bg-primary">
                         <tr>
                             <th class="text-center text-white "  width="10%">ลำดับ</th>
                             <th class="text-center text-white "  width="50%">สาขา</th>
-                            {{-- <th class="text-center text-white "  width="20%">ขอบข่ายร่วมกันทุกประเภท</th> --}}
                             <th class="text-center text-white "  width="20%">เพิ่มขอบข่าย</th>
                         </tr>
                     </thead>
@@ -98,9 +98,7 @@
                             <td style="vertical-align:top">
                                 สำนักงานใหญ่
                             </td>
-                            {{-- <td class="text-center" id ="checkbox-main-branch-container">
-                                
-                            </td> --}}
+     
                             <td class="text-center" id="main-branch-container">
                                 
                             </td>
@@ -179,12 +177,11 @@
             @endif
 
         @elseif($urlType == 'edit')
-            <table class="table table-bordered" id="myTable_labScope">
+            {{-- <table class="table table-bordered" id="myTable_labScope">
                 <thead class="bg-primary">
                     <tr>
                         <th class="text-center text-white "  width="10%">ลำดับ</th>
                         <th class="text-center text-white "  width="50%">สาขา</th>
-                        {{-- <th class="text-center text-white "  width="20%">ขอบข่ายร่วมกันทุกประเภท</th> --}}
                         <th class="text-center text-white "  width="20%">เพิ่มขอบข่าย</th>
                     </tr>
                 </thead>
@@ -200,7 +197,7 @@
                         </td>
                     </tr>
                 </tbody>
-            </table> 
+            </table>  --}}
 
             <div id="scope_table_wrapper">
 
@@ -301,7 +298,7 @@
     </legend>
 
     <div id="viewForm93" style="display: none">
-       TEST viewForm93
+       {{-- TEST viewForm93 --}}
         <div class="row repeater-form-file">
             <div class="col-md-12 box_section72" data-repeater-list="repeater-section72" id="repeater_section72_wrapper">
                 @php

@@ -649,6 +649,7 @@ class CertiIb extends Model
     }
 
     public function getHqSubdistrictNameAttribute() {
+        // dd($this->hq_subdistrict);
         return !empty($this->hq_subdistrict)?$this->hq_subdistrict->DISTRICT_NAME:null;
     }
 

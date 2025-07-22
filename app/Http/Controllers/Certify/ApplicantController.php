@@ -9,16 +9,18 @@ use Mpdf\Mpdf;
 use Mpdf\Tag\Br;
 use Carbon\Carbon;
 use App\AttachFile;
+use App\LabHtmlTemplate;
+use Mpdf\HTMLParserMode;
 use App\CertificateExport;
 use App\Models\Basic\Staff;
 use App\Models\Basic\Amphur;
 use App\Models\Esurv\Trader;
+
 use FontLib\Table\Type\post;
 use Illuminate\Http\Request;
 
 use Smalot\PdfParser\Parser;
 use App\Mail\Lab\CertifyCost;
-
 use App\Models\Basic\Zipcode;
 use App\Models\Basic\District;
 use App\Models\Basic\Province;
@@ -45,20 +47,20 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\Lab\CertifyBoardAuditor;
+
 use App\Models\Bcertify\LabCalRequest;
+
 use App\Models\Certify\Applicant\Cost;
-
 use App\Mail\Lab\CertifySaveAssessment;
-
 use App\Models\Bcertify\LabRequestType;
 use App\Models\Bcertify\LabTestRequest;
 use App\Models\Certify\Applicant\Check;
 use App\Models\Certify\SetStandardUser;
+
 use Illuminate\Support\Facades\Storage;
+
 use App\Mail\Lab\CertifyCostCertificate;
-
 use App\Models\Bcertify\BranchLabAdress;
-
 use App\Models\Bcertify\TestBranchParam;
 use App\Models\Certify\Applicant\Notice;
 use App\Models\Certify\Applicant\Report;
@@ -74,13 +76,14 @@ use App\Models\Certify\Applicant\CostFile;
 use App\Models\Certify\CertificateHistory;
 use App\Models\Certify\SetStandardUserSub;
 use App\Models\Bcertify\LabTestMeasurement;
+
 use App\Models\Bcertify\LabTestTransaction;
 use App\Models\Bcertify\TestBranchCategory;
-
 use App\Models\Certify\BoardAuditorHistory;
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Mail\Lab\CertifyConFirmAuditorsMail;
+use App\Models\Bcertify\LabScopeTransaction;
 use App\Models\Certify\Applicant\Assessment;
 use App\Models\Certify\Applicant\NoticeFile;
 use App\Models\Certify\Applicant\NoticeItem;
@@ -126,15 +129,16 @@ use App\Models\Certify\Applicant\CertiLabExportMapreq;
 use App\Models\Certify\Applicant\CertiLabCheckBoxImage;
 use App\Models\Certify\Applicant\CostAssessmentHistory;
 use App\Models\Bcertify\CalibrationBranchInstrumentGroup;
-use App\Models\Bcertify\LabScopeTransaction;
 
 class ApplicantController extends Controller
 {
     private $attach_path;//ที่เก็บไฟล์แนบ
+    // private $categories = []; // ประกาศ array สำหรับเก็บค่าหมวดหมู่ทั้งหมด
     public function __construct()
     {
         // $this->middleware('auth');
         $this->attach_path = 'files/applicants/check_files/';
+
     }
 
 
@@ -496,126 +500,7 @@ class ApplicantController extends Controller
         ];
     }
 
-    public function scopeEditor(Request $request)
-    {
 
-        // Retrieve query parameters
-        $accordingFormula = $request->query('according_formula');
-        $labAbility = $request->query('lab_ability');
-        $purpose = $request->query('purpose');
-        $labName=  $request->query('lab_name');
-        $labNameEn=  $request->query('lab_name_en');
-
-        $templateType = "";
-
-        $date = $this->getLabCalibrationDate();
-
-        if($labAbility == "calibrate")
-        {
-                $templateType = "lab_cal";
-                $labCalDetails = [
-                'title' => [
-                    'th' => "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
-                    'en' => "Scope of Accreditation for Calibration"
-                ],
-                'certificateNo' => Carbon::now()->format('y')."-LB0000",
-                'labName' => [
-                    'th' => $labName,
-                    'en' => $labNameEn
-                ],
-                'accreditationNo' => [
-                    'th' => "สอบเทียบ 0000",
-                    'en' => "Calibration 0000"
-                ],
-                'issueNo' => "01",
-                'validFrom' => [
-                        'th' => $date['validFrom']['th'],
-                        'en' => $date['validFrom']['en']
-                ],
-                'until' => [
-                    'th' => $date['until']['th'],
-                    'en' => $date['until']['en']
-                ],
-
-                'laboratory_status' => [
-                    'is_permanent' => true,
-                    'is_site' => false,
-                    'is_temporary' => false,
-                    'is_mobile' => false,
-                    'is_multisite' => false,
-                ],
-                'calibrationData' => [ 
-                    [
-                        'field' => ['th' => "(ตัวอย่าง)ไฟฟ้า", 'en' => "Electrical"],
-                        'parameter' => "Measuring instrument<br>&nbsp;DC voltage<br>&nbsp;&nbsp;&nbsp;0 mV to < 220 mV",
-                        'capability' => "<br><br>&nbsp;&nbsp;&nbsp;8.0 &mu;V/V + 1.8 &mu;V",
-                        'method' => "<br>In-house method :<br>CP-01DCV by direct"
-                    ]
-                ]
-            ];
-        
-            return view('certify.applicant.scope-editor', [
-                'templateType' => $templateType,
-                'labCalDetails' => $labCalDetails,
-                'according_formula' => $accordingFormula,
-                'lab_ability' => $labAbility,
-                'purpose' => $purpose
-            ]);
-        }else if($labAbility == "test")
-        {
-            $templateType = "lab_test";
-
-            $labTestDetails = [
-                'title' => [
-                    'th' => "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
-                    'en' => "Scope of Accreditation for Testing" // เปลี่ยนเป็น Testing
-                ],
-                'certificateNo' => Carbon::now()->format('y')."-LB0000",
-                'labName' => [
-                    'th' => "บริษัท เอ็นพีซีโซลูชั่นแอนด์เซอร์วิส จำกัด",
-                    'en' => "IRC Technologies Co.,Ltd."
-                ],
-                'accreditationNo' => [
-                    'th' => "ทดสอบ 0000", // หมายเลขการรับรองอาจจะต่างกัน
-                    'en' => "Testing 0000"
-                ],
-                'issueNo' => "01",
-                'validFrom' => [
-                        'th' => $date['validFrom']['th'],
-                        'en' => $date['validFrom']['en']
-                ],
-                'until' => [
-                    'th' => $date['until']['th'],
-                    'en' => $date['until']['en']
-                ],
-                'laboratory_status' => [
-                    'is_permanent' => true,
-                    'is_site' => false,
-                    'is_temporary' => false,
-                    'is_mobile' => false,
-                    'is_multisite' => false,
-                ],
-                'testLabData' => [
-                    [
-                        'field' => ['th' => "สาขาโยธา", 'en' => "Civil field"],
-                        'parameter' => "<br>ความละเอียดโดยเครื่องแอร์เพอร์มีอะบิลิตี<br>(Fineness by air-permeability)",
-                        'method' => "<br>มอก. 2752 เล่ม 6-2562 (วิธี A)<br>(TIS 2752 Part 6-2562 (2019) (Method A))"
-                    ]
-                ]
-            ];
-
-             return view('certify.applicant.scope-editor', [
-                'templateType' => $templateType,
-                'labTestDetails' => $labTestDetails,
-                 'according_formula' => $accordingFormula,
-                'lab_ability' => $labAbility,
-                'purpose' => $purpose
-            ]);
-
-        }
-
- 
-    }
 
     function uploadCalLabCmc(Request $request)
     {
@@ -798,7 +683,7 @@ class ApplicantController extends Controller
                 }
             }
         }
-
+       
         if($request->lab_ability == 4 )
         {
             // ดึง categories จาก $labMainAddress
@@ -824,22 +709,19 @@ class ApplicantController extends Controller
             }
         }
 
+ 
 
+        $categories = $this->getCategories($request);
 
-        
-        $categories = array_unique($categories);
 
         // กลุ่มงานตามมาตรฐานและสาขา
         if($requestLab['lab_type'] == 3){
-            //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
-            // if(isset($requestData['test_scope'])){
-                // $set_standard  =  SetStandardUserSub::select('standard_user_id')
-                //                                     ->whereIn('test_branch_id',(array)$requestData['test_scope']['branch_id'][0])
-                //                                     ->first() ;
+
                 $set_standard  =  SetStandardUserSub::select('standard_user_id')
                                                     ->whereIn('test_branch_id',$categories)
                                                     ->first() ;
-                                                    // dd($set_standard);
+
+                // dd("test",$set_standard,$set_standard->set_standard_user->sub_department_id);                                    
                 if(!is_null($set_standard)){
                     $requestLab['subgroup'] =  $set_standard->set_standard_user->sub_department_id ?? 1804;
                 }
@@ -847,11 +729,6 @@ class ApplicantController extends Controller
 
         }else if($requestLab['lab_type'] == 4){
             //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
-
-
-
-        
-
 
             // if(isset($requestData['calibrate'])){
                 // $set_standard  =  SetStandardUserSub::select('standard_user_id')
@@ -861,9 +738,10 @@ class ApplicantController extends Controller
                 $set_standard  =  SetStandardUserSub::select('standard_user_id')
                 ->whereIn('test_branch_id',$categories)
                 ->first() ;
-                // dd($set_standard);
+                // dd("cal",$set_standard,$set_standard,$set_standard->set_standard_user->sub_department_id);
                 if(!is_null($set_standard)){
-                    $requestLab['subgroup'] =  $set_standard->set_standard_user->sub_department_id ?? 1806;
+                    // $requestLab['subgroup'] =  $set_standard->set_standard_user->sub_department_id ?? 1806;
+                    $requestLab['subgroup'] =  1806;
                 }
             // }
         }
@@ -921,6 +799,32 @@ class ApplicantController extends Controller
 
         return $certi_lab;
 
+    }
+
+    public function getCategories($request){
+        $_labAblity = "";
+        if($request->lab_ability == 3 )
+        {
+            $_labAblity = "test";
+        }elseif($request->lab_ability == 4)
+        {
+            $_labAblity = "calibrate";
+        }
+
+        $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+            ->where('according_formula',$request->according_formula)
+            ->where('purpose',$request->purpose)
+            ->where('lab_ability',$_labAblity)
+            ->first();
+
+        $labCalItemsCollection = collect($labHtmlTemplate->json_data);
+
+        $categories = $labCalItemsCollection->map(function ($item) {
+            // Decode the JSON string into an array
+            $decoded = json_decode($item, true);
+            return $decoded[0]['field'] ?? null;
+        })->unique()->values()->all();
+        return $categories;
     }
 
     public function SaveInformation($request, $certilab)
@@ -1173,11 +1077,20 @@ class ApplicantController extends Controller
     {
         $mainLabInfo = json_decode($request->input('main_lab_info'), true);
         $branchLabInfos = json_decode($request->input('branch_lab_infos'), true) ?? [];
-       
-        $categories = []; // ประกาศ array สำหรับเก็บค่าหมวดหมู่ทั้งหมด
 
         // dd($mainLabInfo);
-      
+       
+        $user = auth()->user();
+        
+ 
+
+        $labHtmlTemplate = LabHtmlTemplate::where('user_id',$user->id)
+            ->where('according_formula',$request->according_formula)
+            ->where('purpose',$request->purpose)
+            ->where('lab_ability',$request->lab_ability)
+            ->first();
+
+    //   dd($user->id,$request->all(),$template_type,$labHtmlTemplate );
         $model = str_slug('applicant','-');
         $data_session     =    HP::CheckSession();
         
@@ -1189,6 +1102,22 @@ class ApplicantController extends Controller
 
                     // add ceti lab
                     $certilab = $this->SaveCertiLab($request, $data_session , null, $branchLabInfos ,$mainLabInfo );
+
+                    if($labHtmlTemplate !== null)
+                    {
+                        // dd($certilab->id);
+                         $labHtmlTemplate->update([
+                            'app_certi_lab_id' => $certilab->id
+                         ]);
+                    }else{
+                        LabHtmlTemplate::create([
+                            'user_id' => $user->id,
+                            'according_formula' => $request->according_formula,
+                            'purpose' => $request->purpose,
+                            'lab_ability' => $request->lab_ability,
+                            'app_certi_lab_id' => $certilab->id
+                        ]);
+                    }
                     
                     // Save information
                     $this->SaveInformation($request, $certilab);
@@ -1204,15 +1133,21 @@ class ApplicantController extends Controller
                     $check->app_certi_lab_id = $certilab->id;
                     $check->save();
 
+       
+                    $branchCategories = [
+                        'branch_id' => $this->getCategories($request)
+                    ];
+
+                    // dd($branchCategories);
                     if($certilab->lab_type == 3){
                         //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
-                        $requestData['test_scope'] = $requestData['uniqueCalMainBranches'];
+                        $requestData['test_scope'] = $branchCategories;
                         if(isset($requestData['test_scope'])){
                             $this->save_certify_test_scope($certilab,$requestData);
                         }
                     }else if($certilab->lab_type == 4){
                         //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
-                        $requestData['calibrate'] = $requestData['uniqueCalMainBranches'];
+                        $requestData['calibrate'] = $branchCategories;
                         if(isset($requestData['calibrate'])){
                             $this->save_certifyLab_calibrate($certilab,$requestData);
                         }
@@ -1294,90 +1229,94 @@ class ApplicantController extends Controller
 
                     $labScopeTransaction->save();
 
-                    foreach ($branchLabInfos as $branchId => $branchLabInfo) {
-                        $labScopeTransaction = new LabScopeTransaction();
-                        $labScopeTransaction->app_certi_lab_id = $certilab->id;
-                        $labScopeTransaction->request_type = $request_type;
-                        $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'branch';;
-                        $labScopeTransaction->branch_id = $branchId;
-                        $labScopeTransaction->address_number = $branchLabInfo['address_number_add'] ?? '';
-                        $labScopeTransaction->village_no = $branchLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
-                        $labScopeTransaction->address_city = $branchLabInfo['address_city_add'] ?? '';
-                        $labScopeTransaction->address_city_text = $branchLabInfo['address_city_text_add'] ?? '';
-                        $labScopeTransaction->address_district = $branchLabInfo['address_district_add'] ?? '';
-                        $labScopeTransaction->sub_district = $branchLabInfo['sub_district_add'] ?? '';
-                        $labScopeTransaction->postcode = $branchLabInfo['postcode_add'] ?? '';
-                        $labScopeTransaction->address_soi = $branchLabInfo['address_soi_add'] ?? '';
-                        $labScopeTransaction->address_street = $branchLabInfo['address_street_add'] ?? '';
-                        $labScopeTransaction->lab_address_no_eng = $branchLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
-                        $labScopeTransaction->lab_moo_eng = $branchLabInfo['lab_moo_eng_add'] ?? '';
-                        $labScopeTransaction->lab_soi_eng = $branchLabInfo['lab_soi_eng_add'] ?? '';
-                        $labScopeTransaction->lab_street_eng = $branchLabInfo['lab_street_eng_add'] ?? '';
-                        $labScopeTransaction->lab_province_text_eng = $branchLabInfo['lab_province_text_eng_add'] ?? '';
-                        $labScopeTransaction->lab_amphur_eng = $branchLabInfo['lab_amphur_eng_add'] ?? '';
-                        $labScopeTransaction->lab_district_eng = $branchLabInfo['lab_district_eng_add'] ?? '';
-                        $labScopeTransaction->lab_types = json_encode($branchLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
+                    // foreach ($branchLabInfos as $branchId => $branchLabInfo) {
+                    //     $labScopeTransaction = new LabScopeTransaction();
+                    //     $labScopeTransaction->app_certi_lab_id = $certilab->id;
+                    //     $labScopeTransaction->request_type = $request_type;
+                    //     $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'branch';;
+                    //     $labScopeTransaction->branch_id = $branchId;
+                    //     $labScopeTransaction->address_number = $branchLabInfo['address_number_add'] ?? '';
+                    //     $labScopeTransaction->village_no = $branchLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
+                    //     $labScopeTransaction->address_city = $branchLabInfo['address_city_add'] ?? '';
+                    //     $labScopeTransaction->address_city_text = $branchLabInfo['address_city_text_add'] ?? '';
+                    //     $labScopeTransaction->address_district = $branchLabInfo['address_district_add'] ?? '';
+                    //     $labScopeTransaction->sub_district = $branchLabInfo['sub_district_add'] ?? '';
+                    //     $labScopeTransaction->postcode = $branchLabInfo['postcode_add'] ?? '';
+                    //     $labScopeTransaction->address_soi = $branchLabInfo['address_soi_add'] ?? '';
+                    //     $labScopeTransaction->address_street = $branchLabInfo['address_street_add'] ?? '';
+                    //     $labScopeTransaction->lab_address_no_eng = $branchLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
+                    //     $labScopeTransaction->lab_moo_eng = $branchLabInfo['lab_moo_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_soi_eng = $branchLabInfo['lab_soi_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_street_eng = $branchLabInfo['lab_street_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_province_text_eng = $branchLabInfo['lab_province_text_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_amphur_eng = $branchLabInfo['lab_amphur_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_district_eng = $branchLabInfo['lab_district_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_types = json_encode($branchLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
     
-                        $labScopeTransaction->save();
-                    }
+                    //     $labScopeTransaction->save();
+                    // }
    
 
-                    if($certilab->lab_type == 4){
-                        $labCalRequest = new LabCalRequest();
+                    // if($certilab->lab_type == 4){
+                    //     $labCalRequest = new LabCalRequest();
 
-                        $labCalRequest->app_certi_lab_id = $certilab->id;
-                        $labCalRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
-                        $labCalRequest->no = $mainLabInfo['address_number_add'] ?? '';
-                        $labCalRequest->moo = $mainLabInfo['address_moo_add'] ?? '';
-                        $labCalRequest->province_id = $mainLabInfo['address_city_add'] ?? '';
-                        $labCalRequest->province_name = $mainLabInfo['address_city_text_add'] ?? '';
-                        $labCalRequest->amphur_id = $mainLabInfo['amphur_id_add'] ?? '';
-                        $labCalRequest->amphur_name = $mainLabInfo['address_district_add'] ?? '';
-                        $labCalRequest->tambol_id = $mainLabInfo['tambol_id_add'] ?? '';
-                        $labCalRequest->tambol_name = $mainLabInfo['sub_district_add'] ?? '';
-                        $labCalRequest->postal_code = $mainLabInfo['postcode_add'] ?? '';
-                        $labCalRequest->soi = $mainLabInfo['address_soi_add'] ?? '';
-                        $labCalRequest->street = $mainLabInfo['address_street_add'] ?? '';
-                        $labCalRequest->no_eng = $mainLabInfo['lab_address_no_eng_add'] ?? '';
-                        $labCalRequest->moo_eng = $mainLabInfo['lab_moo_eng_add'] ?? '';
-                        $labCalRequest->soi_eng = $mainLabInfo['lab_soi_eng_add'] ?? '';
-                        $labCalRequest->street_eng = $mainLabInfo['lab_street_eng_add'] ?? '';
-                        $labCalRequest->province_name_eng = $mainLabInfo['lab_province_text_eng_add'] ?? '';
-                        $labCalRequest->amphur_name_eng = $mainLabInfo['lab_amphur_eng_add'] ?? '';
-                        $labCalRequest->tambol_name_eng = $mainLabInfo['lab_district_eng_add'] ?? '';
+                    //     $labCalRequest->app_certi_lab_id = $certilab->id;
+                    //     $labCalRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
+                    //     $labCalRequest->no = $mainLabInfo['address_number_add'] ?? '';
+                    //     $labCalRequest->moo = $mainLabInfo['address_moo_add'] ?? '';
+                    //     $labCalRequest->province_id = $mainLabInfo['address_city_add'] ?? '';
+                    //     $labCalRequest->province_name = $mainLabInfo['address_city_text_add'] ?? '';
+                    //     $labCalRequest->amphur_id = $mainLabInfo['amphur_id_add'] ?? '';
+                    //     $labCalRequest->amphur_name = $mainLabInfo['address_district_add'] ?? '';
+                    //     $labCalRequest->tambol_id = $mainLabInfo['tambol_id_add'] ?? '';
+                    //     $labCalRequest->tambol_name = $mainLabInfo['sub_district_add'] ?? '';
+                    //     $labCalRequest->postal_code = $mainLabInfo['postcode_add'] ?? '';
+                    //     $labCalRequest->soi = $mainLabInfo['address_soi_add'] ?? '';
+                    //     $labCalRequest->street = $mainLabInfo['address_street_add'] ?? '';
+                    //     $labCalRequest->no_eng = $mainLabInfo['lab_address_no_eng_add'] ?? '';
+                    //     $labCalRequest->moo_eng = $mainLabInfo['lab_moo_eng_add'] ?? '';
+                    //     $labCalRequest->soi_eng = $mainLabInfo['lab_soi_eng_add'] ?? '';
+                    //     $labCalRequest->street_eng = $mainLabInfo['lab_street_eng_add'] ?? '';
+                    //     $labCalRequest->province_name_eng = $mainLabInfo['lab_province_text_eng_add'] ?? '';
+                    //     $labCalRequest->amphur_name_eng = $mainLabInfo['lab_amphur_eng_add'] ?? '';
+                    //     $labCalRequest->tambol_name_eng = $mainLabInfo['lab_district_eng_add'] ?? '';
 
-                        $labCalRequest->save();
+                    //     $labCalRequest->save();
+                    // }
+                    // else if($certilab->lab_type == 3)
+                    // {
+                    //         $labTestRequest = new LabTestRequest();
+                    //         $labTestRequest->app_certi_lab_id = $certilab->id;
+                    //         $labTestRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
+                    //         $labTestRequest->no = $labMainAddress['address_number_add'] ?? '';
+                    //         $labTestRequest->moo = $labMainAddress['address_moo_add'] ?? '';
+                    //         $labTestRequest->province_id = $labMainAddress['address_city_add'] ?? '';
+                    //         $labTestRequest->province_name = $labMainAddress['address_city_text_add'] ?? '';
+                    //         $labTestRequest->amphur_id = $labMainAddress['amphur_id_add'] ?? '';
+                    //         $labTestRequest->amphur_name = $labMainAddress['address_district_add'] ?? '';
+                    //         $labTestRequest->tambol_id = $labMainAddress['tambol_id_add'] ?? '';
+                    //         $labTestRequest->tambol_name = $labMainAddress['sub_district_add'] ?? '';
+                    //         $labTestRequest->postal_code = $labMainAddress['postcode_add'] ?? '';
+                    //         $labTestRequest->soi = $labMainAddress['address_soi_add'] ?? '';
+                    //         $labTestRequest->street = $labMainAddress['address_street_add'] ?? '';
+                    //         $labTestRequest->no_eng = $labMainAddress['lab_address_no_eng_add'] ?? '';
+                    //         $labTestRequest->moo_eng = $labMainAddress['lab_moo_eng_add'] ?? '';
+                    //         $labTestRequest->soi_eng = $labMainAddress['lab_soi_eng_add'] ?? '';
+                    //         $labTestRequest->street_eng = $labMainAddress['lab_street_eng_add'] ?? '';
+                    //         $labTestRequest->province_name_eng = $labMainAddress['lab_province_text_eng_add'] ?? '';
+                    //         $labTestRequest->amphur_name_eng = $labMainAddress['lab_amphur_eng_add'] ?? '';
+                    //         $labTestRequest->tambol_name_eng = $labMainAddress['lab_district_eng_add'] ?? '';
+                    //         $labTestRequest->save();
+                    // }
+
+
+
+                    if($certilab->status != 0){
+                        $this->exportScopePdf($certilab->id,$labHtmlTemplate);
                     }
-                    else if($certilab->lab_type == 3)
-                    {
-                            $labTestRequest = new LabTestRequest();
-                            $labTestRequest->app_certi_lab_id = $certilab->id;
-                            $labTestRequest->type = 1; // หรือกำหนดค่าตามที่ต้องการ
-                            $labTestRequest->no = $labMainAddress['address_number_add'] ?? '';
-                            $labTestRequest->moo = $labMainAddress['address_moo_add'] ?? '';
-                            $labTestRequest->province_id = $labMainAddress['address_city_add'] ?? '';
-                            $labTestRequest->province_name = $labMainAddress['address_city_text_add'] ?? '';
-                            $labTestRequest->amphur_id = $labMainAddress['amphur_id_add'] ?? '';
-                            $labTestRequest->amphur_name = $labMainAddress['address_district_add'] ?? '';
-                            $labTestRequest->tambol_id = $labMainAddress['tambol_id_add'] ?? '';
-                            $labTestRequest->tambol_name = $labMainAddress['sub_district_add'] ?? '';
-                            $labTestRequest->postal_code = $labMainAddress['postcode_add'] ?? '';
-                            $labTestRequest->soi = $labMainAddress['address_soi_add'] ?? '';
-                            $labTestRequest->street = $labMainAddress['address_street_add'] ?? '';
-                            $labTestRequest->no_eng = $labMainAddress['lab_address_no_eng_add'] ?? '';
-                            $labTestRequest->moo_eng = $labMainAddress['lab_moo_eng_add'] ?? '';
-                            $labTestRequest->soi_eng = $labMainAddress['lab_soi_eng_add'] ?? '';
-                            $labTestRequest->street_eng = $labMainAddress['lab_street_eng_add'] ?? '';
-                            $labTestRequest->province_name_eng = $labMainAddress['lab_province_text_eng_add'] ?? '';
-                            $labTestRequest->amphur_name_eng = $labMainAddress['lab_amphur_eng_add'] ?? '';
-                            $labTestRequest->tambol_name_eng = $labMainAddress['lab_district_eng_add'] ?? '';
-                            $labTestRequest->save();
-                    }
-
-
-      
-                    $pdfService = new CreateLabScopePdf($certilab);
-                    $pdfContent = $pdfService->generatePdf();
+                    
+                    // $pdfService = new CreateLabScopePdf($certilab);
+                    // $pdfContent = $pdfService->generatePdf();
 
                     $babCalScopeUsageStatus = new LabCalScopeUsageStatus();
                     $babCalScopeUsageStatus->app_certi_lab_id = $certilab->id;
@@ -1863,16 +1802,21 @@ class ApplicantController extends Controller
                         //Save lab info
                         $this->SaveCertiLabInfo($request, $certi_lab);
 
+                         $branchCategories = [
+                            'branch_id' => $this->getCategories($request)
+                        ];
+
+
                         if($certi_lab->lab_type == 3){
                             //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
-                            $requestData['test_scope'] = $requestData['uniqueCalMainBranches'];
+                            $requestData['test_scope'] = $branchCategories;
                             // dd();
                             if(isset($requestData['test_scope'])){
                                 $this->save_certify_test_scope($certi_lab,$requestData);
                             }
                         }else if($certi_lab->lab_type == 4){
                             //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
-                            $requestData['calibrate'] = $requestData['uniqueCalMainBranches'];
+                            $requestData['calibrate'] =$branchCategories;
                             if(isset($requestData['calibrate'])){
                                 $this->save_certifyLab_calibrate($certi_lab,$requestData);
                             }
@@ -1927,65 +1871,86 @@ class ApplicantController extends Controller
                         $request_type = "cal";
                     }
 
-                    LabScopeTransaction::where('app_certi_lab_id', $certi_lab->id)->delete();
+                    // LabScopeTransaction::where('app_certi_lab_id', $certi_lab->id)->delete();
 
-                    $labScopeTransaction = new LabScopeTransaction();
-                    $labScopeTransaction->app_certi_lab_id = $certi_lab->id;
-                    $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'main';
-                    $labScopeTransaction->request_type = $request_type;
-                    $labScopeTransaction->address_number = $mainLabInfo['address_number_add'] ?? '';
-                    $labScopeTransaction->village_no = $mainLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
-                    $labScopeTransaction->address_city = $mainLabInfo['address_city_add'] ?? '';
-                    $labScopeTransaction->address_city_text = $mainLabInfo['address_city_text_add'] ?? '';
-                    $labScopeTransaction->address_district = $mainLabInfo['address_district_add'] ?? '';
-                    $labScopeTransaction->sub_district = $mainLabInfo['sub_district_add'] ?? '';
-                    $labScopeTransaction->postcode = $mainLabInfo['postcode_add'] ?? '';
-                    $labScopeTransaction->address_soi = $mainLabInfo['address_soi_add'] ?? '';
-                    $labScopeTransaction->address_street = $mainLabInfo['address_street_add'] ?? '';
-                    $labScopeTransaction->labress_no_eng = $mainLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
-                    $labScopeTransaction->lab_moo_eng = $mainLabInfo['lab_moo_eng_add'] ?? '';
-                    $labScopeTransaction->lab_soi_eng = $mainLabInfo['lab_soi_eng_add'] ?? '';
-                    $labScopeTransaction->lab_street_eng = $mainLabInfo['lab_street_eng_add'] ?? '';
-                    $labScopeTransaction->lab_province_text_eng = $mainLabInfo['lab_province_text_eng_add'] ?? '';
-                    $labScopeTransaction->lab_amphur_eng = $mainLabInfo['lab_amphur_eng_add'] ?? '';
-                    $labScopeTransaction->lab_district_eng = $mainLabInfo['lab_district_eng_add'] ?? '';
-                    $labScopeTransaction->lab_types = json_encode($mainLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
+                    // $labScopeTransaction = new LabScopeTransaction();
+                    // $labScopeTransaction->app_certi_lab_id = $certi_lab->id;
+                    // $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'main';
+                    // $labScopeTransaction->request_type = $request_type;
+                    // $labScopeTransaction->address_number = $mainLabInfo['address_number_add'] ?? '';
+                    // $labScopeTransaction->village_no = $mainLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
+                    // $labScopeTransaction->address_city = $mainLabInfo['address_city_add'] ?? '';
+                    // $labScopeTransaction->address_city_text = $mainLabInfo['address_city_text_add'] ?? '';
+                    // $labScopeTransaction->address_district = $mainLabInfo['address_district_add'] ?? '';
+                    // $labScopeTransaction->sub_district = $mainLabInfo['sub_district_add'] ?? '';
+                    // $labScopeTransaction->postcode = $mainLabInfo['postcode_add'] ?? '';
+                    // $labScopeTransaction->address_soi = $mainLabInfo['address_soi_add'] ?? '';
+                    // $labScopeTransaction->address_street = $mainLabInfo['address_street_add'] ?? '';
+                    // $labScopeTransaction->labress_no_eng = $mainLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
+                    // $labScopeTransaction->lab_moo_eng = $mainLabInfo['lab_moo_eng_add'] ?? '';
+                    // $labScopeTransaction->lab_soi_eng = $mainLabInfo['lab_soi_eng_add'] ?? '';
+                    // $labScopeTransaction->lab_street_eng = $mainLabInfo['lab_street_eng_add'] ?? '';
+                    // $labScopeTransaction->lab_province_text_eng = $mainLabInfo['lab_province_text_eng_add'] ?? '';
+                    // $labScopeTransaction->lab_amphur_eng = $mainLabInfo['lab_amphur_eng_add'] ?? '';
+                    // $labScopeTransaction->lab_district_eng = $mainLabInfo['lab_district_eng_add'] ?? '';
+                    // $labScopeTransaction->lab_types = json_encode($mainLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
 
-                    $labScopeTransaction->save();
+                    // $labScopeTransaction->save();
 
-                    foreach ($branchLabInfos as $branchId => $branchLabInfo) {
-                        $labScopeTransaction = new LabScopeTransaction();
-                        $labScopeTransaction->app_certi_lab_id = $certi_lab->id;
-                        $labScopeTransaction->request_type = $request_type;
-                        $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'branch';;
-                        $labScopeTransaction->branch_id = $branchId;
-                        $labScopeTransaction->address_number = $branchLabInfo['address_number_add'] ?? '';
-                        $labScopeTransaction->village_no = $branchLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
-                        $labScopeTransaction->address_city = $branchLabInfo['address_city_add'] ?? '';
-                        $labScopeTransaction->address_city_text = $branchLabInfo['address_city_text_add'] ?? '';
-                        $labScopeTransaction->address_district = $branchLabInfo['address_district_add'] ?? '';
-                        $labScopeTransaction->sub_district = $branchLabInfo['sub_district_add'] ?? '';
-                        $labScopeTransaction->postcode = $branchLabInfo['postcode_add'] ?? '';
-                        $labScopeTransaction->address_soi = $branchLabInfo['address_soi_add'] ?? '';
-                        $labScopeTransaction->address_street = $branchLabInfo['address_street_add'] ?? '';
-                        $labScopeTransaction->lab_address_no_eng = $branchLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
-                        $labScopeTransaction->lab_moo_eng = $branchLabInfo['lab_moo_eng_add'] ?? '';
-                        $labScopeTransaction->lab_soi_eng = $branchLabInfo['lab_soi_eng_add'] ?? '';
-                        $labScopeTransaction->lab_street_eng = $branchLabInfo['lab_street_eng_add'] ?? '';
-                        $labScopeTransaction->lab_province_text_eng = $branchLabInfo['lab_province_text_eng_add'] ?? '';
-                        $labScopeTransaction->lab_amphur_eng = $branchLabInfo['lab_amphur_eng_add'] ?? '';
-                        $labScopeTransaction->lab_district_eng = $branchLabInfo['lab_district_eng_add'] ?? '';
-                        $labScopeTransaction->lab_types = json_encode($branchLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
+                    // foreach ($branchLabInfos as $branchId => $branchLabInfo) {
+                    //     $labScopeTransaction = new LabScopeTransaction();
+                    //     $labScopeTransaction->app_certi_lab_id = $certi_lab->id;
+                    //     $labScopeTransaction->request_type = $request_type;
+                    //     $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'branch';;
+                    //     $labScopeTransaction->branch_id = $branchId;
+                    //     $labScopeTransaction->address_number = $branchLabInfo['address_number_add'] ?? '';
+                    //     $labScopeTransaction->village_no = $branchLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
+                    //     $labScopeTransaction->address_city = $branchLabInfo['address_city_add'] ?? '';
+                    //     $labScopeTransaction->address_city_text = $branchLabInfo['address_city_text_add'] ?? '';
+                    //     $labScopeTransaction->address_district = $branchLabInfo['address_district_add'] ?? '';
+                    //     $labScopeTransaction->sub_district = $branchLabInfo['sub_district_add'] ?? '';
+                    //     $labScopeTransaction->postcode = $branchLabInfo['postcode_add'] ?? '';
+                    //     $labScopeTransaction->address_soi = $branchLabInfo['address_soi_add'] ?? '';
+                    //     $labScopeTransaction->address_street = $branchLabInfo['address_street_add'] ?? '';
+                    //     $labScopeTransaction->lab_address_no_eng = $branchLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
+                    //     $labScopeTransaction->lab_moo_eng = $branchLabInfo['lab_moo_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_soi_eng = $branchLabInfo['lab_soi_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_street_eng = $branchLabInfo['lab_street_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_province_text_eng = $branchLabInfo['lab_province_text_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_amphur_eng = $branchLabInfo['lab_amphur_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_district_eng = $branchLabInfo['lab_district_eng_add'] ?? '';
+                    //     $labScopeTransaction->lab_types = json_encode($branchLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
     
-                        $labScopeTransaction->save();
-                    }
+                    //     $labScopeTransaction->save();
+                    // }
+
+                           $template_ability = "";
+                            if($request->lab_ability == 4){
+                                $template_ability = "calibrate";
+                            }else if($request->lab_ability == 3)
+                            {
+                                $template_ability = "test";
+                            }
+
    
+                     $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+                        ->where('according_formula',$request->according_formula)
+                        ->where('purpose',$request->purpose)
+                        ->where('lab_ability',$template_ability)
+                        ->first();
 
+                        // dd($request->lab_ability ,$request->according_formula, $request->purpose,$request->lab_ability, $labHtmlTemplate);
 
+                    // $this->exportScopePdf($certi_lab->id,$labHtmlTemplate);
 
+                    // dd($certi_lab->status);
 
-                    $pdfService = new CreateLabScopePdf($certi_lab);
-                    $pdfContent = $pdfService->generatePdf();
+                       if($certi_lab->status != 0){
+                        $this->exportScopePdf($certi_lab->id,$labHtmlTemplate);
+                    }
+
+                    // $pdfService = new CreateLabScopePdf($certi_lab);
+                    // $pdfContent = $pdfService->generatePdf();
 
       
 
@@ -2237,7 +2202,7 @@ class ApplicantController extends Controller
 
     public function editScope($token)
     {
-       
+
         $model = str_slug('applicant','-');
         $data_session     =    HP::CheckSession();
         if(!empty($data_session)){
@@ -2422,8 +2387,8 @@ class ApplicantController extends Controller
     public function updateScope(Request $request, $token)
     {
        
-          $mainLabInfo = json_decode($request->input('main_lab_info'), true);
-        $branchLabInfos = json_decode($request->input('branch_lab_infos'), true) ?? [];
+        //   $mainLabInfo = json_decode($request->input('main_lab_info'), true);
+        // $branchLabInfos = json_decode($request->input('branch_lab_infos'), true) ?? [];
 
         //  dd($mainLabInfo);
      
@@ -2441,78 +2406,37 @@ class ApplicantController extends Controller
                     ]);
                     $certi_lab = CertiLab::where('token',$token)->first();
 
+                    // dd($certi_lab);
+
                     if (!is_null($certi_lab)){
 
-                        if($certi_lab->require_scope_update != 1){
-                            return redirect('certify/applicant');
-                        }
+           
 
-
-
-                    $request_type = "";
+                    $template_ability = "";
                     if($certi_lab->lab_type == 3){
-                        $request_type = "test";
+                        $template_ability = "test";
                     }else if($certi_lab->lab_type == 4){
-                        $request_type = "cal";
+                        $template_ability = "calibrate";
                     }
 
-                    LabScopeTransaction::where('app_certi_lab_id', $certi_lab->id)->delete();
 
-                    $labScopeTransaction = new LabScopeTransaction();
-                    $labScopeTransaction->app_certi_lab_id = $certi_lab->id;
-                    $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'main';
-                    $labScopeTransaction->request_type = $request_type;
-                    $labScopeTransaction->address_number = $mainLabInfo['address_number_add'] ?? '';
-                    $labScopeTransaction->village_no = $mainLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
-                    $labScopeTransaction->address_city = $mainLabInfo['address_city_add'] ?? '';
-                    $labScopeTransaction->address_city_text = $mainLabInfo['address_city_text_add'] ?? '';
-                    $labScopeTransaction->address_district = $mainLabInfo['address_district_add'] ?? '';
-                    $labScopeTransaction->sub_district = $mainLabInfo['sub_district_add'] ?? '';
-                    $labScopeTransaction->postcode = $mainLabInfo['postcode_add'] ?? '';
-                    $labScopeTransaction->address_soi = $mainLabInfo['address_soi_add'] ?? '';
-                    $labScopeTransaction->address_street = $mainLabInfo['address_street_add'] ?? '';
-                    $labScopeTransaction->labress_no_eng = $mainLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
-                    $labScopeTransaction->lab_moo_eng = $mainLabInfo['lab_moo_eng_add'] ?? '';
-                    $labScopeTransaction->lab_soi_eng = $mainLabInfo['lab_soi_eng_add'] ?? '';
-                    $labScopeTransaction->lab_street_eng = $mainLabInfo['lab_street_eng_add'] ?? '';
-                    $labScopeTransaction->lab_province_text_eng = $mainLabInfo['lab_province_text_eng_add'] ?? '';
-                    $labScopeTransaction->lab_amphur_eng = $mainLabInfo['lab_amphur_eng_add'] ?? '';
-                    $labScopeTransaction->lab_district_eng = $mainLabInfo['lab_district_eng_add'] ?? '';
-                    $labScopeTransaction->lab_types = json_encode($mainLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
 
-                    $labScopeTransaction->save();
+                        $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+                        ->where('according_formula',$request->according_formula)
+                        ->where('purpose',$request->purpose)
+                        ->where('lab_ability',$template_ability)
+                        ->where('app_certi_lab_id',$certi_lab->id)
+                        ->first();
 
-                    foreach ($branchLabInfos as $branchId => $branchLabInfo) {
-                        $labScopeTransaction = new LabScopeTransaction();
-                        $labScopeTransaction->app_certi_lab_id = $certi_lab->id;
-                        $labScopeTransaction->request_type = $request_type;
-                        $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'branch';;
-                        $labScopeTransaction->branch_id = $branchId;
-                        $labScopeTransaction->address_number = $branchLabInfo['address_number_add'] ?? '';
-                        $labScopeTransaction->village_no = $branchLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
-                        $labScopeTransaction->address_city = $branchLabInfo['address_city_add'] ?? '';
-                        $labScopeTransaction->address_city_text = $branchLabInfo['address_city_text_add'] ?? '';
-                        $labScopeTransaction->address_district = $branchLabInfo['address_district_add'] ?? '';
-                        $labScopeTransaction->sub_district = $branchLabInfo['sub_district_add'] ?? '';
-                        $labScopeTransaction->postcode = $branchLabInfo['postcode_add'] ?? '';
-                        $labScopeTransaction->address_soi = $branchLabInfo['address_soi_add'] ?? '';
-                        $labScopeTransaction->address_street = $branchLabInfo['address_street_add'] ?? '';
-                        $labScopeTransaction->lab_address_no_eng = $branchLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
-                        $labScopeTransaction->lab_moo_eng = $branchLabInfo['lab_moo_eng_add'] ?? '';
-                        $labScopeTransaction->lab_soi_eng = $branchLabInfo['lab_soi_eng_add'] ?? '';
-                        $labScopeTransaction->lab_street_eng = $branchLabInfo['lab_street_eng_add'] ?? '';
-                        $labScopeTransaction->lab_province_text_eng = $branchLabInfo['lab_province_text_eng_add'] ?? '';
-                        $labScopeTransaction->lab_amphur_eng = $branchLabInfo['lab_amphur_eng_add'] ?? '';
-                        $labScopeTransaction->lab_district_eng = $branchLabInfo['lab_district_eng_add'] ?? '';
-                        $labScopeTransaction->lab_types = json_encode($branchLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
-    
-                        $labScopeTransaction->save();
-                    }
+                        // dd($labHtmlTemplate);
 
-                    // dd(LabScopeTransaction::where('app_certi_lab_id', $certi_lab->id)->first());
 
-                        $pdfService = new CreateLabScopePdf($certi_lab);
-                        $pdfContent = $pdfService->generatePdf();
+                    //   if($certilab->status != 0){
+                        $this->exportScopePdf($certi_lab->id,$labHtmlTemplate);
+                    // }
+
+                        // $pdfService = new CreateLabScopePdf($certi_lab);
+                        // $pdfContent = $pdfService->generatePdf();
 
                         $babCalScopeUsageStatus = new LabCalScopeUsageStatus();
                         $babCalScopeUsageStatus->app_certi_lab_id = $certi_lab->id;
@@ -2626,46 +2550,49 @@ class ApplicantController extends Controller
                         );
                     } 
 
-                    $config = HP::getConfig();
-                    $url  =   !empty($config->url_center) ? $config->url_center : url('');
-                    $data_app = [
-                                    'email'     => $certi_lab->email,
-                                    'certi_lab' =>$certi_lab,
-                                    'url' => $url.'certify/auditor/',
-                                    'email_cc'  =>  (count($certi_lab->DataEmailDirectorLABCC) > 0 ) ? $certi_lab->DataEmailDirectorLABCC : 'lab1@tisi.mail.go.th'
-                               ];
+                    $this->updateScopeEmail($certi_lab);
 
-                    $log_email =  HP::getInsertCertifyLogEmail( $certi_lab->app_no,
-                                                                $certi_lab->id,
-                                                                (new CertiLab)->getTable(),
-                                                                (new Notice)->getTable(),
-                                                                1,
-                                                                'แจ้งการแก้ไขขอบข่าย',
-                                                                view('mail.lab.mail_request_edit_lab_scope', $data_app),
-                                                                $certi_lab->created_by,
-                                                                $certi_lab->agent_id,
-                                                                null,
-                                                                $certi_lab->email,
-                                                                implode(',',(array)$certi_lab->DataEmailDirectorLAB),
-                                                                (count($certi_lab->DataEmailDirectorLABCC) > 0 ) ?   implode(',',(array)$certi_lab->DataEmailDirectorLABCC) : 'lab1@tisi.mail.go.th',
-                                                                null,
-                                                                null
-                                                             );
+                    // $config = HP::getConfig();
+                    // $url  =   !empty($config->url_center) ? $config->url_center : url('');
+                    // $data_app = [
+                    //                 'email'     => $certi_lab->email,
+                    //                 'certi_lab' =>$certi_lab,
+                    //                 'url' => $url.'certify/auditor/',
+                    //                 'email_cc'  =>  (count($certi_lab->DataEmailDirectorLABCC) > 0 ) ? $certi_lab->DataEmailDirectorLABCC : 'lab1@tisi.mail.go.th'
+                    //            ];
 
-
-                    $userIds = $app->CheckExaminers->pluck('user_id')->toArray(); 
-                    $examinerEmails = DB::table('user_register')
-                    ->whereIn('runrecno', $userIds)
-                    ->pluck('reg_email')
-                    ->toArray();
+                    // $log_email =  HP::getInsertCertifyLogEmail( $certi_lab->app_no,
+                    //                                             $certi_lab->id,
+                    //                                             (new CertiLab)->getTable(),
+                    //                                             (new Notice)->getTable(),
+                    //                                             1,
+                    //                                             'แจ้งการแก้ไขขอบข่าย',
+                    //                                             view('mail.lab.mail_request_edit_lab_scope', $data_app),
+                    //                                             $certi_lab->created_by,
+                    //                                             $certi_lab->agent_id,
+                    //                                             null,
+                    //                                             $certi_lab->email,
+                    //                                             implode(',',(array)$certi_lab->DataEmailDirectorLAB),
+                    //                                             (count($certi_lab->DataEmailDirectorLABCC) > 0 ) ?   implode(',',(array)$certi_lab->DataEmailDirectorLABCC) : 'lab1@tisi.mail.go.th',
+                    //                                             null,
+                    //                                             null
+                    //                                          );
 
 
-                        $html = new EditScopeRequest($data_app);
-                        $mail =    Mail::to($examinerEmails)->send($html);
+                    // $userIds = $app->CheckExaminers->pluck('user_id')->toArray(); 
+                    // $examinerEmails = DB::table('user_register')
+                    // ->whereIn('runrecno', $userIds)
+                    // ->pluck('reg_email')
+                    // ->toArray();
 
-                        if(is_null($mail) && !empty($log_email)){
-                            HP::getUpdateCertifyLogEmail($log_email->id);
-                        }
+
+                    //     $html = new EditScopeRequest($data_app);
+                    //     // $mail =    Mail::to($examinerEmails)->send($html);
+                    //     $mail =    Mail::to($certi_lab->DataEmailDirectorLAB)->send($html);
+
+                    //     if(is_null($mail) && !empty($log_email)){
+                    //         HP::getUpdateCertifyLogEmail($log_email->id);
+                    //     }
 
 
 
@@ -2683,6 +2610,43 @@ class ApplicantController extends Controller
         // }
 
     }
+
+    public function updateScopeEmail($certi_lab)
+    {
+        $config = HP::getConfig();
+        $url  =   !empty($config->url_center) ? $config->url_center : url('');
+        $data_app = [
+                        'email'     => $certi_lab->email,
+                        'certi_lab' =>$certi_lab,
+                        'url'       =>$url.'certify/check_certificate/'.$certi_lab->id.'/show',
+                        'email_cc'  =>  (count($certi_lab->DataEmailDirectorLABCC) > 0 ) ? $certi_lab->DataEmailDirectorLABCC : 'lab1@tisi.mail.go.th'
+                    ];
+
+        $log_email =  HP::getInsertCertifyLogEmail( $certi_lab->app_no,
+                                                    $certi_lab->id,
+                                                    (new CertiLab)->getTable(),
+                                                    $certi_lab->id,
+                                                    (new CertiLab)->getTable(),
+                                                    1,
+                                                    'แจ้งการแก้ไขขอบข่าย',
+                                                    view('mail.lab.mail_request_edit_lab_scope', $data_app),
+                                                    $certi_lab->created_by,
+                                                    $certi_lab->agent_id,
+                                                    null,
+                                                    $certi_lab->email,
+                                                    implode(',',(array)$certi_lab->DataEmailDirectorLAB),
+                                                    (count($certi_lab->DataEmailDirectorLABCC) > 0 ) ?   implode(',',(array)$certi_lab->DataEmailDirectorLABCC) : 'lab1@tisi.mail.go.th',
+                                                    null,
+                                                    null
+                                                    );
+            // dd($certi_lab->DataEmailDirectorLAB)                                        ;
+            $html = new EditScopeRequest($data_app);
+            $mail =    Mail::to($certi_lab->DataEmailDirectorLAB)->send($html);
+
+            if(is_null($mail) && !empty($log_email)){
+                HP::getUpdateCertifyLogEmail($log_email->id);
+            }
+}
 
 
     public function getAttachedFileFromRequest($appNo)
@@ -6488,5 +6452,347 @@ private function FormatAddressEn($request){
   {
     return view('certify.applicant.special-sign');
   }
+
+      public function scopeEditor(Request $request)
+    {
+
+        // Retrieve query parameters
+        $accordingFormula = $request->input('according_formula');
+        $labAbility = $request->input('lab_ability');
+        $purpose = $request->input('purpose');
+        $labName=  $request->input('lab_name');
+        $labNameEn=  $request->input('lab_name_en');
+
+        $templateType = "";
+
+        $date = $this->getLabCalibrationDate();
+
+        if($labAbility == "calibrate")
+        {
+                $templateType = "lab_cal";
+                $labCalDetails = [
+                'title' => [
+                    'th' => "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
+                    'en' => "Scope of Accreditation for Calibration"
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-LB0000",
+                'labName' => [
+                    'th' => $labName,
+                    'en' => $labNameEn
+                ],
+                'accreditationNo' => [
+                    'th' => "สอบเทียบ 0000",
+                    'en' => "Calibration 0000"
+                ],
+                'issueNo' => "01",
+                'validFrom' => [
+                        'th' => $date['validFrom']['th'],
+                        'en' => $date['validFrom']['en']
+                ],
+                'until' => [
+                    'th' => $date['until']['th'],
+                    'en' => $date['until']['en']
+                ],
+
+                'laboratory_status' => [
+                    'is_permanent' => true,
+                    'is_site' => false,
+                    'is_temporary' => false,
+                    'is_mobile' => false,
+                    'is_multisite' => false,
+                ],
+                'calibrationData' => [ 
+                    [
+                        'field' => ['th' => "", 'en' => ""],
+                        'parameter' => "",
+                        'capability' => "",
+                        'method' => ""
+                    ]
+                ]
+            ];
+        
+            return view('certify.applicant.scope-editor', [
+                'templateType' => $templateType,
+                'labCalDetails' => $labCalDetails,
+                'according_formula' => $accordingFormula,
+                'lab_ability' => $labAbility,
+                'purpose' => $purpose
+            ]);
+        }else if($labAbility == "test")
+        {
+            $templateType = "lab_test";
+
+            $labTestDetails = [
+                'title' => [
+                    'th' => "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
+                    'en' => "Scope of Accreditation for Testing" // เปลี่ยนเป็น Testing
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-LB0000",
+                'labName' => [
+                    'th' => "บริษัท เอ็นพีซีโซลูชั่นแอนด์เซอร์วิส จำกัด",
+                    'en' => "IRC Technologies Co.,Ltd."
+                ],
+                'accreditationNo' => [
+                    'th' => "ทดสอบ 0000", // หมายเลขการรับรองอาจจะต่างกัน
+                    'en' => "Testing 0000"
+                ],
+                'issueNo' => "01",
+                'validFrom' => [
+                        'th' => $date['validFrom']['th'],
+                        'en' => $date['validFrom']['en']
+                ],
+                'until' => [
+                    'th' => $date['until']['th'],
+                    'en' => $date['until']['en']
+                ],
+                'laboratory_status' => [
+                    'is_permanent' => true,
+                    'is_site' => false,
+                    'is_temporary' => false,
+                    'is_mobile' => false,
+                    'is_multisite' => false,
+                ],
+                'testLabData' => [
+                    [
+                        'field' => ['th' => "", 'en' => ""],
+                        'parameter' => "",
+                        'method' => ""
+                    ]
+                ]
+            ];
+
+             return view('certify.applicant.scope-editor', [
+                'templateType' => $templateType,
+                'labTestDetails' => $labTestDetails,
+                 'according_formula' => $accordingFormula,
+                'lab_ability' => $labAbility,
+                'purpose' => $purpose
+            ]);
+
+        }
+
+ 
+    }
+
+
+    // เมธอดใหม่สำหรับบันทึก HTML template
+    public function saveHtmlTemplate(Request $request)
+    {
+        // $labCalItems = $request->input('labCalItems'); 
+        $labtems = ""; 
+        $user =auth()->user();
+        $htmlPages = $request->input('html_pages');
+        $templateType = $request->input('template_type');
+        $accordingFormula = $request->input('accordingFormula');
+        $labAbility = $request->input('labAbility');
+        $purpose = $request->input('purpose');
+
+        $labtems = $request->input('labItems'); 
+
+        if (!is_array($htmlPages) || empty($htmlPages)) {
+            return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+        }
+
+        if (empty($templateType)) {
+            return response()->json(['message' => 'Template type is missing.'], 400);
+        }
+
+        try {
+            LabHtmlTemplate::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'according_formula' => $accordingFormula,
+                    'lab_ability' => $labAbility,
+                    'purpose' => $purpose,
+                    'template_type' => $templateType,
+                ],
+                [
+                    'html_pages' => json_encode($htmlPages),
+                    'json_data' => json_encode($labtems)
+                ]
+            );
+
+
+            return response()->json(['message' => 'Template saved successfully!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error saving template: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadHtmlTemplate(Request $request)
+    {
+
+        try {
+
+            $user = auth()->user();
+            $htmlTemplate = LabHtmlTemplate::where('user_id',$user->id)
+            ->where('according_formula',$request->accordingFormula)
+            ->where('purpose',$request->purpose)
+            ->where('lab_ability',$request->labAbility)
+            ->first();
+
+            if (!$htmlTemplate) {
+                return response()->json(['message' => 'Template not found for the given type.'], 404);
+            }
+
+            // Decode the JSON string back into an array
+            $htmlPages = json_decode($htmlTemplate->html_pages, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['message' => 'Error decoding HTML pages from database.'], 500);
+            }
+
+            return response()->json([
+                'message' => 'Template loaded successfully!',
+                'html_pages' => $htmlPages,
+                'template_type' => $htmlTemplate->template_type,
+                'htmlTemplate' => $htmlTemplate
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error loading template: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+ public function exportScopePdf($id,$labHtmlTemplate)
+    {
+        $htmlPages = json_decode($labHtmlTemplate->html_pages);
+
+        if (!is_array($htmlPages)) {
+          
+            return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+        }
+        // กรองหน้าเปล่าออก (โค้ดเดิมที่เพิ่มไป)
+        $filteredHtmlPages = [];
+        foreach ($htmlPages as $pageHtml) {
+            $trimmedPageHtml = trim(strip_tags($pageHtml, '<img>'));
+            if (!empty($trimmedPageHtml)) {
+                $filteredHtmlPages[] = $pageHtml;
+            }
+        }
+  
+        if (empty($filteredHtmlPages)) {
+            return response()->json(['message' => 'No valid HTML content to export after filtering empty pages.'], 400);
+        }
+        $htmlPages = $filteredHtmlPages;
+
+        $type = 'I';
+        $fontDirs = [public_path('pdf_fonts/')];
+
+        $fontData = [
+            'thsarabunnew' => [
+                'R' => "THSarabunNew.ttf",
+                'B' => "THSarabunNew-Bold.ttf",
+                'I' => "THSarabunNew-Italic.ttf",
+                'BI' => "THSarabunNew-BoldItalic.ttf",
+            ],
+            'dejavusans' => [
+                'R' => "DejaVuSans.ttf",
+                'B' => "DejaVuSans-Bold.ttf",
+                'I' => "DejaVuSerif-Italic.ttf",
+                'BI' => "DejaVuSerif-BoldItalic.ttf",
+            ],
+        ];
+
+        $mpdf = new Mpdf([
+            'PDFA'              => $type == 'F' ? true : false,
+            'PDFAauto'          => $type == 'F' ? true : false,
+            'format'            => 'A4',
+            'mode'              => 'utf-8',
+            'default_font_size' => 15,
+            'fontDir'           => array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], $fontDirs),
+            'fontdata'          => array_merge((new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'], $fontData),
+            'default_font'      => 'thsarabunnew',
+            'fontdata_fallback' => ['dejavusans', 'freesans', 'arial'],
+            'margin_left'       => 13,
+            'margin_right'      => 13,
+            'margin_top'        => 10,
+            'margin_bottom'     => 0,
+            // 'tempDir'           => sys_get_temp_dir(),
+        ]);
+
+    
+        // Log::info('MPDF Temp Dir: ' . $tempDirPath);
+
+        $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
+        $mpdf->WriteHTML($stylesheet, 1);
+
+        $mpdf->SetWatermarkImage(public_path('images/nc_hq.png'), 1, [23, 23], [170, 12]);
+        $mpdf->showWatermarkImage = true;
+
+        // --- เพิ่ม Watermark Text "DRAFT" ตรงนี้ ---
+        $mpdf->SetWatermarkText('DRAFT');
+        $mpdf->showWatermarkText = true; // เปิดใช้งาน watermark text
+        $mpdf->watermark_font = 'thsarabunnew'; // กำหนด font (ควรใช้ font ที่โหลดไว้แล้ว)
+        $mpdf->watermarkTextAlpha = 0.1;
+$footerHtml = '
+<div width="100%" style="display:inline;line-height:12px">
+
+    <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+      <span style="font-size:20px;">กระทรวงอุตสาหกรรม สํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span><br>
+      <span style="font-size: 16px">(Ministry of Industry, Thai Industrial Standards Institute)</span>
+    </div>
+
+    <div style="display: inline-block; width: 15%;float:right;width:25%">
+  
+    </div>
+
+    <div width="100%" style="display:inline;text-align:center">
+      <span>หน้าที่ {PAGENO}/{nbpg}</span>
+    </div>
+</div>';
+
+// แล้วนำไปกำหนดให้ mPDF เป็น Footer
+$mpdf->SetHTMLFooter($footerHtml);
+
+        foreach ($htmlPages as $index => $pageHtml) {
+            if ($index > 0) {
+                $mpdf->AddPage();
+            }
+            $mpdf->WriteHTML($pageHtml,HTMLParserMode::HTML_BODY);
+        }
+
+    //  $mpdf->Output('', 'S');
+    //  $title = "mypdf.pdf";
+    //  $mpdf->Output($title, "I");  
+
+      $app_certi_lab = CertiLab::find($id);
+      $no = str_replace("RQ-", "", $app_certi_lab->app_no);
+      $no = str_replace("-", "_", $no);
+  
+      $attachPath = '/files/applicants/check_files/' . $no . '/';
+      $fullFileName = uniqid() . '_' . now()->format('Ymd_His') . '.pdf';
+  
+      // สร้างไฟล์ชั่วคราว
+      $tempFilePath = tempnam(sys_get_temp_dir(), 'pdf_') . '.pdf';
+  
+      // บันทึก PDF ไปยังไฟล์ชั่วคราว
+      $mpdf->Output($tempFilePath, \Mpdf\Output\Destination::FILE);
+  
+      // ใช้ Storage::putFileAs เพื่อย้ายไฟล์
+      Storage::putFileAs($attachPath, new \Illuminate\Http\File($tempFilePath), $fullFileName);
+  
+      $storePath = $no  . '/' . $fullFileName;
+        $fileSection = "61";
+        if($app_certi_lab->lab_type == 3){
+           $fileSection = "61";
+        }else if($app_certi_lab->lab_type == 4){
+           $fileSection = "62";
+        }
+    //   dd($fileSection);
+      $certi_lab_attach = new CertiLabAttachAll();
+      $certi_lab_attach->app_certi_lab_id = $id;
+      $certi_lab_attach->file_section     = $fileSection;
+      $certi_lab_attach->file             = $storePath;
+      $certi_lab_attach->file_client_name = $no . '_scope_'.now()->format('Ymd_His').'.pdf';
+      $certi_lab_attach->token            = str_random(16);
+      $certi_lab_attach->default_disk = config('filesystems.default');
+      $certi_lab_attach->save();
+
+
+    }
+
+
 
 }

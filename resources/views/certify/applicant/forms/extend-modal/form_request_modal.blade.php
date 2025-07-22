@@ -1144,32 +1144,6 @@
                     
                     <div class="row" id="test_infomation_scope">
                         <hr>
-                        {{-- <div class="col-md-12 form-group" >
-                            <label for="test_parameter_desc">คำอธิบายพารามิเตอร์(ถ้ามี)</label>
-                            <input type="text" class="form-control" id="test_parameter_desc" >
-                        </div> --}}
-
-                         {{-- <table class="table table-bordered" id="test_parameter_table">
-                            <thead class="bg-primary">
-                                <tr>
-                                    <th class="text-center text-white "  width="30%">คำอธิบาย</th>
-                                    <th class="text-center text-white "  width="30%">รายละเอียด</th>
-                                    <th class="text-center text-white "  width="10%">ลบ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="test_parameter_body">
-                        
-                           
-                            </tbody>
-                        </table> --}}
-
-                         {{-- <div class="col-md-12 form-group">
-                            <button type="button" class="btn btn-success pull-right ml-2" id="button_add_test_param">
-                                <span aria-hidden="true">เพิ่มรายละเอียดพารามิเตอร์</span>
-                            </button>
-                           
-                        </div> --}}
-                        {{-- <div class="row" > --}}
                             <div class="col-md-12 form-group" >
                                 <label for="description">คำอธิบาย / เงื่อนไขการวัด (ถ้ามี)</label>
                                 <textarea class="form-control" rows="3" id="test_condition_description"></textarea>
@@ -1178,48 +1152,14 @@
                             <div class="col-md-12 form-group" >
                                 <label for="exampleInputPassword1">
                                     รายละเอียดพารามิเตอร์
-                                    {{-- <label for="">
-                                        <button type="button" class="btn btn-primary btn-xs" id="show_modal_add_parameter_symbol">
-                                            <i class="fa fa-plus"></i> สัญลักษณ์
-                                        </button>
-                                    </label> --}}
                                 </label>
                                 <textarea class="form-control" rows="5" id="test_param_detail_textarea"></textarea>
                             </div>
-                        {{-- </div> --}}
                         <div class="col-md-12 form-group" >
-                            {{-- <button type="button" class="btn btn-primary pull-right" data-toggle="modal" data-target="#modal-add-test-standard-symbol">
-                                สัญลักษณ์พิเศษ
-                            </button> --}}
                             <label for="test_standard_txtarea">วิธีทดสอบ / มาตรฐานที่ใช้</label>
                             <textarea class="form-control" rows="5" id="test_standard_txtarea"></textarea>
                         </div>
-                    </div>
-                    {{-- <div class="row mt-2"> --}}
-                       
-                        {{-- <div class="col-md-12 form-group">
-                        
-                        </div> --}}
-                        {{-- <table class="table table-bordered" id="myTable_lab_cal_scope">
-                            <thead class="bg-primary">
-                                <tr>
-                                    <th class="text-center text-white "  width="15%">สาขาทดสอบ</th>
-                                    <th class="text-center text-white "  width="15%">เครื่องมือ1</th>
-                                    <th class="text-center text-white "  width="15%">เครื่องมือ2</th>
-                                    <th class="text-center text-white "  width="15%">พารามิเตอร์1</th>
-                                    <th class="text-center text-white "  width="15%">พารามิเตอร์2</th>
-                                    <th class="text-center text-white "  width="20%">วิธีสอบเทียบ</th>
-                                    <th class="text-center text-white "  width="5%">ลบ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="lab_cal_scope_body">
-                        
-                           
-                            </tbody>
-                        </table> --}}
-                    {{-- </div> --}}
-                
-             
+                    </div>          
                 </fieldset>
               
             </div>

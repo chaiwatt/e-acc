@@ -64,8 +64,11 @@
                         'files' => true
                     ]) !!}
 
-
                         
+
+
+                        {{-- <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">แก้ไขขอบข่าย</a>  --}}
+
                         @include ('certify.applicant.form-edit-scope',
                         ['scope_edit' => true])
 
@@ -93,7 +96,54 @@
     <script src="{{ asset('js/jasny-bootstrap.js') }}"></script>
     <script>
 
+        const certi_lab = @json($certi_lab ?? null);
+
         $(document).ready(function () {
+
+        
+            $('#scope-editor').on('click', function(e) {
+                    e.preventDefault();
+
+                    var accordingFormula = certi_lab.standard_id;
+                    var purpose = certi_lab.purpose_type;
+                    var labAbility = "";
+                    var labName = certi_lab.lab_name;
+                    var labNameEn = certi_lab.lab_name_en;
+
+                    if(certi_lab.lab_type == 4){
+                        labAbility = "calibrate"
+                    }else if(certi_lab.lab_type == 3)
+                    {
+                         labAbility = "test"
+                    }
+// console.log(certi_lab)
+                    console.log(accordingFormula,purpose,certi_lab.lab_type,labAbility,labName,labNameEn);
+
+                    // return;
+                    
+                    // Get the values from the form inputs
+                    // var accordingFormula = $('#according_formula').val();
+                    var labAbility = $('input[name="lab_ability"]:checked').val();
+                    var purpose = $('input[name="purpose"]:checked').val();
+                    var labName = $('#lab_name').val();
+                    var labNameEn = $('#lab_name_en').val();
+                    
+                    // Check if any value is undefined or empty
+                    // if (!accordingFormula || !labAbility || !purpose || !labName || !labNameEn) {
+                    //     alert('กรุณากรอกข้อมูลให้ครบถ้วน: ตามมาตรฐานเลข, ความสามารถห้องปฏิบัติการ, วัตถุประสงค์, ชื่อห้องปฏิบัติการ (TH), และชื่อห้องปฏิบัติการ (EN)');
+                    //     return;
+                    // }
+                    
+                    // Build the URL with query parameters
+                    var url = $(this).attr('href') + '?according_formula=' + encodeURIComponent(accordingFormula) +
+                            '&lab_ability=' + encodeURIComponent(labAbility) +
+                            '&purpose=' + encodeURIComponent(purpose) +
+                            '&lab_name=' + encodeURIComponent(labName) +
+                            '&lab_name_en=' + encodeURIComponent(labNameEn);
+                    
+                    // Open the URL in a new tab
+                    window.open(url, '_blank');
+            });
 
             @if(\Session::has('flash_message'))
             $.toast({

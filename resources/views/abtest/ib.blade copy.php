@@ -7,7 +7,6 @@
       <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    {{-- <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet"> --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
 
@@ -165,9 +164,9 @@
 
         .page {
             background-color: white;
-            height: 30.5cm;
-            padding: 1cm;
-            margin-bottom: 1cm;
+            height: 29.5cm;
+            padding: 1cm 1cm 0 1cm;
+            margin-bottom: 0.5cm;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
             line-height: 1.1;
@@ -182,7 +181,7 @@
         }
 
         .page:empty::before {
-            content: "พิมพ์ที่นี่...";
+            /* content: "พิมพ์ที่นี่..."; */
             color: #aaa;
             pointer-events: none;
         }
@@ -191,19 +190,26 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 1em 0;
+            margin: 0.5em 0;
             table-layout: fixed; /* This is key to prevent tables from expanding. */
         }
 
         table.borderless {
             width: 100%;
             border-collapse: collapse;
-            margin: 1em 0;
+            /* margin: 1em 0; */
         }
         
-        td, th {
+        th {
             border: 0.1px solid #050505;
-            padding: 8px;
+            padding: 0px;
+            vertical-align: top;
+            word-wrap: break-word; /* Ensures text wraps within the cell. */
+        }
+
+        td {
+            border: 0.1px solid #050505;
+            padding: 5px;
             vertical-align: top;
             word-wrap: break-word; /* Ensures text wraps within the cell. */
         }
@@ -271,8 +277,10 @@
             padding: 20px 30px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            width: 300px;
+            width: 450px; /* Increased width for more complex modals */
             font-size: 22px;
+            max-height: 90vh; /* Added for scrollability */
+            overflow-y: auto;   /* Added for scrollability */
         }
         
         .modal-content h3 {
@@ -291,14 +299,31 @@
             color: #555;
         }
         
-        .modal-input-group input[type="number"] {
+        .modal-input-group input[type="number"],
+        .modal-input-group input[type="text"] {
             width: 100%;
             padding: 8px;
             box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 4px;
+            font-size: 18px; /* Added for better readability */
+            font-family: inherit; /* Ensure consistent font */
         }
         
+        /* NEW: Styling for contenteditable div in modal */
+        .modal-content .editable-div {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            min-height: 100px;
+            background-color: #fff;
+            line-height: 1.4;
+            cursor: text;
+        }
+
         .modal-buttons {
             display: flex;
             justify-content: flex-end;
@@ -338,16 +363,43 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             z-index: 3000;
             display: none;
+            padding: 4px 0; /* Added padding */
         }
 
         .context-menu-item {
-            padding: 4px 16px;
+            padding: 1px 16px;
             cursor: pointer;
-            font-size: 22px;
+            font-size: 20px;
+            white-space: nowrap; /* Prevent wrapping */
         }
 
         .context-menu-item:hover {
             background-color: #f0f0f0;
+        }
+        .context-menu-separator {
+            height: 1px;
+            background-color: #e0e0e0;
+            margin: 4px 0;
+        }
+
+     
+
+        /* Input field styling */
+        .ib-modal input[type="text"],
+        .ib-modal .editable-div,
+        .cb-modal .editable-div {
+            width: 250px ;
+            font-family: 'thsarabunnew', sans-serif;
+            font-size: 22px;
+            box-sizing: border-box;
+        }
+        
+        .cb-modal .code {
+            width: 200px;
+        }
+
+        .cb-modal .detail {
+            width: 540px;
         }
     </style>
 </head>
@@ -393,15 +445,19 @@
         <div class="dropdown">
             <button class="menu-button" id="template-dropdown-button" title="แทรกเทมเพลต"><i class="fas fa-file-alt"></i></button>
             <div class="dropdown-content">
-                <a href="#" data-template="cb-template" >CB template</a>
-                <a href="#" data-template="ib-template" >IB template</a>
-                <a href="#" data-template="ib-en-template" >IB EN template</a>
-                <a href="#" data-template="lab-cal-template" >Cal Lab template</a>
-                <a href="#" data-template="lab-test-template" >Test Lab template</a>
+                @if ($templateType == "cb")
+                       <a href="#" data-template="cb-template" >CB template</a>
+                @elseif($templateType == "ib")
+                        <a href="#" data-template="ib-template" >IB template</a>
+                @endif
             </div>
         </div>
         
         <button class="menu-button" id="export-pdf-button" title="ส่งออกเป็น PDF"><i class="fas fa-file-pdf"></i></button>
+        <button class="menu-button" id="save-template-button"><i class="fas fa-save"></i></button>
+        <button class="menu-button" id="load-template-button"><i class="fa fa-cloud-download" aria-hidden="true"></i></button>
+
+        
     </div>
 
     <input type="file" id="image-input" accept="image/*" style="display: none;">
@@ -412,6 +468,7 @@
         </div>
     </div>
 
+    <!-- Table Creation Modal -->
     <div id="table-modal-overlay" class="modal-overlay">
         <div class="modal-content">
             <h3>แทรกตาราง</h3>
@@ -429,19 +486,96 @@
             </div>
             <div class="modal-buttons">
                 <button id="insert-table-btn" class="modal-btn-confirm">แทรก</button>
-                <button id="cancel-table-btn" class="modal-btn-cancel">ยกเลิก</button>
+                <button class="modal-btn-cancel">ยกเลิก</button>
             </div>
         </div>
     </div>
 
+    <!-- NEW: Modals for Adding Template Items -->
+    <!-- === START: REVISED CB Item Modal === -->
+    <div id="cb-item-modal" class="modal-overlay cb-modal">
+        <div class="modal-content" style="width: 750px">
+            <h3>เพิ่มรายการ (CB)</h3>
+            
+
+            <div class="modal-input-group" style="display: flex; gap: 20px;">
+                <div style="flex: 1;">
+                    <label for="cb-code-editor">รหัส:</label>
+                    <div id="cb-code-editor" class="editable-div code" contenteditable="true"></div>
+                </div>
+                <div style="flex: 1;">
+                    <label for="cb-description-editor">รายละเอียด:</label>
+                    <div id="cb-description-editor" class="editable-div detail" contenteditable="true"></div>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button id="add-cb-item-btn" class="modal-btn-confirm">เพิ่ม</button>
+                <button class="modal-btn-cancel">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+    <!-- === END: REVISED CB Item Modal === -->
+
+    <!-- === START: REVISED IB Item Modal === -->
+    <div id="ib-item-modal" class="modal-overlay ib-modal">
+        <div class="modal-content" style="width: 540px">
+            <h3>เพิ่มรายการ (IB)</h3>
+            
+            <div class="modal-input-group" style="display: flex; gap: 20px;">
+                <div style="flex: 1;">
+                    <label for="ib-main-branch">สาขาการตรวจหลัก:</label>
+                    <input type="text" id="ib-main-branch">
+                </div>
+                <div style="flex: 1;">
+                    <label for="ib-sub-branch">สาขาการตรวจย่อย:</label>
+                    <div id="ib-sub-branch" class="editable-div" contenteditable="true"></div>
+                </div>
+            </div>
+
+            <div class="modal-input-group" style="display: flex; gap: 20px;">
+                <div style="flex: 1;">
+                    <label for="ib-main-scope">ขอบข่ายหลัก:</label>
+                    <div id="ib-main-scope" class="editable-div" contenteditable="true"></div>
+                </div>
+                <div style="flex: 1;">
+                    <label for="ib-sub-scope">ขอบข่ายย่อย:</label>
+                    <div id="ib-sub-scope" class="editable-div" contenteditable="true"></div>
+                </div>
+            </div>
+
+            <div class="modal-input-group">
+                <label for="ib-requirements-editor">ข้อกำหนดที่ใช้:</label>
+                <div id="ib-requirements-editor" class="editable-div" contenteditable="true"></div>
+            </div>
+
+            <div class="modal-buttons">
+                <button id="add-ib-item-btn" class="modal-btn-confirm">เพิ่ม</button>
+                <button class="modal-btn-cancel">ยกเลิก</button>
+            </div>
+        </div>
+    </div>
+    <!-- === END: REVISED IB Item Modal === -->
+
+
+
+    <!-- === START: MODIFICATION === -->
     <div id="context-menu">
-        <div class="context-menu-item" data-action="insert-row-above">แทรกแถวด้านบน</div>
-        <div class="context-menu-item" data-action="insert-row-below">แทรกแถวด้านล่าง</div>
+        <div class="context-menu-item" data-action="add-item">เพิ่มรายการ</div>
+        <div class="context-menu-separator" data-action="separator-add"></div>
+        <div class="context-menu-item" data-action="insert-row-above">แทรกแถวด้านบน <span style="float: right; color: #888; margin-left: 20px;">Shift+F1</span></div>
+        <div class="context-menu-item" data-action="insert-row-above-no-border">แทรกแถวด้านบน (ไม่มีขอบ) <span style="float: right; color: #888; margin-left: 20px;">Shift+F2</span></div>
+        <div class="context-menu-item" data-action="insert-row-below">แทรกแถวด้านล่าง <span style="float: right; color: #888; margin-left: 20px;">Shift+F4</span></div>
+        <div class="context-menu-item" data-action="insert-row-below-no-border">แทรกแถวด้านล่าง (ไม่มีขอบ) <span style="float: right; color: #888; margin-left: 20px;">Shift+F5</span></div>
         <div class="context-menu-item" data-action="insert-column-left">แทรกคอลัมน์ด้านซ้าย</div>
         <div class="context-menu-item" data-action="insert-column-right">แทรกคอลัมน์ด้านขวา</div>
+        <div class="context-menu-separator"></div>
         <div class="context-menu-item" data-action="delete-row">ลบแถว</div>
         <div class="context-menu-item" data-action="delete-column">ลบคอลัมน์</div>
+        <div class="context-menu-separator" data-action="separator-merge"></div>
+        <div class="context-menu-item" data-action="merge-columns">รวมคอลัมน์</div>
     </div>
+    <!-- === END: MODIFICATION === -->
 
     <script>
         document.execCommand('styleWithCSS', false, true);
@@ -451,7 +585,6 @@
         const menubar = document.getElementById('menubar');
         const tableModalOverlay = document.getElementById('table-modal-overlay');
         const insertTableBtn = document.getElementById('insert-table-btn');
-        const cancelTableBtn = document.getElementById('cancel-table-btn');
         const tableRowsInput = document.getElementById('table-rows');
         const tableColsInput = document.getElementById('table-cols');
         const tableBorderToggle = document.getElementById('table-border-toggle');
@@ -461,16 +594,151 @@
         const templateDropdownContent = document.querySelector('.dropdown-content');
         const exportPdfButton = document.getElementById('export-pdf-button');
         const fontSizeSelector = document.getElementById('font-size-selector');
+        const saveTemplateButton = document.getElementById('save-template-button'); 
+        const loadTemplateButton = document.getElementById('load-template-button');
 
-        let savedRange = null;
+        // --- NEW: Template Item Modals ---
+        const cbItemModal = document.getElementById('cb-item-modal');
+        const ibItemModal = document.getElementById('ib-item-modal');
+   
+
+        // 1. รับข้อมูลจาก Blade ที่ PHP ส่งมา
+        const templateType = "{{ $templateType ?? '' }}"; 
+
+        const cbDetailsFromBlade = @json($cbDetails ?? null);
+        const ibDetailsFromBlade = @json($ibDetails ?? null);
+
+                                                                
+        let savedRange = null; // Used for image insertion
         let contextMenuTarget = null;
+        let contextMenuTargetRow = null; // To store the target TR element for immediate context menu actions
+        let selectedTableCellsForMerge = []; // Holds cells selected for merging
+        let activeModalTargetRow = null; // **NEW**: Persists the target row for modal operations
 
-        // --- Paste as Plain Text Handler ---
+        // --- Global Paste Handler for Main Editor ---
+        // This listener is attached to the main editor container (#document-editor).
+        // It catches all paste events within any ".page" element.
+        // Its purpose is to strip all formatting and paste as plain text.
         editor.addEventListener('paste', (event) => {
+            // Prevent the default paste action which might include rich text formatting.
             event.preventDefault();
+
+            // Get the pasted content as plain text from the clipboard.
             const text = (event.clipboardData || window.clipboardData).getData('text/plain');
+
+            // Insert the plain text at the current cursor position.
             document.execCommand('insertText', false, text);
         });
+        
+        // --- LineExtractor Class ---
+
+        class LineExtractor {
+            constructor(elementId) {
+                this.editableDiv = document.getElementById(elementId);
+                this.init();
+            }
+
+            init() {
+                if (!this.editableDiv) {
+                    console.error('Element not found:', this.elementId);
+                    return;
+                }
+
+                // --- Specific Paste Handler for Modal's Div ---
+                // This listener ONLY applies to the div managed by this class instance
+
+                // Its purpose is to paste as plain text BUT apply specific styles.
+                this.editableDiv.addEventListener('paste', (event) => {
+                    // Prevent the default paste action
+                    event.preventDefault();
+                    console.log("Paste event fired in modal's editableDiv!");
+                    
+                    // Get pasted text as plain text
+                    const text = (event.clipboardData || window.clipboardData).getData('text/plain');
+
+                    // Insert the plain text. The browser will handle wrapping it in the current context.
+                    // For a contenteditable div, this is usually sufficient.
+                    document.execCommand('insertText', false, text);
+                });
+            }
+
+            getLines() {
+                if (!this.editableDiv) return [];
+                
+                const tempDiv = document.createElement('div');
+                const computedStyle = window.getComputedStyle(this.editableDiv);
+                
+                tempDiv.style.width = computedStyle.width;
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.visibility = 'hidden';
+                tempDiv.style.whiteSpace = 'pre-wrap';
+                tempDiv.style.overflowWrap = 'break-word';
+                tempDiv.style.fontFamily = computedStyle.fontFamily;
+                tempDiv.style.fontSize = computedStyle.fontSize;
+                tempDiv.style.lineHeight = computedStyle.lineHeight;
+                tempDiv.style.padding = computedStyle.padding;
+                tempDiv.style.border = computedStyle.border;
+                tempDiv.style.boxSizing = computedStyle.boxSizing;
+
+                // Use innerText to respect user-entered newlines
+                let text = this.editableDiv.innerText;
+                document.body.appendChild(tempDiv);
+            
+                const lines = [];
+                const range = document.createRange();
+                let lastTop = null;
+            
+                // Split text by newlines first to handle manual line breaks
+                const textLines = text.split('\n');
+            
+                for (let line of textLines) {
+                    if (line.trim() === '') {
+                        // Add empty lines from newlines
+                        lines.push('');
+                        continue;
+                    }
+            
+                    // Put the text of this line into tempDiv to check for wrapping
+                    tempDiv.textContent = line;
+            
+                    let subCurrentLine = '';
+                    let tempNode = tempDiv.firstChild;
+                    if (!tempNode || tempNode.nodeType !== Node.TEXT_NODE) {
+                         if (line) lines.push(line);
+                         continue;
+                    }
+
+                    for (let i = 0; i < line.length; i++) {
+                        range.setStart(tempNode, i);
+                        range.setEnd(tempNode, i + 1);
+                        const rects = range.getClientRects();
+                        
+                        if (rects.length > 0) {
+                            const rect = rects[0];
+                            // If the top position changes, it's a new line
+                            if (lastTop !== null && rect.top > lastTop) {
+                                lines.push(subCurrentLine.trim());
+                                subCurrentLine = line[i];
+                            } else {
+                                subCurrentLine += line[i];
+                            }
+                            lastTop = rect.top;
+                        }
+            
+                        // Push the last part of the line
+                        if (i === line.length - 1) {
+                            lines.push(subCurrentLine.trim());
+                        }
+                    }
+                    lastTop = null; // Reset for the next line from text.split('\n')
+                }
+            
+                document.body.removeChild(tempDiv);
+            
+                return lines;
+            }
+        }
+
 
         // --- Core Styling Functions ---
         const applyStyleToSelectedSpans = (styleCallback) => {
@@ -534,6 +802,7 @@
             } else if (command === 'insertTable') {
                 insertTable();
             } else if (command === 'insertImage') {
+                // Save range for image insertion
                 const selection = window.getSelection();
                 if (selection.rangeCount > 0) {
                     savedRange = selection.getRangeAt(0).cloneRange();
@@ -570,18 +839,11 @@
             const templateItem = event.target.closest('a[data-template]');
             if (templateItem) {
                 event.preventDefault();
-                const templateType = templateItem.dataset.template;
-                if (templateType === 'cb-template') {
+                const templateId = templateItem.dataset.template;
+                if (templateId === 'cb-template') {
                     insertCbTemplate();
-                } else if (templateType === 'ib-template') {
+                } else if (templateId === 'ib-template') {
                     insertIbTemplate();
-                }else if (templateType === 'ib-en-template') {
-                    insertIbEnTemplate();
-                }  
-                else if (templateType === 'lab-cal-template') {
-                    insertLabCalTemplate();
-                } else if (templateType === 'lab-test-template') {
-                    insertLabTestTemplate();
                 }
                 templateDropdownContent.parentElement.classList.remove('show');
             }
@@ -647,42 +909,49 @@
             tableModalOverlay.style.display = 'flex';
             tableRowsInput.focus();
         };
+
+        // Helper function to insert template content into the correct page
+        const insertTemplateAtCurrentOrLastPage = (templateHTML) => {
+            let targetPage = editor.querySelector('.page:focus');
+
+            if (!targetPage || (targetPage.textContent.trim() === '' && editor.children.length > 1)) {
+                const pages = Array.from(editor.querySelectorAll('.page'));
+                for (let i = pages.length - 1; i >= 0; i--) {
+                    if (pages[i].textContent.trim() !== '' || i === pages.length - 1) {
+                        targetPage = pages[i];
+                        break;
+                    }
+                }
+            }
+
+            if (!targetPage) {
+                targetPage = editor.querySelector('.page');
+            }
+
+            if (targetPage) {
+                targetPage.focus();
+                const range = document.createRange();
+                const selection = window.getSelection();
+                range.selectNodeContents(targetPage);
+                range.collapse(false);
+                selection.removeAllRanges();
+                selection.addRange(range);
+                document.execCommand('insertHTML', false, templateHTML);
+            }
+            setTimeout(managePages, 10);
+        };
         
-        const insertCbTemplate = () => {
-            const templateData = {
-                scopeOfAccreditation: {
-                    th: "สาขาและขอบข่ายการรับรองระบบงาน",
-                    en: "Scope of Accreditation"
-                },
-                attachmentToCertificate: {
-                    th: "แนบท้ายใบรับรองระบบงาน : หน่วยรับรองระบบงานการจัดการคุณภาพ",
-                    en: "Attachment to Certificate of Quality Management System Certification Body Accreditation"
-                },
-                certificateNo: "24-CB0003",
-                certificationBody: {
-                    th: "สถาบันวิจัยวิทยาศาสตร์และเทคโนโลยีแห่งประเทศไทย สำนักรับรองระบบคุณภาพ",
-                    en: "Thailand Institute of Scientific and Technological Research, Office of Certification Body"
-                },
-                premise: {
-                    th: "35 หมู่ 3 เทคโนธานี ตำบลคลองห้า อำเภอคลองหลวง จังหวัดปทุมธานี",
-                    en: "35 Moo 3 Technopolis, Tambon Klong 5, Amphoe Khlong Luang, Pathum Thani"
-                },
-                accreditationCriteria: [
-                    { th: "ISO/IEC 17021-1:2015 (มอก. 17021-1-2559)", en: "ISO 17021-3:2017 (มอก. 17021-3-2562)" },
-                ],
-                certificationMark: {
-                    th: "การรับรองระบบบริหารงานคุณภาพตามมาตรฐาน ISO 9001/มอก.9001 โดยมีสาขาและ<br>ขอบข่ายตามมาตรฐานการจัดประเภทอุตสาหกรรมตามกิจกรรมทางเศรษฐกิจทุกประเภท<br>ตามมาตรฐานสากล (ISIC) มอก.2000-2540 ดังต่อไปนี้",
-                    en: "Quality Management system Certification according to ISO 9001/TIS 9001, covered by International Standard industrial classification of all economic activities (ISIC) according to TIS 2000-2540 as following"
-                },
-                isicCodes: [
-                    { code: "15", description_th: "การผลิตผลิตภัณฑ์อาหารและเครื่องดื่ม", description_en: "Manufacture of food products and beverages" },
-                    { code: "24(ยกเว้น 2423)", description_th: "การผลิตสารเคมีและผลิตภัณฑ์เคมี", description_en: "Manufacture of chemicals and chemical products" }
-                ]
-            };
+const insertCbTemplate = () => {
+            const templateData = cbDetailsFromBlade;
+
+            if (!templateData) {
+                console.error("No cbDetails data available to render.");
+                return;
+            }
 
             let accreditationCriteriaHTML = '';
             if (templateData.accreditationCriteria && Array.isArray(templateData.accreditationCriteria)) {
-                accreditationCriteriaHTML = templateData.accreditationCriteria.map(item => 
+                accreditationCriteriaHTML = templateData.accreditationCriteria.map(item =>
                     `${item.th}<br><span style="font-size: 15px;">${item.en}</span>`
                 ).join('<br>');
             }
@@ -705,7 +974,7 @@
                     <span style="font-size: 15px;">(${templateData.scopeOfAccreditation.en})</span><br>
                     ${templateData.attachmentToCertificate.th}<br>
                     <span style="font-size: 15px;">(${templateData.attachmentToCertificate.en})</span><br>
-                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
+                    <b>ใบรับรองเลขที่ ${templateData.certificateNo}</b><br>
                     <span style="font-size: 15px;">(Certification No. ${templateData.certificateNo})</span>
                 </div>
                 <table class="borderless" style="width: 100%; margin-bottom: 1em;">
@@ -728,10 +997,10 @@
                         </tr>
                     </tbody>
                 </table>
-                <table style="width: 100%; margin-bottom: 1em;">
+                <table class="detail-table" style="width: 100%; margin-bottom: 1em;">
                     <thead>
                         <tr>
-                            <th>รหัส ISIC<br><span style="font-size: 15px;">(ISIC Codes)</span></th>
+                            <th style="width: 25%;">รหัส ISIC<br><span style="font-size: 15px">(ISIC Codes)</span></th>
                             <th>กิจกรรม<br><span style="font-size: 15px;">(Description)</span></th>
                         </tr>
                     </thead>
@@ -741,27 +1010,16 @@
                 </table>
                 <p><br></p>
             `;
-            (editor.querySelector('.page:focus') || editor.querySelector('.page'))?.focus();
-            document.execCommand('insertHTML', false, templateHTML);
+            insertTemplateAtCurrentOrLastPage(templateHTML);
         };
 
         const insertIbTemplate = () => {
-            const templateData = {
-                title: "รายละเอียดแนบท้ายใบรับรองระบบงานหน่วยตรวจ",
-                certificateNo: "23-IB0005",
-                inspectionBodyName: "บริษัท อินเตอร์เทค เทสติ้ง เซอร์วิสเซส (ประเทศไทย) จำกัด<br>สายธุรกิจ การค้าสินค้าเกษตร",
-                headOfficeAddress: "เลขที่ 1285/5 ถนนประชาราษฎร์ แขวงวงศ์สว่าง เขตบางซื่อ<br>กรุงเทพมหานคร",
-                branchOfficeAddress: "เลขที่ 3 ซอยสาธุฯ 29 ถนนสุขสวัสดิ์ 105 แขวงบางนา<br>เขตบางนา กรุงเทพมหานคร",
-                accreditationNo: "หน่วยตรวจ 0057",
-                inspectionBodyType: "ประเภท A",
-                inspectionItems: [
-                    {
-                        category: "1. สินค้าเกษตร:<br>ข้าวหอมมะลิไทย",
-                        procedure: "การตรวจในขั้นตอนก่อนปล่อยและขั้น<br>ตรวจปล่อย ในรายการต่อไปนี้",
-                        requirements: "1. ประกาศกระทรวงพาณิชย์ เรื่อง<br>หลักเกณฑ์และวิธีการจัดให้มีการ<br>ตรวจสอบมาตรฐานสินค้า และการ<br>ออกใบรับรองมาตรฐานสินค้า<br>สำหรับสินค้าข้าวหอมมะลิไทย<br>พ.ศ. 2559"
-                    }
-                ]
-            };
+            const templateData = ibDetailsFromBlade;
+
+            if (!templateData) {
+                console.error("No ibDetails data available to render.");
+                return;
+            }
 
             let inspectionTableRows = '';
             templateData.inspectionItems.forEach(item => {
@@ -813,7 +1071,7 @@
                         </tr>
                     </tbody>
                 </table>
-                <table style="width: 100%; margin-bottom: 1em;">
+                <table class="detail-table" style="width: 100%; margin-bottom: 1em;">
                     <thead>
                         <tr>
                             <th style="text-align: center;">หมวดหมู่ / สาขาการตรวจ</th>
@@ -828,345 +1086,10 @@
                 <p><br></p>
             `;
 
-            (editor.querySelector('.page:focus') || editor.querySelector('.page'))?.focus();
-            document.execCommand('insertHTML', false, templateHTML);
-        };
-
-        const insertIbEnTemplate = () => {
-            const templateData = {
-                title: "Scope of Accreditation for Inspection Body",
-                certificateNo: "23-IB0005",
-                inspectionBodyName: "บริษัท อินเตอร์เทค เทสติ้ง เซอร์วิสเซส (ประเทศไทย) จำกัด<br>สายธุรกิจ การค้าสินค้าเกษตร",
-                headOfficeAddress: "เลขที่ 1285/5 ถนนประชาราษฎร์ แขวงวงศ์สว่าง เขตบางซื่อ<br>กรุงเทพมหานคร",
-                branchOfficeAddress: "เลขที่ 3 ซอยสาธุฯ 29 ถนนสุขสวัสดิ์ 105 แขวงบางนา<br>เขตบางนา กรุงเทพมหานคร",
-                accreditationNo: "INSPECTION 0057",
-                inspectionBodyType: "Type A",
-                inspectionItems: [
-                    {
-                        category: "1. สินค้าเกษตร:<br>ข้าวหอมมะลิไทย",
-                        procedure: "การตรวจในขั้นตอนก่อนปล่อยและขั้น<br>ตรวจปล่อย ในรายการต่อไปนี้",
-                        requirements: "1. ประกาศกระทรวงพาณิชย์ เรื่อง<br>หลักเกณฑ์และวิธีการจัดให้มีการ<br>ตรวจสอบมาตรฐานสินค้า และการ<br>ออกใบรับรองมาตรฐานสินค้า<br>สำหรับสินค้าข้าวหอมมะลิไทย<br>พ.ศ. 2559"
-                    }
-                ]
-            };
-
-            let inspectionTableRows = '';
-            templateData.inspectionItems.forEach(item => {
-                inspectionTableRows += `
-                    <tr>
-                        <td>${item.category}</td>
-                        <td>${item.procedure}</td>
-                        <td>${item.requirements}</td>
-                    </tr>
-                `;
-            });
-
-            const templateHTML = `
-                <div style="text-align: center; line-height: 1.1; margin-bottom: 1em;">
-                    <b style="font-size: 20px;">${templateData.title}</b><br>
-                    <b>Certificate No. ${templateData.certificateNo}</b>
-                </div>
-                <table class="borderless" style="width: 100%; margin-bottom: 1em;">
-                    <tbody>
-                        <tr>
-                            <td class="vertical-align-top" style="width: 22%;"><b>Name of Inspection Body</b></td>
-                            <td class="vertical-align-top">: ${templateData.inspectionBodyName}</td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top" colspan="2">
-                                <table class="borderless" style="width: 100%; margin: 0;">
-                                    <tbody>
-                                        <tr>
-                                            <td class="vertical-align-top" style="width: 50%;">
-                                                <b>Head office or primary location</b><br>
-                                                ${templateData.headOfficeAddress}
-                                            </td>
-                                            <td class="vertical-align-top" style="width: 50%;">
-                                                <b>Additional Locations (If different from Head Office)</b><br>
-                                                ${templateData.branchOfficeAddress}
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top"><b>Accreditation No.</b></td>
-                            <td class="vertical-align-top">: ${templateData.accreditationNo}</td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top"><b>Type of Inspection Body</b></td>
-                            <td class="vertical-align-top">: ${templateData.inspectionBodyType}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table style="width: 100%; margin-bottom: 1em;">
-                    <thead>
-                        <tr>
-                            <th style="text-align: center;">Category / Field of Inspection</th>
-                            <th style="text-align: center;">Stage and Range of Inspection</th>
-                            <th style="text-align: center;">Inspection Requirements or Criteria</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${inspectionTableRows}
-                    </tbody>
-                </table>
-                <p><br></p>
-            `;
-
-            (editor.querySelector('.page:focus') || editor.querySelector('.page'))?.focus();
-            document.execCommand('insertHTML', false, templateHTML);
+            insertTemplateAtCurrentOrLastPage(templateHTML);
         };
         
-        const insertLabCalTemplate = () => {
-            const templateData = {
-                title: {
-                    th: "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
-                    en: "Scope of Accreditation for Calibration"
-                },
-                certificateNo: "21-LB0036",
-                labName: {
-                    th: "บริษัท ไออาร์ซี เทคโนโลยีส์ จำกัด",
-                    en: "IRC Technologies Co.,Ltd."
-                },
-                accreditationNo: {
-                    th: "สอบเทียบ 0203",
-                    en: "Calibration 0203"
-                },
-                issueNo: "01",
-                validFrom: {
-                    th: "ออกให้ตั้งแต่วันที่ 2 กันยายน 2564",
-                    en: "2nd September 2021"
-                },
-                until: {
-                    th: "ถึงวันที่ 1 กันยายน 2569",
-                    en: "1st September 2026"
-                },
-                calibrationData: [
-                    {
-                        field: { th: "ไฟฟ้า", en: "Electrical" },
-                        parameter: "Measuring instrument<br>DC voltage<br>0 mV to < 220 mV<br>0.22 V to < 2.2 V<br>2.2 V to < 11 V",
-                        capability: "8.0 &mu;V/V + 1.8 &mu;V<br>7.0 &mu;V/V + 7.3 &mu;V<br>7.0 &mu;V/V + 8.1 &mu;V",
-                        method: "In-house method :<br>CP-01DCV by direct<br>measurement with<br>multifunction calibrator"
-                    }
-                ]
-            };
 
-            let calibrationTableRows = '';
-            templateData.calibrationData.forEach(item => {
-                calibrationTableRows += `
-                    <tr>
-                        <td style="text-align: left;">${item.field.th}<br><span style="font-size: 15px;">(${item.field.en})</span></td>
-                        <td style="text-align: left;">${item.parameter}</td>
-                        <td style="text-align: left;">${item.capability}</td>
-                        <td style="text-align: left;">${item.method}</td>
-                    </tr>
-                `;
-            });
-
-            const templateHTML = `
-                <div style="text-align: center; line-height: 1.1; position: relative; padding-top: 50px; margin-bottom: 0em;">
-                    <b style="font-size: 20px;">${templateData.title.th}</b><br>
-                    <span style="font-size: 15px;">(${templateData.title.en})</span><br>
-                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
-                    <span style="font-size: 15px;">(Certification no. ${templateData.certificateNo})</span>
-                </div>
-                <table class="borderless" style="width: 100%; margin-bottom: 1em;">
-                    <tbody>
-                        <tr>
-                            <td class="vertical-align-top" style="width: 25%;"><b>ชื่อห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory Name)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.labName.th}<br><span style="font-size: 15px;">(${templateData.labName.en})</span></td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top"><b>หมายเลขการรับรองที่</b><br><span style="font-size: 15px;">(Accreditation No.)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.accreditationNo.th}<br><span style="font-size: 15px;">(${templateData.accreditationNo.en})</span></td>
-                        </tr>
-                         <tr>
-                            <td class="vertical-align-top"><b>ฉบับที่</b><br><span style="font-size: 15px;">(Issue No.)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.issueNo}</td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top" style="width: 25%;"><b>ออกให้ตั้งแต่วันที่</b><br><span style="font-size: 15px;">(Valid from)</span></td>
-                            <td class="vertical-align-top" style="width: 35%;">${templateData.validFrom.th}<br><span style="font-size: 15px;">(${templateData.validFrom.en})</span></td>
-                            <td class="vertical-align-top" style="width: 15%;"><b>ถึงวันที่</b><br><span style="font-size: 15px;">(Until)</span></td>
-                            <td class="vertical-align-top" style="width: 25%;">${templateData.until.th}<br><span style="font-size: 15px;">(${templateData.until.en})</span></td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top"><b>สถานภาพห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory status)</span></td>
-                            <td class="vertical-align-top" colspan="3">
-                                <table class="borderless" style="width: 100%; margin: 0; font-size: 18px; table-layout: fixed;">
-                                    <tbody>
-                                        <tr>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" checked="checked" style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;">ถาวร<br><span style="font-size: 15px;">(Permanent)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;">นอกสถานที่<br><span style="font-size: 15px;">(Site)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;">ชั่วคราว<br><span style="font-size: 15px;">(Temporary)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;">เคลื่อนที่<br><span style="font-size: 15px;">(Mobile)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;">หลายสาขา<br><span style="font-size: 15px;">(Multisite)</span></span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table style="width: 100%; margin-bottom: 1em;">
-                     <thead>
-                        <tr>
-                            <th style="width: 20%; text-align: center;">สาขาการสอบเทียบ<br><span style="font-size: 15px;">(Field of Calibration)</span></th>
-                            <th style="width: 30%; text-align: center;">รายการสอบเทียบ<br><span style="font-size: 15px;">(Parameter)</span></th>
-                            <th style="text-align: center;">ขีดความสามารถของ<br>การสอบเทียบและการวัด*<br><span style="font-size: 15px;">(Calibration and Measurement<br>Capability*)</span></th>
-                            <th style="text-align: center;">วิธีการสอบเทียบ<br><span style="font-size: 15px;">(Calibration Method)</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${calibrationTableRows}
-                    </tbody>
-                </table>
-                <p><br></p>
-            `;
-
-            (editor.querySelector('.page:focus') || editor.querySelector('.page'))?.focus();
-            document.execCommand('insertHTML', false, templateHTML);
-        };
-
-        const insertLabTestTemplate = () => {
-            const templateData = {
-                title: {
-                    th: "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
-                    en: "Scope of Accreditation for Calibration"
-                },
-                certificateNo: "21-LB0036",
-                labName: {
-                    th: "บริษัท ไออาร์ซี เทคโนโลยีส์ จำกัด",
-                    en: "IRC Technologies Co.,Ltd."
-                },
-                accreditationNo: {
-                    th: "สอบเทียบ 0203",
-                    en: "Calibration 0203"
-                },
-                issueNo: "01",
-                validFrom: {
-                    th: "ออกให้ตั้งแต่วันที่ 2 กันยายน 2564",
-                    en: "2nd September 2021"
-                },
-                until: {
-                    th: "ถึงวันที่ 1 กันยายน 2569",
-                    en: "1st September 2026"
-                },
-                testLabData: [
-                    {
-                        field: { th: "สาขาโยธา", en: "Civil field" },
-                        parameter: "ความละเอียดโดยเครื่องแอร์เพอร์มีอะบิลิตี<br>(Fineness by air-permeability)",
-                        method: "มอก. 2752 เล่ม 6-2562 (วิธี A)<br>(TIS 2752 Part 6-2562 (2019) (Method A))<br>-ASTM C204-18Ɛ1 (Method A)"
-                    }
-                ]
-            };
-
-            let testTableRows = '';
-            templateData.testLabData.forEach(item => {
-                testTableRows += `
-                    <tr>
-                        <td style="text-align: left;">${item.field.th}<br><span style="font-size: 15px;">(${item.field.en})</span></td>
-                        <td style="text-align: left;">${item.parameter}</td>
-                        <td style="text-align: left;">${item.method}</td>
-                    </tr>
-                `;
-            });
-
-            const templateHTML = `
-                <div style="text-align: center; line-height: 1.1; position: relative; padding-top: 50px; margin-bottom: 0em;">
-                    <b style="font-size: 20px;">${templateData.title.th}</b><br>
-                    <span style="font-size: 15px;">(${templateData.title.en})</span><br>
-                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
-                    <span style="font-size: 15px;">(Certification no. ${templateData.certificateNo})</span>
-                </div>
-                <table class="borderless" style="width: 100%; margin-bottom: 1em;">
-                    <tbody>
-                        <tr>
-                            <td class="vertical-align-top" style="width: 25%;"><b>ชื่อห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory Name)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.labName.th}<br><span style="font-size: 15px;">(${templateData.labName.en})</span></td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top"><b>หมายเลขการรับรองที่</b><br><span style="font-size: 15px;">(Accreditation No.)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.accreditationNo.th}<br><span style="font-size: 15px;">(${templateData.accreditationNo.en})</span></td>
-                        </tr>
-                         <tr>
-                            <td class="vertical-align-top"><b>ฉบับที่</b><br><span style="font-size: 15px;">(Issue No.)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.issueNo}</td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top" style="width: 25%;"><b>ออกให้ตั้งแต่วันที่</b><br><span style="font-size: 15px;">(Valid from)</span></td>
-                            <td class="vertical-align-top" style="width: 35%;">${templateData.validFrom.th}<br><span style="font-size: 15px;">(${templateData.validFrom.en})</span></td>
-                            <td class="vertical-align-top" style="width: 15%;"><b>ถึงวันที่</b><br><span style="font-size: 15px;">(Until)</span></td>
-                            <td class="vertical-align-top" style="width: 25%;">${templateData.until.th}<br><span style="font-size: 15px;">(${templateData.until.en})</span></td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top"><b>สถานภาพห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory status)</span></td>
-                            <td class="vertical-align-top" colspan="3">
-                                <table class="borderless" style="width: 100%; margin: 0; font-size: 18px; table-layout: fixed;">
-                                    <tbody>
-                                        <tr>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" checked="checked" style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;">ถาวร<br><span style="font-size: 15px;">(Permanent)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;">นอกสถานที่<br><span style="font-size: 15px;">(Site)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;">ชั่วคราว<br><span style="font-size: 15px;">(Temporary)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;">เคลื่อนที่<br><span style="font-size: 15px;">(Mobile)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;">หลายสาขา<br><span style="font-size: 15px;">(Multisite)</span></span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table style="width: 100%; margin-bottom: 1em;">
-                     <thead>
-                        <tr>
-                            <th style="width: 25%; text-align: center;">สาขาการทดสอบ<br><span style="font-size: 15px;">(Field of Testing)</span></th>
-                            <th style="width: 35%; text-align: center;">รายการทดสอบ<br><span style="font-size: 15px;">(Parameter)</span></th>
-                            <th style="text-align: center;">วิธีทดสอบ<br><span style="font-size: 15px;">(Test Method)</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${testTableRows}
-                    </tbody>
-                </table>
-                <p><br></p>
-            `;
-
-            (editor.querySelector('.page:focus') || editor.querySelector('.page'))?.focus();
-            document.execCommand('insertHTML', false, templateHTML);
-        };
 
         const updateMenubarState = () => {
              const commands = ['bold', 'italic', 'superscript', 'subscript', 'justifyLeft', 'justifyCenter', 'justifyRight'];
@@ -1389,18 +1312,72 @@
 
             element.addEventListener('mousedown', onMouseDown);
         }
+        
+        // --- Table & Context Menu Functions ---
 
-        function insertTableRow(table, rowIndex, above = true) {
-            const row = table.insertRow(above ? rowIndex : rowIndex + 1);
-            const colCount = table.rows[0].cells.length;
+        // === START: MODIFICATION ===
+        function insertTableRow(table, rowIndex, above, removeConnectingBorder) {
+            const insertAt = above ? rowIndex : rowIndex + 1;
+            const newRow = table.insertRow(insertAt);
+
+            // Determine the correct number of columns to create
+            let colCount = 0;
+            const thead = table.querySelector('thead');
+            if (thead && thead.rows.length > 0 && thead.rows[0].cells.length > 0) {
+                colCount = thead.rows[0].cells.length;
+            } else if (table.rows.length > 1) {
+                // Find a row with the most cells to account for colspans
+                for(let i = 0; i < table.rows.length; i++) {
+                    let currentCellCount = 0;
+                    for(let j = 0; j < table.rows[i].cells.length; j++) {
+                        currentCellCount += table.rows[i].cells[j].colSpan;
+                    }
+                    if(currentCellCount > colCount) {
+                        colCount = currentCellCount;
+                    }
+                }
+            } else {
+                colCount = table.rows[rowIndex].cells.length;
+            }
+
+
+            // Create cells for the new row
             for (let i = 0; i < colCount; i++) {
-                const cell = row.insertCell();
+                const cell = newRow.insertCell();
                 cell.style.verticalAlign = 'top';
                 cell.style.textAlign = 'left';
                 cell.innerHTML = '<br>';
             }
+
+            // --- Conditional Border Logic ---
+            if (removeConnectingBorder) {
+                if (!above) { // Inserting BELOW
+                    const rowAbove = table.rows[rowIndex];
+                    for (const cell of newRow.cells) {
+                        cell.style.borderTop = 'none';
+                    }
+                    if (rowAbove) {
+                        for (const cell of rowAbove.cells) {
+                            cell.style.borderBottom = 'none';
+                        }
+                    }
+                } else { // Inserting ABOVE
+                    const rowBelow = table.rows[insertAt];
+                    for (const cell of newRow.cells) {
+                        cell.style.borderBottom = 'none';
+                    }
+                    if (rowBelow) {
+                        for (const cell of rowBelow.cells) {
+                            cell.style.borderTop = 'none';
+                        }
+                    }
+                }
+            }
+            // If removeConnectingBorder is false, do nothing to the borders.
+
             managePages();
         }
+        // === END: MODIFICATION ===
 
         function insertTableColumn(table, colIndex, right = true) {
             const rows = table.rows;
@@ -1428,10 +1405,103 @@
                 managePages();
             }
         }
+        
+        function getSelectedTableCells() {
+            const selection = window.getSelection();
+            if (!selection.rangeCount || selection.isCollapsed) return [];
+
+            const range = selection.getRangeAt(0);
+            let startCell = range.startContainer.closest('td, th');
+            let endCell = range.endContainer.closest('td, th');
+
+            if (!startCell || !endCell || startCell.closest('table') !== endCell.closest('table')) {
+                return [];
+            }
+            
+            if (startCell.compareDocumentPosition(endCell) & Node.DOCUMENT_POSITION_FOLLOWING) {
+                // Correct order
+            } else {
+                [startCell, endCell] = [endCell, startCell]; // Swap
+            }
+
+            const row = startCell.closest('tr');
+            if (!row || endCell.closest('tr') !== row) {
+                return [];
+            }
+
+            const cellsInRow = Array.from(row.cells);
+            const startIndex = cellsInRow.indexOf(startCell);
+            const endIndex = cellsInRow.indexOf(endCell);
+
+            if (startIndex === -1 || endIndex === -1) return [];
+
+            return cellsInRow.slice(startIndex, endIndex + 1);
+        }
+
+        function mergeTableColumns(cellsToMerge) {
+            if (cellsToMerge.length <= 1) return;
+
+            const firstCell = cellsToMerge[0];
+            const parentRow = firstCell.closest('tr');
+            if (!parentRow) return;
+
+            let totalColspan = 0;
+            let combinedContent = '';
+
+            cellsToMerge.forEach(cell => {
+                const cellContent = cell.innerHTML.trim();
+                if (cellContent !== '<br>' && cellContent !== '') {
+                    if (combinedContent !== '') combinedContent += ' ';
+                    combinedContent += cellContent;
+                }
+                totalColspan += cell.colSpan || 1;
+            });
+
+            firstCell.colSpan = totalColspan;
+            firstCell.innerHTML = combinedContent || '<br>';
+
+            for (let i = 1; i < cellsToMerge.length; i++) {
+                parentRow.removeChild(cellsToMerge[i]);
+            }
+            
+            const activePage = firstCell.closest('.page');
+            activePage?.focus();
+            managePages();
+        }
+
 
         function showContextMenu(event, cell) {
             event.preventDefault();
             contextMenuTarget = cell;
+            contextMenuTargetRow = cell.closest('tr'); // Store the target row immediately
+            
+            const addItemMenu = contextMenu.querySelector('[data-action="add-item"]');
+            const addItemSeparator = contextMenu.querySelector('[data-action="separator-add"]');
+            const mergeMenuItem = contextMenu.querySelector('[data-action="merge-columns"]');
+            const mergeSeparator = contextMenu.querySelector('[data-action="separator-merge"]');
+
+            const table = cell.closest('table');
+            const isInTbody = cell.closest('tbody');
+
+            // Show "Add Item" only for tables with 'detail-table' class and inside tbody
+            if (table && table.classList.contains('detail-table') && isInTbody) {
+                addItemMenu.style.display = 'block';
+                addItemSeparator.style.display = 'block';
+            } else {
+                addItemMenu.style.display = 'none';
+                addItemSeparator.style.display = 'none';
+            }
+
+            const selectedCells = getSelectedTableCells();
+            if (selectedCells.length > 1) {
+                selectedTableCellsForMerge = selectedCells;
+                mergeMenuItem.style.display = 'block';
+                mergeSeparator.style.display = 'block';
+            } else {
+                mergeMenuItem.style.display = 'none';
+                mergeSeparator.style.display = 'none';
+            }
+
             contextMenu.style.display = 'block';
             contextMenu.style.left = `${event.pageX}px`;
             contextMenu.style.top = `${event.pageY}px`;
@@ -1440,6 +1510,8 @@
         function hideContextMenu() {
             contextMenu.style.display = 'none';
             contextMenuTarget = null;
+            contextMenuTargetRow = null; // Reset the target row
+            selectedTableCellsForMerge = [];
         }
 
         editor.addEventListener('contextmenu', (event) => {
@@ -1451,21 +1523,68 @@
             }
         });
 
+        // --- FIXED: Context Menu Click Logic ---
+        // === START: MODIFICATION ===
         contextMenu.addEventListener('click', (event) => {
-            const action = event.target.dataset.action;
-            if (!action || !contextMenuTarget) return;
+            const actionTarget = event.target.closest('.context-menu-item');
+            if (!actionTarget) return;
+            const action = actionTarget.dataset.action;
+            if (!action) return;
 
-            const table = contextMenuTarget.closest('table');
-            const row = contextMenuTarget.closest('tr');
-            const rowIndex = Array.from(table.rows).indexOf(row);
-            const colIndex = Array.from(row.cells).indexOf(contextMenuTarget);
+            const table = contextMenuTarget?.closest('table');
+
+            // Special handling for actions that open modals
+            if (action === 'add-item') {
+                activeModalTargetRow = contextMenuTargetRow; // Persist the row for the modal
+                contextMenu.style.display = 'none'; // Hide menu visually, but keep state
+                switch (templateType) {
+                    case 'cb':      cbItemModal.style.display = 'flex'; break;
+                    case 'ib':      ibItemModal.style.display = 'flex'; break;
+   
+                    default:
+                        alert('ไม่พบ Template ที่ใช้งานอยู่เพื่อเพิ่มรายการ');
+                        hideContextMenu(); // Reset state fully if no template
+                        activeModalTargetRow = null; // Clear persisted row if no modal shown
+                }
+                return; // Exit to prevent hideContextMenu() below
+            }
+
+            // Handle merge action
+            if (action === 'merge-columns') {
+                if (selectedTableCellsForMerge.length > 1) {
+                    mergeTableColumns(selectedTableCellsForMerge);
+                }
+                hideContextMenu(); // Reset state fully
+                return;
+            }
+
+            // For direct table manipulation actions
+            if (!contextMenuTarget || !table) {
+                hideContextMenu();
+                return;
+            }
+
+            const row = contextMenuTargetRow;
+            const rowIndex = row ? Array.from(table.rows).indexOf(row) : -1;
+            const colIndex = row ? Array.from(row.cells).indexOf(contextMenuTarget) : -1;
+
+            if (rowIndex === -1 || colIndex === -1) {
+                hideContextMenu();
+                return;
+            }
 
             switch (action) {
                 case 'insert-row-above':
-                    insertTableRow(table, rowIndex, true);
+                    insertTableRow(table, rowIndex, true, false); // above, with border
+                    break;
+                case 'insert-row-above-no-border':
+                    insertTableRow(table, rowIndex, true, true); // above, no border
                     break;
                 case 'insert-row-below':
-                    insertTableRow(table, rowIndex, false);
+                    insertTableRow(table, rowIndex, false, false); // below, with border
+                    break;
+                case 'insert-row-below-no-border':
+                    insertTableRow(table, rowIndex, false, true); // below, no border
                     break;
                 case 'insert-column-left':
                     insertTableColumn(table, colIndex, false);
@@ -1481,13 +1600,16 @@
                     break;
             }
 
-            hideContextMenu();
-            const activePage = table.closest('.page');
-            activePage.focus();
+            hideContextMenu(); // Reset state fully after action
+            const activePage = table?.closest('.page');
+            activePage?.focus();
         });
+        // === END: MODIFICATION ===
+
 
         document.addEventListener('click', (event) => {
-            if (!contextMenu.contains(event.target)) {
+            // Hide context menu if the click is outside of it AND not inside a modal overlay
+            if (!contextMenu.contains(event.target) && !event.target.closest('.modal-overlay')) {
                 hideContextMenu();
             }
         });
@@ -1529,6 +1651,51 @@
                 }
             }
         });
+        
+        // === START: NEW KEYBOARD SHORTCUTS FOR TABLE ROWS ===
+        document.addEventListener('keydown', (event) => {
+            // Check for Shift key and F1, F2, F4, F5 keys
+            if (event.shiftKey && ['F1', 'F2', 'F4', 'F5'].includes(event.key)) {
+                const selection = window.getSelection();
+                if (!selection.rangeCount) return;
+
+                const range = selection.getRangeAt(0);
+                const currentElement = range.startContainer;
+                // Find the closest cell (td or th) from the current cursor position
+                const cell = currentElement.nodeType === Node.ELEMENT_NODE 
+                             ? currentElement.closest('td, th') 
+                             : currentElement.parentElement.closest('td, th');
+
+                if (cell) {
+                    event.preventDefault(); // Prevent default browser actions (like opening help)
+
+                    const table = cell.closest('table');
+                    const row = cell.closest('tr');
+                    const rowIndex = Array.from(table.rows).indexOf(row);
+
+                    if (rowIndex === -1) return;
+
+                    switch (event.key) {
+                        case 'F1': // Shift+F1: Insert row above
+                            insertTableRow(table, rowIndex, true, false);
+                            break;
+                        case 'F2': // Shift+F2: Insert row above (no border)
+                            insertTableRow(table, rowIndex, true, true);
+                            break;
+                        case 'F4': // Shift+F4: Insert row below
+                            insertTableRow(table, rowIndex, false, false);
+                            break;
+                        case 'F5': // Shift+F5: Insert row below (no border)
+                            insertTableRow(table, rowIndex, false, true);
+                            break;
+                    }
+                     const activePage = table?.closest('.page');
+                     activePage?.focus();
+                }
+            }
+        });
+        // === END: NEW KEYBOARD SHORTCUTS FOR TABLE ROWS ===
+
 
         document.addEventListener('mousedown', (event) => {
             if (!event.target.closest('.image-container')) {
@@ -1571,49 +1738,143 @@
             tableBorderToggle.checked = true;
         });
 
-        const closeTableModal = () => {
-            tableModalOverlay.style.display = 'none';
-            savedRange = null;
-            tableBorderToggle.checked = true;
+        // --- FIXED: Modal Cancel/Close Logic ---
+        function closeModal(modal) {
+            modal.style.display = 'none';
+            // Clear inputs
+            modal.querySelectorAll('input[type="text"], input[type="number"]').forEach(input => input.value = '');
+            // MODIFIED: Also clear contenteditable divs
+            modal.querySelectorAll('.editable-div').forEach(div => div.innerHTML = '');
+            // Also reset the context menu state since the modal action is complete.
+            hideContextMenu();
+            activeModalTargetRow = null; // **NEW**: Clear the persisted row
         }
 
-        cancelTableBtn.addEventListener('click', closeTableModal);
-        tableModalOverlay.addEventListener('click', (event) => {
-            if (event.target === tableModalOverlay) closeTableModal();
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    closeModal(modal);
+                }
+            });
+            modal.querySelector('.modal-btn-cancel')?.addEventListener('click', () => {
+                closeModal(modal);
+            });
         });
+        
+        // --- [แก้ไข] Helper function to append text to a cell ---
+        function appendToCell(cell, text) {
+            // Do nothing if text is null, undefined, or empty
+            if (!text) {
+                return;
+            }
 
-        function wrapSpecialCharactersInNode(node) {
-            const specialChars = ['Ω', 'π', 'Σ', 'β', 'α', 'γ', 'µ', 'μ', '±', '∞', 'θ', 'δ', 'ξ', 'φ', 'χ', 'ψ', 'ω', 'ε', 'Δ', '√', '∮', '∫', '∂', '∇', '∑', '∏', '∆', 'λ', 'σ', 'ρ', '℃', '℉', 'Ξ','Ɛ'];
-            const regex = new RegExp(`(${specialChars.join('|')})`, 'g');
+            // Check if the cell has any visible content using textContent.
+            // This is more reliable than manipulating innerHTML with regex.
+            const hasContent = cell.textContent.trim() !== '';
 
-            if (node.nodeType === Node.TEXT_NODE) {
-                const parent = node.parentNode;
-                if (parent.nodeName === 'SCRIPT' || parent.nodeName === 'STYLE') {
-                    return;
-                }
-
-                const text = node.textContent;
-                if (regex.test(text)) {
-                    const fragment = document.createDocumentFragment();
-                    const parts = text.split(regex);
-
-                    parts.forEach(part => {
-                        if (specialChars.includes(part)) {
-                            const span = document.createElement('span');
-                            span.style.fontFamily = 'dejavusans';
-                            span.style.fontSize = '14px';
-                            span.textContent = part;
-                            fragment.appendChild(span);
-                        } else if (part) {
-                            fragment.appendChild(document.createTextNode(part));
-                        }
-                    });
-                    parent.replaceChild(fragment, node);
-                }
-            } else if (node.nodeType === Node.ELEMENT_NODE) {
-                Array.from(node.childNodes).forEach(child => wrapSpecialCharactersInNode(child));
+            if (hasContent) {
+                // If there's existing content, add a line break before the new text.
+                cell.innerHTML += '<br>' + text;
+            } else {
+                // If the cell is empty, just set the new text, replacing any placeholder <br>.
+                cell.innerHTML = text;
             }
         }
+
+
+        // --- Add Item Button Logic for each Modal (Using activeModalTargetRow) ---
+        
+        // === START: REVISED CB Item Button Logic ===
+        document.getElementById('add-cb-item-btn').addEventListener('click', () => {
+            const targetRow = activeModalTargetRow;
+            if (!targetRow) {
+                alert("ไม่สามารถหาแถวเป้าหมายได้");
+                closeModal(cbItemModal);
+                return;
+            }
+
+            const cells = targetRow.cells;
+            if (cells.length < 2) {
+                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการอย่างน้อย 2 คอลัมน์)");
+                closeModal(cbItemModal);
+                return;
+            }
+
+            // Get values from editable divs using LineExtractor
+            const codeLines = cbCodeEditorExtractor.getLines();
+            const code = codeLines.join('<br>');
+
+            const descriptionLines = cbDescriptionEditorExtractor.getLines();
+            const description = descriptionLines.join('<br>');
+
+            // Append to the first cell
+            appendToCell(cells[0], code);
+
+            // Append to the second cell
+            appendToCell(cells[1], description);
+
+            managePages();
+            closeModal(cbItemModal);
+        });
+        // === END: REVISED CB Item Button Logic ===
+
+
+        // === START: REVISED IB Item Button Logic ===
+        document.getElementById('add-ib-item-btn').addEventListener('click', () => {
+            const targetRow = activeModalTargetRow;
+            if (!targetRow) {
+                alert("ไม่สามารถหาแถวเป้าหมายได้");
+                closeModal(ibItemModal);
+                return;
+            }
+
+            const cells = targetRow.cells;
+            if (cells.length < 3) {
+                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการ 3 คอลัมน์)");
+                closeModal(ibItemModal);
+                return;
+            }
+
+            // Get values from modal
+            const mainBranch = document.getElementById('ib-main-branch').value.trim();
+
+            const subBranchLines = ibSubBranchExtractor.getLines();
+            const subBranch = subBranchLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
+
+            const mainScopeLines = ibMainScopeExtractor.getLines();
+            const mainScope = mainScopeLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
+
+            const subScopeLines = ibSubScopeExtractor.getLines();
+            const subScope = subScopeLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
+
+            const requirementsLines = ibRequirementsExtractor.getLines();
+            const requirements = requirementsLines.join('<br>');
+
+            // --- Cell 1: Main/Sub Branch ---
+            const cell1Parts = [];
+            if (mainBranch) cell1Parts.push(mainBranch);
+            if (subBranch) cell1Parts.push(subBranch);
+            const cell1Content = cell1Parts.join('<br>');
+            appendToCell(cells[0], cell1Content);
+
+            // --- Cell 2: Main/Sub Scope ---
+            const cell2Parts = [];
+            if (mainScope) cell2Parts.push(mainScope);
+            if (subScope) cell2Parts.push(subScope);
+            const cell2Content = cell2Parts.join('<br>');
+            appendToCell(cells[1], cell2Content);
+
+            // --- Cell 3: Requirements ---
+            if (requirements) {
+                appendToCell(cells[2], requirements);
+            }
+
+            managePages();
+            closeModal(ibItemModal);
+        });
+        // === END: REVISED IB Item Button Logic ===
+
+
 
         exportPdfButton.addEventListener('click', () => {
             const editorClone = editor.cloneNode(true);
@@ -1664,6 +1925,135 @@
                 alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + error.message);
             });
         });
+
+        if (saveTemplateButton) {
+            saveTemplateButton.addEventListener('click', () => {
+
+                const editorClone = editor.cloneNode(true);
+                const pagesContent = [];
+
+                editorClone.querySelectorAll('.page').forEach(page => {
+                    page.removeAttribute('contenteditable');
+
+                    page.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                        if (checkbox.checked) {
+                            checkbox.setAttribute('checked', 'checked');
+                        } else {
+                            checkbox.removeAttribute('checked');
+                        }
+                    });
+
+                    page.querySelectorAll('.image-container').forEach(container => {
+                        const containerWidth = container.style.width;
+                        const img = container.querySelector('img');
+                        if (img && containerWidth) {
+                            img.style.width = containerWidth;
+                            img.style.height = 'auto';
+                        }
+                        container.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
+                        container.classList.remove('active');
+                        container.style.border = 'none';
+                    });
+
+                    wrapSpecialCharactersInNode(page);
+
+                    pagesContent.push(page.innerHTML);
+                });
+
+
+                console.log(pagesContent);
+
+                fetch('/save-html-template', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        html_pages: pagesContent,
+                        template_type: templateType
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.message || 'Network response was not ok');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert(data.message);
+                    console.log('Save successful:', data);
+                })
+                .catch(error => {
+                    console.error('There was a problem with the save operation:', error);
+                    alert('เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
+                });
+            });
+        }
+        
+        if (loadTemplateButton) {
+            loadTemplateButton.addEventListener('click', () => {
+                const templateIdentifier = prompt("โปรดระบุประเภทของเทมเพลตที่ต้องการโหลด (เช่น 'cb', 'ib'):");
+                if (!templateIdentifier) {
+                    alert("ไม่ได้ระบุประเภทของเทมเพลต");
+                    return;
+                }
+
+                fetch('/download-html-template', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        template_type: templateIdentifier
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.message || 'Network response was not ok');
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.html_pages && Array.isArray(data.html_pages)) {
+                        while (editor.firstChild) {
+                            editor.removeChild(editor.firstChild);
+                        }
+
+                        console.log(data.html_pages)
+                        data.html_pages.forEach(pageHtml => {
+                            const newPage = createNewPage();
+                            newPage.innerHTML = pageHtml;
+                            editor.appendChild(newPage);
+                        });
+                        console.log('Load successful:', data);
+                    } else {
+                        throw new Error(data.message || 'ไม่พบข้อมูลเทมเพลต หรือข้อมูลไม่ถูกต้อง');
+                    }
+                })
+                .catch(error => {
+                    console.error('มีปัญหาในการโหลดเทมเพลต:', error);
+                    alert('เกิดข้อผิดพลาดในการโหลด: ' + error.message);
+                });
+            });
+        }
+
+        // === START: MODIFICATION FOR LineExtractor INSTANCES ===
+        // Instantiate LineExtractor for all editable divs in the modals
+        const cbCodeEditorExtractor = new LineExtractor('cb-code-editor');
+        const cbDescriptionEditorExtractor = new LineExtractor('cb-description-editor');
+        
+        // New extractors for the modified IB modal
+        const ibSubBranchExtractor = new LineExtractor('ib-sub-branch');
+        const ibMainScopeExtractor = new LineExtractor('ib-main-scope');
+        const ibSubScopeExtractor = new LineExtractor('ib-sub-scope');
+        const ibRequirementsExtractor = new LineExtractor('ib-requirements-editor');
+        // === END: MODIFICATION FOR LineExtractor INSTANCES ===
 
         if (editor.children.length === 0) {
             editor.appendChild(createNewPage());

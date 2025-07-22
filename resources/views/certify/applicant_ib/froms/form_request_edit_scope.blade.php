@@ -1,4 +1,4 @@
-<fieldset class="white-box">
+<fieldset class="white-box" hidden>
     <legend><h4>ข้อมูลขอรับบริการ</h4></legend>
 
 
@@ -575,7 +575,7 @@
     
 </fieldset>
 
-<fieldset class="white-box">
+<fieldset class="white-box" hidden>
     <legend><h4>1. ข้อมูลทั่วไป (General information)</h4></legend>
     <div class="m-l-10 form-group {{ $errors->has('petitioner') ? 'has-error' : ''}}">
         <div class="col-md-6 ">

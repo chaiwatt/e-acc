@@ -54,6 +54,13 @@ Route::get('/show-lab-cal-details','MyTestController@showLabCalDetails');
 Route::get('/show-lab-test-details','MyTestController@showLabTestDetails');
 Route::get('/show-cb-details','MyTestController@showCbDetails');
 Route::get('/show-ib-details','MyTestController@showIbDetails');
+Route::get('/show-ib-report-one-details','MyTestController@showIbReportOneDetails');
+
+
+
+Route::get('/show-cb-isic-details','MyTestController@showCbIsicDetails');
+
+
 
 Route::post('/save-html-template','MyTestController@saveHtmlTemplate');
 
@@ -611,6 +618,11 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
         Route::get('/edit-scope/{token}','Certify\ApplicantController@editScope')->name('applicant.edit_scope');
         Route::post('/update-scope/{token}','Certify\ApplicantController@updateScope');
 
+
+        Route::post('/save-html-template','Certify\ApplicantController@saveHtmlTemplate')->name('certify.applicant.save-html-template');
+        Route::post('/download-html-template','Certify\ApplicantController@downloadHtmlTemplate')->name('certify.applicant.download-html-template');
+        
+
         Route::post('/store','Certify\ApplicantController@store')->name('applicant.store');
         Route::post('/update/{token}','Certify\ApplicantController@update');
         Route::post('/delete/applicant/store','Certify\ApplicantController@deleteApplicant');
@@ -790,6 +802,19 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
     Route::post('/certi_cb/update_delete','Certify\ApplicantCBController@deleteApplicant');
     Route::get('/certi_cb/delete/{path}/{token}','Certify\ApplicantCBController@removeFilesCertiCBAttachAll');
 
+
+    Route::post('/certi_cb/get-cb-isic','Certify\ApplicantCBController@cbIsicScope')->name('certi_cb.get-cb-isic');
+    Route::post('/certi_cb/get-cb-ohsms','Certify\ApplicantCBController@cbOhsmsScope')->name('certi_cb.get-cb-ohsms');
+    Route::post('/certi_cb/get-cb-enms','Certify\ApplicantCBController@cbEnmsScope')->name('certi_cb.get-cb-enms');
+    Route::post('/certi_cb/get-cb-bcms','Certify\ApplicantCBController@cbBcmsScope')->name('certi_cb.get-cb-bcms');
+    Route::post('/certi_cb/get-cb-sfms','Certify\ApplicantCBController@cbSfmsScope')->name('certi_cb.get-cb-sfms');
+    Route::post('/certi_cb/get-cb-mdms','Certify\ApplicantCBController@cbMdmsScope')->name('certi_cb.get-cb-mdms');
+    Route::post('/certi_cb/get-cb-corsia','Certify\ApplicantCBController@cbCorsiaScope')->name('certi_cb.get-cb-corsia');
+
+    // Route::post('/save-html-template','Certify\ApplicantCBController@saveHtmlTemplate')->name('certi_cb.save-html-template');
+    Route::post('/certi_cb/save-html-template','Certify\ApplicantCBController@saveHtmlTemplate')->name('certi_cb.save-html-template');
+    Route::post('/certi_cb/download-html-template','Certify\ApplicantCBController@downloadHtmlTemplate')->name('certi_cb.download-html-template');
+
     Route::get('applicant-cb/delete/file_app_certi_cb_attach_all/{id?}/{token?}', function($id,$token)
     {
 
@@ -804,6 +829,7 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
 
         return redirect('/certify/applicant-cb/'.$token.'/edit')->with('delete_message', 'Delete Complete!');
     });
+
 
     Route::get('/certi_cb/is-cb-type-and-standard-belong','Certify\ApplicantCBController@isCbTypeAndStandardBelong');
     Route::get('/certi_cb/get-certificate-belong','Certify\ApplicantCBController@getCertificatedBelong');
@@ -820,6 +846,11 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
 
     Route::get('/applicant-cb/draft_pdf/{id}','Certify\ApplicantCBController@draft_pdf');
     
+
+    Route::get('/applicant-cb/cost/{token?}','Certify\ApplicantCBController@EditCost');
+
+
+    Route::get('/applicant-cb/cb-scope-editor','Certify\ApplicantCBController@scopeEditor')->name('certify.applicant-cb.cb-scope-editor');
 
     //การประมาณค่าใช้จ่าย  (CB)
     Route::get('/applicant-cb/cost/{token?}','Certify\ApplicantCBController@EditCost');
@@ -863,7 +894,7 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
     Route::post('/applicant-cb/demo-store-cb-bcms-scope','Certify\ApplicantCBController@demoStoreBcmsScope')->name('applicant_cb.demo_store_cb_bcms_scope');
     Route::post('/applicant-cb/get-select-cb-bcms-transaction','Certify\ApplicantCBController@getCbScopeBcmsTransaction')->name('applicant_cb.get_cb_bcms_scope_transaction');
     Route::post('/applicant-cb/update-doc-review-team','Certify\ApplicantCBController@updateDocReviewTeam')->name('applicant_cb.update_doc_review_team');
-    Route::post('/applicant-cb/get-cb-doc-review-auditor','Certify\ApplicantCBController@getCbDocReviewAuditor')->name('applicant_cb.ge_cb_doc_review_auditor');
+    Route::get('/applicant-cb/get-cb-doc-review-auditor','Certify\ApplicantCBController@getCbDocReviewAuditor')->name('applicant_cb.ge_cb_doc_review_auditor');
     //log
     Route::get('/applicant-cb/Log-CB/{token?}','Certify\ApplicantCBController@DataLogCB');
 
@@ -895,6 +926,11 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
 
     Route::post('/certi_ib/get_certificated','Certify\ApplicantIBController@checkTransferee')->name('certi_ib.check_ib_transferee');
 
+
+    Route::post('/save-html-template','Certify\ApplicantIBController@saveHtmlTemplate')->name('certi_ib.save-html-template');
+    Route::post('/download-html-template','Certify\ApplicantIBController@downloadHtmlTemplate')->name('certi_ib.download-html-template');
+
+
     Route::get('applicant-ib/delete/file_app_certi_ib_attach_all/{id?}/{token?}', function($id,$token)
     {
 
@@ -910,6 +946,8 @@ Route::group(['prefix'=>'certify'],function (){ // ระบบยื่นค�
         return redirect('/certify/applicant-ib/'.$token.'/edit')->with('delete_message', 'Delete Complete!');
     });
 
+
+    Route::get('/applicant-ib/ib-scope-editor','Certify\ApplicantIBController@scopeEditor')->name('certify.applicant-ib.ib-scope-editor');
     
     //การประมาณค่าใช้จ่าย  (IB)
     Route::get('/applicant-ib/cost/{token?}','Certify\ApplicantIBController@EditCost');

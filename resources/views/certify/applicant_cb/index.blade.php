@@ -399,7 +399,7 @@
                                     <td>
 
                                         @if ($item->require_scope_update == "1")
-                                            <a href="{{ url('/certify/applicant-cb/' . $item->token . '/edit_scope') }}"  title="Edit ApplicantCB" class="btn btn-primary btn-xs">
+                                            <a href="{{ url('/certify/applicant-cb/' . $item->token . '/edit_scope') }}"  title="Edit ApplicantCB" class="btn btn-warning btn-xs">
                                                 <i class="fa fa-pencil-square-o" aria-hidden="true"> </i>
                                             </a>
                                         @endif
@@ -425,9 +425,9 @@
                                             @if( HP::CheckPermission('delete-'.str_slug('applicantcbs')) )
 
                                                 @if( empty($item->app_certi_cb_export->certificate_newfile) || (!empty($item->app_certi_cb_export->certificate_newfile) && ( ( !empty($item->app_certi_cb_export) && !in_array($item->app_certi_cb_export->status, [4]) ) && !in_array($item->status, [20]) ))  )
-                                                    <button class="btn btn-xs btn-danger" data-toggle="modal" data-target="#modalDelete{{$loop->iteration}}"data-no="{{ $item->app_no }}"data-id="{{ $item->token }}" >
+                                                    {{-- <button class="btn btn-xs btn-danger" data-toggle="modal" data-target="#modalDelete{{$loop->iteration}}"data-no="{{ $item->app_no }}"data-id="{{ $item->token }}" >
                                                         <i class="fa fa-trash-o" aria-hidden="true"></i>
-                                                    </button>
+                                                    </button> --}}
                                                     @include ('certify.applicant_cb.modal.modaldelete',['id'=>$loop->iteration, 'token'=>$item->token, 'app_no'=>$item->app_no])
                                                 @endif
                                      
@@ -657,7 +657,7 @@
 
         $.ajax({
             url: "{{route('applicant_cb.ge_cb_doc_review_auditor')}}",
-            method: "POST",
+            method: "GET",
             data: {
                 certiCbId: certiCbId,
                 _token: _token

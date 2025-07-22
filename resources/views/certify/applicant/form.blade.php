@@ -778,10 +778,10 @@
                 }
             }
 
-            if (!hasMainLabType) {
-                alert('กรุณาเพิ่มข้อมูล labtype อย่างน้อย 1 รายการสำหรับสำนักงานใหญ่');
-                return false;
-            }
+            // if (!hasMainLabType) {
+            //     alert('กรุณาเพิ่มข้อมูล labtype อย่างน้อย 1 รายการสำหรับสำนักงานใหญ่');
+            //     return false;
+            // }
 
             // ตรวจสอบ branch_lab_infos
             const branchData = JSON.parse(sessionStorage.getItem('branch_lab_infos')) || [];
@@ -914,309 +914,263 @@
         }
 
 
-        function submit_form(status) {
+        function submit_form(status) 
+        {
+            var accordingFormula_data = $('#according_formula').val();
+            var labAbility_data = $('input[name="lab_ability"]:checked').val();
+            var purpose_data = $('input[name="purpose"]:checked').val();
 
-            // ตรวจสอบข้อมูลก่อนส่ง
-            if (!validateLabData()) { 
-                return; // หยุดการทำงานถ้าไม่ผ่านการตรวจสอบ
-            }
+            fetch("{!! route('certify.applicant.download-html-template') !!}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        accordingFormula: accordingFormula_data,
+                        labAbility: labAbility_data,
+                        purpose: purpose_data,
+                    })
+                })
+                .then(response => {
+                    
+                    if (response.ok) {
+                            if (!validateLabData()) { 
+                                return; // หยุดการทำงานถ้าไม่ผ่านการตรวจสอบ
+                            }
 
-            let purpose = $('input[name="purpose"]:checked').val();
+                            let purpose = $('input[name="purpose"]:checked').val();
 
-            if(purpose == 6)
-            {
-                if($('#transferee_name').val() == "")
-                {
-                    alert("โปรดตรวสอบข้อมูลผู้โอน");
-                    return;
-                }
-            }
-
-
-            // var lab_main_address = JSON.parse(sessionStorage.getItem('lab_main_address'));
-
-
-            // ดึงข้อมูล
-            const mainLabInfo = JSON.parse(sessionStorage.getItem('main_lab_info')) || {};
-
-            const branchData = JSON.parse(sessionStorage.getItem('branch_lab_infos')) || [];
-
-
-
-            var uniqueCalMainBranches;
-
-            if($("input[name=lab_ability]:checked").val() == "calibrate"){
-                uniqueCalMainBranches = getUniqueCalMainBranches(branchData, mainLabInfo);
-            }else if($("input[name=lab_ability]:checked").val() == "test")
-            {
-                uniqueCalMainBranches = getUniqueTestMainBranches(branchData, mainLabInfo);
-            }
-            // console.log('uniqueCalMainBranches',uniqueCalMainBranches);
-            // return;
-            renderHiddenInputs(uniqueCalMainBranches);
+                            if(purpose == 6)
+                            {
+                                if($('#transferee_name').val() == "")
+                                {
+                                    alert("โปรดตรวสอบข้อมูลผู้โอน");
+                                    return;
+                                }
+                            }
 
 
-            // แปลง lab_types ของ main_lab_info
-            mainLabInfo.lab_types = transformLabTypes(mainLabInfo.lab_types);
+                            const mainLabInfo = JSON.parse(sessionStorage.getItem('main_lab_info')) || {};
 
-            // แปลง lab_types ของแต่ละสาขา
-            branchData.forEach(branch => {
-                branch.lab_types = transformLabTypes(branch.lab_types);
-            });
+                            const branchData = JSON.parse(sessionStorage.getItem('branch_lab_infos')) || [];
 
-            // ล้าง hidden input เดิม (ถ้ามี)
-            $('#app_certi_form').find('input[name="main_lab_info"]').remove();
-            $('#app_certi_form').find('input[name="branch_lab_infos"]').remove();
+                            var uniqueCalMainBranches;
 
-            // เพิ่ม hidden input สำหรับ main_lab_info
-            $('<input>').attr({
-                type: 'hidden',
-                name: 'main_lab_info',
-                value: JSON.stringify(mainLabInfo)
-            }).appendTo('#app_certi_form');
-
-            // เพิ่ม hidden input สำหรับ branch_lab_infos
-            $('<input>').attr({
-                type: 'hidden',
-                name: 'branch_lab_infos',
-                value: JSON.stringify(branchData)
-            }).appendTo('#app_certi_form');
-
-
-
-            // console.log('mainLabInfo==>',mainLabInfo);
-            // return;
-
-            // return;
-            var  number =  1;
-            var max_size = "{{ ini_get('post_max_size') }}";
-            var res = max_size.replace("M", "");
-            $('#app_certi_form').find('input[type="file"]').each(function(index, el) {
-                if(checkNone($(el).val()) && $(el).prop("tagName")=="INPUT" && $(el).prop("type")=="file"   ){
-                    number +=  (el.files[0].size /1024/1024);
-                }
-            });
-            
-            var row = $("input[name=lab_ability]:checked").val();
-            if(row == 'test'){ 
-                // var test_scope_branch_id = $(".test_scope_branch_id").length;
-                // if(test_scope_branch_id > 0){
-                if(number < res){
-                    $('div#status_btn').html('<input type="text" name="save" value="' + status + '" hidden>');
-                    setTimeout(function () {
-                        $('#app_certi_form').submit();
-                    }, 500);
-                }else{
-                    Swal.fire(
-                        'ขนาดไฟล์รวม '+number.toFixed(2)+' MB ไม่สามารถบันทึกได้ ต้องไม่เกิน ' + res + ' MB',
-                        '',
-                        'warning'
-                    )
-                }
-                // }else{
-                //     Swal.fire(
-                //         'กรุณาเลือก ขอบข่ายที่ยื่นขอรับการรับรองห้องปฏิบัติการ (ทดสอบ)',
-                //         '',
-                //         'info'
-                //      )
-                // }
-            }else{  //ห้องปฏิบัติการ (สอบเทียบ)
-               
-                var calibrate_branch_id = $(".calibrate_branch_id").length;
+                            if($("input[name=lab_ability]:checked").val() == "calibrate"){
+                                uniqueCalMainBranches = getUniqueCalMainBranches(branchData, mainLabInfo);
+                            }else if($("input[name=lab_ability]:checked").val() == "test")
+                            {
+                                uniqueCalMainBranches = getUniqueTestMainBranches(branchData, mainLabInfo);
+                            }
                 
-                // if(calibrate_branch_id > 0){
-                console.log('submit สอบเทียบ ' + calibrate_branch_id);
-                console.log('number ' + number);
-                console.log('res ' + res);
-                if(number < res){
-                    $('div#status_btn').html('<input type="text" name="save" value="' + status + '" hidden>');
-                    console.log('aha');
-                    setTimeout(function () {
-                        $('#app_certi_form').submit();
-                    }, 500);
-                }else{
-                    Swal.fire(
-                        'ขนาดไฟล์รวม '+number.toFixed(2)+' MB ไม่สามารถบันทึกได้ ต้องไม่เกิน ' + res + ' MB',
-                        '',
-                        'warning'
-                    )
-                }
-                // }else{
-                //     Swal.fire(
-                //         'กรุณาเลือก ขอบข่ายที่ยื่นขอรับการรับรองห้องปฏิบัติการ (สอบเทียบ)',
-                //         '',
-                //         'info'
-                //     )
-                // }
-            }
+                            renderHiddenInputs(uniqueCalMainBranches);
+
+
+                            // แปลง lab_types ของ main_lab_info
+                            mainLabInfo.lab_types = transformLabTypes(mainLabInfo.lab_types);
+
+                            // แปลง lab_types ของแต่ละสาขา
+                            branchData.forEach(branch => {
+                                branch.lab_types = transformLabTypes(branch.lab_types);
+                            });
+
+                            // ล้าง hidden input เดิม (ถ้ามี)
+                            $('#app_certi_form').find('input[name="main_lab_info"]').remove();
+                            $('#app_certi_form').find('input[name="branch_lab_infos"]').remove();
+
+                            // เพิ่ม hidden input สำหรับ main_lab_info
+                            $('<input>').attr({
+                                type: 'hidden',
+                                name: 'main_lab_info',
+                                value: JSON.stringify(mainLabInfo)
+                            }).appendTo('#app_certi_form');
+
+                            // เพิ่ม hidden input สำหรับ branch_lab_infos
+                            $('<input>').attr({
+                                type: 'hidden',
+                                name: 'branch_lab_infos',
+                                value: JSON.stringify(branchData)
+                            }).appendTo('#app_certi_form');
+
+                            var  number =  1;
+                            var max_size = "{{ ini_get('post_max_size') }}";
+                            var res = max_size.replace("M", "");
+                            $('#app_certi_form').find('input[type="file"]').each(function(index, el) {
+                                if(checkNone($(el).val()) && $(el).prop("tagName")=="INPUT" && $(el).prop("type")=="file"   ){
+                                    number +=  (el.files[0].size /1024/1024);
+                                }
+                            });
+                            
+                            var row = $("input[name=lab_ability]:checked").val();
+                            if(row == 'test'){ 
+                                // var test_scope_branch_id = $(".test_scope_branch_id").length;
+                                // if(test_scope_branch_id > 0){
+                                if(number < res){
+                                    $('div#status_btn').html('<input type="text" name="save" value="' + status + '" hidden>');
+                                    setTimeout(function () {
+                                        $('#app_certi_form').submit();
+                                    }, 500);
+                                }else{
+                                    Swal.fire(
+                                        'ขนาดไฟล์รวม '+number.toFixed(2)+' MB ไม่สามารถบันทึกได้ ต้องไม่เกิน ' + res + ' MB',
+                                        '',
+                                        'warning'
+                                    )
+                                }
+                            }else{ 
+                            
+                                var calibrate_branch_id = $(".calibrate_branch_id").length;
+                                
+                                // if(calibrate_branch_id > 0){
+                                console.log('submit สอบเทียบ ' + calibrate_branch_id);
+                                console.log('number ' + number);
+                                console.log('res ' + res);
+                                if(number < res){
+                                    $('div#status_btn').html('<input type="text" name="save" value="' + status + '" hidden>');
+                                    console.log('aha');
+                                    setTimeout(function () {
+                                        $('#app_certi_form').submit();
+                                    }, 500);
+                                }else{
+                                    Swal.fire(
+                                        'ขนาดไฟล์รวม '+number.toFixed(2)+' MB ไม่สามารถบันทึกได้ ต้องไม่เกิน ' + res + ' MB',
+                                        '',
+                                        'warning'
+                                    )
+                                }
+                            }
+                    }else{
+                        alert("ยังไม่ได้เพิ่มขอบข่าย");
+                    }
+                });
         }
 
         //ฉบับร่าง
         function  submit_form_draft(status){
 
-            // let purpose = $('input[name="purpose"]:checked').val();
+            var accordingFormula_data = $('#according_formula').val();
+            var labAbility_data = $('input[name="lab_ability"]:checked').val();
+            var purpose_data = $('input[name="purpose"]:checked').val();
 
-    
-            // if(purpose == 6)
-            // {
-            //     if($('#transferee_name').val() == "")
-            //     {
-            //         alert("โปรดตรวสอบข้อมูลผู้โอน")
-            //         return;
-            //     }
-            // }
+            console.log(accordingFormula_data,labAbility_data,purpose_data)
 
- 
-            // if(validateMainScope() == false){
-            //     alert('รูปแบบขอบข่ายสำนักงานไม่ถูกต้อง โปรดตรวจสอบว่าได้เพิ่มขอบข่ายทุกประเภทสถานปฏิบัติการแล้ว');
-            //     return
-            // }
-
-            // if(validateBranchScope() == false){
-            //     alert('รูปแบบขอบข่ายสาขาไม่ถูกต้อง โปรดตรวจสอบว่าได้เพิ่มขอบข่ายทุกประเภทสถานปฏิบัติการแล้ว');
-            //     return
-            // }
-
-            // var lab_main_address = JSON.parse(sessionStorage.getItem('lab_main_address'));
-
-            // var updatedFields = {
-            //     checkbox_main: null,
-            //     address_number_add: $('#address_number').val(),
-            //     village_no_add: $('#village_no').val(),
-            //     address_soi: $('#address_soi').val(),
-            //     address_street: $('#address_street').val(),
-            //     address_city_add: $('#address_city').val(),
-            //     address_city_text_add: $('#address_city option:selected').text(),
-            //     address_district_add: $('#address_district').val(),
-            //     sub_district_add: $('#sub_district').val(),
-            //     postcode_add: $('#postcode').val(),
-            //     lab_address_no_eng_add: $('#lab_address_no_eng').val(),
-            //     lab_moo_eng_add: $('#lab_moo_eng').val(),
-            //     lab_soi_eng_add: $('#lab_soi_eng').val(),
-            //     lab_street_eng_add: $('#lab_street_eng').val(),
-            //     lab_province_text_eng_add: $('#lab_province_eng option:selected').text(),
-            //     lab_province_eng_add: $('#lab_province_eng').val(),
-            //     lab_amphur_eng_add: $('#lab_amphur_eng').val(),
-            //     lab_district_eng_add: $('#lab_district_eng').val(),
-
-            //     amphur_id_add: $('#address_district').data('id'),
-            //     tambol_id_add: $('#sub_district').data('id'),
-            // };
-
-            // // รวมข้อมูลใหม่เข้ากับข้อมูลเดิม
-            // lab_main_address = { ...lab_main_address, ...updatedFields };
-
-            // sessionStorage.setItem('lab_main_address', JSON.stringify(lab_main_address));
-
-            // var lab_addresses_array = JSON.stringify(JSON.parse(sessionStorage.getItem('lab_addresses_array')) || []);
-            // var lab_main_address = JSON.stringify(JSON.parse(sessionStorage.getItem('lab_main_address')) || {});
-
-            // var lab_addresses_json = JSON.parse(sessionStorage.getItem('lab_addresses_array')) || [];
-            // var lab_main_address_json = JSON.parse(sessionStorage.getItem('lab_main_address')) || {};
-
- 
-            // var uniqueCalMainBranches = getUniqueCalMainBranches(lab_addresses_json, lab_main_address_json);
-
-
-            // $('#lab_addresses_input').val(lab_addresses_array);
-            // $('#lab_main_address_input').val(lab_main_address);
-
-            // ตรวจสอบข้อมูลก่อนส่ง
-            if (!validateLabData()) { 
-                return; // หยุดการทำงานถ้าไม่ผ่านการตรวจสอบ
-            }
-
-            let purpose = $('input[name="purpose"]:checked').val();
-
-            if(purpose == 6)
-            {
-                if($('#transferee_name').val() == "")
-                {
-                    alert("โปรดตรวสอบข้อมูลผู้โอน");
-                    return;
-                }
-            }
-
-
-            const mainLabInfo = JSON.parse(sessionStorage.getItem('main_lab_info')) || {};
-
-            const branchData = JSON.parse(sessionStorage.getItem('branch_lab_infos')) || [];
-
-
-            // var uniqueCalMainBranches = getUniqueCalMainBranches(branchData, mainLabInfo);
-            var uniqueCalMainBranches;
-            if($("input[name=lab_ability]:checked").val() == "calibrate"){
-                uniqueCalMainBranches = getUniqueCalMainBranches(branchData, mainLabInfo);
-            }else if($("input[name=lab_ability]:checked").val() == "test")
-            {
-                uniqueCalMainBranches = getUniqueTestMainBranches(branchData, mainLabInfo);
-            }
-
-            renderHiddenInputs(uniqueCalMainBranches);
-
-
-            // แปลง lab_types ของ main_lab_info
-            mainLabInfo.lab_types = transformLabTypes(mainLabInfo.lab_types);
-
-            // แปลง lab_types ของแต่ละสาขา
-            branchData.forEach(branch => {
-                branch.lab_types = transformLabTypes(branch.lab_types);
-            });
-
-            // ล้าง hidden input เดิม (ถ้ามี)
-            $('#app_certi_form').find('input[name="main_lab_info"]').remove();
-            $('#app_certi_form').find('input[name="branch_lab_infos"]').remove();
-
-            // เพิ่ม hidden input สำหรับ main_lab_info
-            $('<input>').attr({
-                type: 'hidden',
-                name: 'main_lab_info',
-                value: JSON.stringify(mainLabInfo)
-            }).appendTo('#app_certi_form');
-
-            // เพิ่ม hidden input สำหรับ branch_lab_infos
-            $('<input>').attr({
-                type: 'hidden',
-                name: 'branch_lab_infos',
-                value: JSON.stringify(branchData)
-            }).appendTo('#app_certi_form');
-
-
-
-            var  number =  1;
-            var max_size = "{{ ini_get('post_max_size') }}";
-            var res = max_size.replace("M", "");
-            $('#app_certi_form').find('input[type="file"]').each(function(index, el) {
-                if(checkNone($(el).val()) && $(el).prop("tagName")=="INPUT" && $(el).prop("type")=="file"   ){
-                    number +=  (el.files[0].size /1024/1024);
-                }
-            });
-
-            Swal.fire({
-                title: 'ยืนยันการทำรายงาน ฉบับร่าง!',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'บันทึก',
-                cancelButtonText: 'ยกเลิก'
-            }).then((result) => {
-                    if (result.value) {
-                        if(number < res){
-                            $('#checkbox_confirm').attr('required',false);
-                            $('div#status_btn').html('<input type="text" name="draft" value="' + status + '" hidden>');
-                            setTimeout(function () {
-                                $('#app_certi_form').submit();
-                            }, 500);
-                        }else{
-                            Swal.fire(
-                                        'ขนาดไฟล์รวม '+number.toFixed(2)+' MB ไม่สามารถบันทึกได้ ต้องไม่เกิน ' + res + ' MB',
-                                        '',
-                                        'warning'
-                                    )
-                        }
-                    }
+             fetch("{!! route('certify.applicant.download-html-template') !!}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        accordingFormula: accordingFormula_data,
+                        labAbility: labAbility_data,
+                        purpose: purpose_data,
+                    })
                 })
+                .then(response => {
+                    if (response.ok) {
+                        // ตรวจสอบข้อมูลก่อนส่ง
+                        if (!validateLabData()) { 
+                            return; // หยุดการทำงานถ้าไม่ผ่านการตรวจสอบ
+                        }
+
+                        let purpose = $('input[name="purpose"]:checked').val();
+
+                        if(purpose == 6)
+                        {
+                            if($('#transferee_name').val() == "")
+                            {
+                                alert("โปรดตรวสอบข้อมูลผู้โอน");
+                                return;
+                            }
+                        }
+
+
+                        const mainLabInfo = JSON.parse(sessionStorage.getItem('main_lab_info')) || {};
+
+                        const branchData = JSON.parse(sessionStorage.getItem('branch_lab_infos')) || [];
+
+
+                        // var uniqueCalMainBranches = getUniqueCalMainBranches(branchData, mainLabInfo);
+                        var uniqueCalMainBranches;
+                        if($("input[name=lab_ability]:checked").val() == "calibrate"){
+                            uniqueCalMainBranches = getUniqueCalMainBranches(branchData, mainLabInfo);
+                        }else if($("input[name=lab_ability]:checked").val() == "test")
+                        {
+                            uniqueCalMainBranches = getUniqueTestMainBranches(branchData, mainLabInfo);
+                        }
+
+                        renderHiddenInputs(uniqueCalMainBranches);
+
+                        // แปลง lab_types ของ main_lab_info
+                        mainLabInfo.lab_types = transformLabTypes(mainLabInfo.lab_types);
+
+                        // แปลง lab_types ของแต่ละสาขา
+                        branchData.forEach(branch => {
+                            branch.lab_types = transformLabTypes(branch.lab_types);
+                        });
+
+                        // ล้าง hidden input เดิม (ถ้ามี)
+                        $('#app_certi_form').find('input[name="main_lab_info"]').remove();
+                        $('#app_certi_form').find('input[name="branch_lab_infos"]').remove();
+
+                        // เพิ่ม hidden input สำหรับ main_lab_info
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'main_lab_info',
+                            value: JSON.stringify(mainLabInfo)
+                        }).appendTo('#app_certi_form');
+
+                        // เพิ่ม hidden input สำหรับ branch_lab_infos
+                        $('<input>').attr({
+                            type: 'hidden',
+                            name: 'branch_lab_infos',
+                            value: JSON.stringify(branchData)
+                        }).appendTo('#app_certi_form');
+
+
+
+                        var  number =  1;
+                        var max_size = "{{ ini_get('post_max_size') }}";
+                        var res = max_size.replace("M", "");
+                        $('#app_certi_form').find('input[type="file"]').each(function(index, el) {
+                            if(checkNone($(el).val()) && $(el).prop("tagName")=="INPUT" && $(el).prop("type")=="file"   ){
+                                number +=  (el.files[0].size /1024/1024);
+                            }
+                        });
+
+                        Swal.fire({
+                            title: 'ยืนยันการทำรายงาน ฉบับร่าง!',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'บันทึก',
+                            cancelButtonText: 'ยกเลิก'
+                        }).then((result) => {
+                                if (result.value) {
+                                    if(number < res){
+                                        $('#checkbox_confirm').attr('required',false);
+                                        $('div#status_btn').html('<input type="text" name="draft" value="' + status + '" hidden>');
+                                        setTimeout(function () {
+                                            $('#app_certi_form').submit();
+                                        }, 500);
+                                    }else{
+                                        Swal.fire(
+                                                    'ขนาดไฟล์รวม '+number.toFixed(2)+' MB ไม่สามารถบันทึกได้ ต้องไม่เกิน ' + res + ' MB',
+                                                    '',
+                                                    'warning'
+                                                )
+                                    }
+                                }
+                        })
+                    }else{
+                        alert("ยังไม่ได้เพิ่มขอบข่าย");
+                    }
+
+                });
+
+
         }
 
         function button_save(){

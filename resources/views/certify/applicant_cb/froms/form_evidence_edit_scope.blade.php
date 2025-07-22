@@ -175,22 +175,22 @@
 
             @if ( isset( $certi_cb->id ) && count( App\Models\Certify\ApplicantCB\CertiCBAttachAll::where('app_certi_cb_id', $certi_cb->id )->where('file_section', '1')->get() ) > 0 )
 
-                @php
+                {{-- @php
                     $file_section3 = App\Models\Certify\ApplicantCB\CertiCBAttachAll::where('app_certi_cb_id', $certi_cb->id)
-                                    ->where('file_section', '1')
+                                    ->where('file_section', '3')
                                     ->latest() // เรียงตาม created_at จากใหม่ไปเก่า
                                     ->first(); // ดึงรายการล่าสุดเพียงรายการเดียว
                     
-                @endphp
+                @endphp --}}
 
     
-                <div class="form-group">
+                {{-- <div class="form-group">
                     <div class="col-md-4 text-light"></div>
                     <div class="col-md-6">
                         <a href="{!! HP::getFileStorage($attach_path.$file_section3->file) !!}" target="_blank" class="view-attach"> {!! HP::FileExtension($file_section3->file_client_name)  ?? '' !!} {!! $file_section3->file_client_name  ?? '' !!}</a>
                     
                     </div>
-                </div>
+                </div> --}}
             @endif
             
             @if ($methodType != 'show')
@@ -199,9 +199,12 @@
                         <div class="form-group">
                             <div class="col-md-10"></div>
                             <div class="col-md-2">
-                                <button type="button" id="btn_add_cb_scope_isic_isic" class="btn btn-success">
+                                {{-- <button type="button" id="btn_add_cb_scope_isic_isic" class="btn btn-success">
                                     <i class="icon-plus"></i>เพิ่มขอบข่าย
-                                </button>
+                                </button> --}}
+
+                                 <a href="{{route('certify.applicant-cb.cb-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm" style="margin-bottom:5px">แก้ไขขอบข่าย</a> 
+
                             </div>
                         </div> 
                     </div>

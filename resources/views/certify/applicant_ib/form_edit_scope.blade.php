@@ -73,8 +73,8 @@
 
 @if ($certi_ib->tracking == null)
         @if ($certi_ib == null || empty($certi_ib->doc_review_reject))
-            @include ('certify.applicant_ib/froms.infomation')
-            @include ('certify.applicant_ib/froms.form_request')
+            @include ('certify.applicant_ib/froms.infomation_edit_scope')
+            @include ('certify.applicant_ib/froms.form_request_edit_scope')
         @endif
 
 
@@ -376,9 +376,9 @@
             // console.log(transactions)
 
             // createTransactionInput()
-            if (!createTransactionInput()) {
-                return; // ออกถ้า createTransactionInput คืนค่า false
-            }
+            // if (!createTransactionInput()) {
+            //     return; // ออกถ้า createTransactionInput คืนค่า false
+            // }
 
             // return;
             var  number =  1;

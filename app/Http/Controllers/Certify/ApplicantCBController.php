@@ -6,52 +6,63 @@ use HP;
 use File;
 use App\User;
 use stdClass;
+use Mpdf\Mpdf;
 use Carbon\Carbon;
+use App\AttachFile;
 use App\ApplicantCB;
 use App\Http\Requests;
+use App\CbHtmlTemplate;
+use Mpdf\HTMLParserMode;
 use App\Mail\CB\CBCostMail;
 use App\Models\Basic\Amphur;
 use Illuminate\Http\Request;
 use App\Mail\CB\CBReportMail;
 use App\Models\Basic\Zipcode;
 use App\Models\Esurv\Trader; 
+ 
 use App\Models\Basic\District;
 use App\Models\Basic\Province;
 use App\Mail\CB\CBAuditorsMail;
 use App\Mail\CB\CBPayInOneMail;
- 
 use App\Mail\CB\CBPayInTwoMail;
 use App\Mail\CB\CBApplicantMail;
 use App\Models\Bcertify\Formula;
+use App\Mail\CB\EditScopeRequest;
 use App\Mail\CB\CBInspectiontMail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Mail\Lab\NotifyCBTransferer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+
 use App\Mail\CB\CBSaveAssessmentMail;
+
 use App\Mail\CB\CBConFirmAuditorsMail;
+
 use App\Services\CreateCbScopeBcmsPdf;
 use App\Services\CreateCbScopeIsicPdf;
 use App\Mail\CB\CBRequestDocumentsMail;
-
 use App\Models\Certificate\CbScopeBcms;
-
+use App\Models\Certificate\CbScopeEnms;
+use App\Models\Certificate\CbScopeMdms;
+use App\Models\Certificate\CbScopeSfms;
 use App\Models\Certificate\CbTrustMark;
-
 use Illuminate\Support\Facades\Storage;
 use App\Models\Bcertify\CbScopeIsicIsic;
+use App\Models\Certificate\CbScopeOhsms;
+use App\Models\Certificate\CbScopeCorsia;
+
 use App\Models\Certify\ApplicantCB\CertiCb;
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\Bcertify\CertificationBranch;
 use App\Models\Certify\SendCertificateLists;
 use App\Models\Certificate\CbDocReviewAuditor;
+use App\Models\Certificate\TrackingInspection;
 use App\Models\Certify\ApplicantCB\CertiCBCost;
 use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantCB\CertiCBReport;
 use App\Models\Certify\ApplicantCB\CertiCBReview;
-
 use App\Models\Certificate\CbScopeBcmsTransaction;
 use App\Models\Certificate\CbScopeIsicTransaction;
 use App\Models\Certify\ApplicantCB\CertiCBFileAll;
@@ -67,7 +78,7 @@ use App\Models\Certify\ApplicantCB\CertiCBSaveAssessment;
 use App\Models\Certificate\CbScopeIsicCategoryTransaction;
 use App\Models\Certify\ApplicantCB\CertiCBSaveAssessmentBug;
 use App\Models\Certificate\CbScopeIsicSubCategoryTransaction;
- 
+
 class ApplicantCBController extends Controller
 {
        private $attach_path;//ที่เก็บไฟล์แนบ
@@ -170,11 +181,15 @@ class ApplicantCBController extends Controller
             // $certifieds = CertiCBExport::whereIn('app_no',$app_certi_cb->get()->pluck('app_no')->toArray())->get();
             // dd($certifieds);
             // $Formula_Arr = Formula::where('applicant_type',1)->where('state',1)->orderbyRaw('CONVERT(title USING tis620)')->pluck('title','id');
+            // $Formula_Arr = Formula::where('applicant_type', 1)
+            //     ->where('state', 1)
+            //     ->whereHas('certificationBranchs', function ($query) {
+            //         $query->whereNotNull('model_name');
+            //     })
+            //     ->pluck('title', 'id');
+
             $Formula_Arr = Formula::where('applicant_type', 1)
                 ->where('state', 1)
-                ->whereHas('certificationBranchs', function ($query) {
-                    $query->whereNotNull('model_name');
-                })
                 ->pluck('title', 'id');
 
             $cbTrustmarks = CbTrustMark::all();
@@ -182,7 +197,6 @@ class ApplicantCBController extends Controller
             $Query = CertiCb::with(['app_certi_cb_export' => function($q){
                 $q->where('status', 4);
             }]);
-
             
 
             $certifieds = collect() ;
@@ -421,15 +435,21 @@ class ApplicantCBController extends Controller
     
     public function store(Request $request)
     {
-        
+        $user= auth()->user();
         $request->json()->all();
         
         // ดึงข้อมูล JSON จาก request
-        $cbScopeJson = json_decode($request->cbScopeJson, true);
+        // $cbScopeJson = json_decode($request->cbScopeJson, true);
 
-        // dd($request->all());
+        $cbHtmlTemplate = CbHtmlTemplate::where('user_id',$user->id)
+                ->where('type_standard',$request->type_standard)
+                ->where('petitioner',$request->petitioner)
+                ->where('trust_mark',$request->trust_mark)
+                ->first();
 
-        $selectedModel = $request->selectedModel;
+        // dd($request->all(),$cbHtmlTemplate);
+
+        // $selectedModel = $request->selectedModel;
         
         $model = str_slug('applicantcbs','-');
         $data_session     =    HP::CheckSession();
@@ -465,20 +485,44 @@ class ApplicantCBController extends Controller
                     $this->SaveFileSection($request, 'repeater-section5', 'attachs_sec5', 5 , $certi_cb );
                 }
 
-
-                if($selectedModel == "CbScopeIsicIsic")
+               $cercbId = $certi_cb->id;
+               
+                if($cbHtmlTemplate !== null)
                 {
-                    $this->storeCbScopeIsicIsic($cbScopeJson,$certi_cb);
-                    $pdfService = new CreateCbScopeIsicPdf($certi_cb);
-                    $pdfContent = $pdfService->generatePdf();
+                     
+                    $cbHtmlTemplate->update([
+                        'app_certi_cb_id' => $cercbId
+                    ]);
+                    // dd($certi_cb->id);
+                }else{
+                    $cbHtmlTemplate = cbHtmlTemplate::create([
+                        'user_id' => $user->id,
+                         'type_standard' => $request->type_standard,
+                        'petitioner' => $request->petitioner,
+                        'trust_mark' => $request->trust_mark,
+                        'app_certi_cb_id' => $cercbId
+                    ]);
+                }
+
+                if($certi_cb->status != 0){
+                    $this->exportScopePdf($cercbId,$cbHtmlTemplate);
+                  
+                }
+
+                
+                // if($selectedModel == "CbScopeIsicIsic")
+                // {
+                    // $this->storeCbScopeIsicIsic($cbScopeJson,$certi_cb);
+                    // $pdfService = new CreateCbScopeIsicPdf($certi_cb);
+                //     $pdfContent = $pdfService->generatePdf();
                 
 
-                }else if($selectedModel == "CbScopeBcms")
-                {
-                    $this->storeCbScopeBcms($cbScopeJson,$certi_cb);
-                    $pdfService = new CreateCbScopeBcmsPdf($certi_cb);
-                    $pdfContent = $pdfService->generatePdf();
-                }
+                // }else if($selectedModel == "CbScopeBcms")
+                // {
+                //     $this->storeCbScopeBcms($cbScopeJson,$certi_cb);
+                //     $pdfService = new CreateCbScopeBcmsPdf($certi_cb);
+                //     $pdfContent = $pdfService->generatePdf();
+                // }
 
                 // เงื่อนไขเช็คมีใบรับรอง 
                 $this->save_certicb_export_mapreq($certi_cb);
@@ -488,6 +532,7 @@ class ApplicantCBController extends Controller
                   
                 }
 
+                //  dd($certi_cb->id);
                 if(!empty($request->transferer_id_number) && !empty($request->transferee_certificate_number))
                 {
                     $transfererIdNumber = $request->input('transferer_id_number');
@@ -812,6 +857,8 @@ class ApplicantCBController extends Controller
      
             $certifieds = CertiCBExport::whereIn('app_no',$certiCbs->get()->pluck('app_no')->toArray())->get();
 
+            // dd($certi_cb);
+
             return view('certify/applicant_cb.edit', compact('tis_data',
                                                              'previousUrl',
                                                              'certi_cb',
@@ -897,36 +944,28 @@ class ApplicantCBController extends Controller
         $cbScopeJson = json_decode($request->cbScopeJson, true);
         $selectedModel = $request->selectedModel;
         $certi_cb =  CertiCb::where('token',$token)->first();
-
+        $user= auth()->user();
+        $cbHtmlTemplate = CbHtmlTemplate::where('user_id',$user->id)
+                ->where('app_certi_cb_id',$certi_cb->id)
+                ->where('type_standard',$request->type_standard)
+                ->where('petitioner',$request->petitioner)
+                ->where('trust_mark',$request->trust_mark)
+                ->first();
+        // dd($cbHtmlTemplate);
         if($certi_cb->require_scope_update != "1")
         {
             if($certi_cb->tracking == null)
             {
                 if($certi_cb->status == 9 && $certi_cb->doc_review_reject !== null)
                 {
+                    
                     $this->docUpdate($request, $token);
                     $certi_cb->update([
                         'doc_review_reject' => null
                     ]);
                 }else{
         
-                    if($selectedModel == "CbScopeIsicIsic")
-                    {
-                        $this->clearCbScopeIsic($certi_cb);
-                        $certi_cb =  CertiCb::where('token',$token)->first();
-                        $this->storeCbScopeIsicIsic($cbScopeJson,$certi_cb);
-                        $pdfService = new CreateCbScopeIsicPdf($certi_cb);
-                        $pdfContent = $pdfService->generatePdf();
-                    
-        
-                    }else if($selectedModel == "CbScopeBcms")
-                    {
-                        $this->clearCbScopeBcms($certi_cb);
-                        $certi_cb =  CertiCb::where('token',$token)->first();
-                        $this->storeCbScopeBcms($cbScopeJson,$certi_cb);
-                        $pdfService = new CreateCbScopeBcmsPdf($certi_cb);
-                        $pdfContent = $pdfService->generatePdf();
-                    }
+                    $this->exportScopePdf( $certi_cb->id,$cbHtmlTemplate);
         
                     $this->normalUpdate($request, $token);
                 }
@@ -937,30 +976,22 @@ class ApplicantCBController extends Controller
 
         }else{
 
-            if($selectedModel == "CbScopeIsicIsic")
-            {
-                // dd($cbScopeJson);
-                $this->clearCbScopeIsic($certi_cb);
-                $certi_cb =  CertiCb::where('token',$token)->first();
-                $this->storeCbScopeIsicIsic($cbScopeJson,$certi_cb);
-                $pdfService = new CreateCbScopeIsicPdf($certi_cb);
-                $pdfContent = $pdfService->generatePdf();
-            
 
-            }else if($selectedModel == "CbScopeBcms")
-            {
-                $this->clearCbScopeBcms($certi_cb);
-                $certi_cb =  CertiCb::where('token',$token)->first();
-                $this->storeCbScopeBcms($cbScopeJson,$certi_cb);
-                $pdfService = new CreateCbScopeBcmsPdf($certi_cb);
-                $pdfContent = $pdfService->generatePdf();
-            }
+            $cbHtmlTemplate = CbHtmlTemplate::where('user_id',$user->id)
+                ->where('app_certi_cb_id',$certi_cb->id)
+                ->where('type_standard',$request->type_standard)
+                ->where('petitioner',$request->petitioner)
+                ->where('trust_mark',$request->trust_mark)
+                ->first();
+
+
+            $this->exportScopePdf( $certi_cb->id,$cbHtmlTemplate);
+
             CertiCb::where('token',$token)->first()->update([
                 'require_scope_update' => 2
             ]);
 
         }
-        // dd($certi_cb->status);
 
 
         return redirect('certify/applicant-cb')->with('message', 'แก้ไขเรียบร้อยแล้ว!');
@@ -1059,35 +1090,65 @@ class ApplicantCBController extends Controller
 
     public function updateScope(Request $request, $token)
     {
-        $cbScopeJson = json_decode($request->cbScopeJson, true);
         $certi_cb =  CertiCb::where('token',$token)->first();
-        // dd($certi_cb);
+
+        $user= auth()->user();
+        $cbHtmlTemplate = CbHtmlTemplate::where('user_id',$user->id)
+                ->where('app_certi_cb_id',$certi_cb->id)
+                ->where('type_standard',$request->type_standard)
+                ->where('petitioner',$request->petitioner)
+                ->where('trust_mark',$request->trust_mark)
+                ->first();
+
         CertiCb::where('token',$token)->update([
             'require_scope_update' => null
          ]);
 
+         $this->exportScopePdf( $certi_cb->id,$cbHtmlTemplate);
+
+         $this->updateScopeMail($certi_cb);
+
+        return redirect('certify/applicant-cb')->with('flash_message', 'แก้ไข applicantCB เรียบร้อยแล้ว!');
+    }
+
+    public function updateScopeMail($certi_cb)
+    {
+                  $config = HP::getConfig();
+            $url  =   !empty($config->url_center) ? $config->url_center : url('');    
+
+             $data_app =[
+                        'certi_cb' => $certi_cb ,
+                        'email'     => $certi_cb->email,
+                        'url'       => $url.'/certify/check_certificate-cb/'.$certi_cb->token ?? '-',
+                        'email_cc'  => count($certi_cb->DataEmailAndLtCBCC) > 0  ? $certi_cb->DataEmailAndLtCBCC : 'cb@tisi.mail.go.th'
+                        ];
+
+             $email_cc =    (count($certi_cb->DataEmailAndLtCBCC) > 0 ) ? implode(',', $certi_cb->DataEmailAndLtCBCC): 'cb@tisi.mail.go.th' ;
+
+             $log_email =  HP::getInsertCertifyLogEmail( $certi_cb->app_no,
+                                                        $certi_cb->id,
+                                                        (new CertiCb)->getTable(),
+                                                        $certi_cb->id,
+                                                        (new CertiCb)->getTable(),
+                                                        3,
+                                                        'แจ้งการแก้ใขขอบข่ายเรียบร้อยแล้ว',
+                                                        view('mail.CB.mail_request_edit_cb_scope', $data_app),
+                                                        $certi_cb->created_by,
+                                                        $certi_cb->agent_id,
+                                                        null,
+                                                        $certi_cb->email,
+                                                        implode(',',(array)$certi_cb->CertiEmailLt),
+                                                        $email_cc,
+                                                        null,
+                                                        null
+                                                   );
+
+             $html = new EditScopeRequest($data_app);
+             $mail =  Mail::to($certi_cb->CertiEmailLt)->send($html);
          
-        if($certi_cb->scope_table == "cb_scope_isic_transactions")
-        {
-            $this->clearCbScopeIsic($certi_cb);
-            $certi_cb =  CertiCb::where('token',$token)->first();
-            $this->storeCbScopeIsicIsic($cbScopeJson,$certi_cb);
-            $pdfService = new CreateCbScopeIsicPdf($certi_cb);
-            $pdfContent = $pdfService->generatePdf();
-        
-
-        }else if($certi_cb->scope_table == "cb_scope_bcms_transactions")
-        {
-            $this->clearCbScopeBcms($certi_cb);
-            $certi_cb =  CertiCb::where('token',$token)->first();
-            $this->storeCbScopeBcms($cbScopeJson,$certi_cb);
-            $pdfService = new CreateCbScopeBcmsPdf($certi_cb);
-            $pdfContent = $pdfService->generatePdf();
-        }
-        
-
-
-        return redirect('certify/applicant-ib')->with('flash_message', 'แก้ไข applicantIB เรียบร้อยแล้ว!');
+             if(is_null($mail) && !empty($log_email)){
+                 HP::getUpdateCertifyLogEmail($log_email->id);
+             }
     }
 
     public function normalUpdate($request, $token)
@@ -1160,6 +1221,7 @@ class ApplicantCBController extends Controller
 
     public function docUpdate($request, $token)
     {
+        $requestData = $request->all();
         $model = str_slug('applicantcbs','-');
         $data_session     =    HP::CheckSession();
         if(!empty($data_session)){
@@ -3194,7 +3256,7 @@ class ApplicantCBController extends Controller
 
     public function getCbDocReviewAuditor(Request $request)
     {
-        
+        // dd("ok");
         $cbDocReviewAuditor = CbDocReviewAuditor::where('app_certi_cb_id',$request->certiCbId)->first();
         // dd($cbDocReviewAuditor);
         return response()->json([
@@ -3288,4 +3350,925 @@ class ApplicantCBController extends Controller
          ]);  
  
     }
+
+    public function scopeEditor(Request $request)
+    {
+        // Retrieve query parameters in alphabetical order
+        $addressNo = $request->input('address');
+        $allay = $request->input('allay');
+        $amphurId = $request->input('amphur_id');
+        $cbAddressNoEng = $request->input('cb_address_no_eng');
+        $cbAmphurEng = $request->input('cb_amphur_eng');
+        $cbDistrictEng = $request->input('cb_district_eng');
+        $cbMooEng = $request->input('cb_moo_eng');
+        $cbPostcodeEng = $request->input('cb_postcode_eng');
+        $cbProvinceEng = $request->input('cb_province_eng');
+        $cbSoiEng = $request->input('cb_soi_eng');
+        $cbStreetEng = $request->input('cb_street_eng');
+        $districtId = $request->input('district_id');
+        $nameEnStandard = $request->input('name_en_standard');
+        $nameStandard = $request->input('name_standard');
+        $petitioner = $request->input('petitioner');
+        $postcode = $request->input('postcode');
+        $province = $request->input('province');
+        $road = $request->input('road');
+        $standardChange = $request->query('standard_change');
+        $trustMark = $request->input('trust_mark');
+        $typeStandard = $request->input('type_standard');
+        $villageNo = $request->input('village_no');
+
+        // dd($request->all());
+
+
+        $certificateInitial = CertificationBranch::find($petitioner)->certificate_initial;
+
+
+        $standanrdType = Formula::find($typeStandard);
+        // dd($standanrdType);
+        $address = "เลขที่ " .  $addressNo;
+
+        if($allay!=''){
+           $address .=  " หมู่ที่ " . $allay;
+        }
+
+         if($villageNo!='' && $villageNo !='-'  && $villageNo !='--'){
+           $address .=  " ซอย "  . $villageNo;
+         }
+
+         if($road!='' && $road !='-'  && $road !='--'){
+           $address .=  " ถนน".$road;
+         }
+
+        if($districtId!=''){
+             if(trim($province)=='กรุงเทพมหานคร'){
+                 $address .= " แขวง".$districtId;
+             }else{
+                 $address .= " ตำบล".$districtId;
+ 
+             }
+         }
+
+        if($amphurId!=''){
+             if(trim($province)=='กรุงเทพมหานคร'){
+                 $address .= " เขต".$amphurId;
+             }else{
+                 $address .= " อำเภอ".$amphurId;
+             }
+         }
+
+          if($province!=''){
+             if(trim($province)=='กรุงเทพมหานคร'){
+                 $address .=  " ".trim($province);
+             }else{
+                 $address .=  " จังหวัด".trim($province);
+             }
+         }
+         $address .= " ". $postcode;
+
+         $addressEn = $cbAddressNoEng;
+
+            if($cbMooEng!=''){
+           $addressEn .=  " Moo " . $cbMooEng;
+        }
+
+         if($cbSoiEng!='' && $cbSoiEng !='-'  && $cbSoiEng !='--'){
+           $addressEn .=  " Soi "  . $cbSoiEng;
+         }
+
+         if($cbStreetEng!='' && $cbStreetEng !='-'  && $cbStreetEng !='--'){
+           $addressEn .=  " " . $cbStreetEng . " Road";
+         }
+
+        $addressEn .=  ", ".$cbDistrictEng;
+
+        $addressEn .=  ", ".$cbAmphurEng;
+
+        $addressEn .=  ", ".$cbProvinceEng;
+
+        $addressEn .=  " ".$cbPostcodeEng;
+        $cbDetails = [];
+        if($certificateInitial == "QMS" || $certificateInitial == "EMS" || $certificateInitial == "TLS")
+        {
+            $headerData = [];
+            if ($certificateInitial == "QMS")
+            {
+                $headerData = [
+                    'scopeOfAccreditation' => [
+                        'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                        'en' => "Scope of Accreditation"
+                    ],
+                    'attachmentToCertificate' => [
+                        'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองระบบงานการจัดการคุณภาพ",
+                        'en' => "Attachment to Certificate of Quality Management System Certification Body Accreditation"
+                    ],
+                    'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                    'certificationBody' => [
+                        'th' => $nameStandard,
+                        'en' =>  $nameEnStandard
+                    ],
+                    'premise' => [
+                        'th' => $address,
+                        'en' => $addressEn
+                    ],
+                    'accreditationCriteria' => [
+                        [ 
+                            'th' => "ISO/IEC 17021-1:2015 (มอก. 17021-1-2559)", 
+                            'en' => "ISO 17021-3:2017 (มตช. 17021-3-2562)" 
+                        ],
+                    ],
+                    'certificationMark' => [
+                        'th' => "การรับรองระบบการบริหารงานคุณภาพตามมาตรฐาน ISO 9001/มอก.9001 โดยมีสาขา<br>และขอบข่ายตามมาตรฐานการจัดประเภทอุตสาหกรรมตามกิจกรรมทางเศรษฐกิจ<br>ทุกประเภทตามมาตรฐานสากล (ISIC) มอก.2000-2540 ดังต่อไปนี้",
+                        'en' => "Quality Management system Certification according to ISO 9001/TIS 9001, covered by international Standard industrial classification of all economic activities (ISIC) according to TIS 2000-2540 as following"
+                    ], 
+                ];
+            }else if($certificateInitial == "EMS")
+            {
+                $headerData = [
+                    'scopeOfAccreditation' => [
+                        'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                        'en' => "Scope of Accreditation"
+                    ],
+                    'attachmentToCertificate' => [
+                        'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองระบบการจัดการสิ่งแวดล้อม",
+                        'en' => "Attachment to Certificate of Environmental Management System Certification Body Accreditation"
+                    ],
+                    'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                    'certificationBody' => [
+                        'th' => $nameStandard,
+                        'en' =>  $nameEnStandard
+                    ],
+                    'premise' => [
+                        'th' => $address,
+                        'en' => $addressEn
+                    ],
+                    'accreditationCriteria' => [
+                        [ 
+                            'th' => "ISO/IEC (มอก. 17021-1-2559)", 
+                            'en' => "ISO 17021-2:2016 (มตช. 17021-2-2562)" 
+                        ],
+                    ],
+                    'certificationMark' => [
+                        'th' => "การรับรองระบบการจัดการสิ่งแวดล้อม ตามมาตรฐาน ISO 14001/มอก.14001 โดยมี สาขา<br>และขอบข่ายตามมาตรฐานการจัดประเภทอุตสาหกรรมตามกิจกรรมทางเศรษฐกิจ<br>ทุกประเภทตามมาตรฐานสากล (ISIC) มอก.2000-2540 ดังต่อไปนี้",
+                        'en' => "Environmental Management system Certification according to ISO 14001/TIS 14001, covered byinternational Standard industrial classification of all economic activities (ISIC) according to TIS 2000-2540 as following"
+                    ], 
+                ];
+            }else if($certificateInitial == "TLS")
+            {
+                $headerData = [
+                    'scopeOfAccreditation' => [
+                        'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                        'en' => "Scope of Accreditation"
+                    ],
+                    'attachmentToCertificate' => [
+                        'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองมาตรฐานแรงงานไทย ความรับผิดชอบทางสังคมของธุรกิจไทย",
+                        'en' => "Attachment to Certificate of Thai Labour Standard Certification Body Accreditation"
+                    ],
+                    'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                    'certificationBody' => [
+                        'th' => $nameStandard,
+                        'en' =>  $nameEnStandard
+                    ],
+                    'premise' => [
+                        'th' => $address,
+                        'en' => $addressEn
+                    ],
+                    'accreditationCriteria' => [
+                        [ 
+                            'th' => "ISO/IEC 17021-1:2015 (มอก. 17021-1-2559)", 
+                            'en' => "" 
+                        ],
+                    ],
+                    'certificationMark' => [
+                        'th' => "การรับรองมาตรฐานแรงงานไทย ความรับผิดชอบทางสังคมของธุรกิจไทย ตามมาตรฐาน<br>มรท. ๘๐๐๑ โดยมีสาขาและขอบข่ายตามมาตรฐานการจัดประเภทอุตสาหกรรม<br>ตามกิจกรรมทางเศรษฐกิจทุกประเภทตามมาตรฐานสากล (ISIC) มอก. 2000-2540 ดังต่อไปนี้",
+                        'en' => "Thai Labour Standard Certification according to TLS 8001, covered by International Standard Industrial Classification of all Economic Activities (ISIC) according to TIS 2000-2540 as following"
+                    ], 
+                ];
+            }
+            
+
+            $tableData = [
+                'isicCodes' => [
+                    [ 'code' => "<br>", 'description_th' => "", 'description_en' => "" ],  
+                ]
+            ];
+
+            $cbDetails = $headerData + $tableData;
+        }else if($certificateInitial == "OHSMS")
+        {
+            $cbDetails = [
+                'scopeOfAccreditation' => [
+                    'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                    'en' => "Scope of Accreditation"
+                ],
+                'attachmentToCertificate' => [
+                    'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองระบบการจัดการอาชีวอนามัยและความปลอดภัย",
+                    'en' => "Attachment to Certificate of Occupational Health and Safety Management System Certification Body Accreditation"
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                'certificationBody' => [
+                    'th' => $nameStandard,
+                    'en' =>  $nameEnStandard
+                ],
+                'premise' => [
+                    'th' => $address,
+                    'en' => $addressEn
+                ],
+                'accreditationCriteria' => [
+                    [ 
+                        'th' => "ISO/IEC 17021 1:2015 มอก. 17021-1-2559", 
+                        'en' => "ISO/IEC TS 17021-10:2018" 
+                    ],
+                ],
+                'certificationMark' => [
+                    'th' => "การรับรอง ระบบการจัดการอาชีวอนามัยและความปลอดภัย ตามมาตรฐาน ISO 45001<br>มอก. 45001 โดยมีสาขาและขอบข่ายตามประเภท ของ กิจกรรมทางเศรษฐกิจ ตามที่ระบุ<br>ไว้ในเอกสาร IAF MD 17 ดังต่อไปนี้",
+                    'en' => "Occupational Health and Safety Management System Certification according to ISO 45001 / TIS 45001, covered by economic activities according to IAF MD 17 as following"
+                ],
+                'oshms' => [
+                    [ 'iaf_code' => "<br>", 'description_th' => "", 'description_en' => "" ],
+                    
+                ]
+            ];
+        }else if($certificateInitial == "EnMS")
+        {
+            $cbDetails = [
+                'scopeOfAccreditation' => [
+                    'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                    'en' => "Scope of Accreditation"
+                ],
+                'attachmentToCertificate' => [
+                    'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองระบบการจัดการพลังงาน",
+                    'en' => "Attachment to Certificate of Energy Management System Certification Body Accreditation"
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                'certificationBody' => [
+                    'th' => $nameStandard,
+                    'en' =>  $nameEnStandard
+                ],
+                'premise' => [
+                    'th' => $address,
+                    'en' => $addressEn
+                ],
+                'accreditationCriteria' => [
+                    [ 
+                        'th' => "ISO/IEC TS 17021-1:2015", 
+                        'en' => "ISO 50003:2021 (มตช.50003-2564)" 
+                    ],
+                ],
+                'certificationMark' => [
+                    'th' => "การรับรองระบบการจัดการพลังงานตามมาตรฐาน มตช โดยมีสาขาและ<br>ขอบข่ายตามหลักเกณฑ์ วิธีการ และเงื่อนไขสำหรับการกำหนดขอบข่าย และการสุ่มตัวอย่าง<br>เพื่อการรับรองหน่วยรับรองระบบการจัดการพลังงาน ดังต่อไปนี้",
+                    'en' => "Energy Management system Certification according to ISO 50001/TCAS 50001, covered by Criteria Method and conditions Energy Management System Certification Body Accreditation as following"
+                ],
+                'enms' => [
+                    [ 'description_th' => "", 'description_en' => "" ],
+                    
+                ]
+            ];
+        }else if($certificateInitial == "BCMS" || $certificateInitial == "ISMS")
+        {
+            $headerData = [];
+            if($certificateInitial == "BCMS"){
+                $headerData = [
+                    'scopeOfAccreditation' => [
+                        'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                        'en' => "Scope of Accreditation"
+                    ],
+                    'attachmentToCertificate' => [
+                        'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองระบบการบริหารความต่อเนื่องทางธุรกิจ",
+                        'en' => "Attachment to Certificate of Business Continuity Management Systems Certification Body Accreditation"
+                    ],
+                    'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                    'certificationBody' => [
+                        'th' => $nameStandard,
+                        'en' =>  $nameEnStandard
+                    ],
+                    'premise' => [
+                        'th' => $address,
+                        'en' => $addressEn
+                    ],
+                    'accreditationCriteria' => [
+                        [ 
+                            'th' => "ISO/IEC 17021-1:2015 (มอก. 17021-1-2559)", 
+                            'en' => "" 
+                        ],
+                    ],
+                    'certificationMark' => [
+                        'th' => "การรับรองระบบการจัดการความปลอดภัยด้านสารสนเทศตามมาตรฐาน ISO/IEC<br>22301/มตช. 22301 โดยมีสาขาและขอบข่ายการแบ่งประเภทอุตสาหกรรมตาม<br>กิจกรรมทางเศรษฐกิจทุกประเภทตามมาตรฐานสากล (หมวด A-Q) ที่ระบุไว้ในมาตรฐาน<br>เลขที่ มอก. 2000-2540 ดังต่อไปนี้",
+                        'en' => "Business Continuity Management Systems Certification according to ISO/IEC 22301/TCAS 22301, covered by International Standard Industrial Classification of all Economic Activities (Sector A-Q) according to TIS 2000-2540 as following"
+                    ],  
+                ];
+
+               
+            }else if($certificateInitial == "ISMS")
+            {
+                $headerData = [
+                    'scopeOfAccreditation' => [
+                        'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                        'en' => "Scope of Accreditation"
+                    ],
+                    'attachmentToCertificate' => [
+                        'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองระบบการจัดการความปลอดภัยด้านสารสนเทศ",
+                        'en' => "Attachment to Certificate of Information security management systems Certification Body Accreditation"
+                    ],
+                    'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                    'certificationBody' => [
+                        'th' => $nameStandard,
+                        'en' =>  $nameEnStandard
+                    ],
+                    'premise' => [
+                        'th' => $address,
+                        'en' => $addressEn
+                    ],
+                    'accreditationCriteria' => [
+                        [ 
+                            'th' => "ISO/IEC 17021-1:2015 (มอก. 17021-1-2559)", 
+                            'en' => "" 
+                        ],
+                    ],
+                    'certificationMark' => [
+                        'th' => "การรับรองระบบการจัดการความปลอดภัยด้านสารสนเทศตามมาตรฐาน ISO/IEC<br>27006/มตช. 27006 โดยมีสาขาและขอบข่ายการแบ่งประเภทอุตสาหกรรมตาม<br>กิจกรรมทางเศรษฐกิจทุกประเภทตามมาตรฐานสากล (หมวด A-Q) ที่ระบุไว้ในมาตรฐาน<br>เลขที่ มอก. 2000-2540 ดังต่อไปนี้",
+                        'en' => "Information Security Management Systems Certification according to ISO/IEC 27006/TCAS 27006, covered by International Standard Industrial Classification of all Economic Activities (Sector A-Q) according to TIS 2000-2540 as following"
+                    ],  
+                ];
+            }
+            
+            $tableData = [
+                'bcms' => 
+                [
+
+                    [ 'sector' => "<br>", 'description_th' => "", 'description_en' => "" ],
+                    
+                ]
+            ];
+
+            $cbDetails = $headerData + $tableData;
+            
+        }else if($certificateInitial == "SFMS")
+        {
+            $cbDetails = [
+                'scopeOfAccreditation' => [
+                    'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                    'en' => "Scope of Accreditation"
+                ],
+                'attachmentToCertificate' => [
+                    'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองระบบการจัดการสวนป่าเศรษฐกิจอย่างยั่งยืน",
+                    'en' => "Attachment to Certificate of Sustainable Forest Plantation Management System Certification Body Accreditation"
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                'certificationBody' => [
+                    'th' => $nameStandard,
+                    'en' =>  $nameEnStandard
+                ],
+                'premise' => [
+                    'th' => $address,
+                    'en' => $addressEn
+                ],
+                'accreditationCriteria' => [
+                    [ 
+                        'th' => "", 
+                        'en' => "" 
+                    ],
+                ],
+                'certificationMark' => [
+                    'th' => "การรับรองการจัดการสวนป่าเศรษฐกิจอย่างยั่งยืน",
+                    'en' => ""
+                ],
+                'sfms' => [
+                    [ 'scope_th' => "",'scope_en' => "", 'activity_th' => "", 'activity_en' => "" ],
+                    
+                ]
+            ];
+        }else if($certificateInitial == "MDMS")
+        {
+            $cbDetails = [
+                'scopeOfAccreditation' => [
+                    'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                    'en' => "Scope of Accreditation"
+                ],
+                'attachmentToCertificate' => [
+                    'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองระบบบริหารงานคุณภาพสำหรับเครื่องมือแพทย์",
+                    'en' => "Attachment to Certificate of Sustainable Forest Plantation Management System Certification Body Accreditation"
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                'certificationBody' => [
+                    'th' => $nameStandard,
+                    'en' =>  $nameEnStandard
+                ],
+                'premise' => [
+                    'th' => $address,
+                    'en' => $addressEn
+                ],
+                'accreditationCriteria' => [
+                    [ 
+                        'th' => "ISO/IEC 17021-1:2015 (มอก. 17021-1-2559)", 
+                        'en' => "" 
+                    ],
+                ],
+                'certificationMark' => [
+                    'th' => "การรับรองระบบบริหารงานคุณภาพสำหรับเครื่องมือแพทย์ตามมาตรฐาน ISO<br>13485 /มตช. 13485 โดยมีสาขาและขอบข่ายตามหลักเกณฑ์ วิธีการ และเงื่อนไข<br>การกำหนดขอบข่าย และการสุ่มตัวอย่าง เพื่อการรับรองหน่วยรับรองระบบ<br>บริหารงานคุณภาพสำหรับเครื่องมือแพทย์ ดังต่อไปนี้",
+                    'en' => "Medical Device Quality Management Systems Certification according to ISO 13485/TCAS 13485, covered by Criteria Method and conditions Medical Device Quality Management System Certification Body Accreditation as following"
+                ],
+                'mdms' => [
+                    [ 'sector' => "", 'description_th' => "", 'description_en' => "" ],
+                    
+                ]
+            ];
+        }else if($certificateInitial == "ICAO CORSIA")
+        {
+            $cbDetails = [
+                'scopeOfAccreditation' => [
+                    'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                    'en' => "Scope of Accreditation"
+                ],
+                'attachmentToCertificate' => [
+                    'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยตรวจสอบความใช้ได้และทวนสอบก๊าซเรือนกระจก",
+                    'en' => "Attachment to Certificate of Validation and Verification Body Accreditation"
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                'certificationBody' => [
+                    'th' => $nameStandard,
+                    'en' =>  $nameEnStandard
+                ],
+                'premise' => [
+                    'th' => $address,
+                    'en' => $addressEn
+                ],
+                'accreditationCriteria' => [
+                    [ 
+                        'th' => "ISO/IEC 17029:2019 (มตช. 17029 - 2564)", 
+                        'en' => "ISO 14065:2020 (มตช. 14065 - 2564)<br>ISO 14064-3:2019 (มตช. 14064 เล่ม 3 - 2564)<br>ISO 14066:2011" 
+                    ],
+                ],
+                'certificationMark' => [
+                    'th' => "การทวนสอบรายงานปริมาณการปล่อยก๊าซคาร์บอนไดออกไซด์ (Emissions Report)<br>ตามโครงการการชดเชยและการลดปริมาณการปล่อยก๊าซคาร์บอนไดออกไซด์ในภาคการ<br>บินระหว่างประเทศ (Carbon Offsetting and Reduction Scheme for International<br>Aviation (CORSIA))",
+                    'en' => "Verification of the Emissions Report for Carbon Offsetting and Reduction Scheme for International Aviation (CORSIA)"
+                ],
+                'icao_corsia' => [
+                    [ 'sector_th' => "",'sector_en' => "",'scope_en' => "" ],
+                    
+                ]
+            ];
+        }else if($certificateInitial == "PRODUCT")
+        {
+            $cbDetails = [
+                'scopeOfAccreditation' => [
+                    'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                    'en' => "Scope of Accreditation"
+                ],
+                'attachmentToCertificate' => [
+                    'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองผลิตภัณฑ์",
+                    'en' => "Attachment to Certificate Product Certification Body Accreditation"
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                'certificationBody' => [
+                    'th' => $nameStandard,
+                    'en' =>  $nameEnStandard
+                ],
+                'premise' => [
+                    'th' => $address,
+                    'en' => $addressEn
+                ],
+                'accreditationCriteria' => [
+                    [ 
+                        'th' => "ISO/IEC 17029:2019 (มตช. 17029 - 2564)", 
+                        'en' => "ISO 14065:2020 (มตช. 14065 - 2564)<br>ISO 14064-3:2019 (มตช. 14064 เล่ม 3 - 2564)<br>ISO 14066:2011" 
+                    ],
+                ],
+                'certificationMark' => [
+                    'th' => "โดยมีรูปแบบการรับรองตามเอกสาร ดังนี้<br>หลักเกณฑ์และเงื่อนไข เรื่อง การรับรองพลาสติกสลายตัวทางชีวภาพ ISO 17088:2012<br>หมายเลขเอกสาร (GR.PCB.11)",
+                    'en' => "General term and conditions for the Certification of Specifications for compostable plastics ISO 17088:2012"
+                ],
+                'product' => [
+                    [ 'product_th' => "",'product_en' => "", 'standard_th' => "", 'standard_en' => "" ],
+                    
+                ]
+            ];
+        }else if($certificateInitial == "PERSONEL")
+        {
+            $cbDetails = [
+                'scopeOfAccreditation' => [
+                    'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                    'en' => "Scope of Accreditation"
+                ],
+                'attachmentToCertificate' => [
+                    'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : หน่วยรับรองบุคลากร",
+                    'en' => "Attachment to Certificate of Persons Certification Body Accreditation"
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                'certificationBody' => [
+                    'th' => $nameStandard,
+                    'en' =>  $nameEnStandard
+                ],
+                'premise' => [
+                    'th' => $address,
+                    'en' => $addressEn
+                ],
+                'accreditationCriteria' => [
+                    [ 
+                        'th' => "ISO/IEC 17024:2012 (มอก.17024 - 2556)", 
+                        'en' => "" 
+                    ],
+                ],
+                'personel' => [
+                    [ 'text1' => "<br>",'text2' => ""],
+                    
+                ]
+            ];
+        }
+
+// dd($trustMark);
+        $templateType ="cb";
+        return view('certify.applicant_cb.scope-editor', [
+            'templateType' => $templateType,
+            'cbDetails' => $cbDetails,
+            'certificateInitial' => $certificateInitial,
+            'typeStandard' => $typeStandard,
+            'petitioner' => $petitioner,
+            'trustMark' => $trustMark
+        ]);
+ 
+    }
+
+    public function cbIsicScope()
+   {
+        $cbIsicScopes = CbScopeIsicIsic::all();
+        return response()->json([
+            'cbIsicScopes' => $cbIsicScopes,
+        ]);
+   }
+
+    public function cbOhsmsScope()
+   {
+        $cbOhsmsScopes = CbScopeOhsms::all();
+        return response()->json([
+            'cbOhsmsScopes' => $cbOhsmsScopes,
+        ]);
+   }
+
+    public function cbEnmsScope()
+   {
+        $cbEnmsScopes = CbScopeEnms::all();
+        return response()->json([
+            'cbEnmsScopes' => $cbEnmsScopes,
+        ]);
+   }
+
+    public function cbBcmsScope()
+   {
+        $cbBcmsScopes = CbScopeBcms::all();
+        return response()->json([
+            'cbBcmsScopes' => $cbBcmsScopes,
+        ]);
+   }
+
+    public function cbSfmsScope()
+   {
+        $cbScopeSfms = CbScopeSfms::all();
+        return response()->json([
+            'cbScopeSfms' => $cbScopeSfms,
+        ]);
+   }
+
+    public function cbMdmsScope()
+   {
+        $cbScopeMdms = CbScopeMdms::all();
+        return response()->json([
+            'cbScopeMdms' => $cbScopeMdms,
+        ]);
+   }
+
+    public function cbCorsiaScope()
+   {
+        $cbScopeCorsias = CbScopeCorsia::all();
+        return response()->json([
+            'cbScopeCorsias' => $cbScopeCorsias,
+        ]);
+   }
+
+    public function saveHtmlTemplate(Request $request)
+    {
+        $user =auth()->user();
+        $htmlPages = $request->input('html_pages');
+        $templateType = $request->input('template_type');
+        $typeStandard = $request->input('typeStandard');
+        $petitioner = $request->input('petitioner');
+        $trustMark = $request->input('trustMark');
+        $cbItems = $request->input('cbItems'); 
+            if (!is_array($htmlPages) || empty($htmlPages)) {
+            return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+        }
+
+        if (empty($templateType)) {
+            return response()->json(['message' => 'Template type is missing.'], 400);
+        }
+        try {
+            CbHtmlTemplate::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'type_standard' => $typeStandard,
+                    'petitioner' => $petitioner,
+                    'trust_mark' => $trustMark,
+                    'template_type' => $templateType,
+                ],
+                [
+                    'html_pages' => json_encode($htmlPages),
+                    'json_data' => json_encode($cbItems)
+                ]
+            );
+            return response()->json(['message' => 'Template saved successfully!'], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error saving template: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadHtmlTemplate(Request $request)
+    {
+        try {
+            $user = auth()->user();
+            $htmlTemplate = CbHtmlTemplate::where('user_id',$user->id)
+            ->where('type_standard',$request->typeStandard)
+            ->where('petitioner',$request->petitioner)
+            ->where('trust_mark',$request->trustMark)
+            ->first();
+
+            if (!$htmlTemplate) {
+                return response()->json(['message' => 'Template not found for the given type.'], 404);
+            }
+
+            // Decode the JSON string back into an array
+            $htmlPages = json_decode($htmlTemplate->html_pages, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json(['message' => 'Error decoding HTML pages from database.'], 500);
+            }
+
+            return response()->json([
+                'message' => 'Template loaded successfully!',
+                'html_pages' => $htmlPages,
+                'template_type' => $htmlTemplate->template_type,
+                'htmlTemplate' => $htmlTemplate
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error loading template: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+        
+    public function exportScopePdf($id,$cbHtmlTemplate)
+    {
+
+        $htmlPages = json_decode($cbHtmlTemplate->html_pages);
+
+        // dd($htmlPages);
+
+        if (!is_array($htmlPages)) {
+          
+            return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+        }
+        // กรองหน้าเปล่าออก (โค้ดเดิมที่เพิ่มไป)
+        $filteredHtmlPages = [];
+        foreach ($htmlPages as $pageHtml) {
+            $trimmedPageHtml = trim(strip_tags($pageHtml, '<img>'));
+            if (!empty($trimmedPageHtml)) {
+                $filteredHtmlPages[] = $pageHtml;
+            }
+        }
+  
+        if (empty($filteredHtmlPages)) {
+            return response()->json(['message' => 'No valid HTML content to export after filtering empty pages.'], 400);
+        }
+        $htmlPages = $filteredHtmlPages;
+
+        $type = 'I';
+        $fontDirs = [public_path('pdf_fonts/')];
+
+        $fontData = [
+            'thsarabunnew' => [
+                'R' => "THSarabunNew.ttf",
+                'B' => "THSarabunNew-Bold.ttf",
+                'I' => "THSarabunNew-Italic.ttf",
+                'BI' => "THSarabunNew-BoldItalic.ttf",
+            ],
+            'dejavusans' => [
+                'R' => "DejaVuSans.ttf",
+                'B' => "DejaVuSans-Bold.ttf",
+                'I' => "DejaVuSerif-Italic.ttf",
+                'BI' => "DejaVuSerif-BoldItalic.ttf",
+            ],
+        ];
+
+        $mpdf = new Mpdf([
+            'PDFA'              => $type == 'F' ? true : false,
+            'PDFAauto'          => $type == 'F' ? true : false,
+            'format'            => 'A4',
+            'mode'              => 'utf-8',
+            'default_font_size' => 15,
+            'fontDir'           => array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], $fontDirs),
+            'fontdata'          => array_merge((new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'], $fontData),
+            'default_font'      => 'thsarabunnew',
+            'fontdata_fallback' => ['dejavusans', 'freesans', 'arial'],
+            'margin_left'       => 13,
+            'margin_right'      => 13,
+            'margin_top'        => 10,
+            'margin_bottom'     => 0,
+            // 'tempDir'           => sys_get_temp_dir(),
+        ]);
+
+    
+        // Log::info('MPDF Temp Dir: ' . $tempDirPath);
+
+        $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
+        $mpdf->WriteHTML($stylesheet, 1);
+
+        $mpdf->SetWatermarkImage(public_path('images/nc_hq.png'), 1, [23, 23], [170, 12]);
+        $mpdf->showWatermarkImage = true;
+
+        // --- เพิ่ม Watermark Text "DRAFT" ตรงนี้ ---
+        $mpdf->SetWatermarkText('DRAFT');
+        $mpdf->showWatermarkText = true; // เปิดใช้งาน watermark text
+        $mpdf->watermark_font = 'thsarabunnew'; // กำหนด font (ควรใช้ font ที่โหลดไว้แล้ว)
+        $mpdf->watermarkTextAlpha = 0.1;
+
+$footerHtml = '';
+
+
+
+
+// $initialIssueDateEn = $this->ordinal(Carbon::now()->day) . ' ' . Carbon::now()->format('F Y');
+$initialIssueDateTh = HP::formatDateThaiFull(Carbon::now());
+
+
+
+$footerHtml = '
+<div width="100%" style="display:inline;line-height:12px">
+
+    <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+      <span style="font-size:20px;">ออกให้ครั้งแรกเมื่อวันที่ ' . $initialIssueDateTh . '</span><br>
+      <span style="font-size: 16px">กระทรวงอุตสาหกรรม สำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span>
+    </div>
+
+    <div style="display: inline-block; width: 15%;float:right;width:25%">
+  
+    </div>
+
+    <div width="100%" style="display:inline;text-align:center">
+      <span>หน้าที่ {PAGENO}/{nbpg}</span>
+    </div>
+</div>';
+
+// แล้วนำไปกำหนดให้ mPDF เป็น Footer
+$mpdf->SetHTMLFooter($footerHtml);
+
+        foreach ($htmlPages as $index => $pageHtml) {
+            if ($index > 0) {
+                $mpdf->AddPage();
+            }
+            $mpdf->WriteHTML($pageHtml,HTMLParserMode::HTML_BODY);
+        }
+
+    //  $mpdf->Output('', 'S');
+    //  $title = "mypdf.pdf";
+    //  $mpdf->Output($title, "I");  
+
+  
+ $app_certi_cb = CertiCb::find($id);
+        $no = str_replace("RQ-", "", $app_certi_cb->app_no);
+        $no = str_replace("-", "_", $no);
+
+
+        $attachPath = '/files/applicants/check_files_cb/' . $no . '/';
+        $fullFileName = uniqid() . '_' . now()->format('Ymd_His') . '.pdf';
+    
+        // สร้างไฟล์ชั่วคราว
+        $tempFilePath = tempnam(sys_get_temp_dir(), 'pdf_') . '.pdf';
+        // บันทึก PDF ไปยังไฟล์ชั่วคราว
+        $mpdf->Output($tempFilePath, \Mpdf\Output\Destination::FILE);
+        // ใช้ Storage::putFileAs เพื่อย้ายไฟล์
+        Storage::putFileAs($attachPath, new \Illuminate\Http\File($tempFilePath), $fullFileName);
+    
+        $storePath = $no  . '/' . $fullFileName;
+    
+
+    
+        $tb = new CertiCb;
+        $certi_cb_attach                   = new CertiCBAttachAll();
+        $certi_cb_attach->app_certi_cb_id = $app_certi_cb->id;
+        $certi_cb_attach->table_name       = $tb->getTable();
+        $certi_cb_attach->file_section     = 3;
+        $certi_cb_attach->file_desc        = null;
+        $certi_cb_attach->file             = $storePath;
+        $certi_cb_attach->file_client_name = $no . '_scope_'.now()->format('Ymd_His').'.pdf';
+        $certi_cb_attach->token            = str_random(16);
+        $certi_cb_attach->save();
+
+        $checkScopeCertiCBSaveAssessment = CertiCBAttachAll::where('app_certi_cb_id',$id)
+        ->where('table_name', (new CertiCBSaveAssessment)->getTable())
+        ->where('file_section', 2)
+        ->latest() // ใช้ latest() เพื่อให้เรียงตาม created_at โดยอัตโนมัติ
+        ->first(); // ดึง record ล่าสุดเพียงตัวเดียว
+
+
+        if($checkScopeCertiCBSaveAssessment != null)
+        {
+            $assessment = CertiCBSaveAssessment::find($checkScopeCertiCBSaveAssessment->ref_id);
+            $json = $this->copyScopeCbFromAttachement($assessment->app_certi_cb_id);
+            $copiedScopes = json_decode($json, true);
+            $tbx = new CertiCBSaveAssessment;
+            $certi_cb_attach_more = new CertiCBAttachAll();
+            $certi_cb_attach_more->app_certi_cb_id      = $assessment->app_certi_cb_id ?? null;
+            $certi_cb_attach_more->ref_id               = $assessment->id;
+            $certi_cb_attach_more->table_name           = $tbx->getTable();
+            $certi_cb_attach_more->file_section         = '2';
+            $certi_cb_attach_more->file                 = $copiedScopes[0]['attachs'];
+            $certi_cb_attach_more->file_client_name     = $copiedScopes[0]['file_client_name'];
+            $certi_cb_attach_more->token                = str_random(16);
+            $certi_cb_attach_more->save();
+        }
+
+        $checkScopeCertiCBReport= CertiCBAttachAll::where('app_certi_cb_id',$id)
+        ->where('table_name',(new CertiCBReport)->getTable())
+        ->where('file_section',1)
+        ->latest() // ใช้ latest() เพื่อให้เรียงตาม created_at โดยอัตโนมัติ
+        ->first(); // ดึง record ล่าสุดเพียงตัวเดียว
+
+        if($checkScopeCertiCBReport != null)
+        {
+            $report = CertiCBReport::find($checkScopeCertiCBReport->ref_id);
+            $json = $this->copyScopeCbFromAttachement($report->app_certi_cb_id);
+            $copiedScopes = json_decode($json, true);
+            $tb = new CertiCBReport;
+            $certi_cb_attach_more = new CertiCBAttachAll();
+            $certi_cb_attach_more->app_certi_cb_id      = $report->app_certi_cb_id ?? null;
+            $certi_cb_attach_more->ref_id               = $report->id;
+            $certi_cb_attach_more->table_name           = $tb->getTable();
+            $certi_cb_attach_more->file_section         = '1';
+            $certi_cb_attach_more->file                 = $copiedScopes[0]['attachs'];
+            $certi_cb_attach_more->file_client_name     = $copiedScopes[0]['file_client_name'];
+            $certi_cb_attach_more->token                = str_random(16);
+            $certi_cb_attach_more->save();
+        }
+
+
+            $tracking = $app_certi_cb->tracking;
+        if($tracking !== null)
+        {
+            $inspection = TrackingInspection::where('tracking_id',$tracking->id)  
+                    ->where('reference_refno',$tracking->reference_refno)
+                    ->first();
+            if($inspection !== null){
+                    $certiCbFileAll = CertiCBAttachAll::where('app_certi_cb_id',$app_certi_cb->id)
+                        ->where('table_name',$tb->getTable())
+                        ->where('file_section',1)
+                        ->latest() // เรียงจาก created_at จากมากไปน้อย
+                        ->first();
+            
+                    $filePath = 'files/applicants/check_files_cb/' . $certiCbFileAll->file ;
+            
+                    $localFilePath = HP::downloadFileFromTisiCloud($filePath);
+
+                    // dd($app_certi_cb ,$certiCbFileAll,$filePath,$localFilePath);
+
+                    $check = AttachFile::where('systems','Center')
+                            ->where('ref_id',$inspection->id)
+                            ->where('ref_table',(new TrackingInspection)->getTable())
+                            ->where('section','file_scope')
+                            ->first();
+                    if($check != null)
+                    {
+                        $check->delete();
+                    }
+
+                    $tax_number = (!empty(auth()->user()->reg_13ID) ?  str_replace("-","", auth()->user()->reg_13ID )  : '0000000000000');
+            
+                    $uploadedFile = new \Illuminate\Http\UploadedFile(
+                        $localFilePath,      // Path ของไฟล์
+                        basename($localFilePath), // ชื่อไฟล์
+                        mime_content_type($localFilePath), // MIME type
+                        null,               // ขนาดไฟล์ (null ถ้าไม่ทราบ)
+                        true                // เป็นไฟล์ที่ valid แล้ว
+                    );
+                                
+                    $attach_path = "files/trackingcb";
+                    // ใช้ไฟล์ที่จำลองในการอัปโหลด
+                    HP::singleFileUploadRefno(
+                        $uploadedFile,
+                        $attach_path.'/'.$inspection->reference_refno,
+                        ( $tax_number),
+                        (auth()->user()->FullName ?? null),
+                        'Center',
+                        (  (new TrackingInspection)->getTable() ),
+                        $inspection->id,
+                        'file_scope',
+                        null
+                    );
+            }        
+        }
+
+
+
+
+    }
+
 }
+

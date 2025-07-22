@@ -8,489 +8,1127 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    {{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> --}}
-   
     <style>
 
-        @font-face {
-            font-family: 'thsarabunnew';
-            /* src: url('/fonts/THSarabunNew.ttf') format('truetype'); */
-            src: url('{{ asset('fonts/THSarabunNew.ttf') }}') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-        /* Style for the entire page */
-        body {
-            background-color: #f8f9fa;
-            font-family: 'thsarabunnew', 'Arial', sans-serif;
-            margin: 0;
-            padding: 0;
-            color: #333;
-        }
+@font-face {
+    font-family: 'thsarabunnew';
+    src: url('/fonts/THSarabunNew.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+/* Style for the entire page */
+body {
+    background-color: #f8f9fa;
+    font-family: 'thsarabunnew', 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
 
-        /* Superscript and Subscript Styling */
-        sup, sub {
-            font-size: 16px;
-        }
+/* Superscript and Subscript Styling */
+sup, sub {
+    font-size: 16px;
+}
 
-        /* --- Menubar --- */
-        #menubar {
-            background-color: #edf2fa;
-            padding: 8px 16px;
-            border-bottom: 1px solid #d4d4d4;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+/* --- Menubar --- */
+#menubar {
+    background-color: #edf2fa;
+    padding: 8px 16px;
+    border-bottom: 1px solid #d4d4d4;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+}
+
+.vertical-align-top {
+    vertical-align: top !important; /* Use !important to ensure it applies */
+}
+
+
+.menu-button {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    font-size: 18px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    color: #444;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-button:hover {
+    background-color: #dce1e6;
+    border-color: #c9ced2;
+}
+
+.menu-button.active {
+    background-color: #cce1ff;
+    color: #0b57d0;
+}
+
+.separator {
+    width: 1px;
+    height: 20px;
+    background-color: #ccc;
+    margin: 0 8px;
+}
+
+/* --- [ใหม่] Font Size Dropdown Styling --- */
+.font-size-container {
+    display: flex;
+    align-items: center;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    height: 36px;
+    padding: 0 4px;
+    cursor: pointer;
+}
+.font-size-container:hover {
+    background-color: #dce1e6;
+    border-color: #c9ced2;
+}
+#font-size-selector {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border: none;
+    background: transparent;
+    height: 100%;
+    font-size: 18px;
+    font-family: inherit;
+    cursor: pointer;
+    outline: none;
+    text-align: center;
+    min-width: 50px;
+}
+
+/* --- Dropdown Styling --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    border-radius: 4px;
+    top: 100%; /* Position below the button */
+    left: 0;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 3px 12px;
+    text-decoration: none;
+    display: block;
+    cursor: pointer;
+    font-size: 20px
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+/* Show dropdown content when the button is clicked */
+.dropdown.show .dropdown-content {
+    display: block;
+}
+
+
+/* --- Editor Area --- */
+#editor-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+#document-editor {
+    width: 20cm;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.page {
+    background-color: white;
+    height: 29.5cm;
+    padding: 1cm 1cm 0 1cm;
+    margin-bottom: 0.5cm;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    line-height: 1.1;
+    font-size: 20px;
+    overflow: hidden;
+    outline: none;
+    position: relative;
+}
+
+.page:focus {
+    outline: none;
+}
+
+.page:empty::before {
+    /* content: "พิมพ์ที่นี่..."; */
+    color: #aaa;
+    pointer-events: none;
+}
+
+/* --- Table Styling --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.5em 0;
+    table-layout: fixed; /* This is key to prevent tables from expanding. */
+}
+
+table.borderless {
+    width: 100%;
+    border-collapse: collapse;
+    /* margin: 1em 0; */
+}
+
+th {
+    border: 0.1px solid #050505;
+    padding: 0px;
+    vertical-align: top;
+    word-wrap: break-word; /* Ensures text wraps within the cell. */
+}
+
+td {
+    border: 0.1px solid #050505;
+    padding: 5px;
+    vertical-align: top;
+    word-wrap: break-word; /* Ensures text wraps within the cell. */
+}
+
+table.borderless td,
+table.borderless th {
+
+    border: none;
+    padding: 2px 8px;
+    margin: 0;
+}
+
+/* --- Image Styling (Revised) --- */
+.image-container {
+    position: relative; /* Changed */
+    display: inline-block; /* Added */
+    vertical-align: bottom; /* Added for better text alignment */
+    line-height: 0; /* Added to remove extra space under image */
+    border: 2px dashed transparent;
+    user-select: none;
+}
+.image-container.active {
+    border-color: #4285f4;
+    z-index: 10;
+}
+.image-container img {
+    width: 100%;
+    height: auto; /* Changed for aspect ratio */
+    display: block;
+    pointer-events: none;
+}
+.resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #4285f4;
+    border: 1px solid white;
+    border-radius: 50%;
+    display: none;
+}
+.image-container.active .resize-handle {
+    display: block;
+}
+.resize-handle.top-left { top: -5px; left: -5px; cursor: nwse-resize; }
+.resize-handle.top-right { top: -5px; right: -5px; cursor: nesw-resize; }
+.resize-handle.bottom-left { bottom: -5px; left: -5px; cursor: nesw-resize; }
+.resize-handle.bottom-right { bottom: -5px; right: -5px; cursor: nwse-resize; }
+
+/* --- Modal Styling --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    width: 450px; /* Increased width for more complex modals */
+    font-size: 22px;
+    max-height: 90vh; /* Added for scrollability */
+    overflow-y: auto;   /* Added for scrollability */
+}
+
+.modal-content h3 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.modal-input-group {
+    margin: 15px 0;
+}
+
+.modal-input-group label {
+    display: block;
+    margin-bottom: 5px;
+    color: #555;
+}
+
+.modal-input-group input[type="number"],
+.modal-input-group input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 18px; /* Added for better readability */
+    font-family: inherit; /* Ensure consistent font */
+}
+
+/* NEW: Styling for contenteditable div in modal */
+.modal-content .editable-div {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: inherit;
+    min-height: 100px;
+    background-color: #fff;
+    line-height: 1.4;
+    cursor: text;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-buttons button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.modal-btn-confirm {
+    background-color: #4285f4;
+    color: white;
+}
+.modal-btn-confirm:hover {
+    background-color: #357ae8;
+}
+
+.modal-btn-cancel {
+    background-color: #e0e0e0;
+    color: #333;
+}
+.modal-btn-cancel:hover {
+    background-color: #d1d1d1;
+}
+
+/* --- Context Menu Styling --- */
+#context-menu {
+    position: absolute;
+    background-color: white;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 3000;
+    display: none;
+    padding: 4px 0; /* Added padding */
+}
+
+.context-menu-item {
+    padding: 1px 16px;
+    cursor: pointer;
+    font-size: 20px;
+    white-space: nowrap; /* Prevent wrapping */
+}
+
+.context-menu-item:hover {
+    background-color: #f0f0f0;
+}
+.context-menu-separator {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 4px 0;
+}
+
+
+
+/* Input field styling */
+.ib-modal input[type="text"],
+.ib-modal .editable-div,
+.cb-modal .editable-div {
+    width: 250px ;
+    font-family: 'thsarabunnew', sans-serif;
+    font-size: 22px;
+    box-sizing: border-box;
+}
+
+.cb-modal .code {
+    width: 200px;
+}
+
+.cb-modal .detail {
+    width: 540px;
+}
+
+/* Custom checkbox styling */
+input[type="checkbox"] {
+    /* Hide default checkbox */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    width: 1em; /* Same width as your custom span */
+    height: 1em; /* Same height as your custom span */
+    border: 1px solid #333; /* Same border as your custom span */
+    margin-right: 0.5em; /* Same margin as your custom span */
+    display: inline-block;
+    vertical-align: middle;
+    position: relative;
+    top: 2px; /* Same top adjustment as your custom span */
+    cursor: pointer;
+    flex-shrink: 0; /* Prevent shrinking in flex containers */
+}
+
+input[type="checkbox"]:checked {
+    /* For checked state, use a background image for the checkmark */
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24"><path fill="black" d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-color: transparent; /* Ensure no background color obscures the checkmark */
+}
+
+    .wrapper {
+        max-width: 800px; /* ขนาดความกว้าง */
+        margin: 0 auto; /* จัดให้อยู่กึ่งกลางแนวนอน */
+        padding: 20px; /* เพิ่มช่องว่างรอบเนื้อหา */
+        background-color: #fff; /* สีพื้นหลังของเนื้อหา */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* เพิ่มเงา */
+        /* border-radius: 8px;  */
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+    .header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+
+    .header-request {
+        width: 100%;
+        text-align: left;
+        margin-bottom: -10px;
+        padding-left: 10px;
+    }
+
+    .header-request span {
+        font-size: 18px;
+    }
+
+    .header-title {
+        padding-top: 20px;
+        text-align: center;
+        font-weight: bold;
+        font-size: 24px;
+    }
+
+    /* .header-title span{
+        margin-left: -100px;
+    } */
+    .section {
+        margin-top: 15px;
+        margin-bottom: 10px;
+    }
+
+    .section-title {
+        font-weight: bold;
+        margin-left: 110px;
+        margin-top:20px;
+    }
+
+    .indent {
+        margin-left: 5px;
+        margin-top:5px;
+    }
+
+    .table-section {
+        margin-top: 10px;
+        margin-bottom: 5px;
+    }
+
+    .table-section td {
+        font-size: 28px;
+        vertical-align: bottom;
+    }
+
+    .table-section td:first-child {
+        
+        font-weight: 500;
+    }
+
+    .table-section td:last-child {
+        
+        /* padding-left: 20px; */
+    }
+
+    .under-line {
+        border-bottom: 1px dotted #000;
+    }
+
+    .input-no-border {
+        width: 100%;
+        font-size: 18px !important;
+        font-family: 'Sarabun', sans-serif;
+        border: none;
+        outline: none;
+        background-color: #fffdcc; /* พื้นหลังสีเหลืองเริ่มต้น */
+        border-bottom: 1px dotted #000;
+        color: #000;
+        padding: 2px 0;
+        transition: background-color 0.3s ease; /* เปลี่ยนสีอย่าง Smooth */
+    }
+
+    .input-no-border.has-value,
+    .input-no-border:focus {
+        background-color: #ffffff; /* พื้นหลังสีขาว */
+    }
+
+    .text-area-no-border {
+        width: 100%;
+        font-size: 16px;
+        font-family: 'Sarabun', sans-serif;
+        border: none;
+        outline: none;
+        background-color: #fffdcc; /* พื้นหลังสีเหลืองเริ่มต้น */
+        border-bottom: 1px dotted #000;
+        color: #000;
+        padding: 2px;
+        transition: background-color 0.3s ease; /* เปลี่ยนสีอย่าง Smooth */
+    }
+
+    .text-area-no-border.has-value,
+    .text-area-no-border:focus {
+        background-color: #ffffff; /* พื้นหลังสีขาว */
+    }
+
+
+    /* เพิ่มการตั้งค่าการจัดตำแหน่ง */
+    .submit-section {
+        text-align: center;  /* ทำให้ปุ่มอยู่ตรงกลาง */
+        margin-top: 50px;     /* เว้นระยะห่างจากเนื้อหาด้านบน */
+        margin-bottom: 30px;
+    }
+
+    .btn-submit {
+        font-family: 'Sarabun', sans-serif;
+        padding: 10px 20px;  /* เพิ่มขนาดของปุ่ม */
+        background-color: #4CAF50; /* สีพื้นหลัง */
+        color: white;         /* สีตัวอักษร */
+        border: none;         /* ไม่ให้มีขอบ */
+        border-radius: 5px;   /* ทำมุมโค้ง */
+        font-size: 22px;      /* ขนาดตัวอักษร */
+        cursor: pointer;     /* เปลี่ยนรูปแบบเมาส์เมื่อชี้ที่ปุ่ม */
+        transition: background-color 0.3s; /* เพิ่มการเปลี่ยนสีเมื่อ hover */
+    }
+
+    .btn-submit:hover {
+        background-color: #45a049;  /* เปลี่ยนสีปุ่มเมื่อ hover */
+    }
+
+    .btn-draft {
+        font-family: 'Sarabun', sans-serif;
+        padding: 10px 20px;  /* เพิ่มขนาดของปุ่ม */
+        background-color: #f75e06; /* สีพื้นหลัง */
+        color: white;         /* สีตัวอักษร */
+        border: none;         /* ไม่ให้มีขอบ */
+        border-radius: 5px;   /* ทำมุมโค้ง */
+        font-size: 22px;      /* ขนาดตัวอักษร */
+        cursor: pointer;     /* เปลี่ยนรูปแบบเมาส์เมื่อชี้ที่ปุ่ม */
+        transition: background-color 0.3s; /* เพิ่มการเปลี่ยนสีเมื่อ hover */
+    }
+
+    .btn-draft:hover {
+        background-color: #45a049;  /* เปลี่ยนสีปุ่มเมื่อ hover */
+    }
+
+    /* Custom Alert Styles */
+    .custom-alert {
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 5px;
+        font-size: 14px;
+        line-height: 1.5;
+        position: relative;
+        border: 1px solid transparent;
+    }
+
+    .custom-alert strong {
+        font-weight: bold;
+    }
+
+    .custom-alert.error {
+        background-color: #f8d7da;
+        color: #842029;
+        border-color: #f5c2c7;
+    }
+
+    .custom-alert.success {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border-color: #badbcc;
+    }
+
+    /* สไตล์สำหรับ overlay */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* แสงสีดำ */
+        display: flex;
+        flex-direction: column; /* ทำให้ลูกอยู่ในแนวตั้ง */
+        justify-content: center;
+        align-items: center;
+        z-index: 9999; /* อยู่ด้านหน้า */
+    }
+
+    /* สไตล์สำหรับสปินเนอร์ */
+    .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #ffffff;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+    }
+
+    /* Animation สำหรับการหมุน */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* สไตล์สำหรับข้อความ "กำลังบันทึก..." */
+    .loading-text {
+        color: white;
+        font-size: 26px; /* ขนาดข้อความใหญ่ขึ้น */
+        margin-top: 15px; /* ให้ข้อความห่างจาก spinner */
+        text-align: center;
+    }
+
+    /* body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        } */
+
+        #toolbar {
             display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
-            gap: 4px;
-            align-items: center;
         }
 
-        .vertical-align-top {
-            vertical-align: top !important; /* Use !important to ensure it applies */
-        }
-
-
-        .menu-button {
-            background: none;
-            border: 1px solid transparent;
-            border-radius: 4px;
-            font-size: 18px;
-            width: 36px;
-            height: 36px;
+        button.toolbar {
+            padding: 6px 14px;
+            font-size: 12px;
             cursor: pointer;
-            color: #444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
         }
 
-        .menu-button:hover {
-            background-color: #dce1e6;
-            border-color: #c9ced2;
+        button.toolbar:hover {
+            background-color: #007bff;
+            color: white;
         }
 
-        .menu-button.active {
-            background-color: #cce1ff;
-            color: #0b57d0;
+        button.toolbar:active {
+            background-color: #0056b3;
+            color: white;
         }
+
         
-        .separator {
-            width: 1px;
-            height: 20px;
-            background-color: #ccc;
-            margin: 0 8px;
-        }
-
-        /* --- [ใหม่] Font Size Dropdown Styling --- */
-        .font-size-container {
-            display: flex;
-            align-items: center;
-            border: 1px solid transparent;
-            border-radius: 4px;
-            height: 36px;
-            padding: 0 4px;
-            cursor: pointer;
-        }
-        .font-size-container:hover {
-            background-color: #dce1e6;
-            border-color: #c9ced2;
-        }
-        #font-size-selector {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            border: none;
-            background: transparent;
-            height: 100%;
-            font-size: 18px;
-            font-family: inherit;
-            cursor: pointer;
-            outline: none;
-            text-align: center;
-            min-width: 50px;
-        }
-
-        /* --- Dropdown Styling --- */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: #f9f9f9;
-            min-width: 160px;
-            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            border-radius: 4px;
-            top: 100%; /* Position below the button */
-            left: 0;
-        }
-
-        .dropdown-content a {
-            color: black;
-            padding: 3px 12px;
-            text-decoration: none;
-            display: block;
-            cursor: pointer;
-            font-size: 20px
-        }
-
-        .dropdown-content a:hover {
-            background-color: #f1f1f1;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
-        /* Show dropdown content when the button is clicked */
-        .dropdown.show .dropdown-content {
-            display: block;
-        }
 
 
-        /* --- Editor Area --- */
-        #editor-container {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-        }
-        
-        #document-editor {
-            width: 20cm;
-            margin-top: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .page {
-            background-color: white;
-            height: 29.5cm;
-            padding: 1cm 1cm 0 1cm;
-            margin-bottom: 0.5cm;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            box-sizing: border-box;
-            line-height: 1.1;
-            font-size: 20px;
+        .editor {
+            width: 740px;
+            min-height: 200px;
+            max-height: 600px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            font-family: 'Sarabun', sans-serif; /* ใช้ฟอนต์ TH Sarabun */
+            font-size: 17px;
+            padding: 10px;
+            border: 1px solid #ccc;
             overflow: hidden;
-            outline: none;
+            margin-bottom: 20px;
+        }
+
+        .editor-table {
+            border-collapse: collapse;
+            min-width: 200px;
+            width: auto;
+            max-width: 100%;
+            table-layout: auto;
+        }
+
+        .editor-table, .editor-table th, .editor-table td {
+            border: 1px solid black;
+            padding: 5px;
+            text-align: center;
             position: relative;
         }
 
-        .page:focus {
-            outline: none;
+
+        .resizer {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 5px;
+            height: 100%;
+            cursor: col-resize;
+            background: transparent;
         }
 
-        .page:empty::before {
-            /* content: "พิมพ์ที่นี่..."; */
-            color: #aaa;
-            pointer-events: none;
-        }
-        
-        /* --- Table Styling --- */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 0.5em 0;
-            table-layout: fixed; /* This is key to prevent tables from expanding. */
-        }
-
-        table.borderless {
-            width: 100%;
-            border-collapse: collapse;
-            /* margin: 1em 0; */
-        }
-        
-        th {
-            border: 0.1px solid #050505;
-            padding: 0px;
-            vertical-align: top;
-            word-wrap: break-word; /* Ensures text wraps within the cell. */
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            text-align: center;
+            z-index: 1000;
+            font-family: Arial, sans-serif;
         }
 
-        td {
-            border: 0.1px solid #050505;
+        .popup label {
+            display: inline-block;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            margin-right: 10px;
+        }
+
+        .popup input {
+            display: inline-block;
+            width: 40px;
             padding: 5px;
-            vertical-align: top;
-            word-wrap: break-word; /* Ensures text wraps within the cell. */
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+            font-size: 14px;
         }
 
-        table.borderless td,
-        table.borderless th {
-            
+        .popup button {
+            padding: 8px 15px;
             border: none;
-            padding: 2px 8px;
-            margin: 0;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            margin: 5px;
         }
 
-        /* --- Image Styling (Revised) --- */
-        .image-container {
-            position: relative; /* Changed */
-            display: inline-block; /* Added */
-            vertical-align: bottom; /* Added for better text alignment */
-            line-height: 0; /* Added to remove extra space under image */
-            border: 2px dashed transparent;
+        .popup button:first-of-type {
+            background: #28a745;
+            color: white;
+        }
+
+        .popup button:last-of-type {
+            background: #dc3545;
+            color: white;
+        }
+
+        .popup button:hover {
+            opacity: 0.85;
+        }
+
+        #contextMenu {
+            position: absolute;
+            display: none;
+            background: white;
+            border: 1px solid #ccc;
+            box-shadow: 0px 0px 5px rgba(0,0,0,0.2);
+            padding: 5px;
+            z-index: 1000;
+        }
+
+        #contextMenu button {
+            display: block;
+            width: 100%;
+            background: none;
+            border: none;
+            padding: 5px 10px;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #contextMenu button:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .inline-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 5px;
+        }
+
+        .label {
+            white-space: nowrap;
+            font-weight: bold;
+            width: 130px;
+        }
+
+        .content {
+            flex: 1;
+            word-wrap: break-word;
+        }
+        .content .info{
+            margin-left:20px
+        }
+        .spaced {
+            display: flex;
+            gap: 100px;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: auto auto;
+            gap: 10px;
+            margin-top:10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
             user-select: none;
         }
-        .image-container.active {
-            border-color: #4285f4;
-            z-index: 10;
-        }
-        .image-container img {
-            width: 100%;
-            height: auto; /* Changed for aspect ratio */
-            display: block;
-            pointer-events: none;
-        }
-        .resize-handle {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #4285f4;
-            border: 1px solid white;
-            border-radius: 50%;
-            display: none;
-        }
-        .image-container.active .resize-handle {
-            display: block;
-        }
-        .resize-handle.top-left { top: -5px; left: -5px; cursor: nwse-resize; }
-        .resize-handle.top-right { top: -5px; right: -5px; cursor: nesw-resize; }
-        .resize-handle.bottom-left { bottom: -5px; left: -5px; cursor: nesw-resize; }
-        .resize-handle.bottom-right { bottom: -5px; right: -5px; cursor: nwse-resize; }
 
-        /* --- Modal Styling --- */
-        .modal-overlay {
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            transform: scale(1.2); /* ปรับขนาด Checkbox */
+        }
+
+        .checkbox-item label {
+            cursor: pointer;
+        }
+
+        .report-table {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .report-table table {
+            border-collapse: collapse;
+            width: 100%;
+            text-align: center;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 18px;
+            border: 1px solid #000;
+        }
+
+
+        .report-table th, .report-table td {
+            border: 1px solid #000;
+            padding: 5px;
+        }
+
+        .report-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+
+        .report-table td {
+            vertical-align: top;
+            text-align: left;
+        }
+
+        .report-table td:nth-child(3) {
+            text-align: center;
+        }
+
+        .report-table td:nth-child(4) {
+            text-align: left;
+        }
+
+        .report-table tbody tr td {
+            padding: 5px;
+        }
+
+        .report-table tbody tr:nth-child(odd) {
+            background-color: #fafafa;
+        }
+
+        .report-table tbody tr:nth-child(even) {
+            background-color: #fff;
+        }
+
+        .evaluation-select {
+            font-family: 'Sarabun', sans-serif;
+            padding: 3px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 16px
+        }
+
+        .evaluation-checkbox-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .evaluation-checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            transform: scale(1.2); /* ปรับขนาด Checkbox */
+        }
+
+        .evaluation-checkbox-item label {
+            cursor: pointer;
+        }
+
+        /* CSS */
+        .signature-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px; /* ระยะห่างระหว่างแต่ละแถว */
+            width: 70%; /* กำหนดความกว้าง */
+            margin-left: auto; /* ดันให้ติดขวา */
+            margin-right: 0;
+            text-align: left; /* ตัวอักษรชิดซ้ายใน input */
+        }
+
+        .signature-select {
+            width: 100%; /* กำหนด select ให้กว้างเต็ม container */
+            font-size: 16px;
+            font-family: 'Sarabun', sans-serif;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 5px;
+        }
+
+        /* ปรับขนาด Select2 */
+        .select2-container .select2-selection--single {
+            height: 38px; /* ปรับความสูง */
+            font-size: 18px; /* ปรับขนาดฟอนต์ */
+            line-height: 38px; /* จัดข้อความให้อยู่ตรงกลาง */
+            display: flex; /* ใช้ Flexbox */
+            align-items: center; /* จัดให้อยู่กลางแนวตั้ง */
+        }
+
+        .select2-container .select2-selection__rendered {
+            font-family: 'Sarabun', sans-serif;
+            font-size: 18px; /* ขนาดฟอนต์ที่แสดงผล */
+            padding-left: 10px; /* ระยะห่างด้านซ้าย */
+        }
+
+        .select2-container .select2-selection__arrow {
+            height: 36px; /* ความสูงของลูกศร */
+        }
+
+        .select2-container .select2-dropdown {
+            font-size: 18px; /* ปรับขนาดตัวเลือกใน dropdown */
+        }
+
+        .select2-container--default .select2-selection--single {
+            border: 1px solid #ccc; /* สีขอบ */
+            border-radius: 4px; /* มุมโค้ง */
+            display: flex; /* ใช้ Flexbox */
+            align-items: center; /* จัดให้อยู่กลางแนวตั้ง */
+        }
+
+
+        .select2-container .select2-search--dropdown .select2-search__field {
+            height: 40px; /* ความสูงของช่องค้นหา */
+            font-size: 18px; /* ขนาดฟอนต์ */
+            padding: 5px 10px; /* ระยะห่างภายใน */
+            border: 1px solid #ccc; /* ขอบสีเทา */
+            border-radius: 4px; /* มุมโค้ง */
+            outline: none; /* เอาเส้นขอบ Highlight ออก */
+            box-shadow: none; /* ป้องกันเงาเวลาคลิก */
+        }
+
+        .select2-container .select2-search--dropdown .select2-search__field:focus {
+            border-color: #999; /* เปลี่ยนสีขอบเมื่อโฟกัส */
+        }
+
+        /* สไตล์สำหรับ overlay */
+        .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
+            background-color: rgba(0, 0, 0, 0.5); /* แสงสีดำ */
+            display: flex;
+            flex-direction: column; /* ทำให้ลูกอยู่ในแนวตั้ง */
             justify-content: center;
             align-items: center;
-            z-index: 2000;
+            z-index: 9999; /* อยู่ด้านหน้า */
         }
 
-        .modal-content {
-            background-color: white;
-            padding: 20px 30px;
+        /* สไตล์สำหรับสปินเนอร์ */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        /* Animation สำหรับการหมุน */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* สไตล์สำหรับข้อความ "กำลังบันทึก..." */
+        .loading-text {
+            color: white;
+            font-size: 26px; /* ขนาดข้อความใหญ่ขึ้น */
+            margin-top: 15px; /* ให้ข้อความห่างจาก spinner */
+            text-align: center;
+        }
+
+        /* พื้นหลัง Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* กล่อง Modal */
+        .modal-dialog {
+            background: white;
+            padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            width: 450px; /* Increased width for more complex modals */
-            font-size: 22px;
-            max-height: 90vh; /* Added for scrollability */
-            overflow-y: auto;   /* Added for scrollability */
-        }
-        
-        .modal-content h3 {
-            margin-top: 0;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 10px;
+            width: 350px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
         }
 
-        .modal-input-group {
-            margin: 15px 0;
-        }
-        
-        .modal-input-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: #555;
-        }
-        
-        .modal-input-group input[type="number"],
-        .modal-input-group input[type="text"] {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 18px; /* Added for better readability */
-            font-family: inherit; /* Ensure consistent font */
-        }
-        
-        /* NEW: Styling for contenteditable div in modal */
-        .modal-content .editable-div {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-family: inherit;
-            min-height: 100px;
-            background-color: #fff;
-            line-height: 1.4;
-            cursor: text;
-        }
-
-        .modal-buttons {
+        /* หัวข้อ Modal */
+        .modal-header {
             display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 20px;
+            justify-content: space-between;
+            align-items: center;
+            /* border-bottom: 1px solid #ddd; */
+            padding-bottom: 5px;
         }
-        
-        .modal-buttons button {
-            padding: 8px 16px;
-            border-radius: 4px;
+
+        .modal-title
+        {
+            font-size: 20px;
+        }
+
+        .modal-footer {
+            margin-top: 15px;
+            text-align: right;
+        }
+        /* ปิด Modal */
+        .close {
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close:hover {
+            color: red;
+        }
+
+        /* ปรับสไตล์ Input */
+        .input-field {
+            width: 95%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .input-field:focus {
+            border-color: #007bff;
+        }
+
+        /* ปุ่ม */
+        .btn {
+            padding: 10px 15px;
             border: none;
             cursor: pointer;
-            font-weight: bold;
+            border-radius: 5px;
+            font-size: 16px;
         }
 
-        .modal-btn-confirm {
-            background-color: #4285f4;
+        .btn-primary {
+            background-color: #1f794f;
             color: white;
         }
-        .modal-btn-confirm:hover {
-            background-color: #357ae8;
+
+        .btn-secondary {
+            background-color: #ccc;
         }
 
-        .modal-btn-cancel {
-            background-color: #e0e0e0;
-            color: #333;
-        }
-        .modal-btn-cancel:hover {
-            background-color: #d1d1d1;
+        .btn:hover {
+            opacity: 0.8;
         }
 
-        /* --- Context Menu Styling --- */
-        #context-menu {
-            position: absolute;
-            background-color: white;
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 3000;
-            display: none;
-            padding: 4px 0; /* Added padding */
-        }
 
-        .context-menu-item {
-            padding: 1px 16px;
-            cursor: pointer;
-            font-size: 20px;
-            white-space: nowrap; /* Prevent wrapping */
-        }
-
-        .context-menu-item:hover {
-            background-color: #f0f0f0;
-        }
-        .context-menu-separator {
-            height: 1px;
-            background-color: #e0e0e0;
-            margin: 4px 0;
-        }
-
-        /* Input field styling */
-        .lab-test-modal input[type="text"],
-        .lab-test-modal .editable-div {
-            width: 250px;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-        }
-        /* Input field styling */
-        .lab-cal-modal input[type="text"] {
-            width: 200px;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-        }
-
-        /* Editable div styling */
-        .lab-cal-modal .editable-div {
-            width: 180px;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-        }
-
-        /* Specific styling for lab-cal-method-editor */
-        .lab-cal-modal #lab-cal-method-editor {
-            width: 200px;
-        }
-
-        /* Input field styling */
-        .ib-modal input[type="text"],
-        .ib-modal .editable-div,
-        .cb-modal .editable-div {
-            width: 250px ;
-            font-family: 'thsarabunnew', sans-serif;
-            font-size: 22px;
-            box-sizing: border-box;
-        }
-        
-        .cb-modal .code {
-            width: 200px;
-        }
-
-        .cb-modal .detail {
-            width: 540px;
-        }
-
-        /* Adjust select element styling to match other inputs */
-        #lab-cal-item-modal select {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 22px;
-            font-family: 'thsarabunnew', sans-serif;
-            appearance: none; /* Remove default arrow */
-            background-color: #fff;
-            cursor: pointer;
-            width: 200px;
-        }
-
-        /* Custom arrow for select */
-        #lab-cal-item-modal select::-ms-expand {
-            display: none; /* Hide default arrow in IE */
-        }
-
-        #lab-cal-item-modal .modal-input-group select:focus {
-            outline: none;
-            border-color: #4285f4;
-            box-shadow: 0 0 5px rgba(66, 133, 244, 0.5);
-        }
-
-        /* Ensure consistent height and alignment */
-        #lab-cal-item-modal .modal-input-group {
-            align-items: center;
-        }
-
-        
-        /* Adjust select element styling to match other inputs */
-        #lab-test-item-modal select {
-            width: 100%;
-            padding: 8px;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 22px;
-            font-family: 'thsarabunnew', sans-serif;
-            appearance: none; /* Remove default arrow */
-            background-color: #fff;
-            cursor: pointer;
-            width: 250px;
-        }
-
-        /* Custom arrow for select */
-        #lab-test-item-modal select::-ms-expand {
-            display: none; /* Hide default arrow in IE */
-        }
-
-        #lab-test-item-modal .modal-input-group select:focus {
-            outline: none;
-            border-color: #4285f4;
-            box-shadow: 0 0 5px rgba(66, 133, 244, 0.5);
-        }
-
-        /* Ensure consistent height and alignment */
-        #lab-test-item-modal .modal-input-group {
-            align-items: center;
-        }
     </style>
 </head>
 <body>
@@ -539,10 +1177,8 @@
                        <a href="#" data-template="cb-template" >CB template</a>
                 @elseif($templateType == "ib")
                         <a href="#" data-template="ib-template" >IB template</a>
-                @elseif($templateType == "lab_cal")
-                        <a href="#" data-template="lab-cal-template" >Cal Lab template</a>
-                @elseif($templateType == "lab_test")
-                        <a href="#" data-template="lab-test-template" >Test Lab template</a>
+                @elseif($templateType == "ib-report-one-template")
+                        <a href="#" data-template="ib-report-one-template" >IB Report One template</a>
                 @endif
             </div>
         </div>
@@ -651,110 +1287,6 @@
     </div>
     <!-- === END: REVISED IB Item Modal === -->
 
-    <!-- MODIFIED: Lab Cal Item Modal -->
-    <div id="lab-cal-item-modal" class="modal-overlay lab-cal-modal">
-        <div class="modal-content">
-            <h3>เพิ่มรายการ (Lab Cal)</h3>
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-cal-field">สาขาการสอบเทียบ:</label>
-                    <select id="lab-cal-field" >
-                    </select>
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-cal-instrument">เครื่องมือ:</label>
-                    <select id="lab-cal-instrument" >
-                    </select>
-                </div>
-            </div>
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-cal-parameter-one">พารามิเตอร์1: <a href="{{ route('certify.applicant.special-sign') }}" style="text-decoration: none; font-size: 18px;" target="_blank">สัญลักษณ์พิเศษ</a></label>
-                     <select id="lab-cal-parameter-one" >
-                    </select>
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-cal-parameter-two">พารามิเตอร์2: </label>
-                     <select id="lab-cal-parameter-two" >
-                    </select>
-                </div>
-
-            </div>
-
-            <div class="modal-input-group"  >
-                <label for="lab-cal-condition">เงื่อนไขการวัด:</label>
-                <input type="text" id="lab-cal-condition" >
-            </div>
-              
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
- 
-                <div style="flex: 1;">
-                    <label for="lab-cal-param-details-editor">รายละเอียดพารามิเตอร์:</label>
-                    <div id="lab-cal-param-details-editor" class="editable-div"  contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-cal-capability-editor">ขีดความสามารถฯ:</label>
-                    <div id="lab-cal-capability-editor" class="editable-div" contenteditable="true"></div>
-                </div>
-            </div>
-            <div class="modal-input-group">
-                <label for="lab-cal-method-editor" style="display: block;">วิธีสอบเทียบ / มาตรฐานที่ใช้:</label>
-                <div id="lab-cal-method-editor" class="editable-div" contenteditable="true"></div>
-            </div>
-            <div class="modal-buttons">
-                <button id="add-lab-cal-item-btn" class="modal-btn-confirm">เพิ่ม</button>
-                <button class="modal-btn-cancel">ยกเลิก</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- === START: MODIFICATION FOR LAB TEST MODAL === -->
-    <div id="lab-test-item-modal" class="modal-overlay lab-test-modal" >
-        <div class="modal-content" style="width: 540px">
-            <h3>เพิ่มรายการ (Lab Test)</h3>
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                    <label for="lab-test-field">สาขาการทดสอบ:</label>
-                    <select id="lab-test-field" >
-                    </select>
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-test-category">สาขาการทดสอบ:</label>
-                    <select id="lab-test-category" >
-                    </select>
-                </div>
-            </div>
-
-             <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                     <label for="lab-test-parameter">สาขาการทดสอบ:</label>
-                    <select id="lab-test-parameter" >
-                    </select>
-                </div>
-                  <div style="flex: 1;">
-                    <label for="lab-test-description-editor">คำอธิบาย:</label>
-                
-                    <input type="text" id="lab-test-description-editor" >
-                </div>
-             </div>
-
-            <div class="modal-input-group" style="display: flex; gap: 20px;">
-                <div style="flex: 1;">
-                     <label for="lab-test-param-details-editor">รายละเอียดพารามิเตอร์:</label>
-                    <div id="lab-test-param-details-editor" class="editable-div"  contenteditable="true"></div>
-                </div>
-                <div style="flex: 1;">
-                    <label for="lab-test-method-editor">วิธีทดสอบ:</label>
-                    <div id="lab-test-method-editor" class="editable-div"  contenteditable="true"></div>
-                </div>
-            </div>
-            <div class="modal-buttons">
-                <button id="add-lab-test-item-btn" class="modal-btn-confirm">เพิ่ม</button>
-                <button class="modal-btn-cancel">ยกเลิก</button>
-            </div>
-        </div>
-    </div>
-    <!-- === END: MODIFICATION FOR LAB TEST MODAL === -->
 
 
     <!-- === START: MODIFICATION === -->
@@ -774,7 +1306,7 @@
         <div class="context-menu-item" data-action="merge-columns">รวมคอลัมน์</div>
     </div>
     <!-- === END: MODIFICATION === -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
         document.execCommand('styleWithCSS', false, true);
 
@@ -798,29 +1330,18 @@
         // --- NEW: Template Item Modals ---
         const cbItemModal = document.getElementById('cb-item-modal');
         const ibItemModal = document.getElementById('ib-item-modal');
-        const labCalItemModal = document.getElementById('lab-cal-item-modal');
-        const labTestItemModal = document.getElementById('lab-test-item-modal');
+   
 
         // 1. รับข้อมูลจาก Blade ที่ PHP ส่งมา
         const templateType = "{{ $templateType ?? '' }}"; 
-        const labCalDetailsFromBlade = @json($labCalDetails ?? null); 
-        const labTestDetailsFromBlade = @json($labTestDetails ?? null);
+
         const cbDetailsFromBlade = @json($cbDetails ?? null);
         const ibDetailsFromBlade = @json($ibDetails ?? null);
+        const certi_ib = @json($certi_ib ?? null);
 
-        const labCalDetails = @json($labCalDetails ?? null);
-        const accordingFormula = @json($according_formula ?? null);
-        const labAbility = @json($lab_ability ?? null);
-        const purpose = @json($purpose ?? null);
+        
 
-        let labCalItems = [];
-        let labTestItems = [];
-
-        document.addEventListener('DOMContentLoaded', () => {
-            downloadTemplate();
-        });                                
-
-
+                                                                
         let savedRange = null; // Used for image insertion
         let contextMenuTarget = null;
         let contextMenuTargetRow = null; // To store the target TR element for immediate context menu actions
@@ -843,7 +1364,7 @@
         });
         
         // --- LineExtractor Class ---
-        // This class is specifically for the contenteditable div in the Lab Cal modal.
+
         class LineExtractor {
             constructor(elementId) {
                 this.editableDiv = document.getElementById(elementId);
@@ -858,7 +1379,7 @@
 
                 // --- Specific Paste Handler for Modal's Div ---
                 // This listener ONLY applies to the div managed by this class instance
-                // (e.g., #lab-cal-method-editor).
+
                 // Its purpose is to paste as plain text BUT apply specific styles.
                 this.editableDiv.addEventListener('paste', (event) => {
                     // Prevent the default paste action
@@ -1056,10 +1577,8 @@
                     insertCbTemplate();
                 } else if (templateId === 'ib-template') {
                     insertIbTemplate();
-                } else if (templateId === 'lab-cal-template') {
-                    insertLabCalTemplate();
-                } else if (templateId === 'lab-test-template') {
-                    insertLabTestTemplate();
+                }else if (templateId === 'ib-report-one-template') {
+                    insertIbReportOneTemplate();
                 }
                 templateDropdownContent.parentElement.classList.remove('show');
             }
@@ -1190,7 +1709,7 @@ const insertCbTemplate = () => {
                     <span style="font-size: 15px;">(${templateData.scopeOfAccreditation.en})</span><br>
                     ${templateData.attachmentToCertificate.th}<br>
                     <span style="font-size: 15px;">(${templateData.attachmentToCertificate.en})</span><br>
-                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
+                    <b>ใบรับรองเลขที่ ${templateData.certificateNo}</b><br>
                     <span style="font-size: 15px;">(Certification No. ${templateData.certificateNo})</span>
                 </div>
                 <table class="borderless" style="width: 100%; margin-bottom: 1em;">
@@ -1229,7 +1748,7 @@ const insertCbTemplate = () => {
             insertTemplateAtCurrentOrLastPage(templateHTML);
         };
 
-   const insertIbTemplate = () => {
+        const insertIbTemplate = () => {
             const templateData = ibDetailsFromBlade;
 
             if (!templateData) {
@@ -1304,218 +1823,153 @@ const insertCbTemplate = () => {
 
             insertTemplateAtCurrentOrLastPage(templateHTML);
         };
-        
 
-        const insertLabCalTemplate = () => {
-            const templateData = labCalDetailsFromBlade;
+        const insertIbReportOneTemplate = () => {
+            const templateData = ibDetailsFromBlade;
 
             if (!templateData) {
-                console.error("No labCalDetails data available to render.");
+                console.error("No ibDetails data available to render.");
                 return;
             }
 
-            let calibrationTableRows = '';
-            templateData.calibrationData.forEach(item => {
-                calibrationTableRows += `
-                    <tr>
-                        <td style="text-align: left;">${item.field.th}<br><span style="font-size: 15px;">${item.field.en}</span></td>
-                        <td style="text-align: left;">${item.parameter}</td>
-                        <td style="text-align: left;">${item.capability}</td>
-                        <td style="text-align: left;">${item.method}</td>
-                    </tr>
-                `;
-            });
-            calibrationTableRows +=`
+            // let inspectionTableRows = '';
+            // templateData.inspectionItems.forEach(item => {
+            //     inspectionTableRows += `
+            //         <tr>
+            //             <td>${item.category}</td>
+            //             <td>${item.procedure}</td>
+            //             <td>${item.requirements}</td>
+            //         </tr>
+            //     `;
+            // });
+
+const templateHTML = `
+
+        <div class="header">
+            <div class="header-request">
+                <span>เลขที่คำขอ : ${certi_ib.app_no}</span>
+            </div>
+            <div class="header-title">
+                <span>รายงานการตรวจประเมิน ณ สถานประกอบการ</span>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="inline-group">
+                <div class="label">1. หน่วยตรวจ : </div>
+                <div class="content">
+                     ${certi_ib.name_unit}
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="inline-group">
+                <div class="label">2. ที่ตั้งสำนักงานใหญ่ : </div>
+                <div class="content">
+                    <div class="inline-block w-78 float-left">
+                        ${certi_ib && certi_ib.hq_address !== null ? `เลขที่ ${certi_ib.hq_address}` : ''}
+                        ${certi_ib && certi_ib.hq_moo !== null ? `หมู่${certi_ib.hq_moo}` : ''}
+                        ${certi_ib && certi_ib.hq_soi !== null ? `ซอย${certi_ib.hq_soi}` : ''}
+                        ${certi_ib && certi_ib.hq_road !== null ? `ถนน${certi_ib.hq_road}` : ''}
+                        ${certi_ib && certi_ib.HqProvinceName && certi_ib.HqProvinceName.includes('กรุงเทพ') ?
+                            `แขวง ${certi_ib.HqSubdistrictName} เขต${certi_ib.HqDistrictName} ${certi_ib.HqProvinceName}` :
+                            `ตำบล${certi_ib.HqSubdistrictName} อำเภอ${certi_ib.HqDistrictName} จังหวัด${certi_ib.HqProvinceName}`
+                        }
+                        ${certi_ib && certi_ib.hq_zipcode !== null ? certi_ib.hq_zipcode : ''}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    <div style="text-align: left; margin-bottom: 1em;">
+        สถาบันพัฒนาบุคลากรการบิน มหาวิทยาลัยเกษมบัณฑิต
+    </div>
+
+    <div style="text-align: center; line-height: 1.1; margin-bottom: 1em;">
+        <b style="font-size: 20px;">รายงานการตรวจประเมิน ณ สถานประกอบการ</b>
+    </div>
+
+    <table class="borderless" style="width: 100%; margin-bottom: 1em;">
+        <tbody>
             <tr>
-                <td style="text-align: center; line-height: 1; padding: 5px 0 0 0;" colspan="4">
-                    <span>* ค่าความไม่แน่นอน (±) ที่ระดับความเชื่อมั่นประมาณ 95 %</span><br>
-                    <span>และมีความหมายเป็นไปตามเอกสารวิชาการเรื่อง ขีดความสามารถของการสอบเทียบและการวัด (TLA-03)</span><br>
-                    <span style="font-size:16px">(* Expressed as an uncertainty (±) providing a level of confidence of approximately 95%</span><br>
-                    <span style="font-size:16px">and the term “CMCs” has been expressed in the technical document (TLA-03))</span><br>
+                <td class="vertical-align-top" style="width: 1%;">1.</td>
+                <td class="vertical-align-top" style="width: 25%;"><b>หน่วยรับรอง:</b></td>
+                <td class="vertical-align-top" >สถาบันพัฒนาบุคลากรการบิน มหาวิทยาลัยเกษมบัณฑิต</td>
+            </tr>
+            <tr>
+                <td class="vertical-align-top">2.</td>
+                <td class="vertical-align-top"><b>ที่ตั้งสำนักงานใหญ่:</b></td>
+                <td class="vertical-align-top">60 ถนนร่มเกล้า แขวงมีนบุรี เขตมีนบุรี กรุงเทพฯ 10510</td>
+            </tr>
+            <tr>
+                <td class="vertical-align-top"></td>
+                <td class="vertical-align-top" style="padding-left: 2em;">โทรศัพท์:</td>
+                <td class="vertical-align-top">0 2904 2222 ต่อ 2230</td>
+                <td class="vertical-align-top" style="width: 10%;">โทรสาร:</td>
+                <td class="vertical-align-top">0 2904 2200</td>
+            </tr>
+            <tr>
+                <td class="vertical-align-top"></td>
+                <td class="vertical-align-top"><b>ที่ตั้งสำนักงาน:</b></td>
+                <td class="vertical-align-top" colspan="3">ไม่มี</td>
+            </tr>
+            <tr>
+                <td class="vertical-align-top"></td>
+                <td class="vertical-align-top" style="padding-left: 2em;">โทรศัพท์:</td>
+                <td class="vertical-align-top"><span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 150px;"></span></td>
+                <td class="vertical-align-top">โทรสาร:</td>
+                <td class="vertical-align-top"><span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 150px;"></span></td>
+            </tr>
+            <tr>
+                <td class="vertical-align-top" style="padding-top: 1em;">3.</td>
+                <td class="vertical-align-top bold" style="padding-top: 1em;">ประเภทการตรวจประเมิน</td>
+                <td colspan="3" style="padding-top: 1em;">
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5em; padding-left: 2em;">
+                            <input type="checkbox"> การตรวจประเมินเพื่อการรับรองครั้งแรก
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5em; padding-left: 2em;">
+                            <input type="checkbox" checked> การตรวจติดตามผลครั้งที่ 1
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; width: 100%;">
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5em; padding-left: 2em;">
+                            <input type="checkbox"> การตรวจประเมินเพื่อต่ออายุการรับรอง
+                        </div>
+                        <div style="display: flex; align-items: center; margin-bottom: 0.5em; padding-left: 2em;">
+                            <input type="checkbox"> อื่นๆ <span style="border-bottom: 1px dotted #000; display: inline-block; min-width: 200px;"></span>
+                        </div>
+                    </div>
                 </td>
             </tr>
-            `;
-
-            const isPermanentChecked = templateData.laboratory_status.is_permanent ? 'checked="checked"' : '';
-            const isSiteChecked = templateData.laboratory_status.is_site ? 'checked="checked"' : '';
-            const isTemporaryChecked = templateData.laboratory_status.is_temporary ? 'checked="checked"' : '';
-            const isMobileChecked = templateData.laboratory_status.is_mobile ? 'checked="checked"' : '';
-            const isMultisiteChecked = templateData.laboratory_status.is_multisite ? 'checked="checked"' : '';
-
-
-            const templateHTML = `
-                <div style="text-align: center; line-height: 1.1; position: relative;  margin-bottom: 0em;">
-                    <b style="font-size: 20px;">${templateData.title.th}</b><br>
-                    <span style="font-size: 15px;">(${templateData.title.en})</span><br>
-                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
-                    <span style="font-size: 15px;">(Certification no. ${templateData.certificateNo})</span>
-                </div>
-                <table class="borderless" style="width: 100%; ">
-                    <tbody>
-                        <tr>
-                            <td class="vertical-align-top" style="width: 22%;"><b>ชื่อห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory Name)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.labName.th}<br><span style="font-size: 15px;">(${templateData.labName.en})</span></td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top"><b>หมายเลขการรับรองที่</b><br><span style="font-size: 15px;">(Accreditation No.)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.accreditationNo.th}<br><span style="font-size: 15px;">(${templateData.accreditationNo.en})</span></td>
-                        </tr>
-
-                        <tr>
-                            <td class="vertical-align-top"><b>ฉบับที่</b> ${templateData.issueNo}<br><span style="font-size: 15px;">(Issue No.)</span></td>
-                            <td class="vertical-align-top" colspan="2">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}<br><span style="font-size: 15px;">(Valid from ${templateData.validFrom.en})</span></td>
-                            <td class="vertical-align-top" colspan="2">ถึงวันที่ ${templateData.until.th}<br><span style="font-size: 15px;">(Until ${templateData.until.en})</span></td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top"><b>สถานภาพห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory status)</span></td>
-                            <td class="vertical-align-top" colspan="4">
-                                <table class="borderless" style="width: 100%; margin: 0; font-size: 18px; table-layout: fixed;">
-                                    <tbody>
-                                        <tr>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isPermanentChecked} style="vertical-align: middle;">
-                                                <span style="line-height: 1.2;font-size:20px">ถาวร<br><span style="font-size: 15px;">(Permanent)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isSiteChecked} style="vertical-align: middle; ">
-                                                <span style="line-height: 1.2;font-size:20px">นอกสถานที่<br><span style="font-size: 15px;">(Site)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isTemporaryChecked} style="vertical-align: middle; ">
-                                                <span style="line-height: 1.2;font-size:20px">ชั่วคราว<br><span style="font-size: 15px;">(Temporary)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isMobileChecked} style="vertical-align: middle; ">
-                                                <span style="line-height: 1.2;font-size:20px">เคลื่อนที่<br><span style="font-size: 15px;">(Mobile)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isMultisiteChecked} style="vertical-align: middle; ">
-                                                <span style="line-height: 1.2;font-size:20px">หลายสาขา<br><span style="font-size: 15px;">(Multisite)</span></span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table class="detail-table" style="width: 100%; margin-bottom: 1em; line-height: 1.1; ">
-                    <thead>
-                        <tr>
-                            <th style="width: 22%; text-align: center;">สาขาการสอบเทียบ<br><span style="font-size: 15px;">(Field of Calibration)</span></th>
-                            <th style="width: 26%; text-align: center;">รายการสอบเทียบ<br><span style="font-size: 15px;">(Parameter)</span></th>
-                            <th style="width: 26%; text-align: center;">ขีดความสามารถของ<br>การสอบเทียบและการวัด*<br><span style="font-size: 15px;">(Calibration and Measurement<br>Capability*)</span></th>
-                            <th style="width: 26%; text-align: center;">วิธีการสอบเทียบ<br><span style="font-size: 15px;">(Calibration Method)</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${calibrationTableRows}
-                    </tbody>
-                </table>
-                <p><br></p>
-            `;
-
+            <tr>
+                <td class="vertical-align-top"></td>
+                <td class="vertical-align-top bold">หมายเหตุ:</td>
+                <td colspan="3" class="vertical-align-top">
+                    <span style="border-bottom: 1px dotted #000; display: inline-block; width: 100%;"></span>
+                    <span style="border-bottom: 1px dotted #000; display: inline-block; width: 100%;"></span>
+                </td>
+            </tr>
+            <tr>
+                <td class="vertical-align-top" style="padding-top: 1em;">4.</td>
+                <td class="vertical-align-top bold" colspan="4" style="padding-top: 1em;">สาขาและขอบข่ายการรับรองระบบงาน</td>
+            </tr>
+            <tr>
+                <td class="vertical-align-top"></td>
+                <td colspan="4" class="vertical-align-top" style="padding-left: 2em;">
+                    หน่วยรับรองได้รับการรับรองระบบงาน สาขาหน่วยรับรองบุคลากร ในขอบข่าย บริการภาคพื้นและสนับสนุนการบิน พื้นที่ในอาคาร อาชีพพนักงานต้อนรับผู้โดยสารภาคพื้น ระดับ 3 และสาขาพนักงานต้อนรับบนเครื่องบิน อาชีพพนักงานต้อนรับบนเครื่องบิน ระดับ 4 รายละเอียดขอบข่ายการรับรองดู เอกสารแนบ 1
+                </td>
+            </tr>
+        </tbody>
+    </table>
+`;
             insertTemplateAtCurrentOrLastPage(templateHTML);
         };
+        
+        
 
-        const insertLabTestTemplate = () => {
-            const templateData = labTestDetailsFromBlade;
-
-            if (!templateData) {
-                console.error("No labTestDetails data available to render.");
-                return;
-            }
-
-            let testTableRows = '';
-            templateData.testLabData.forEach(item => {
-                testTableRows += `
-                    <tr>
-                        <td style="text-align: left;">${item.field.th}<br><span style="font-size: 15px;">${item.field.en}</span></td>
-                        <td style="text-align: left;">${item.parameter}</td>
-                        <td style="text-align: left;">${item.method}</td>
-                    </tr>
-                `;
-            });
-
-            const isPermanentChecked = templateData.laboratory_status.is_permanent ? 'checked="checked"' : '';
-            const isSiteChecked = templateData.laboratory_status.is_site ? 'checked="checked"' : '';
-            const isTemporaryChecked = templateData.laboratory_status.is_temporary ? 'checked="checked"' : '';
-            const isMobileChecked = templateData.laboratory_status.is_mobile ? 'checked="checked"' : '';
-            const isMultisiteChecked = templateData.laboratory_status.is_multisite ? 'checked="checked"' : '';
-
-            const templateHTML = `
-                <div style="text-align: center; line-height: 1.1; position: relative; margin-bottom: 0em;">
-                    <b style="font-size: 20px;">${templateData.title.th}</b><br>
-                    <span style="font-size: 15px;">(${templateData.title.en})</span><br>
-                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
-                    <span style="font-size: 15px;">(Certification no. ${templateData.certificateNo})</span>
-                </div>
-                <table class="borderless" style="width: 100%; ">
-                    <tbody>
-                        <tr>
-                            <td class="vertical-align-top" style="width: 25%;"><b>ชื่อห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory Name)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.labName.th}<br><span style="font-size: 15px;">(${templateData.labName.en})</span></td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top"><b>หมายเลขการรับรองที่</b><br><span style="font-size: 15px;">(Accreditation No.)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.accreditationNo.th}<br><span style="font-size: 15px;">(${templateData.accreditationNo.en})</span></td>
-                        </tr>
-
-                        <tr>
-                            <td class="vertical-align-top"><b>ฉบับที่</b> ${templateData.issueNo}<br><span style="font-size: 15px;">(Issue No.)</span></td>
-                            <td class="vertical-align-top" colspan="2">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}<br><span style="font-size: 15px;">(Valid from ${templateData.validFrom.en})</span></td>
-                            <td class="vertical-align-top" colspan="2">ถึงวันที่ ${templateData.until.th}<br><span style="font-size: 15px;">(Until ${templateData.until.en})</span></td>
-                        </tr>
-                        <tr>
-                            <td class="vertical-align-top"><b>สถานภาพห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory status)</span></td>
-                            <td class="vertical-align-top" colspan="4">
-                                <table class="borderless" style="width: 100%; margin: 0; font-size: 18px; table-layout: fixed;">
-                                    <tbody>
-                                        <tr>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isPermanentChecked} style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;font-size:20px">ถาวร<br><span style="font-size: 15px;">(Permanent)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isSiteChecked} style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;font-size:20px">นอกสถานที่<br><span style="font-size: 15px;">(Site)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isTemporaryChecked} style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;font-size:20px">ชั่วคราว<br><span style="font-size: 15px;">(Temporary)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isMobileChecked} style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;font-size:20px">เคลื่อนที่<br><span style="font-size: 15px;">(Mobile)</span></span>
-                                            </td>
-                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
-                                                <input type="checkbox" ${isMultisiteChecked} style="vertical-align: middle; margin-right: 5px;">
-                                                <span style="line-height: 1.2;font-size:20px">หลายสาขา<br><span style="font-size: 15px;">(Multisite)</span></span>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table class="detail-table" style="width: 100%; margin-bottom: 1em; line-height: 1.1;">
-                    <thead>
-                        <tr>
-                            <th style="width: 30%; text-align: center;">สาขาการทดสอบ<br><span style="font-size: 15px;">(Field of Testing)</span></th>
-                            <th style="width: 35%; text-align: center;">รายการทดสอบ<br><span style="font-size: 15px;">(Parameter)</span></th>
-                            <th style="width: 35%; text-align: center;">วิธีทดสอบ<br><span style="font-size: 15px;">(Test Method)</span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${testTableRows}
-                    </tbody>
-                </table>
-                <p><br></p>
-            `;
-
-            insertTemplateAtCurrentOrLastPage(templateHTML);
-        };
 
         const updateMenubarState = () => {
              const commands = ['bold', 'italic', 'superscript', 'subscript', 'justifyLeft', 'justifyCenter', 'justifyRight'];
@@ -1966,66 +2420,7 @@ const insertCbTemplate = () => {
                 switch (templateType) {
                     case 'cb':      cbItemModal.style.display = 'flex'; break;
                     case 'ib':      ibItemModal.style.display = 'flex'; break;
-                    case 'lab_cal': 
-                        const labCalField = $('#lab-cal-field');
-                        const instrumentSelect = $('#lab-cal-instrument');
-                        const parameterOneSelect = $('#lab-cal-parameter-one');
-                        const parameterTwoSelect = $('#lab-cal-parameter-two');
-                        labCalField.empty().append('<option value="" disabled selected>- สาขาสอบเทียบ -</option>');
-                        instrumentSelect.empty();
-                        parameterOneSelect.empty(); // ล้างค่าเก่า
-                        parameterTwoSelect.empty(); // ล้างค่าเก่า
-                    
-                        $.ajax({
-                                url: "{!! url('/certify/applicant/api/calibrate') !!}", // As requested
-                                method: "POST",
-                                headers: {
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                                },
-                                success: function(response) {
-                          
-                                    if (Array.isArray(response)) {
-                                        $.each(response, function (index, value) {
-                                            labCalField.append(`<option value="${value.id}" data-en="${value.title_en}">${value.title}</option>`);
-                                        });
-                                    }
-                                    labCalItemModal.style.display = 'flex';
-                                }
-                            });
-                            labCalItemModal.style.display = 'flex'; 
-                    
-                    break;
-                    case 'lab_test':
-                        const labTestField = $('#lab-test-field');
-                        const categorySelect = $('#lab-test-category'); // เปลี่ยนจาก instrumentSelect
-                        const parameterSelect = $('#lab-test-parameter'); // เปลี่ยนจาก parameterOneSelect
-
-                        labTestField.empty().append('<option value="" disabled selected>- สาขาการทดสอบ -</option>'); // เปลี่ยนข้อความให้ตรงกับ field
-                        categorySelect.empty().append('<option value="" disabled selected>- หมวดหมู่การทดสอบ -</option>'); // เพิ่ม option สำหรับ category
-                        parameterSelect.empty().append('<option value="" disabled selected>- พารามิเตอร์การทดสอบ -</option>'); // เพิ่ม option สำหรับ parameter
-
-                       $.ajax({
-                            url: "{!! url('/certify/applicant/api/test') !!}", // As requested
-                            method: "POST",
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            },
-                            success: function(response) {
-                                console.log(response);
-                                // ไม่ต้องมี return; ตรงนี้ เพราะจะทำให้โค้ดที่เหลือไม่ทำงาน
-                               
-                                if (Array.isArray(response)) {
-                                    $.each(response, function (index, value) {
-                                        labTestField.append(`<option value="${value.id}" data-en="${value.title_en}">${value.title}</option>`);
-                                    });
-                                }
-                            }
-                        });
-
-                        labTestItemModal.style.display = 'flex'; 
-                        break;
-
-
+   
                     default:
                         alert('ไม่พบ Template ที่ใช้งานอยู่เพื่อเพิ่มรายการ');
                         hideContextMenu(); // Reset state fully if no template
@@ -2091,147 +2486,6 @@ const insertCbTemplate = () => {
         });
         // === END: MODIFICATION ===
 
-
-        $('#lab-cal-field').on('change', function() {
-            const fieldId = $(this).val();
-            if (fieldId) {
-
-                const instrumentSelect = $('#lab-cal-instrument');
-                instrumentSelect.empty();
-                instrumentSelect.append(`<option value="">==เลือกรายการ==</option>`);
-
-                $.ajax({
-                    url:  "{!! url('/certify/applicant/api/instrumentgroup') !!}" ,
-                    method: "POST",
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    data: { bcertify_calibration_branche_id: fieldId},
-                    success: function(response) {
-
-                        console.log(response)
-                        
-                        if (Array.isArray(response)) {
-                            $.each(response, function(index, value) {
-                                instrumentSelect.append(`<option value="${value.id}">${value.name}</option>`);
-                            });
-                        }
-                    }
-                });
-            }
-        });
-
-        $('#lab-cal-instrument').on('change', function() {
-            const fieldId = $(this).val();
-            if (fieldId) {
-                const parameterOneSelect = $('#lab-cal-parameter-one');
-                const parameterTwoSelect = $('#lab-cal-parameter-two');
-                parameterOneSelect.empty(); // ล้างค่าเก่า
-                parameterTwoSelect.empty(); // ล้างค่าเก่า
-
-                $.ajax({
-                    url: "{!! url('/certify/applicant/api/instrument') !!}",
-                    method: "POST",
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    data: { calibration_branch_instrument_group_id: fieldId },
-                    success: function(response) {
-                        console.log(response)
-                       
-                        
-                        if (Array.isArray(response.parameter_one) && response.parameter_one.length > 0) {
-                            parameterOneSelect.append(`<option value="">==เลือกรายการ==</option>`);
-                            // วนลูปเพื่อสร้าง <option>
-                            $.each(response.parameter_one, function(index, value) {
-                                parameterOneSelect.append(`<option value="${value.id}">${value.name}</option>`);
-                            });
-                        }
-
-                        // ตรวจสอบว่า parameter_two เป็น array และมีข้อมูล
-                        if (Array.isArray(response.parameter_two) && response.parameter_two.length > 0) {
-                            parameterTwoSelect.append(`<option value="">==เลือกรายการ==</option>`);
-                            // วนลูปเพื่อสร้าง <option>
-                            $.each(response.parameter_two, function(index, value) {
-                                parameterTwoSelect.append(`<option value="${value.id}">${value.name}</option>`);
-                            });
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        // ควรมีการจัดการ error ด้วย
-                        console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
-                        alert("ไม่สามารถโหลดข้อมูลพารามิเตอร์ได้");
-                    }
-                });
-            } else {
-                // กรณีที่ผู้ใช้เลือก "เลือกเครื่องมือ" ให้ล้างค่า parameter ด้วย
-                $('#lab-cal-parameter-one').empty().append(`<option value="">==เลือกพารามิเตอร์==</option>`);
-            }
-        });
-
-        $('#lab-test-field').on('change', function() {
-            const fieldId = $(this).val();
-            if (fieldId) {
-                const categorySelect = $('#lab-test-category'); // เลือก select box ของหมวดหมู่
-                categorySelect.empty(); // ล้างข้อมูลเดิม
-                categorySelect.append(`<option value="">==เลือกรายการ==</option>`); // เพิ่ม option เริ่มต้น
-                $.ajax({
-                    url: "/certify/applicant/api/test_category", // ตามที่คุณระบุ
-                    method: "POST",
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    data: { 
-                        bcertify_test_branche_id: fieldId 
-                    },
-                    success: function(response) {
-                        console.log(response); // ตรวจสอบข้อมูลที่ได้จาก API
-                       
-
-                        if (Array.isArray(response)) {
-                            $.each(response, function(index, value) {
-                                // สมมติว่า response มี id และ name หรือ title สำหรับหมวดหมู่
-                                categorySelect.append(`<option value="${value.id}">${value.name || value.title}</option>`); 
-                            });
-                        }
-                    }
-                });
-            }
-        });
-
-        // เพิ่มโค้ดสำหรับการเปลี่ยนแปลงใน dropdown 'category'
-        $('#lab-test-category').on('change', function() {
-            const test_branch_category_id = $(this).val();
-            const parameterSelect = $('#lab-test-parameter');
-
-            // ล้างข้อมูลเดิมและเพิ่ม option เริ่มต้นสำหรับ Parameter
-            parameterSelect.empty().append(`<option value="">==เลือกรายการ==</option>`);
-
-            if (test_branch_category_id) {
-                $.ajax({
-                    url: "/certify/applicant/api/test_parameter",
-                    method: "POST",
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // ใช้ X-CSRF-TOKEN แทน _token ใน data
-                    },
-                    data: {
-                        test_branch_category_id: test_branch_category_id
-                    },
-                    success: function(response) {
-                        console.log("Parameters:", response); // ตรวจสอบข้อมูล Parameters
-                        if (Array.isArray(response)) {
-                            $.each(response, function(index, value) {
-                                // สมมติว่า response มี id และ name หรือ title สำหรับ parameter
-                                parameterSelect.append(`<option value="${value.id}">${value.name || value.title}</option>`);
-                            });
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error("Error fetching parameters:", error);
-                    }
-                });
-            }
-        });
 
         document.addEventListener('click', (event) => {
             // Hide context menu if the click is outside of it AND not inside a modal overlay
@@ -2500,232 +2754,7 @@ const insertCbTemplate = () => {
         });
         // === END: REVISED IB Item Button Logic ===
 
-        // --- [MODIFIED] Logic for adding Lab Cal item ---
-        document.getElementById('add-lab-cal-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
-                closeModal(labCalItemModal);
-                return;
-            }
 
-            const cells = targetRow.cells;
-            if (cells.length < 4) {
-                 alert("โครงสร้างตารางไม่ถูกต้อง");
-                 closeModal(labCalItemModal);
-                 return;
-            }
-
-
-            const fieldValue = $('#lab-cal-field').val();
-            const fieldValueEn = $('#lab-cal-field option:selected').data('en');
-            const instrumentValue = $('#lab-cal-instrument').val();
-            const parameterOneValue = $('#lab-cal-parameter-one').val();
-            const parameterTwoValue = $('#lab-cal-parameter-two').val();
-            // Get values from modal and trim them
-            // const field = document.getElementById('lab-cal-field').value.trim();
-            const field = $('#lab-cal-field option:selected').text();
-            const instrument = $('#lab-cal-instrument option:selected').text();
-            // const instrument = document.getElementById('lab-cal-instrument').value.trim();
-            const parameterOne = $('#lab-cal-parameter-one option:selected').text();
-            const parameterTwo = $('#lab-cal-parameter-two option:selected').text();
-            // const parameter = document.getElementById('lab-cal-parameter-one').value.trim();
-            const condition = document.getElementById('lab-cal-condition').value.trim();
-            
-            // Get values from editable divs using LineExtractor
-            const paramDetailsLines = labCalParamDetailsEditorExtractor.getLines();
-            const paramDetails = paramDetailsLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-
-            const capabilityLines = labCalCapabilityEditorExtractor.getLines();
-            const capability = capabilityLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-            
-            const methodLines = labCalMethodEditorExtractor.getLines();
-            const method = methodLines.join('<br>');
-            
-
-            if (field && cells[0].textContent.trim()) {
-                 if (field != cells[0].textContent.trim()) {
-                    alert("ให้เพิ่มแถวใหม่สำหนับสาขาใหม่");
-                    return;
-                }
-            }
-      
-            // --- Field (cells[0]) Logic ---
-            if (field && !cells[0].textContent.trim()) {
-                cells[0].innerHTML = field + "<br>(" + fieldValueEn + ")";
-            }
-
-            // console.log(field,cells[0].textContent.trim());
-
-            // --- Parameter Column (cells[1]) Logic ---
-            const parameterParts = [];
-            if (instrument && instrument != "==เลือกรายการ==") {
-                parameterParts.push(instrument);
-            }
-            if (parameterOne && parameterOne != "==เลือกรายการ==") {
-                parameterParts.push('&nbsp;' + parameterOne);
-            }
-            if (parameterTwo && parameterTwo != "==เลือกรายการ==") {
-                parameterParts.push('&nbsp;' + parameterTwo);
-            }
-            if (condition) {
-                parameterParts.push('&nbsp;&nbsp;' + condition);
-            }
-            if (paramDetails) {
-                parameterParts.push(paramDetails);
-            }
-            const parameterColumnContent = parameterParts.join('<br>');
-            appendToCell(cells[1], parameterColumnContent);
-
-            // --- Capability (cells[2]) Logic ---
-            if (capability) {
-                appendToCell(cells[2], capability);
-            }
-
-            // --- Method (cells[3]) Logic ---
-            if (method) {
-                appendToCell(cells[3], method);
-            }
-
-            const newItem = {
-                field: fieldValue,
-                instrument: instrumentValue,
-                parameterOne: parameterOneValue,
-                parameterTwo: parameterTwoValue,
-            };
-
-            // 2. เพิ่ม object ใหม่เข้าไปใน array `labCalItems`
-            labCalItems.push(newItem);
-
-            console.log(labCalItems)
-            
-            managePages();
-            closeModal(labCalItemModal);
-        });
-
-        // === START: MODIFICATION FOR LAB TEST LOGIC ===
-        document.getElementById('add-lab-test-item-btn').addEventListener('click', () => {
-            const targetRow = activeModalTargetRow;
-            if (!targetRow) {
-                alert("ไม่สามารถหาแถวเป้าหมายได้");
-                closeModal(labTestItemModal);
-                return;
-            }
-
-            const cells = targetRow.cells;
-            if (cells.length < 3) {
-                alert("โครงสร้างตารางไม่ถูกต้อง (ต้องการ 3 คอลัมน์)");
-                closeModal(labTestItemModal);
-                return;
-            }
-
-            const fieldValue = $('#lab-test-field').val();
-            const fieldValueEn = $('#lab-test-field option:selected').data('en');
-            const categoryValue = $('#lab-test-category').val();
-            const parameterValue = $('#lab-test-parameter').val();
-
-            // Get text of selected options
-            const field = $('#lab-test-field option:selected').text();
-            const category = $('#lab-test-category option:selected').text();
-            const parameter = $('#lab-test-parameter option:selected').text();
-
-
-            const description = document.getElementById('lab-test-description-editor').value.trim();
-
-            const paramDetailsLines = labTestParamDetailsEditorExtractor.getLines();
-            const paramDetails = paramDetailsLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
-            
-            const methodLines = labTestMethodEditorExtractor.getLines();
-            const method = methodLines.join('<br>');
-
-     
-
-            // 
-            
-            if (field && cells[0].textContent.trim()) {
-                let cleanedCell0 = cells[0].textContent.trim().replace(/\(.*$/, '')   // ลบตั้งแต่ ( จนจบ
-                          .replace('สาขา', '')   // ลบคำว่า สาขา
-                          .trim();               // ลบช่องว่างหน้า-หลัง
-                    console.log(field , cleanedCell0);
-                 if (field != cleanedCell0) {
-                    alert("ให้เพิ่มแถวใหม่สำหนับสาขาใหม่");
-                    return;
-                }
-            }
-            
-            // --- Cell 1 Logic: Field and Category ---
-            const cell1Parts = [];
-
-            
-                // --- Field (cells[0]) Logic ---
-            if (field && !cells[0].textContent.trim()) {
-                if (field) cell1Parts.push("สาขา"+field + "<br>(" + fieldValueEn + ")");
-            }
-
-            if (category) cell1Parts.push(category);
-            const cell1Content = cell1Parts.join('<br>');
-            appendToCell(cells[0], cell1Content);
-
-            // --- Cell 2 Logic: Parameter, Description, and Details ---
-            const cell2Parts = [];
-            if (parameter) cell2Parts.push(parameter);
-            if (description) cell2Parts.push(description);
-            if (paramDetails) cell2Parts.push(paramDetails);
-            const cell2Content = cell2Parts.join('<br>');
-            appendToCell(cells[1], cell2Content);
-
-            // --- Cell 3 Logic: Method ---
-            if (method) {
-                appendToCell(cells[2], method);
-            }
-            
-
-            const newItem = {
-                field: fieldValue,
-                categoryValue: categoryValue,
-                parameterValue: parameterValue
-            };
-
-            // 2. เพิ่ม object ใหม่เข้าไปใน array `labCalItems`
-            labTestItems.push(newItem);
-
-            managePages();
-            closeModal(labTestItemModal);
-        });
-        // === END: MODIFICATION FOR LAB TEST LOGIC ===
-
-        function wrapSpecialCharactersInNode(node) {
-            const specialChars = ['Ω', 'π', 'Σ', 'β', 'α', 'γ', 'µ', 'μ', '±', '∞', 'θ', 'δ', 'ξ', 'φ', 'χ', 'ψ', 'ω', 'ε', 'Δ', '√', '∮', '∫', '∂', '∇', '∑', '∏', '∆', 'λ', 'σ', 'ρ', '℃', '℉', 'Ξ','Ɛ'];
-            const regex = new RegExp(`(${specialChars.join('|')})`, 'g');
-
-            if (node.nodeType === Node.TEXT_NODE) {
-                const parent = node.parentNode;
-                if (parent.nodeName === 'SCRIPT' || parent.nodeName === 'STYLE') {
-                    return;
-                }
-
-                const text = node.textContent;
-                if (regex.test(text)) {
-                    const fragment = document.createDocumentFragment();
-                    const parts = text.split(regex);
-
-                    parts.forEach(part => {
-                        if (specialChars.includes(part)) {
-                            const span = document.createElement('span');
-                            span.style.fontFamily = 'dejavusans';
-                            span.style.fontSize = '14px';
-                            span.textContent = part;
-                            fragment.appendChild(span);
-                        } else if (part) {
-                            fragment.appendChild(document.createTextNode(part));
-                        }
-                    });
-                    parent.replaceChild(fragment, node);
-                }
-            } else if (node.nodeType === Node.ELEMENT_NODE) {
-                Array.from(node.childNodes).forEach(child => wrapSpecialCharactersInNode(child));
-            }
-        }
 
         exportPdfButton.addEventListener('click', () => {
             const editorClone = editor.cloneNode(true);
@@ -2751,7 +2780,7 @@ const insertCbTemplate = () => {
                 pagesContent.push(page.innerHTML); 
             });
 
-            fetch("{!! url('/export-pdf') !!}", {
+            fetch('/export-pdf', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2812,19 +2841,9 @@ const insertCbTemplate = () => {
                 });
 
 
-                // console.log(pagesContent);
-                let labItems = [];
-                if(templateType == "lab_test")
-                {
-                    labItems = labTestItems;
-                }else if(templateType == "lab_cal")
-                {
-                    labItems = labCalItems;
-                }
+                console.log(pagesContent);
 
-                // console.log(labItems)
-
-                fetch("{!! route('certify.applicant.save-html-template') !!}" , {
+                fetch('/save-html-template', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2832,12 +2851,7 @@ const insertCbTemplate = () => {
                     },
                     body: JSON.stringify({
                         html_pages: pagesContent,
-                        template_type: templateType,
-                        labCalDetails: labCalDetails,
-                        accordingFormula: accordingFormula,
-                        labAbility: labAbility,
-                        purpose: purpose,
-                        labItems: labItems
+                        template_type: templateType
                     })
                 })
                 .then(response => {
@@ -2861,87 +2875,51 @@ const insertCbTemplate = () => {
         
         if (loadTemplateButton) {
             loadTemplateButton.addEventListener('click', () => {
-                downloadTemplate();
-               
-            });
-        }
-
-        function downloadTemplate()
-        {
-            fetch("{!! route('certify.applicant.download-html-template') !!}" , {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    accordingFormula: accordingFormula,
-                    labAbility: labAbility,
-                    purpose: purpose,
-                })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.message || 'Network response was not ok');
-                    });
+                const templateIdentifier = prompt("โปรดระบุประเภทของเทมเพลตที่ต้องการโหลด (เช่น 'cb', 'ib'):");
+                if (!templateIdentifier) {
+                    alert("ไม่ได้ระบุประเภทของเทมเพลต");
+                    return;
                 }
-                return response.json();
-            })
-            .then(data => {
-                if (data.html_pages && Array.isArray(data.html_pages)) {
-                    while (editor.firstChild) {
-                        editor.removeChild(editor.firstChild);
+
+                fetch('/download-html-template', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        template_type: templateIdentifier
+                    })
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.message || 'Network response was not ok');
+                        });
                     }
-
-                    console.log(data.htmlTemplate)
-                    data.html_pages.forEach(pageHtml => {
-                        const newPage = createNewPage();
-                        newPage.innerHTML = pageHtml;
-                        editor.appendChild(newPage);
-                    });
-                    console.log('Load successful:', data);
-
-                    // ตรวจสอบ template_type เพื่อสร้างตัวแปรที่เหมาะสม
-                    if (data.htmlTemplate && data.htmlTemplate.template_type === "lab_test") {
-                        const labTestItems = [];
-                        try {
-                            // Parse json_data ซึ่งเป็น string ให้เป็น JavaScript array/object
-                            const jsonData = JSON.parse(data.htmlTemplate.json_data);
-                            jsonData.forEach(item => {
-                                const newItem = {
-                                    field: item.field,
-                                    categoryValue: item.categoryValue,
-                                    parameterValue: item.parameterValue
-                                };
-                                labTestItems.push(newItem);
-                            });
-                            console.log('labTestItems:', labTestItems);
-                        } catch (error) {
-                            console.error("Error parsing json_data for lab_test:", error);
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.html_pages && Array.isArray(data.html_pages)) {
+                        while (editor.firstChild) {
+                            editor.removeChild(editor.firstChild);
                         }
-                    } else if (data.htmlTemplate && data.htmlTemplate.template_type === "lab_cal") {
-                        const labCalItems = [];
-                        try {
 
-                            const jsonData = JSON.parse(data.htmlTemplate.json_data);
-                            jsonData.forEach(item => {
-                                const newItem = {
-                                    field: item.field,
-                                    instrument: item.instrument,
-                                    parameterOne: item.parameterOne,
-                                    parameterTwo: item.parameterTwo,
-                                };
-                                labCalItems.push(newItem);
-                            });
-                            console.log('labCalItems:', labCalItems);
-                        } catch (error) {
-                            console.error("Error parsing json_data for lab_cal:", error);
-                        }
+                        console.log(data.html_pages)
+                        data.html_pages.forEach(pageHtml => {
+                            const newPage = createNewPage();
+                            newPage.innerHTML = pageHtml;
+                            editor.appendChild(newPage);
+                        });
+                        console.log('Load successful:', data);
+                    } else {
+                        throw new Error(data.message || 'ไม่พบข้อมูลเทมเพลต หรือข้อมูลไม่ถูกต้อง');
                     }
-                
-                } 
-                
+                })
+                .catch(error => {
+                    console.error('มีปัญหาในการโหลดเทมเพลต:', error);
+                    alert('เกิดข้อผิดพลาดในการโหลด: ' + error.message);
+                });
             });
         }
 
@@ -2949,11 +2927,6 @@ const insertCbTemplate = () => {
         // Instantiate LineExtractor for all editable divs in the modals
         const cbCodeEditorExtractor = new LineExtractor('cb-code-editor');
         const cbDescriptionEditorExtractor = new LineExtractor('cb-description-editor');
-        const labCalMethodEditorExtractor = new LineExtractor('lab-cal-method-editor');
-        const labCalParamDetailsEditorExtractor = new LineExtractor('lab-cal-param-details-editor');
-        const labCalCapabilityEditorExtractor = new LineExtractor('lab-cal-capability-editor');
-        const labTestParamDetailsEditorExtractor = new LineExtractor('lab-test-param-details-editor');
-        const labTestMethodEditorExtractor = new LineExtractor('lab-test-method-editor');
         
         // New extractors for the modified IB modal
         const ibSubBranchExtractor = new LineExtractor('ib-sub-branch');

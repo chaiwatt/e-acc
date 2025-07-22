@@ -82,14 +82,14 @@
     <legend><h4><span class="text-danger">*</span> 5. ขอบข่ายที่ยื่นขอรับการรับรอง
         (<span class="text-warning">ห้องปฏิบัติการสอบเทียบ</span>) (Scope of Accreditation Sought (<span class="text-warning">For calibration laboratory</span>)) </h4></legend>
             <div class="clearfix"></div>
-            <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">เพิ่มขอบข่าย</a> 
+            
             @if ($urlType == 'create')
-                <table class="table table-bordered" id="myTable_labScope">
+            <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">เพิ่มขอบข่าย</a> 
+                {{-- <table class="table table-bordered" id="myTable_labScope">
                     <thead class="bg-primary">
                         <tr>
                             <th class="text-center text-white "  width="10%">ลำดับ</th>
                             <th class="text-center text-white "  width="50%">สาขา</th>
-                            {{-- <th class="text-center text-white "  width="20%">ขอบข่ายร่วมกันทุกประเภท</th> --}}
                             <th class="text-center text-white "  width="20%">เพิ่มขอบข่าย</th>
                         </tr>
                     </thead>
@@ -99,9 +99,6 @@
                             <td style="vertical-align:top">
                                 สำนักงานใหญ่
                             </td>
-                            {{-- <td class="text-center" id ="checkbox-main-branch-container">
-                                
-                            </td> --}}
                             <td class="text-center" id="main-branch-container">
                                 
                             </td>
@@ -110,7 +107,7 @@
                 </table> 
 
 
-                <div id="scope_table_wrapper"></div>
+                <div id="scope_table_wrapper"></div> --}}
 
              
 
@@ -180,12 +177,12 @@
             @endif
 
         @elseif($urlType == 'edit')
-            <table class="table table-bordered" id="myTable_labScope">
+        <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">เพิ่มขอบข่าย</a> 
+            {{-- <table class="table table-bordered" id="myTable_labScope">
                 <thead class="bg-primary">
                     <tr>
                         <th class="text-center text-white "  width="10%">ลำดับ</th>
                         <th class="text-center text-white "  width="50%">สาขา</th>
-                        {{-- <th class="text-center text-white "  width="20%">ขอบข่ายร่วมกันทุกประเภท</th> --}}
                         <th class="text-center text-white "  width="20%">เพิ่มขอบข่าย</th>
                     </tr>
                 </thead>
@@ -205,7 +202,7 @@
 
             <div id="scope_table_wrapper">
 
-            </div>
+            </div> --}}
 
 
         @endif      
@@ -302,7 +299,7 @@
     </legend>
 
     <div id="viewForm93" style="display: none">
-       TEST viewForm93
+       {{-- TEST viewForm93 --}}
         <div class="row repeater-form-file">
             <div class="col-md-12 box_section72" data-repeater-list="repeater-section72" id="repeater_section72_wrapper">
                 @php
@@ -744,7 +741,7 @@
                     
                     // Open the URL in a new tab
                     window.open(url, '_blank');
-                });
+            });
 
             //เพิ่มตำแหน่งงาน
             $('#test_tools_add').click(function() {
