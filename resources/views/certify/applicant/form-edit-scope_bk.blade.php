@@ -265,7 +265,7 @@
     <script src="{{asset('plugins/components/repeater/jquery.repeater.min.js')}}"></script>
 
     <script src="{{asset('js/jasny-bootstrap.js')}}"></script>
-    <script src="{{asset('assets/js/lab/applicant.js?v=1.11')}}"></script>
+    <script src="{{asset('assets/js/lab/applicant.js?v=1.12')}}"></script>
 
     <script>
    
