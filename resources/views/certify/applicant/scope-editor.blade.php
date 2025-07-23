@@ -2544,8 +2544,9 @@ const insertCbTemplate = () => {
             
 
             if (field && cells[0].textContent.trim()) {
-                 if (field != cells[0].textContent.trim()) {
-                    alert("ให้เพิ่มแถวใหม่สำหนับสาขาใหม่");
+                // ตรวจสอบโดย trim ทั้งสองค่าก่อนเปรียบเทียบ
+                if (!cells[0].textContent.trim().startsWith(field.trim())) {
+                    alert("ให้เพิ่มแถวใหม่สำหรับสาขาใหม่");
                     return;
                 }
             }
