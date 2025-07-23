@@ -1807,20 +1807,20 @@ class ApplicantController extends Controller
                         ];
 
 
-                        if($certi_lab->lab_type == 3){
-                            //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
-                            $requestData['test_scope'] = $branchCategories;
-                            // dd();
-                            if(isset($requestData['test_scope'])){
-                                $this->save_certify_test_scope($certi_lab,$requestData);
-                            }
-                        }else if($certi_lab->lab_type == 4){
-                            //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
-                            $requestData['calibrate'] =$branchCategories;
-                            if(isset($requestData['calibrate'])){
-                                $this->save_certifyLab_calibrate($certi_lab,$requestData);
-                            }
-                        }
+                        // if($certi_lab->lab_type == 3){
+                        //     //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
+                        //     $requestData['test_scope'] = $branchCategories;
+                        //     // dd();
+                        //     if(isset($requestData['test_scope'])){
+                        //         $this->save_certify_test_scope($certi_lab,$requestData);
+                        //     }
+                        // }else if($certi_lab->lab_type == 4){
+                        //     //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
+                        //     $requestData['calibrate'] =$branchCategories;
+                        //     if(isset($requestData['calibrate'])){
+                        //         $this->save_certifyLab_calibrate($certi_lab,$requestData);
+                        //     }
+                        // }
 
                         //ไฟล์แนบ
 
