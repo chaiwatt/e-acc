@@ -1766,7 +1766,7 @@ class ApplicantController extends Controller
      */
    public function update(Request $request, $token)
     {
-
+         dd("ok");
         // $labAddresses = json_decode($request->input('lab_addresses'), true);
         // $labMainAddress = json_decode($request->input('lab_main_address'), true);
 
