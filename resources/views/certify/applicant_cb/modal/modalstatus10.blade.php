@@ -116,10 +116,31 @@
                                 $assessment_url = 'certify/applicant-cb/inspection/'.$assessment->id.'/'.$certi->token;;
                             }
                           @endphp
-                        <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
-                           {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}}  
-                           {{ array_key_exists($assessment->bug_report,$bug_report) ?  '( '.$bug_report[$assessment->bug_report].' )' :'' }}
-                        </a> 
+
+                        @if ($assessment->bug_report == 2)
+                        
+                                @if ($assessment->CertiCBAuditorsTo->isAllFinalReportSigned())
+                                    <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                        {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}}  
+                                        {{ array_key_exists($assessment->bug_report,$bug_report) ?  '( '.$bug_report[$assessment->bug_report].' )' :'' }}
+                                    </a> 
+                                @else
+                                    <a  class="btn {{$assessment_btn}} "  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                        {{$assessment->CertiCBAuditorsTo->auditor}} (อยู่ระหว่างดำเนินการ)
+                                    </a> 
+                                    
+                                @endif
+
+                            @else
+                                    <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                        {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}}  
+                                        {{ array_key_exists($assessment->bug_report,$bug_report) ?  '( '.$bug_report[$assessment->bug_report].' )' :'' }}
+                                    </a> 
+
+                        @endif
+
+
+                       
                        <br>
                     @endforeach
       

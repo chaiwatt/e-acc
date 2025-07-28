@@ -24,7 +24,8 @@ class SignAssessmentReportTransaction extends Model
         'linesapce',
         'view_url',
         'approval',
-        'report_type'
+        'report_type',
+        'template'
     ];
 
     // public function labReportInfo(){

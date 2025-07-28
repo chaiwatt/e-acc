@@ -295,7 +295,7 @@
 
 
 
-                                            @elseif($item->status == 10 || $item->status == 11) <!-- อยู่ระหว่างดำเนินการ  -->
+                                            @elseif($item->status == 10 || $item->status == 11) 
                                                 <button style="border: none" data-toggle="modal"  data-target="#TakeAction{{$loop->iteration}}"  data-id="{{ $item->token }}"  >
                                                     <i class="mdi mdi-magnify"></i> อยู่ระหว่างดำเนินการ
                                                 </button>

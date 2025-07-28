@@ -253,13 +253,9 @@
                                                 <td></td>
                                             @endif
                                         <td>
-                                            @if ($applicant->lab_type == 3)
-                                                   {{-- {{$applicant->BranchTitle ?? null}} --}}
-                                                   {{$applicant->allLabTestTransactionCategories()}}
-                                               @elseif ($applicant->lab_type == 4)
-                                                {{-- {{ $applicant->ClibrateBranchTitle ?? null }} --}}
-                                                {{$applicant->allLabCalTransactionCategories()}}
-                                            @endif
+                                      
+                                                {{$applicant->allCategories()}}
+                                         
                                             
                                         </td>
 

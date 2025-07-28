@@ -940,6 +940,22 @@ public function fullyApprovedAuditors()
         return implode(', ', array_unique($categories)); // ใช้ array_unique เพื่อลบค่าซ้ำ
     }
 
+    public function allCategories()
+    {
+        $categories = [];
+       $certifyLabCalibrates = CertifyLabCalibrate::where('app_certi_lab_id',$this->id)->get();
+      
+        foreach ($certifyLabCalibrates as $certifyLabCalibrate) {
+            //  dd($certifyLabCalibrate->TableCalibrationBranch);
+            // dd($certifyLabCalibrate->TableCalibrationBranch->first()->title);
+            if($certifyLabCalibrate->TableCalibrationBranch != null){
+                $categories[] = $certifyLabCalibrate->TableCalibrationBranch->title;
+            }
+            
+        }
+        return implode(', ', array_unique($categories)); // ใช้ array_unique เพื่อลบค่าซ้ำ
+    }
+
     public function FormulaTo()
     {
         return $this->belongsTo(Formula::class,'standard_id');

@@ -974,13 +974,14 @@ class ApplicantController extends Controller
         }
 
     }
-    private function save_certifyLab_calibrate($main, $requestData){
+    private function save_certifyLab_calibrate($main, $jsonData){
         CertifyLabCalibrate::where('app_certi_lab_id', $main->id)->delete();
 
-        if( isset($requestData['calibrate']) ){
+        // if( isset($requestData['calibrate']) ){
             /*  ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ) */
-            $calibrate = (array)@$requestData['calibrate'];
-            foreach($calibrate['branch_id'] as $key => $itme) {
+            // $calibrate = (array)@$requestData['calibrate'];
+            foreach($jsonData as $key => $itme) {
+                // dd($main->id,$itme);
                 $input = [];
                 $input['app_certi_lab_id'] = $main->id;
                 //   $input['group_id'] = $itme;
@@ -988,9 +989,11 @@ class ApplicantController extends Controller
                 $input['token'] = str_random(16);
                 CertifyLabCalibrate::create($input);
             }
-        }
+        // }
 
     }
+
+    
 
     public function copyExistFiles($newCertiLab, $certiLabId)
     {
@@ -1103,6 +1106,18 @@ class ApplicantController extends Controller
                     // add ceti lab
                     $certilab = $this->SaveCertiLab($request, $data_session , null, $branchLabInfos ,$mainLabInfo );
 
+                    // dd($certilab);
+
+                    $tmp ="";
+                    if($certilab->lab_type == 3){
+                        $tmp = str_replace("RQ-LAB","TEST",$certilab->app_no);
+                    }else if($certilab->lab_type == 4){
+                        $tmp = str_replace("RQ-LAB","CAL",$certilab->app_no);
+                    }
+
+                    // dd($tmp);
+                    CertificateHistory::where("app_no",$tmp)->delete();
+
                     if($labHtmlTemplate !== null)
                     {
                         // dd($certilab->id);
@@ -1139,19 +1154,46 @@ class ApplicantController extends Controller
                     ];
 
                     // dd($branchCategories);
-                    if($certilab->lab_type == 3){
-                        //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
-                        $requestData['test_scope'] = $branchCategories;
-                        if(isset($requestData['test_scope'])){
-                            $this->save_certify_test_scope($certilab,$requestData);
+                    // if($certilab->lab_type == 3){
+                    //     //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
+                    //     $requestData['test_scope'] = $branchCategories;
+                    //     if(isset($requestData['test_scope'])){
+                    //         $this->save_certify_test_scope($certilab,$requestData);
+                    //     }
+                    // }else if($certilab->lab_type == 4){
+                    //     //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
+                    //     $requestData['calibrate'] = $branchCategories;
+                    //     if(isset($requestData['calibrate'])){
+                    //         $this->save_certifyLab_calibrate($certilab,$requestData);
+                    //     }
+                    // }
+
+                         $template_ability = "";
+                        if($certilab->lab_type == 4){
+                            $template_ability = "calibrate";
+                        }else if($certilab->lab_type == 3)
+                        {
+                            $template_ability = "test";
                         }
-                    }else if($certilab->lab_type == 4){
-                        //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
-                        $requestData['calibrate'] = $branchCategories;
-                        if(isset($requestData['calibrate'])){
-                            $this->save_certifyLab_calibrate($certilab,$requestData);
-                        }
-                    }
+
+
+                    
+                    $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+                        ->where('according_formula',$request->according_formula)
+                        ->where('purpose',$request->purpose)
+                        ->where('lab_ability',$template_ability)
+                        ->first();
+
+                        $jsonDataString = $labHtmlTemplate->json_data;
+
+                        $dataArray = json_decode($jsonDataString, true);
+
+                        // 2. ดึงค่าจาก key 'field' ทั้งหมดออกมาเป็น array ใหม่
+                        $fieldArray = array_column($dataArray, 'field');
+
+                        // dd($labHtmlTemplate,$fieldArray);
+
+                        $this->save_certifyLab_calibrate($certilab,$fieldArray);
                     
 
                     if ( isset($requestData['repeater-section4'] ) ){
@@ -1773,7 +1815,6 @@ class ApplicantController extends Controller
         $mainLabInfo = json_decode($request->input('main_lab_info'), true);
         $branchLabInfos = json_decode($request->input('branch_lab_infos'), true) ?? [];
 
-
         $model = str_slug('applicant','-');
         $data_session     =    HP::CheckSession();
 
@@ -1788,7 +1829,24 @@ class ApplicantController extends Controller
 
                     $certi_lab = CertiLab::where('token',$token)->first();
 
+
+
                     if (!is_null($certi_lab)){
+
+
+                        $template_ability = "";
+                        if($certi_lab->lab_type == 4){
+                            $template_ability = "calibrate";
+                        }else if($certi_lab->lab_type == 3)
+                        {
+                            $template_ability = "test";
+                        }
+
+                        $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+                            ->where('according_formula',$request->according_formula)
+                            ->where('purpose',$request->purpose)
+                            ->where('lab_ability',$template_ability)
+                            ->first();
 
 
                         $certi_lab = $this->SaveCertiLab($request, $data_session , $token,$branchLabInfos,    $mainLabInfo  );
@@ -1806,21 +1864,42 @@ class ApplicantController extends Controller
                             'branch_id' => $this->getCategories($request)
                         ];
 
+                        
 
+                    $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+                        ->where('according_formula',$request->according_formula)
+                        ->where('purpose',$request->purpose)
+                        ->where('lab_ability',$template_ability)
+                        ->first();
+
+                        $jsonDataString = $labHtmlTemplate->json_data;
+
+                        $dataArray = json_decode($jsonDataString, true);
+
+                        // 2. ดึงค่าจาก key 'field' ทั้งหมดออกมาเป็น array ใหม่
+                        $fieldArray = array_column($dataArray, 'field');
+
+                        // dd($fieldArray);
+
+                        // 
                         // if($certi_lab->lab_type == 3){
-                        //     //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
-                        //     $requestData['test_scope'] = $branchCategories;
-                        //     // dd();
-                        //     if(isset($requestData['test_scope'])){
-                        //         $this->save_certify_test_scope($certi_lab,$requestData);
-                        //     }
+                            //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
+                            // $requestData['test_scope'] = $branchCategories;
+                            // // dd();
+                            // if(isset($requestData['test_scope'])){
+                            //     $this->save_certify_test_scope($certi_lab,$requestData);
+                            // }
+                        //     $this->save_certifyLab_calibrate($certi_lab,$fieldArray);
                         // }else if($certi_lab->lab_type == 4){
-                        //     //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
-                        //     $requestData['calibrate'] =$branchCategories;
-                        //     if(isset($requestData['calibrate'])){
-                        //         $this->save_certifyLab_calibrate($certi_lab,$requestData);
-                        //     }
+                            // dd("ok");
+                            //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
+                            // $requestData['calibrate'] =$branchCategories;
+                            // if(isset($requestData['calibrate'])){
+                                $this->save_certifyLab_calibrate($certi_lab,$fieldArray);
+                            // }
                         // }
+
+                        // dd($fieldArray);
 
                         //ไฟล์แนบ
 
@@ -1924,20 +2003,7 @@ class ApplicantController extends Controller
                     //     $labScopeTransaction->save();
                     // }
 
-                           $template_ability = "";
-                            if($request->lab_ability == 4){
-                                $template_ability = "calibrate";
-                            }else if($request->lab_ability == 3)
-                            {
-                                $template_ability = "test";
-                            }
 
-   
-                     $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
-                        ->where('according_formula',$request->according_formula)
-                        ->where('purpose',$request->purpose)
-                        ->where('lab_ability',$template_ability)
-                        ->first();
 
                         // dd($request->lab_ability ,$request->according_formula, $request->purpose,$request->lab_ability, $labHtmlTemplate);
 
@@ -6789,7 +6855,6 @@ $mpdf->SetHTMLFooter($footerHtml);
       $certi_lab_attach->token            = str_random(16);
       $certi_lab_attach->default_disk = config('filesystems.default');
       $certi_lab_attach->save();
-
 
     }
 

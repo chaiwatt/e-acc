@@ -903,7 +903,7 @@ class ApplicantIBController extends Controller
                 ->where('type_unit',$request->type_unit)
                 ->first();
 
-       
+    //    dd(auth()->user()->id,$request->type_standard,$certi_ib->id,$request->type_unit);
         $this->exportScopePdf($certi_ib->id,$ibHtmlTemplate);
          $this->updateScopeEmail( $certi_ib);
 
@@ -3179,10 +3179,10 @@ function ordinal($number) {
     
  public function exportScopePdf($id,$ibHtmlTemplate)
     {
-
+//  dd($ibHtmlTemplate);
         $htmlPages = json_decode($ibHtmlTemplate->html_pages);
 
-        // dd($htmlPages);
+       
 
         if (!is_array($htmlPages)) {
           

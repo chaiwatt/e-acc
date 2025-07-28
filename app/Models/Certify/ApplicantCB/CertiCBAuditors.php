@@ -4,8 +4,10 @@ namespace App\Models\Certify\ApplicantCB;
 
 use HP;
 use App\User;
+use App\Certify\CbReportTemplate;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Certify\MessageRecordTransaction;
+use App\Models\Certify\SignAssessmentReportTransaction;
 
 class CertiCBAuditors  extends Model
 {
@@ -131,5 +133,42 @@ class CertiCBAuditors  extends Model
    {
        return $this->hasMany(MessageRecordTransaction::class, 'board_auditor_id', 'id');
    }
+
+     public function isAllFinalReportSigned()
+    {
+            // 1. ค้นหา Assessment
+        $assessment = CertiCBSaveAssessment::where('auditors_id', $this->id)->first();
+
+        // ถ้าไม่พบข้อมูล Assessment ให้ return false
+        if (!$assessment) {
+            return false;
+        }
+
+        // 2. ค้นหา Report Template
+        $report = CbReportTemplate::where('cb_assessment_id', $assessment->id)
+                                ->where('report_type', "cb_final_report_process_one")
+                                ->first();
+
+        // ถ้าไม่พบข้อมูล Report ให้ return false
+        if (!$report) {
+            return false;
+        }
+
+        // 3. ค้นหารายการที่ยังไม่ถูกอนุมัติ (approval = 0)
+        $pendingSignatures = SignAssessmentReportTransaction::where('report_info_id', $report->id)
+                                                        ->where('certificate_type', 0)
+                                                        ->where('report_type', 1)
+                                                        ->where('approval', 1)
+                                                        ->get();
+        if( $pendingSignatures->count() == 3){
+            return true;
+        }   else{
+          return false;  
+        }    
+
+        // ถ้าพบรายการที่ยังไม่ถูกอนุมัติ (collection ไม่ใช่ค่าว่าง) ให้ return false
+        // ถ้าไม่พบเลย (collection เป็นค่าว่าง) หมายความว่าทุกอย่างถูกอนุมัติแล้ว ให้ return true
+        // return $pendingSignatures->isEmpty(); 
+    }
 
 }
