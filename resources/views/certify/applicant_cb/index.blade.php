@@ -180,7 +180,7 @@
                                 <tr>
                                     <td class="text-center">{{ $loop->iteration + ( ((request()->query('page') ?? 1) - 1) * $certiCbs->perPage() ) }}</td>
                                     <td> {{  @$item->app_no }}
-                                        <p style="font-style:italic;font-size:14px" >{{$item->purposeType->name}}</p>
+                                        <p style="font-style:italic;font-size:14px" >{{optional($item->purposeType)->name}}</p>
                                     </td>
                                     <td>{{ $item->name ?? null  }}
                                         

@@ -144,11 +144,14 @@
                                     $type_unit =  ['1'=>'A','2'=>'B','3'=>'C'] ;
                                 @endphp
                                  @foreach($certiIbs as $item)
+                                 {{-- @php
+                                     dd($item);
+                                 @endphp --}}
                                     <tr>
                                         <td class="text-center">{{ $loop->iteration + ( ((request()->query('page') ?? 1) - 1) * $certiIbs->perPage() ) }}</td>
                                         <td>
                                             {{ @$item->app_no }}
-                                            <p style="font-style:italic;font-size:14px" >{{$item->purposeType->name}}</p>
+                                            <p style="font-style:italic;font-size:14px" >{{ optional($item->purposeType)->name }}</p>
                                         </td>
                                         <td>
                                             {{ array_key_exists($item->type_unit,$type_unit) ? $type_unit[$item->type_unit]  :'-' }}
