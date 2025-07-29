@@ -742,9 +742,9 @@
                 var cbDistrictEng = $('#cb_district_eng').val();
                 var cbPostcodeEng = $('#cb_postcode_eng').val();
 
-                console.log("aha");
+                // console.log("aha");
 
-                return;
+                // return;
                 
                 // Check if required values are undefined or empty
                 // if (!typeStandard || !petitioner || !trustMark || !standardChange || !nameStandard || 
