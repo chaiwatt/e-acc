@@ -126,17 +126,17 @@
                      
 
                      @if ($assessment->bug_report == 2)
-                            @if ($assessment->CertiIBAuditorsTo->isAllFinalReportSigned())
+                            {{-- @if ($assessment->CertiIBAuditorsTo->isAllFinalReportSigned()) --}}
                                 <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                     {{ $assessment->CertiIBAuditorsTo->auditor ?? '-'}}  
                                     {{ array_key_exists($assessment->bug_report,$bug_report) ?  '( '.$bug_report[$assessment->bug_report].' )' :'' }}
                                 </a> 
-                            @else
+                            {{-- @else
                                 
                                 <a  class="btn {{$assessment_btn}} " style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                     {{$assessment->CertiIBAuditorsTo->auditor}} (อยู่ระหว่างดำเนินการ)
                                 </a> 
-                            @endif
+                            @endif --}}
                          @else
                                 <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                     {{ $assessment->CertiIBAuditorsTo->auditor ?? '-'}}  
