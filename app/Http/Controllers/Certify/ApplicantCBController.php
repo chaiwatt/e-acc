@@ -495,7 +495,7 @@ class ApplicantCBController extends Controller
                     ]);
                     // dd($certi_cb->id);
                 }else{
-                    $cbHtmlTemplate = cbHtmlTemplate::create([
+                    $cbHtmlTemplate = CbHtmlTemplate::create([
                         'user_id' => $user->id,
                          'type_standard' => $request->type_standard,
                         'petitioner' => $request->petitioner,

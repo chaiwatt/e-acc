@@ -414,7 +414,6 @@ class ApplicantIBController extends Controller
                     $ibHtmlTemplate = ibHtmlTemplate::create([
                         'user_id' => $user->id,
                         'type_standard' => $request->typeStandard,
-                        // 'standard_change' => $request->standardChange,
                         'type_unit' => $request->typeUnit,
                         'app_certi_ib_id' => $certi_ib->id
                     ]);
@@ -3177,9 +3176,8 @@ function ordinal($number) {
 }
 
     
- public function exportScopePdf($id,$ibHtmlTemplate)
+    public function exportScopePdf($id,$ibHtmlTemplate)
     {
-//  dd($ibHtmlTemplate);
         $htmlPages = json_decode($ibHtmlTemplate->html_pages);
 
        
