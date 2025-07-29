@@ -741,14 +741,18 @@
                 var cbAmphurEng = $('#cb_amphur_eng').val();
                 var cbDistrictEng = $('#cb_district_eng').val();
                 var cbPostcodeEng = $('#cb_postcode_eng').val();
+
+                console.log("aha");
+
+                return;
                 
                 // Check if required values are undefined or empty
-                if (!typeStandard || !petitioner || !trustMark || !standardChange || !nameStandard || 
-                    !nameEnStandard || !address || !provinceId || !amphurId || !districtId || !postcode ||
-                    !cbAddressNoEng || !cbProvinceEng || !cbAmphurEng || !cbDistrictEng || !cbPostcodeEng) {
-                    alert('กรุณากรอกข้อมูลให้ครบถ้วน: ข้อกำหนดที่ใช้ในการรับรอง, สาขาการรับรอง, มาตรฐานที่ใช้รับรอง, วัตถุประสงค์ในการยื่นคำขอ, หน่วยรับรอง (TH), หน่วยรับรอง (EN), เลขที่ (TH), จังหวัด (TH), เขต/อำเภอ (TH), แขวง/ตำบล (TH), รหัสไปรษณีย์ (TH), เลขที่ (EN), จังหวัด (EN), เขต/อำเภอ (EN), แขวง/ตำบล (EN), และรหัสไปรษณีย์ (EN)');
-                    return;
-                }
+                // if (!typeStandard || !petitioner || !trustMark || !standardChange || !nameStandard || 
+                //     !nameEnStandard || !address || !provinceId || !amphurId || !districtId || !postcode ||
+                //     !cbAddressNoEng || !cbProvinceEng || !cbAmphurEng || !cbDistrictEng || !cbPostcodeEng) {
+                //     alert('กรุณากรอกข้อมูลให้ครบถ้วน: ข้อกำหนดที่ใช้ในการรับรอง, สาขาการรับรอง, มาตรฐานที่ใช้รับรอง, วัตถุประสงค์ในการยื่นคำขอ, หน่วยรับรอง (TH), หน่วยรับรอง (EN), เลขที่ (TH), จังหวัด (TH), เขต/อำเภอ (TH), แขวง/ตำบล (TH), รหัสไปรษณีย์ (TH), เลขที่ (EN), จังหวัด (EN), เขต/อำเภอ (EN), แขวง/ตำบล (EN), และรหัสไปรษณีย์ (EN)');
+                //     return;
+                // }
                 
                 // Build the URL with query parameters
                 var url = $(this).attr('href') + '?type_standard=' + encodeURIComponent(typeStandard) +
