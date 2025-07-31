@@ -3238,7 +3238,7 @@ function ordinal($number) {
     
         // Log::info('MPDF Temp Dir: ' . $tempDirPath);
 
-        $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
+        $stylesheet = file_get_contents(public_path('css/pdf-css/ib_update.css'));
         $mpdf->WriteHTML($stylesheet, 1);
 
         $mpdf->SetWatermarkImage(public_path('images/nc_hq.png'), 1, [23, 23], [170, 12]);
