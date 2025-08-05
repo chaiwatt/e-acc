@@ -8,9 +8,11 @@ use HP;
 use App\User; 
 use  App\Models\Esurv\Trader;
 
-use Kyslik\ColumnSortable\Sortable;
+use App\Certify\CbReportTemplate;
 
+use Kyslik\ColumnSortable\Sortable;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Certify\SignAssessmentReportTransaction;
 use App\Models\Certify\ApplicantCB\AuditorRepresentative;
 
 class CertiCBSaveAssessment extends Model
@@ -124,4 +126,44 @@ class CertiCBSaveAssessment extends Model
                          ->where('file_section',6)
                          ->orderby('id','desc');
        }
+
+    public function cbReportTemplate() {
+      return $this->hasOne(CbReportTemplate::class, 'cb_assessment_id','id');
+    }
+
+    public function isCbHasCar($reportType) {
+       $cbReportTemplate = CbReportTemplate::where('cb_assessment_id',$this->id)->where('report_type',$reportType)->first();
+
+       if($cbReportTemplate !== null){
+            return true;
+       }else{
+            return false;
+       }
+      
+    }
+
+    public function isAllFinalReportSigned($report)
+    {
+ 
+        // 3. ค้นหารายการที่ยังไม่ถูกอนุมัติ (approval = 0)
+        $pendingSignatures = SignAssessmentReportTransaction::where('report_info_id', $report->id)
+                                                        ->where('certificate_type', 0)
+                                                        ->where('report_type', 1)
+                                                        ->where('approval', 1)
+                                                        ->where('template', $report->report_type)
+                                                        ->get();
+
+
+        // dd($report->id,$pendingSignatures->count())                                               ;
+        if( $pendingSignatures->count() >= 3){
+            return true;
+        }   else{
+          return false;  
+        }    
+
+        // ถ้าพบรายการที่ยังไม่ถูกอนุมัติ (collection ไม่ใช่ค่าว่าง) ให้ return false
+        // ถ้าไม่พบเลย (collection เป็นค่าว่าง) หมายความว่าทุกอย่างถูกอนุมัติแล้ว ให้ return true
+        // return $pendingSignatures->isEmpty(); 
+    }
+
 }

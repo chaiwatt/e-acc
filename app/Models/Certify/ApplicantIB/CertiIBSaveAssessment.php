@@ -2,15 +2,17 @@
 
 namespace App\Models\Certify\ApplicantIB;
 
-use Illuminate\Database\Eloquent\Model;
-use Kyslik\ColumnSortable\Sortable;
-
-use HP;
 use DB;
+use HP;
 
 use App\User; 
-
 use  App\Models\Esurv\Trader;
+
+use App\Certify\IbReportTemplate;
+
+use Kyslik\ColumnSortable\Sortable;
+use Illuminate\Database\Eloquent\Model;
+use App\Models\Certify\SignAssessmentReportTransaction;
 
 class CertiIBSaveAssessment extends Model
 {
@@ -127,5 +129,43 @@ class CertiIBSaveAssessment extends Model
               ->where('table_name',$tb->getTable()) 
               ->where('system',8);
    }
+
+    public function ibReportTemplate() {
+      return $this->hasOne(IbReportTemplate::class, 'ib_assessment_id','id');
+    }
+
+    public function isIbHasCar($reportType) {
+       $ibReportTemplate =  IbReportTemplate::where('ib_assessment_id',$this->id)->where('report_type',$reportType)->first();
+        if($ibReportTemplate !== null){
+            return true;
+       }else{
+            return false;
+       }
+    }
+
+    
+    public function isAllFinalReportSigned($report)
+    {
+ 
+        // 3. ค้นหารายการที่ยังไม่ถูกอนุมัติ (approval = 0)
+        $pendingSignatures = SignAssessmentReportTransaction::where('report_info_id', $report->id)
+                                                        ->where('certificate_type', 1)
+                                                        ->where('report_type', 1)
+                                                        ->where('approval', 1)
+                                                        ->where('template', $report->report_type)
+                                                        ->get();
+
+
+        // dd($report->id,$pendingSignatures->count())                                               ;
+        if( $pendingSignatures->count() >= 3){
+            return true;
+        }   else{
+          return false;  
+        }    
+
+        // ถ้าพบรายการที่ยังไม่ถูกอนุมัติ (collection ไม่ใช่ค่าว่าง) ให้ return false
+        // ถ้าไม่พบเลย (collection เป็นค่าว่าง) หมายความว่าทุกอย่างถูกอนุมัติแล้ว ให้ return true
+        // return $pendingSignatures->isEmpty(); 
+    }
 
 }

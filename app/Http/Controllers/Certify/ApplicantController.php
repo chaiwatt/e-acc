@@ -956,14 +956,33 @@ class ApplicantController extends Controller
 
     }
 
-    private function save_certify_test_scope($main, $requestData){
+    // private function save_certify_test_scope($main, $requestData){
+    //     CertifyTestScope::where('app_certi_lab_id', $main->id)->delete();
+
+    //     if( isset($requestData['test_scope']) ){
+    //         /* ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ) */
+    //         $test_scope = (array)@$requestData['test_scope'];
+
+    //         foreach($test_scope['branch_id'] as $key => $itme) {
+    //             $input = [];
+    //             $input['app_certi_lab_id'] = $main->id;
+    //             //   $input['category_product_id'] = $itme;
+    //             $input['branch_id'] = $itme;
+    //             $input['token'] = str_random(16);
+    //             CertifyTestScope::create($input);
+    //         }
+    //     }
+
+    // }
+
+    private function save_certify_test_scope($main, $jsonData){
         CertifyTestScope::where('app_certi_lab_id', $main->id)->delete();
 
-        if( isset($requestData['test_scope']) ){
+        // if( isset($requestData['test_scope']) ){
             /* ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ) */
-            $test_scope = (array)@$requestData['test_scope'];
+            // $test_scope = (array)@$requestData['test_scope'];
 
-            foreach($test_scope['branch_id'] as $key => $itme) {
+            foreach($jsonData as $key => $itme) {
                 $input = [];
                 $input['app_certi_lab_id'] = $main->id;
                 //   $input['category_product_id'] = $itme;
@@ -971,7 +990,7 @@ class ApplicantController extends Controller
                 $input['token'] = str_random(16);
                 CertifyTestScope::create($input);
             }
-        }
+        // }
 
     }
     private function save_certifyLab_calibrate($main, $jsonData){
@@ -1153,6 +1172,8 @@ class ApplicantController extends Controller
                         'branch_id' => $this->getCategories($request)
                     ];
 
+                    
+
                     // dd($branchCategories);
                     // if($certilab->lab_type == 3){
                     //     //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
@@ -1184,16 +1205,26 @@ class ApplicantController extends Controller
                         ->where('lab_ability',$template_ability)
                         ->first();
 
+
+                    
+
                         $jsonDataString = $labHtmlTemplate->json_data;
 
                         $dataArray = json_decode($jsonDataString, true);
 
+
                         // 2. ดึงค่าจาก key 'field' ทั้งหมดออกมาเป็น array ใหม่
                         $fieldArray = array_column($dataArray, 'field');
+              
+                       
+                        if($certilab->lab_type == 3){
 
-                        // dd($labHtmlTemplate,$fieldArray);
+                            $this->save_certify_test_scope($certilab,$fieldArray);
+                        }else if($certilab->lab_type == 4)
+                        {
+                            $this->save_certifyLab_calibrate($certilab,$fieldArray);
+                        }
 
-                        $this->save_certifyLab_calibrate($certilab,$fieldArray);
                     
 
                     if ( isset($requestData['repeater-section4'] ) ){
@@ -1876,10 +1907,19 @@ class ApplicantController extends Controller
 
                         $dataArray = json_decode($jsonDataString, true);
 
+                        
+
                         // 2. ดึงค่าจาก key 'field' ทั้งหมดออกมาเป็น array ใหม่
                         $fieldArray = array_column($dataArray, 'field');
 
                         // dd($fieldArray);
+
+                        if($certi_lab->lab_type == 3){
+                            $this->save_certify_test_scope($certi_lab,$fieldArray);
+                        }else if($certi_lab->lab_type == 4)
+                        {
+                            $this->save_certifyLab_calibrate($certi_lab,$fieldArray);
+                        }
 
                         // 
                         // if($certi_lab->lab_type == 3){
@@ -1895,7 +1935,7 @@ class ApplicantController extends Controller
                             //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
                             // $requestData['calibrate'] =$branchCategories;
                             // if(isset($requestData['calibrate'])){
-                                $this->save_certifyLab_calibrate($certi_lab,$fieldArray);
+                                // $this->save_certifyLab_calibrate($certi_lab,$fieldArray);
                             // }
                         // }
 
@@ -4918,7 +4958,7 @@ class ApplicantController extends Controller
 
      public function UpdateAssessment(Request $request, $id)
      {
-        // dd('ok');
+        // dd($request->all());
 
 //   try {
             $data_session     =    HP::CheckSession();
@@ -4936,12 +4976,13 @@ class ApplicantController extends Controller
                 foreach ($detail['id'] as $key => $item) {
                         $notice_itme = NoticeItem::where('id',$item)->first();
                         $notice_itme->details =  $detail["details"][$key] ?? $notice_itme->details;
-                                $assessment->check_file = 'false';
-                            if($request->attachs  && $request->hasFile('attachs')){
-                                $notice_itme->attachs             =  array_key_exists($key, $request->attachs) ?  $this->storeFile($request->attachs[$key],$certi_lab->app_no): @$notice_itme->attachs;
-                                $notice_itme->attachs_client_name =  array_key_exists($key, $request->attachs) ?  HP::ConvertCertifyFileName($request->attachs[$key]->getClientOriginalName()) : @$notice_itme->attachs_client_name;
-                                $assessment->check_file  = 'true';
-                            }
+                        $notice_itme->user_cause =  $detail["user_cause"][$key] ?? $notice_itme->user_cause;
+                        $assessment->check_file = 'false';
+                        if($request->attachs  && $request->hasFile('attachs')){
+                            $notice_itme->attachs             =  array_key_exists($key, $request->attachs) ?  $this->storeFile($request->attachs[$key],$certi_lab->app_no): @$notice_itme->attachs;
+                            $notice_itme->attachs_client_name =  array_key_exists($key, $request->attachs) ?  HP::ConvertCertifyFileName($request->attachs[$key]->getClientOriginalName()) : @$notice_itme->attachs_client_name;
+                            $assessment->check_file  = 'true';
+                        }
                         $notice_itme->save();
 
                     }
@@ -4954,7 +4995,7 @@ class ApplicantController extends Controller
                                                    ->orderby('id','desc')
                                                    ->first();
 
-          $NoticeItem = NoticeItem::select('remark','report','no','type','status','file_status','reporter','reporter_id','attachs','attachs','comment','comment_file','details','attachs_client_name')
+          $NoticeItem = NoticeItem::select('remark','report','no','type','status','file_status','reporter','reporter_id','attachs','attachs','comment','comment_file','details','attachs_client_name','user_cause')
                                         ->where('app_certi_lab_notice_id',$assessment->id)
                                         ->get()
                                         ->toArray();

@@ -118,12 +118,48 @@
                           @endphp
 
                         @if ($assessment->bug_report == 2)
+
+
+                            @php
+                                $isAllFinalReportSigned =false;
+                                $hasCarOrAllsigned = false;
+                            @endphp
+
+                            @if ($assessment->CertiCBAuditorsTo->assessment_type == 0)
+                    
+                                    @php
+                                        $isAllFinalReportSigned = $assessment->CertiCBAuditorsTo->isAllFinalReportSigned("cb_final_report_process_one");
+                                         $hasCarOrAllsigned = $assessment->CertiCBAuditorsTo->hasCarOrAllsigned("ib_car_report_two_process_one");
+                                    @endphp
                         
-                                {{-- @if ($assessment->CertiCBAuditorsTo->isAllFinalReportSigned()) --}}
-                                    <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                            @elseif($assessment->CertiCBAuditorsTo->assessment_type == 1)
+                                    
+                                    @php
+                                    // dd($assessment->cbReportTemplate);
+                                        $isAllFinalReportSigned = $assessment->CertiCBAuditorsTo->isAllFinalReportSigned("cb_final_report_process_two");
+                                         $hasCarOrAllsigned = $assessment->CertiCBAuditorsTo->hasCarOrAllsigned("ib_car_report_two_process_two");
+                                    @endphp
+
+                            @endif
+
+                            
+                             {{-- @if ($isAllFinalReportSigned && $hasCarOrAllsigned)  --}}
+                                  <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                         {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}}  
                                         {{ array_key_exists($assessment->bug_report,$bug_report) ?  '( '.$bug_report[$assessment->bug_report].' )' :'' }}
                                     </a> 
+                             {{-- @else
+                   
+                                <a  class="btn {{$assessment_btn}} " style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                    {{$assessment->CertiCBAuditorsTo->auditor}} (อยู่ระหว่างดำเนินการ)
+                                </a> 
+                            @endif  --}}
+                        
+                                {{-- @if ($assessment->CertiCBAuditorsTo->isAllFinalReportSigned()) --}}
+                                    {{-- <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                        {{ $assessment->CertiCBAuditorsTo->auditor ?? '-'}}  
+                                        {{ array_key_exists($assessment->bug_report,$bug_report) ?  '( '.$bug_report[$assessment->bug_report].' )' :'' }}
+                                    </a>  --}}
                                 {{-- @else
                                     <a  class="btn {{$assessment_btn}} "  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                         {{$assessment->CertiCBAuditorsTo->auditor}} (อยู่ระหว่างดำเนินการ)

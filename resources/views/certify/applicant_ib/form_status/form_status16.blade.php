@@ -240,8 +240,9 @@
         <thead>
             <tr>
                 <th class="text-center" width="2%">ลำดับ</th>
-                <th class="text-center" width="40%">ผลการประเมินที่พบ</th>
-                <th class="text-center" width="58%">แนวทางการแก้ไข</th>  
+                <th class="text-center" width="38%">รายละเอียดข้อบกพร่อง</th>
+                <th class="text-center" width="30%">แนวทางการแก้ไข</th>  
+                <th class="text-center" width="30%">สาเหตุ</th>   
             </tr>
         </thead>
         <tbody id="table-body">
@@ -261,6 +262,11 @@
                 <td style="padding: 0px">
                     
                     <textarea name="detail[details][]" class="form-control auto-expand {{ $assessment->accept_fault == null || $assessment->submit_type != 'confirm' ? 'non-editable' : '' }}"  rows="5" required>{{ !empty($item->details) ? $item->details : '' }}</textarea>
+                </td>
+                
+                <td style="padding: 0px">
+                    <textarea name="detail[user_cause][]"  class="form-control auto-expand {{ $assessment->accept_fault == null || $assessment->submit_type != 'confirm' ? 'non-editable' : '' }}"  rows="5"  required>{{ !empty($item->user_cause) ? $item->user_cause : '' }}</textarea>
+
                 </td>
             </tr>
            @endforeach 

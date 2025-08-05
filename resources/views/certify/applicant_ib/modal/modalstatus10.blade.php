@@ -123,21 +123,53 @@
                                 $assessment_url = 'certify/applicant-ib/inspection/'.$assessment->id.'/'.$certi->token;
                             }
                           @endphp
-                     
+                      {{-- {{$assessment->ibReportTemplate->report_type}} --}}
 
                      @if ($assessment->bug_report == 2)
-                            {{-- @if ($assessment->CertiIBAuditorsTo->isAllFinalReportSigned()) --}}
+
+                        {{-- @php
+                            dd($assessment->CertiIBAuditorsTo->assessment_type);
+                        @endphp --}}
+                            @php
+                                $isAllFinalReportSigned =false;
+                                $hasCarOrAllsigned =false;
+                            @endphp
+
+                            @if ($assessment->CertiIBAuditorsTo->assessment_type == 0)
+                    
+                                    @php
+                                        $isAllFinalReportSigned = $assessment->CertiIBAuditorsTo->isAllFinalReportSigned("ib_final_report_process_one");
+                                        $hasCarOrAllsigned = $assessment->CertiIBAuditorsTo->hasCarOrAllsigned("ib_car_report_two_process_one");
+                                    @endphp
+                        
+                            @elseif($assessment->CertiIBAuditorsTo->assessment_type == 1)
+
+                                    @php
+                                        $isAllFinalReportSigned = $assessment->CertiIBAuditorsTo->isAllFinalReportSigned("ib_final_report_process_two");
+                                        $hasCarOrAllsigned = $assessment->CertiIBAuditorsTo->hasCarOrAllsigned("ib_car_report_two_process_two");
+                                    @endphp
+
+                            @endif
+                         
+                        {{-- @php
+                            dd($isAllFinalReportSigned);
+                        @endphp --}}
+
+                             @if ($isAllFinalReportSigned && $hasCarOrAllsigned) 
                                 <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                     {{ $assessment->CertiIBAuditorsTo->auditor ?? '-'}}  
                                     {{ array_key_exists($assessment->bug_report,$bug_report) ?  '( '.$bug_report[$assessment->bug_report].' )' :'' }}
                                 </a> 
-                            {{-- @else
+                             @else
                                 
                                 <a  class="btn {{$assessment_btn}} " style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                     {{$assessment->CertiIBAuditorsTo->auditor}} (อยู่ระหว่างดำเนินการ)
                                 </a> 
-                            @endif --}}
+                            @endif 
+
+                            
                          @else
+                            {{-- {{$assessment->ibReportTemplate->report_type}} --}}
                                 <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                     {{ $assessment->CertiIBAuditorsTo->auditor ?? '-'}}  
                                     {{ array_key_exists($assessment->bug_report,$bug_report) ?  '( '.$bug_report[$assessment->bug_report].' )' :'' }}

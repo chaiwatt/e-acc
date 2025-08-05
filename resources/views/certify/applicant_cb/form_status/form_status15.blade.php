@@ -541,10 +541,58 @@
 
 <div class="row">
     <div class="form-group">
+
+        @php
+            $signComplete = true;
+        @endphp
+
+        
+        @if ($assessment->CertiCBAuditorsTo->assessment_type == 0)
+            @php
+                $cbHasCar = $assessment->isCbHasCar("cb_car_report_two_process_one")
+            @endphp
+            @if (!$cbHasCar)
+                @php
+                $isAllSigned = $assessment->isAllFinalReportSigned($assessment->cbReportTemplate)   
+                @endphp
+                @if (!$isAllSigned)
+                    @php
+                        $signComplete = false
+                    @endphp
+                @endif
+
+            @endif
+        
+        @elseif($assessment->CertiCBAuditorsTo->assessment_type == 1)   
+            @php
+                $cbHasCar = $assessment->isCbHasCar("cb_car_report_two_process_two")
+            @endphp
+            @if (!$cbHasCar)  
+                @php
+                $isAllSigned = $assessment->isAllFinalReportSigned($assessment->cbReportTemplate)   
+                @endphp
+
+                @if (!$isAllSigned)
+                    @php
+                        $signComplete = false
+                    @endphp
+                @endif
+            
+            @endif
+
+        @endif
+
         <div class="col-md-offset-5 col-md-6">
-                <button class="btn btn-primary" type="submit"  onclick="submit_form();return false">
-                <i class="fa fa-paper-plane"></i> บันทึก
-                </button>
+                @if ($signComplete)
+                    <button class="btn btn-primary" type="submit"  onclick="submit_form();return false">
+                    <i class="fa fa-paper-plane"></i> บันทึก
+                    </button>
+                @else
+                    <button class="btn btn-default" disabled>
+                    <i class="fa fa-paper-plane"></i> อยู่ระหว่างดำเนินการ
+                    </button>
+                @endif
+
                     <a class="btn btn-default" href="{{url('/certify/applicant-cb')}}">
                         <i class="fa fa-rotate-left"></i> ยกเลิก
                     </a>

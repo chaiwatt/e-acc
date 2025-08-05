@@ -134,8 +134,9 @@ class CertiCBAuditors  extends Model
        return $this->hasMany(MessageRecordTransaction::class, 'board_auditor_id', 'id');
    }
 
-     public function isAllFinalReportSigned()
+     public function isAllFinalReportSigned($reportType)
     {
+        // dd($reportType);
             // 1. ค้นหา Assessment
         $assessment = CertiCBSaveAssessment::where('auditors_id', $this->id)->first();
 
@@ -146,9 +147,9 @@ class CertiCBAuditors  extends Model
 
         // 2. ค้นหา Report Template
         $report = CbReportTemplate::where('cb_assessment_id', $assessment->id)
-                                ->where('report_type', "cb_final_report_process_one")
+                                ->where('report_type', $reportType)
                                 ->first();
-
+// dd($report);
         // ถ้าไม่พบข้อมูล Report ให้ return false
         if (!$report) {
             return false;
@@ -159,8 +160,12 @@ class CertiCBAuditors  extends Model
                                                         ->where('certificate_type', 0)
                                                         ->where('report_type', 1)
                                                         ->where('approval', 1)
+                                                        ->where('template', $reportType)
                                                         ->get();
-        if( $pendingSignatures->count() == 3){
+
+
+        // dd($report->id,$pendingSignatures->count())                                               ;
+        if( $pendingSignatures->count() >= 3){
             return true;
         }   else{
           return false;  
@@ -169,6 +174,29 @@ class CertiCBAuditors  extends Model
         // ถ้าพบรายการที่ยังไม่ถูกอนุมัติ (collection ไม่ใช่ค่าว่าง) ให้ return false
         // ถ้าไม่พบเลย (collection เป็นค่าว่าง) หมายความว่าทุกอย่างถูกอนุมัติแล้ว ให้ return true
         // return $pendingSignatures->isEmpty(); 
+    }
+
+    public function hasCarOrAllsigned($reportType)
+    {
+        $assessment = CertiCBSaveAssessment::where('auditors_id', $this->id)->first();
+        $report = CbReportTemplate::where('cb_assessment_id', $assessment->id)
+                                ->where('report_type', $reportType)
+                                ->first();
+        if (!$report) {
+            return true;
+        }
+
+        $pendingSignatures = SignAssessmentReportTransaction::where('report_info_id', $report->id)
+                                                ->where('certificate_type', 0)
+                                                ->where('report_type', 2)
+                                                ->where('approval', 1)
+                                                ->where('template', $reportType)
+                                                ->get();
+        if( $pendingSignatures->count() >= 3){
+            return true;
+        }   else{
+          return false;  
+        }                                          
     }
 
 }
