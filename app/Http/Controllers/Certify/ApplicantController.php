@@ -713,19 +713,18 @@ class ApplicantController extends Controller
 
         $categories = $this->getCategories($request);
 
+       
+// dd($categories,$requestLab['lab_type'] );
 
         // กลุ่มงานตามมาตรฐานและสาขา
         if($requestLab['lab_type'] == 3){
 
                 $set_standard  =  SetStandardUserSub::select('standard_user_id')
                                                     ->whereIn('test_branch_id',$categories)
-                                                    ->first() ;
-
-                // dd("test",$set_standard,$set_standard->set_standard_user->sub_department_id);                                    
+                                                    ->first() ;                                
                 if(!is_null($set_standard)){
                     $requestLab['subgroup'] =  $set_standard->set_standard_user->sub_department_id ?? 1804;
                 }
-            // }
 
         }else if($requestLab['lab_type'] == 4){
             //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
@@ -738,12 +737,11 @@ class ApplicantController extends Controller
                 $set_standard  =  SetStandardUserSub::select('standard_user_id')
                 ->whereIn('test_branch_id',$categories)
                 ->first() ;
+
                 // dd("cal",$set_standard,$set_standard,$set_standard->set_standard_user->sub_department_id);
                 if(!is_null($set_standard)){
-                    // $requestLab['subgroup'] =  $set_standard->set_standard_user->sub_department_id ?? 1806;
-                    $requestLab['subgroup'] =  1806;
+                    $requestLab['subgroup'] =  $set_standard->set_standard_user->sub_department_id ?? 1806;
                 }
-            // }
         }
 
         // dd($categories);
@@ -816,6 +814,8 @@ class ApplicantController extends Controller
             ->where('purpose',$request->purpose)
             ->where('lab_ability',$_labAblity)
             ->first();
+
+        // dd($labHtmlTemplate);
 
         $labCalItemsCollection = collect($labHtmlTemplate->json_data);
 

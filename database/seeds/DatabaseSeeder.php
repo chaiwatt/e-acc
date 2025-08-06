@@ -52,6 +52,7 @@ class DatabaseSeeder extends Seeder
         // $this->call(CbScopeMdmsTableSeeder::class);
         
         // $this->call(SignerGroupsTableSeeder::class);
+        // $this->call(TestLabGroupsTableSeeder::class);
         
         
         

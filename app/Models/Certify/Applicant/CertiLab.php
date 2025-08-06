@@ -918,42 +918,57 @@ public function fullyApprovedAuditors()
 
     public function allLabTestTransactionCategories()
     {
-        $categories = [];
+        // $categories = [];
 
-        foreach ($this->labTestRequests as $labTestRequest) {
-            foreach ($labTestRequest->labTestTransactions as $labTestTransaction) {
-                $categories[] = $labTestTransaction->category_th;
+        // foreach ($this->labTestRequests as $labTestRequest) {
+        //     foreach ($labTestRequest->labTestTransactions as $labTestTransaction) {
+        //         $categories[] = $labTestTransaction->category_th;
+        //     }
+        // }
+        // return implode(', ', array_unique($categories));
+
+              $categories = [];
+       $certifyLabTests = CertifyTestScope::where('app_certi_lab_id',$this->id)->get();
+
+       
+      
+        foreach ($certifyLabTests as $certifyLabTest) {
+           
+            if($certifyLabTest->Tablebranch != null){
+                $categories[] = $certifyLabTest->Tablebranch->title;
             }
+            
         }
-        return implode(', ', array_unique($categories)); // ใช้ array_unique เพื่อลบค่าซ้ำ
+        //  dd(implode(', ', array_unique($categories)));
+        return implode(', ', array_unique($categories));
     }
 
     public function allLabCalTransactionCategories()
     {
-        $categories = [];
 
-        foreach ($this->labCalRequests as $labCalRequest) {
-            foreach ($labCalRequest->labCalTransactions as $labCalTransaction) {
-                $categories[] = $labCalTransaction->category_th;
+        $categories = [];
+       $certifyLabCalibrates = CertifyLabCalibrate::where('app_certi_lab_id',$this->id)->get();
+        foreach ($certifyLabCalibrates as $certifyLabCalibrate) {
+            if($certifyLabCalibrate->TableCalibrationBranch != null){
+                $categories[] = $certifyLabCalibrate->TableCalibrationBranch->title;
             }
+            
         }
-        return implode(', ', array_unique($categories)); // ใช้ array_unique เพื่อลบค่าซ้ำ
+        return implode(', ', array_unique($categories));
     }
 
     public function allCategories()
     {
         $categories = [];
        $certifyLabCalibrates = CertifyLabCalibrate::where('app_certi_lab_id',$this->id)->get();
-      
+    //   dd();
         foreach ($certifyLabCalibrates as $certifyLabCalibrate) {
-            //  dd($certifyLabCalibrate->TableCalibrationBranch);
-            // dd($certifyLabCalibrate->TableCalibrationBranch->first()->title);
             if($certifyLabCalibrate->TableCalibrationBranch != null){
                 $categories[] = $certifyLabCalibrate->TableCalibrationBranch->title;
             }
             
         }
-        return implode(', ', array_unique($categories)); // ใช้ array_unique เพื่อลบค่าซ้ำ
+        return implode(', ', array_unique($categories));
     }
 
     public function FormulaTo()

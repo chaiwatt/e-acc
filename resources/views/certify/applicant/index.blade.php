@@ -254,7 +254,13 @@
                                             @endif
                                         <td>
                                       
-                                                {{$applicant->allCategories()}}
+                                            @if ($applicant->lab_type == 3)
+                                                {{$applicant->allLabTestTransactionCategories()}}
+                                            @elseif ($applicant->lab_type == 4)
+                                                {{$applicant->allLabCalTransactionCategories()}}
+                            
+                                            @endif
+                                                {{-- {{$applicant->allCategories()}} --}}
                                          
                                             
                                         </td>

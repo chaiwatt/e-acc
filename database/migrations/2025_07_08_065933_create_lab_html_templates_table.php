@@ -16,6 +16,7 @@ class CreateLabHtmlTemplatesTable extends Migration
         Schema::create('lab_html_templates', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('app_certi_lab_id')->nullable();
+            $table->foreign('app_certi_lab_id')->references('id')->on('app_certi_labs')->onDelete('cascade');
             $table->unsignedInteger('user_id')->nullable();
             $table->string('according_formula')->nullable();
             $table->string('lab_ability')->nullable();
