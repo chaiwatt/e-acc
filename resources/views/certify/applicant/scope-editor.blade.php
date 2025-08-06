@@ -1977,8 +1977,7 @@ const insertCbTemplate = () => {
                         parameterTwoSelect.empty(); // ล้างค่าเก่า
                     
                         $.ajax({
-                                // url: "{!! url('/certify/applicant/api/calibrate') !!}", // As requested
-                                url: window.location.origin + "/certify/applicant/api/calibrate", 
+                                url: "{!! url('/certify/applicant/api/calibrate') !!}", // As requested
                                 method: "POST",
                                 headers: {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -2006,8 +2005,7 @@ const insertCbTemplate = () => {
                         parameterSelect.empty().append('<option value="" disabled selected>- พารามิเตอร์การทดสอบ -</option>'); // เพิ่ม option สำหรับ parameter
 
                        $.ajax({
-                            // url: "{!! url('/certify/applicant/api/test') !!}", 
-                            url: window.location.origin + "/certify/applicant/api/test", 
+                            url: "{!! url('/certify/applicant/api/test') !!}", // As requested
                             method: "POST",
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -2132,8 +2130,7 @@ const insertCbTemplate = () => {
                 parameterTwoSelect.empty(); // ล้างค่าเก่า
 
                 $.ajax({
-                    // url: "{!! url('/certify/applicant/api/instrument') !!}",
-                    url: window.location.origin + "/certify/applicant/api/instrument", 
+                    url: "{!! url('/certify/applicant/api/instrument') !!}",
                     method: "POST",
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
