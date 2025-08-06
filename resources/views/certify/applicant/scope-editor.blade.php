@@ -2176,7 +2176,8 @@ const insertCbTemplate = () => {
                 categorySelect.empty(); // ล้างข้อมูลเดิม
                 categorySelect.append(`<option value="">==เลือกรายการ==</option>`); // เพิ่ม option เริ่มต้น
                 $.ajax({
-                    url: "/certify/applicant/api/test_category", // ตามที่คุณระบุ
+                    // url: "/certify/applicant/api/test_category", 
+                    url: "{!! url('/certify/applicant/api/test_category') !!}",
                     method: "POST",
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
@@ -2209,7 +2210,8 @@ const insertCbTemplate = () => {
 
             if (test_branch_category_id) {
                 $.ajax({
-                    url: "/certify/applicant/api/test_parameter",
+                    // url: "/certify/applicant/api/test_parameter",
+                    url: "{!! url('/certify/applicant/api/test_parameter') !!}",
                     method: "POST",
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content') // ใช้ X-CSRF-TOKEN แทน _token ใน data
