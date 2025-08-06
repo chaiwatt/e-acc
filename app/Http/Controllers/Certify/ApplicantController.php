@@ -740,7 +740,8 @@ class ApplicantController extends Controller
 
                 // dd("cal",$set_standard,$set_standard,$set_standard->set_standard_user->sub_department_id);
                 if(!is_null($set_standard)){
-                    $requestLab['subgroup'] =  $set_standard->set_standard_user->sub_department_id ?? 1806;
+                    // $requestLab['subgroup'] =  $set_standard->set_standard_user->sub_department_id ?? 1806;
+                    $requestLab['subgroup'] =  1806;
                 }
         }
 
