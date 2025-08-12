@@ -24,6 +24,7 @@ class StandardOffersController extends Controller
         $data_session     =    HP::CheckSession();
         $filter['perPage'] = $request->get('perPage', 10);
         $offers = EstandardOffers::where('owner',$data_session->username)
+        ->where('request_owner',1)
         ->paginate($filter['perPage']);
         return view('tisi.standard-offers.index',[
             'filter'     => [],
@@ -69,11 +70,19 @@ class StandardOffersController extends Controller
         $requestData['owner'] = $data_session->username;
         $requestData['department_id'] = $department->id;
         $requestData['department'] = $department->title;
+        $requestData['objectve'] = $request->objectve;
+
+        // ที่เพิ่มเข้ามา
+        $requestData['proposer_type'] = $request->proposer_type;
+        $requestData['meeting_count'] = $request->meeting_count;
+        $requestData['iso_number'] = $request->iso_number;
+        $requestData['standard_name'] = $request->standard_name;
+        $requestData['national_strategy'] = $request->national_strategy;
+        $requestData['reason'] = $request->reason;
 
         $offers = EstandardOffers::create($requestData);
 
         if ($request->attach_file && $request->hasFile('attach_file')) {
-            // dd($request->attach_file);
             HP::singleFileUpload(
                 $request->file('attach_file') ,
                 $this->attach_path,
@@ -87,7 +96,6 @@ class StandardOffersController extends Controller
             ); 
         }
  
-
         return redirect('tisi/standard-offers')->with('message',  'เสนอความเห็นฯ เรียบร้อย'  );
 
     }
@@ -122,13 +130,12 @@ class StandardOffersController extends Controller
         return view('tisi.standard-offers.edit', compact('offer', 'department', 'districts', 'amphurs','addressInfo'));
     }
 
-    public function update(Request $request, $id)
+public function update(Request $request, $id)
 {
+    // dd($request->all());
     $requestData = $request->all();
     $offer = EstandardOffers::findOrFail($id);
     $department = Department::findOrFail($offer->department_id);
-
-
 
     $department->update($requestData);
     $requestData['department'] = $department->title;
@@ -138,6 +145,14 @@ class StandardOffersController extends Controller
     $requestData['user_agent'] = $request->server('HTTP_USER_AGENT');
     $requestData['created_by'] = auth()->user()->id ?? null;
     $requestData['telephone'] = HP::CheckSession()->tel;
+    $requestData['objectve'] = $request->objectve;
+    $requestData['proposer_type'] = $request->proposer_type;
+    $requestData['meeting_count'] = $request->meeting_count;
+    $requestData['iso_number'] = $request->iso_number;
+    $requestData['standard_name'] = $request->standard_name;
+    $requestData['national_strategy'] = $request->national_strategy;
+    $requestData['reason'] = $request->reason;
+    $requestData['state'] = 1;
 
     $offer->update($requestData);
 

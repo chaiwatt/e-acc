@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateIbReportTemplatesTable extends Migration
+class CreateCbDocReviewReportsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateIbReportTemplatesTable extends Migration
      */
     public function up()
     {
-        Schema::create('ib_report_templates', function (Blueprint $table) {
+        Schema::create('cb_doc_review_reports', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('ib_assessment_id')->nullable();
+            $table->unsignedInteger('app_certi_cb_id')->nullable();
             $table->longText('template')->nullable();
             $table->string('report_type')->nullable();
             $table->char('status',20)->default("draft");
-            $table->longText('signers')->nullable();
+              $table->longText('signers')->nullable();
             $table->timestamps();
         });
     }
@@ -31,6 +31,6 @@ class CreateIbReportTemplatesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('ib_report_templates');
+        Schema::dropIfExists('cb_doc_review_reports');
     }
 }

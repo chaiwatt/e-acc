@@ -89,14 +89,14 @@
     {!! Form::label('address_show', '&nbsp; ', ['class' => 'col-md-2 control-label label-height']) !!}
     <div class="col-md-8">
         <div class="label-height">
-            <label class="label-height">ที่อยู่ตามทะเบียนบ้าน</label>
+            <label class="label-height">ที่อยู่หน่วยงาน</label>
         </div>
     </div>
 </div>
 
 <div class="row">
 
-    <div class="col-md-6">
+    {{-- <div class="col-md-6">
 
         <div class="form-group required {{ $errors->has('head_address_no') ? 'has-error' : ''}}">
             {!! Form::label('head_address_no', 'เลขที่:', ['class' => 'col-md-4 control-label']) !!}
@@ -127,14 +127,59 @@
                 {!! $errors->first('head_province', '<p class="help-block">:message</p>') !!}
             </div>
         </div>
+    </div> --}}
+
+    <div class="col-md-6">
+
+    <div class="form-group required {{ $errors->has('head_address_no') ? 'has-error' : ''}}">
+        <label for="head_address_no" class="col-md-4 control-label">เลขที่:</label>
+        <div class="col-md-8">
+            <input class="form-control" id="head_address_no" required name="head_address_no" type="text" value="{{ $user->address_no }}">
+            @if ($errors->has('head_address_no'))
+                <p class="help-block">{{ $errors->first('head_address_no') }}</p>
+            @endif
+        </div>
     </div>
+
+    <div class="form-group {{ $errors->has('head_soi') ? 'has-error' : ''}}">
+        <label for="head_soi" class="col-md-4 control-label">ตรอก/ซอย:</label>
+        <div class="col-md-8">
+            <input class="form-control" id="head_soi" name="head_soi" type="text" value="{{ $user->soi }}">
+            @if ($errors->has('head_soi'))
+                <p class="help-block">{{ $errors->first('head_soi') }}</p>
+            @endif
+        </div>
+    </div>
+
+    <div class="form-group required {{ $errors->has('head_subdistrict') ? 'has-error' : ''}}">
+        <label for="head_subdistrict" class="col-md-4 control-label">แขวง/ตำบล:</label>
+        <div class="col-md-8">
+            <input class="form-control" id="head_subdistrict" required name="head_subdistrict" type="text" value="{{ $user->subdistrict }}">
+            @if ($errors->has('head_subdistrict'))
+                <p class="help-block">{{ $errors->first('head_subdistrict') }}</p>
+            @endif
+        </div>
+    </div>
+
+    <div class="form-group required {{ $errors->has('head_province') ? 'has-error' : ''}}">
+        <label for="head_province" class="col-md-4 control-label">จังหวัด:</label>
+        <div class="col-md-8">
+            <input class="form-control" id="head_province" required name="head_province" type="text" value="{{ $user->province }}">
+            @if ($errors->has('head_province'))
+                <p class="help-block">{{ $errors->first('head_province') }}</p>
+            @endif
+        </div>
+    </div>
+
+</div>
+
 
     <div class="col-md-6">
 
         <div class="form-group {{ $errors->has('head_village') ? 'has-error' : ''}}">
             {!! Form::label('head_village', 'อาคาร/หมู่บ้าน:', ['class' => 'col-md-4 control-label']) !!}
             <div class="col-md-8">
-                {!! Form::text('head_village', null,  ['class' => 'form-control','id'=>"head_village", 'readonly' => true]) !!}
+                {!! Form::text('head_village', null,  ['class' => 'form-control','id'=>"head_village", 'readonly' => false]) !!}
                 {!! $errors->first('head_village', '<p class="help-block">:message</p>') !!}
             </div>
         </div>
@@ -142,7 +187,7 @@
         <div class="form-group {{ $errors->has('head_moo') ? 'has-error' : ''}}">
             {!! Form::label('head_moo', 'หมู่:', ['class' => 'col-md-4 control-label']) !!}
             <div class="col-md-8">
-                {!! Form::text('head_moo', $user->moo,  ['class' => 'form-control','id'=>"head_moo", 'readonly' => true]) !!}
+                {!! Form::text('head_moo', $user->moo,  ['class' => 'form-control','id'=>"head_moo", 'readonly' => false]) !!}
                 {!! $errors->first('head_moo', '<p class="help-block">:message</p>') !!}
             </div>
         </div>
@@ -150,7 +195,7 @@
         <div class="form-group required {{ $errors->has('head_district') ? 'has-error' : ''}}">
             {!! Form::label('head_district', 'เขต/อำเภอ:', ['class' => 'col-md-4 control-label']) !!}
             <div class="col-md-8">
-                {!! Form::text('head_district', $user->district,  ['class' => 'form-control','id'=>"head_district", 'readonly' => true, 'required' => true]) !!}
+                {!! Form::text('head_district', $user->district,  ['class' => 'form-control','id'=>"head_district", 'readonly' => false, 'required' => true]) !!}
                 {!! $errors->first('head_district', '<p class="help-block">:message</p>') !!}
             </div>
         </div>
@@ -158,7 +203,7 @@
         <div class="form-group required {{ $errors->has('head_zipcode') ? 'has-error' : ''}}">
             {!! Form::label('head_zipcode', 'รหัสไปรษณีย์:', ['class' => 'col-md-4 control-label']) !!}
             <div class="col-md-8">
-                {!! Form::text('head_zipcode', $user->zipcode,  ['class' => 'form-control','id'=>"head_zipcode", 'readonly' => true , 'required' => true]) !!}
+                {!! Form::text('head_zipcode', $user->zipcode,  ['class' => 'form-control','id'=>"head_zipcode", 'readonly' => false , 'required' => true]) !!}
                 {!! $errors->first('head_zipcode', '<p class="help-block">:message</p>') !!}
             </div>
         </div>
@@ -170,7 +215,7 @@
     <div class="col-md-8">
         <div class="checkbox checkbox-success  label-height">
             <input id="address_same_head" class="address_same_head" type="checkbox" name="address_same_head"  {{  !empty($expert->address_same_head) ? 'checked' : ''  }}>
-            <label for="address_same_head  label-height"> &nbsp;ใช้ที่อยู่ตามทะเบียนบ้าน&nbsp;</label>
+            <label for="address_same_head  label-height"> &nbsp;ใช้ที่อยู่ตามหน่วยงาน&nbsp;</label>
         </div>
     </div>
 </div>

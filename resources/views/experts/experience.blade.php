@@ -63,7 +63,7 @@
 </div>   
  
 
-<div class="row">
+<div class="row" >
 <div class="col-md-12">
               <h3 class="box-title pull-left">ประวัติการดำเนินงานกับ สมอ.</h3>
               <button type="button" class="btn btn-success btn-sm pull-right" id="plus_historys_row">
@@ -93,13 +93,13 @@
                                           <td>1</td>
                                           <td>
                                                         {!! Form::hidden('history[id][]',$history->id ?? null) !!}
-                                                        {!! Form::text('history[operation_at][]',  !empty( $history->operation_at)? HP::revertDate($history->operation_at,true):null , ['class' => 'form-control mydatepicker_th  operation_at input_required', 'maxlength' => '255', 'placeholder' => 'dd/mm/yyyy']) !!}
+                                                        {!! Form::text('history[operation_at][]',  !empty( $history->operation_at)? HP::revertDate($history->operation_at,true):null , ['class' => 'form-control mydatepicker_th  operation_at ', 'maxlength' => '255', 'placeholder' => 'dd/mm/yyyy']) !!}
                                           </td>
                                           <td>
                                                         {!! Form::select('history[department_id][]', 
                                                         App\Models\Basic\AppointDepartment::orderbyRaw('CONVERT(title USING tis620)')->pluck('title','id'),
                                                         $history->department_id ?? null,
-                                                        ['class' => 'form-control select2 department_id input_required',
+                                                        ['class' => 'form-control select2 department_id ',
                                                         'placeholder'=>'- เลือกหน่วยงาน-' ]);
                                                         !!}
                                           </td>
@@ -110,7 +110,7 @@
                                                         {!! Form::select('history[expert_group_id][]', 
                                                         App\Models\Basic\ExpertGroup::orderbyRaw('CONVERT(title USING tis620)')->pluck('title','id'),
                                                         $history->expert_group_id ?? null,
-                                                        ['class' => 'form-control select2 expert_group_id input_required',
+                                                        ['class' => 'form-control select2 expert_group_id ',
                                                         'placeholder'=>'- เลือกความเชียวชาญด้าน-' ]);
                                                         !!}
                                           </td>
@@ -118,7 +118,7 @@
                                                         {!! Form::select('history[position_id][]', 
                                                         App\Models\Basic\BoardType::orderbyRaw('CONVERT(title USING tis620)')->pluck('title','id'),
                                                         $history->position_id ?? null,
-                                                        ['class' => 'form-control select2 position_id input_required',
+                                                        ['class' => 'form-control select2 position_id ',
                                                         'placeholder'=>'- เลือกตำแหน่ง-' ]);
                                                         !!}
                                           </td>

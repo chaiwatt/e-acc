@@ -145,7 +145,7 @@
                                      {{ HP::DateThai($offer->created_at) }}
                                  </td>
                                     <td> 
-                                         ID:{{$offer->state}} {{ HP::StateEstandardOffers()[$offer->state] ?? 'ไม่พบข้อมูล' }}
+                                         ID:{{$offer->state}} {{ HP::StateEstandardOffers()[$offer->state] ?? 'ขอเอกสารเพิ่มเติม' }}
                                  </td>
                                    
 {{-- 
@@ -161,11 +161,19 @@
                                             <i class="fa fa-eye"></i>
                                         </a>
                                     @endif
+
+
+                           
+
+                                    {{-- @php
+                                        dd($offer);
+                                    @endphp --}}
+                                    {{-- {{$offer}} --}}
                                    
-                                    @if ($offer->id == 1)
-                                         @if(HP::CheckPermission('edit-'.str_slug('applicantcbs')))
+                                    @if ($offer->state == 0)
+                                        @if(HP::CheckPermission('edit-'.str_slug('applicantcbs')))
                                             <a href="{{ route('tisi.standard-offers.edit', $offer->id) }}" class="btn btn-warning btn-xs">
-                                                <i class="fa fa-edit"></i>
+                                                <i class="fa fa-edit"></i> 
                                             </a>
                                         @endif
                                     @endif

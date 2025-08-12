@@ -293,7 +293,7 @@
     </div>
 </div>
 
-<div class="row ">
+<div class="row " >
     <div class="col-md-12">
         <div class="white-box" style="border: 2px solid #e5ebec;">
             <legend class="label-height">ข้อมูลประสบการณ์/ประวัติการดำเนินงานกับ สมอ.</legend>

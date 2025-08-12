@@ -1,3 +1,4 @@
+{{-- StandardOffersController --}}
 @extends('layouts.master')
 
 @push('css')
@@ -124,13 +125,29 @@
             </div>
 
 
-            <div class="form-group required {{ $errors->has('province_id') ? 'has-error' : ''}}">
+            {{-- <div class="form-group required {{ $errors->has('province_id') ? 'has-error' : ''}}">
                 {!! Form::label('province_id', 'จังหวัด', ['class' => 'control-label']) !!}
                 <div>
                     {!! Form::select('province_id', App\Models\Basic\Province::pluck('PROVINCE_NAME', 'PROVINCE_ID'), null, ['class' => 'form-control', 'placeholder'=>'- เลือกจังหวัด -', 'required' => 'required']) !!}
                     {!! $errors->first('province_id', '<p class="help-block">:message</p>') !!}
                 </div>
+            </div> --}}
+
+            <div class="form-group required {{ $errors->has('province_id') ? 'has-error' : ''}}">
+                <label for="province_id" class="control-label">จังหวัด</label>
+                <div>
+                    <select name="province_id" id="province_id" class="form-control" required>
+                        <option value="" selected="selected">- เลือกจังหวัด -</option>
+                        @foreach(App\Models\Basic\Province::pluck('PROVINCE_NAME', 'PROVINCE_ID') as $id => $name)
+                            <option value="{{ $id }}">{{ $name }}</option>
+                        @endforeach
+                    </select>
+                    @if ($errors->has('province_id'))
+                        <p class="help-block">{{ $errors->first('province_id') }}</p>
+                    @endif
+                </div>
             </div>
+
 
             <div class="form-group required {{ $errors->has('district_id') ? 'has-error' : ''}}">
                 {!! Form::label('district_id', 'ตำบล/แขวง', ['class' => 'control-label']) !!}
@@ -205,10 +222,11 @@
                 </div>
             </div>
 
-            <div class="form-group {{ $errors->has('mobile') ? 'has-error' : ''}}">
+            <div class="form-group required{{ $errors->has('mobile') ? 'has-error' : ''}}">
                 {!! Form::label('mobile', 'มือถือ', ['class' => 'control-label']) !!}
                 <div>
-                    {!! Form::text('mobile', null, ['class' => 'form-control']) !!}
+                    {{-- {!! Form::text('mobile', null, ['class' => 'form-control']) !!} --}}
+                     {!! Form::text('mobile', null, ('required' == 'required') ? ['class' => 'form-control', 'required' => 'required'] : ['class' => 'form-control']) !!}
                     {!! $errors->first('mobile', '<p class="help-block">:message</p>') !!}
                 </div>
             </div>
@@ -228,7 +246,7 @@
     </div>
 </div>
 
-
+้<hr>
 
 <div class="container">
     <h3 class="mb-4">รายละเอียดมาตรฐาน</h3>
@@ -247,77 +265,182 @@
                 </div>
             </div>
 
-            <div class="form-group required{{ $errors->has('std_type') ? 'has-error' : ''}}">
-                <!-- Label ไม่มี col-md-X -->
-                {!! Form::label('std_type', 'ประเภทมาตรฐาน'.' : ', ['class' => 'control-label']) !!}
+            {{-- {!! Form::select('province_id', App\Models\Basic\Province::pluck('PROVINCE_NAME', 'PROVINCE_ID'), null, ['class' => 'form-control', 'placeholder'=>'- เลือกจังหวัด -', 'required' => 'required']) !!} --}}
+
+            <div class="form-group required {{ $errors->has('std_type') ? ' has-error' : '' }}">
+                <label for="std_type" class="control-label">ประเภทมาตรฐาน :</label>
                 <div>
-                    <!-- Div ครอบ select ไม่มี col-md-X -->
-                    {!! Form::select('std_type',
-                        App\Models\Bcertify\Standardtype::orderbyRaw('CONVERT(offertype USING tis620)')->pluck('offertype', 'id'),
-                        null,
-                        ['class' => 'form-control',
-                        'id'=>'std_type',
-                        'placeholder'=>'- เลือกประเภทมาตรฐาน -']) !!}
-                    {!! $errors->first('std_type', '<p class="help-block">:message</p>') !!}
+                    <select name="std_type" id="std_type" class="form-control" required>
+                        <option value="" selected="selected">- เลือกประเภทมาตรฐาน -</option>
+                        @foreach(App\Models\Bcertify\Standardtype::orderbyRaw('CONVERT(offertype USING tis620)')->pluck('offertype', 'id') as $id => $offertype)
+                            <option value="{{ $id }}">{{ $offertype }}</option>
+                        @endforeach
+
+                    </select>
+                    
+                    @if ($errors->has('std_type'))
+                        <p class="help-block">{{ $errors->first('std_type') }}</p>
+                    @endif
                 </div>
             </div>
 
-            <div class="form-group required{{ $errors->has('objectve') ? 'has-error' : ''}}">
-                <!-- Label ไม่มี col-md-X -->
-                {!! Html::decode(Form::label('objectve', 'จุดประสงค์และเหตุผล'.' : ', ['class' => 'control-label'])) !!}
+            <div class="form-group required{{ $errors->has('std_type') ? ' has-error' : '' }}">
+                <label for="proposer_type" class="control-label">ประเภทข้อเสนอ (Proposer) :</label>
                 <div>
-                    <!-- Div ครอบ textarea ไม่มี col-md-X -->
-                    {!! Form::text('objectve', null, [ 'class' => 'form-control', 'required'=>true]) !!}
-                    {!! $errors->first('objectve', '<p class="help-block">:message</p>') !!}
+                    <select name="proposer_type" id="proposer_type" class="form-control" required>
+                        <option value="">-- กรุณาเลือก --</option>
+                        <option value="sdo_advanced">SDO ขั้นสูง</option>
+                        <option value="sdo_basic_or_non_sdo">SDO ขั้นต้น หรือหน่วยงานที่ไม่ใช่ SDO</option>
+                    </select>
+                </div>
+                @if ($errors->has('proposer_type'))
+                    <p class="help-block">{{ $errors->first('proposer_type') }}</p>
+                @endif
+            </div>
+
+  
+
+            <div class="form-group required{{ $errors->has('stakeholders') ? 'has-error' : ''}}">
+                <label for="stakeholders" class="control-label">ผู้มีส่วนได้เสียที่เกี่ยวข้อง :</label>
+                <div>
+                    <textarea name="stakeholders" id="stakeholders" class="form-control" required></textarea>
+                    @if ($errors->has('stakeholders'))
+                        <p class="help-block">{{ $errors->first('stakeholders') }}</p>
+                    @endif
                 </div>
             </div>
+
+        <div class="form-group {{ $errors->has('iso_number') ? 'has-error' : ''}}">
+            <label for="iso_number" class="control-label">เลขมาตรฐาน ISO :</label>
+            <div>
+                <input class="form-control" placeholder="เลขมาตรฐาน ISO" name="iso_number" type="text" id="iso_number">
+                @if ($errors->has('iso_number'))
+                    <p class="help-block">{{ $errors->first('iso_number') }}</p>
+                @endif
+            </div>
+        </div>
+
+            <div class="form-group required{{ $errors->has('standard_name_en') ? 'has-error' : ''}}">
+                <label for="standard_name_en" class="control-label">ชื่อมาตรฐาน(Eng) :</label>
+                <div>
+                    <input class="form-control" placeholder="ชื่อมาตรฐาน" name="standard_name_en" type="text" id="standard_name_en" required>
+                    @if ($errors->has('standard_name_en'))
+                        <p class="help-block">{{ $errors->first('standard_name_en') }}</p>
+                    @endif
+                </div>
+            </div>
+
+
 
             
         </div>
+         <div class="col-md-6">
 
-        <!-- คอลัมน์ที่ 2 (ครึ่งหนึ่งของหน้าจอสำหรับขนาดกลางขึ้นไป) -->
-        <div class="col-md-6">
+
+            {{-- <div class="form-group required{{ $errors->has('objectve') ? 'has-error' : ''}}">
+                {!! Html::decode(Form::label('objectve', 'จุดประสงค์และเหตุผล'.' : ', ['class' => 'control-label'])) !!}
+                <div>
+                    {!! Form::text('objectve', null, [ 'class' => 'form-control', 'required'=>true]) !!}
+                    {!! $errors->first('objectve', '<p class="help-block">:message</p>') !!}
+                </div>
+            </div> --}}
+
+
+
             <div class="form-group required{{ $errors->has('title_eng') ? 'has-error' : ''}}">
-                <!-- Label ไม่มี col-md-X -->
                 {!! Form::label('title_eng', 'ชื่อเรื่อง (Eng)'.' : ', ['class' => 'control-label']) !!}
                 <div>
-                    <!-- Div ครอบ input ไม่มี col-md-X -->
-                    {{-- {!! Form::text('title_eng', null, ['class' => 'form-control','required'=>false]) !!} --}}
-                     {!! Form::text('title_eng', null, ('required' == 'required') ? ['class' => 'form-control', 'required' => 'required'] : ['class' => 'form-control']) !!}
+                    {!! Form::text('title_eng', null, ('required' == 'required') ? ['class' => 'form-control', 'required' => 'required'] : ['class' => 'form-control']) !!}
                     {!! $errors->first('title_eng', '<p class="help-block">:message</p>') !!}
                 </div>
             </div>
 
-            <div class="form-group {{ $errors->has('scope') ? 'has-error' : ''}}">
-                <!-- Label ไม่มี col-md-X -->
-                {!! Form::label('scope', 'ขอบข่าย'.' : ', ['class' => 'control-label']) !!}
+         </div>
+
+
+        <!-- คอลัมน์ที่ 2 (ครึ่งหนึ่งของหน้าจอสำหรับขนาดกลางขึ้นไป) -->
+        <div class="col-md-6">
+
+
+            <div class="form-group required{{ $errors->has('objectve') ? ' has-error' : '' }}">
+                <label for="objectve" class="control-label">จุดประสงค์และเหตุผลในการจัดทำ :</label>
                 <div>
-                    <!-- Div ครอบ textarea ไม่มี col-md-X -->
-                    {!! Form::text('scope', null, [ 'class' => 'form-control','required'=>false]) !!}
-                    {!! $errors->first('scope', '<p class="help-block">:message</p>') !!}
+                    <select name="objectve" id="objectve" class="form-control" required>
+                        <option value="">- เลือกจุดประสงค์ -</option>
+                        <option value="first_creation">จัดทำครั้งแรก</option>
+                        <option value="standard_revision">ปรับปรุงมาตรฐาน</option>
+                    </select>
+                </div>
+                
+                @if ($errors->has('objectve'))
+                    <p class="help-block">{{ $errors->first('objectve') }}</p>
+                @endif
+            </div>
+
+
+            <div class="form-group {{ $errors->has('scope') ? 'has-error' : '' }}">
+                <label for="scope" class="control-label">ขอบข่าย :</label>
+                <div>
+                    <input class="form-control" name="scope" type="text" id="scope">
+                    @if ($errors->has('scope'))
+                        <p class="help-block">{{ $errors->first('scope') }}</p>
+                    @endif
                 </div>
             </div>
 
-            <div class="form-group {{ $errors->has('stakeholders') ? 'has-error' : ''}}">
-                <!-- Label ไม่มี col-md-X -->
-                {!! Form::label('stakeholders', 'ผู้มีส่วนได้เสียที่เกี่ยวข้อง'.' : ', ['class' => 'control-label']) !!}
+            <div class="form-group required{{ $errors->has('meeting_count') ? ' has-error' : '' }}">
+                <label for="meeting_count" class="control-label" style="text-align: left">จำนวนการประชุมเชิงปฏิบัติการที่คาดว่าจะจัดและช่วงเวลาที่คาดว่าจะจัดการประชุมเชิงปฏิบัติการ (เฉพาะกรณีจัดทำข้อตกลงร่วม) :</label>
                 <div>
-                    <!-- Div ครอบ input ไม่มี col-md-X -->
-                    {!! Form::text('stakeholders', null, ['class' => 'form-control','required'=>false]) !!}
-                    {!! $errors->first('stakeholders', '<p class="help-block">:message</p>') !!}
+                    <input class="form-control" name="meeting_count" type="text" id="meeting_count" required>
+                </div>
+                
+                @if ($errors->has('meeting_count'))
+                    <p class="help-block">{{ $errors->first('meeting_count') }}</p>
+                @endif
+            </div>
+
+            <div class="form-group required{{ $errors->has('standard_name') ? 'has-error' : ''}}">
+                <label for="standard_name" class="control-label">ชื่อมาตรฐาน :</label>
+                <div>
+                    <input class="form-control" placeholder="ชื่อมาตรฐาน" name="standard_name" type="text" id="standard_name" required>
+                    @if ($errors->has('standard_name'))
+                        <p class="help-block">{{ $errors->first('standard_name') }}</p>
+                    @endif
                 </div>
             </div>
 
+            <div class="form-group {{ $errors->has('national_strategy') ? 'has-error' : ''}}">
+                <label for="national_strategy" class="control-label" style="text-align: left">แผนยุทธศาสตร์ชาติ 20 ปี/แผนพัฒนาเศรษฐกิจและสังคมแห่งชาติ ฉบับที่ 13 (ถ้ามี) :</label>
+                <div>
+                    <input class="form-control" placeholder="ระบุแผนยุทธศาสตร์ชาติ..." name="national_strategy" type="text" id="national_strategy">
+                    @if ($errors->has('national_strategy'))
+                        <p class="help-block">{{ $errors->first('national_strategy') }}</p>
+                    @endif
+                </div>
+            </div>
+
+
+    
 
         </div>
         <div class="col-md-12">
-            <div class="form-group {{ $errors->has('attach_file') ? 'has-error' : ''}}"> {{-- เปลี่ยนเป็น attach_file สำหรับ error check --}}
-                <!-- Label ไม่มี col-md-X -->
-                {!! Form::label('additional_documents', 'เอกสารเพิ่มเติม'.' : ', ['class' => 'control-label']) !!} {{-- เปลี่ยน ID/Name สำหรับ label --}}
+            <div class="form-group {{ $errors->has('stakeholders') ? 'has-error' : ''}}">
+                <label for="reason" class="control-label">เหตุผล :</label>
                 <div>
-                    <!-- Div ครอบเนื้อหา ไม่มี col-md-X -->
+                    <textarea name="reason" id="reason" class="form-control" ></textarea>
+                    @if ($errors->has('reason'))
+                        <p class="help-block">{{ $errors->first('reason') }}</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        {{-- <div class="col-md-12">
+            <div class="form-group {{ $errors->has('attach_file') ? 'has-error' : ''}}"> 
+                {!! Form::label('additional_documents', 'เอกสารเพิ่มเติม โปรดระบุ เช่น แผนการดำเนินงาน, ร่างมาตรฐานหรืออื่น ๆ กรณีเป็นลิงก์ดาวน์โหลดให้ใส่ใน Text file'.' : ', ['class' => 'control-label']) !!} 
+                <div>
                     <div class="form-group other_attach_item">
-                        <div class="col-md-6"> {{-- ลบ text-light ออก เพราะไม่ใช่คลาสมาตรฐานของ Bootstrap 3 --}}
+                        <div class="col-md-6"> 
                             {!! Form::text('caption', null, ['class' => 'form-control ', 'placeholder' => 'รายละเอียดเอกสาร']) !!}
                         </div>
                         <div class="col-md-6">
@@ -333,13 +456,44 @@
                                 </span>
                                 <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
                             </div>
-                            {!! $errors->first('attach', '<p class="help-block">:message</p>') !!} {{-- ยังคงใช้ attach สำหรับ error --}}
+                            {!! $errors->first('attach', '<p class="help-block">:message</p>') !!} 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>            --}}
+
+        <div class="col-md-12">
+            <div class="form-group {{ $errors->has('attach_file') ? 'has-error' : ''}}">
+                <label for="additional_documents" class="control-label">เอกสาร (.zip) ประกอบด้วย แผนการดำเนินงาน, ร่างมาตรฐาน หรืออื่น ๆ กรณีเป็นลิงก์ดาวน์โหลดให้ใส่ใน Text file แล้ว zip : <span class="text-danger">*</span> </label>
+                <div>
+                    <div class="form-group other_attach_item">
+                        <div class="col-md-6">
+                            <input class="form-control" placeholder="รายละเอียดเอกสาร" name="caption" type="text">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="fileinput fileinput-new input-group" data-provides="fileinput">
+                                <div class="form-control" data-trigger="fileinput">
+                                    <i class="glyphicon glyphicon-file fileinput-exists"></i>
+                                    <span class="fileinput-filename"></span>
+                                </div>
+                                <span class="input-group-addon btn btn-default btn-file">
+                                    <span class="fileinput-new">เลือกไฟล์</span>
+                                    <span class="fileinput-exists">เปลี่ยน</span>
+                                    <input type="file" name="attach_file" class="attach check_max_size_file" accept=".zip,.rar" required>
+                                </span>
+                                <a href="#" class="input-group-addon btn btn-default fileinput-exists" data-dismiss="fileinput">ลบ</a>
+                            </div>
+                            @if ($errors->has('attach'))
+                                <p class="help-block">{{ $errors->first('attach') }}</p>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-                
+
+
     </div>
 </div>
 

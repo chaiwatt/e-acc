@@ -167,7 +167,7 @@ class ExpertsController extends Controller
     public function create()
     {
 
-
+        // dd('oo');
         $data_session     =    HP::CheckSession();
         if(!empty($data_session)){
               $model = str_slug('experts','-');
@@ -370,6 +370,80 @@ class ExpertsController extends Controller
     }
     }
 
+        public function addExpertByOfficer()
+    {
+        DB::beginTransaction();
+        try {
+            // --- 1. จำลองข้อมูลสำหรับตาราง Expert ---
+            $expertPrimaryData = [
+                'head_name'       => 'นายทดสอบ ระบบ (สร้างโดย จนท.)',
+                'taxid'           => '1122334455667',
+                'email'           => 'officer.create.' . time() . '@example.com',
+                'mobile_phone'    => '0998887776',
+                'department_id'   => 1, // ID หน่วยงาน (จำลอง)
+                'position'        => 'ผู้เชี่ยวชาญพิเศษ',
+                'status'          => 1,
+                'updated_by'      => auth()->check() ? auth()->id() : 1, // สมมติว่ามี จนท. login อยู่
+                'operation_id'    => auth()->check() ? auth()->id() : 1,
+                'trader_id'       => auth()->check() ? auth()->id() : 1,
+            ];
+
+            // --- 2. สร้าง Expert หลักเพื่อเอา ID ---
+            $expert = Expert::create($expertPrimaryData);
+            Log::info("Officer created Expert ID: {$expert->id}");
+
+            // --- 3. จำลองข้อมูลในรูปแบบ Array ที่ฟังก์ชัน helper ต้องการ ---
+
+            // ข้อมูลสำหรับ get_detail()
+            $mockDetailData = [
+                'id'           => [null, null], // ID เป็น null เพราะเป็นของใหม่
+                'year'         => ['2560', '2564'],
+                'education_id' => [2, 3], // สมมติ 2=ป.ตรี, 3=ป.โท
+                'academy'      => ['มหาวิทยาลัยเทคโนโลยีราชมงคลล้านนา', 'สถาบันบัณฑิตพัฒนบริหารศาสตร์'],
+                'file_education' => [null, null] // ไม่มีไฟล์แนบ
+            ];
+
+            // ข้อมูลสำหรับ get_experience()
+            $mockExperienceData = [
+                'id'            => [null],
+                'years'         => ['2565 - ปัจจุบัน'],
+                'department_id' => [10],
+                'position'      => ['วิศวกรซอฟต์แวร์อาวุโส'],
+                'role'          => ['พัฒนาระบบ ERP ของบริษัท']
+            ];
+            
+            // ข้อมูลสำหรับ get_history()
+            $mockHistoryData = [
+                'id'              => [null],
+                'operation_at'    => ['11/08/2025'], // รูปแบบวันที่ที่ HP::convertDate รับได้
+                'department_id'   => [15],
+                'committee_no'    => ['กท.01/2568'],
+                'expert_group_id' => [4],
+                'position_id'     => [5]
+            ];
+
+            // --- 4. เรียกใช้ฟังก์ชันเดิมที่คุณให้มาตามลำดับ ---
+            $this->get_detail($expert->id, $mockDetailData);
+            Log::info("Called get_detail for Expert ID: {$expert->id}");
+
+            $this->get_experience($expert->id, $mockExperienceData);
+            Log::info("Called get_experience for Expert ID: {$expert->id}");
+            
+            $this->get_history($expert->id, $mockHistoryData);
+            Log::info("Called get_history for Expert ID: {$expert->id}");
+
+            // ยืนยันการบันทึกข้อมูล
+            DB::commit();
+
+            // ส่งคืนค่าเป็นการ redirect หรือ JSON ก็ได้ตามต้องการ
+            return redirect('experts')->with('flash_message', 'สร้างข้อมูล Expert โดยเจ้าหน้าที่สำเร็จ ID: ' . $expert->id);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error("เกิดข้อผิดพลาดใน addExpertByOfficer: " . $e->getMessage() . " on line " . $e->getLine());
+            return redirect('experts')->with('message_error', 'เกิดข้อผิดพลาด: ' . $e->getMessage());
+        }
+    }
 
     public function update(Request $request, $id)
     {
@@ -459,14 +533,14 @@ class ExpertsController extends Controller
                     }
     
                     $requestData = $request->all();
-                    if(isset($requestData['detail'])){  //ข้อมูลการศึกษา
-                        self::get_detail($expert->id,$requestData['detail']);
+                    if(isset($requestData['detail'])){ 
+                        $this->get_detail($expert->id,$requestData['detail']);
                     }
-                    if(isset($requestData['experience'])){  //ประสบการณ์
-                        self::get_experience($expert->id,$requestData['experience']);
+                    if(isset($requestData['experience'])){  
+                        $this->get_experience($expert->id,$requestData['experience']);
                     }
-                    if(isset($requestData['history'])){  //ประวัติการดำเนินงานกับ สมอ.
-                        self::get_history($expert->id,$requestData['history']);
+                    if(isset($requestData['history'])){  
+                        $this->get_history($expert->id,$requestData['history']);
                     }
     
                     return redirect('experts')->with('flash_message', 'อัพเดทเรียบร้อยแล้ว');
@@ -482,6 +556,9 @@ class ExpertsController extends Controller
         }
 
     }
+
+
+    
 
 
     public function get_detail($id , $requestData)
@@ -551,7 +628,7 @@ class ExpertsController extends Controller
         }
     }
 
-    public function get_history($id , $requestData)
+    public function  ($id , $requestData)
     {
         $data = (array)$requestData;
   
