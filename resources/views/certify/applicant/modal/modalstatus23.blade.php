@@ -40,7 +40,8 @@
                                 <span style="color:#26ddf5;">{{ number_format($certificate->amount_fixed,2).' บาท ' ??'0.00' }}</span>
                             </p>
                             <p>ค่าธรรมเนียมใบรับรอง สก. :
-                                <span style="color:#26ddf5;">{{ number_format($certificate->amount_fee,2).' บาท '  ??'0.00' }}</span>
+                                <span style="color:#26ddf5;">{{ number_format($certificate->amount_fixed,2).' บาท '  ??'0.00' }}</span>
+                                {{-- <span style="color:#26ddf5;">{{ number_format($certificate->amount_fee,2).' บาท '  ??'0.00' }}</span> --}}
                             </p>
                             <p>ใบแจ้งหนี้ค่าธรรมเนียม :
                                 @if(!is_null($certificate) && !is_null($certificate->attach))
