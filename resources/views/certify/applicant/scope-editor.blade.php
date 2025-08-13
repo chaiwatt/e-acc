@@ -667,6 +667,14 @@
                     </select>
                 </div>
             </div>
+               <div class="modal-input-group" style="display: flex; gap: 20px;">
+
+                <div style="flex: 1;">
+                    <label for="lab-cal-instrument2">เครื่องมือ:</label>
+                    <select id="lab-cal-instrument2" >
+                    </select>
+                </div>
+            </div>
             <div class="modal-input-group" style="display: flex; gap: 20px;">
                 <div style="flex: 1;">
                     <label for="lab-cal-parameter-one">พารามิเตอร์1: <a href="{{ route('certify.applicant.special-sign') }}" style="text-decoration: none; font-size: 18px;" target="_blank">สัญลักษณ์พิเศษ</a></label>
