@@ -1977,10 +1977,12 @@ const insertCbTemplate = () => {
                     case 'lab_cal': 
                         const labCalField = $('#lab-cal-field');
                         const instrumentSelect = $('#lab-cal-instrument');
+                        const instrumentSelect2 = $('#lab-cal-instrument2');
                         const parameterOneSelect = $('#lab-cal-parameter-one');
                         const parameterTwoSelect = $('#lab-cal-parameter-two');
                         labCalField.empty().append('<option value="" disabled selected>- สาขาสอบเทียบ -</option>');
                         instrumentSelect.empty();
+                        instrumentSelect2.empty();
                         parameterOneSelect.empty(); // ล้างค่าเก่า
                         parameterTwoSelect.empty(); // ล้างค่าเก่า
                     
@@ -2005,8 +2007,8 @@ const insertCbTemplate = () => {
                     break;
                     case 'lab_test':
                         const labTestField = $('#lab-test-field');
-                        const categorySelect = $('#lab-test-category'); // เปลี่ยนจาก instrumentSelect
-                        const parameterSelect = $('#lab-test-parameter'); // เปลี่ยนจาก parameterOneSelect
+                        const categorySelect = $('#lab-test-category'); 
+                        const parameterSelect = $('#lab-test-parameter'); 
 
                         labTestField.empty().append('<option value="" disabled selected>- สาขาการทดสอบ -</option>'); // เปลี่ยนข้อความให้ตรงกับ field
                         categorySelect.empty().append('<option value="" disabled selected>- หมวดหมู่การทดสอบ -</option>'); // เพิ่ม option สำหรับ category
