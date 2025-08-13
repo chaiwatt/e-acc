@@ -670,7 +670,7 @@
                <div class="modal-input-group" style="display: flex; gap: 20px;">
 
                 <div style="flex: 1;">
-                    <label for="lab-cal-instrument2">เครื่องมือ:</label>
+                    <label for="lab-cal-instrument2">เครื่องมือ2:</label>
                     <select id="lab-cal-instrument2" >
                     </select>
                 </div>
