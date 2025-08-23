@@ -118,10 +118,25 @@
                                       $assessment_url = 'certify/applicant/inspection/'.base64_encode($assessment->id).'/'.$certi->token;;
                                   }
                                 @endphp
-                              <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
-                                 {{ $assessment->board_auditor_to->auditor ?? '-'}} 
-                                 {{ array_key_exists($assessment->report_status,$report_status) ?  '( '.$report_status[$assessment->report_status].' )' :'' }}
-                              </a> 
+
+                                @php
+                                   $report = $assessment->whatKindOfReport();
+                                   $reportId = $report->id;
+                                   $allReportSigned = $assessment->reportLabSigned($reportId);
+                                //    dd($remainTransactions);
+                                @endphp
+                             @if ($allReportSigned )
+                                    <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                        {{ $assessment->board_auditor_to->auditor ?? '-'}} 
+                                        {{ array_key_exists($assessment->report_status,$report_status) ?  '( '.$report_status[$assessment->report_status].' )' :'' }}
+                                    </a> 
+                                 @else
+                                    <button  class="btn {{$assessment_btn}} "  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
+                                        {{ $assessment->board_auditor_to->auditor ?? '-'}} 
+                                        {{ array_key_exists($assessment->report_status,$report_status) ?  '(อยู่ระหว่างดำเนินการ)' :'' }}
+                                    </button> 
+                             @endif
+                                
                              <br>
                           @endforeach
             

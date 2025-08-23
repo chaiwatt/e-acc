@@ -1023,9 +1023,9 @@
                                 var calibrate_branch_id = $(".calibrate_branch_id").length;
                                 
                                 // if(calibrate_branch_id > 0){
-                                console.log('submit สอบเทียบ ' + calibrate_branch_id);
-                                console.log('number ' + number);
-                                console.log('res ' + res);
+                                // console.log('submit สอบเทียบ ' + calibrate_branch_id);
+                                // console.log('number ' + number);
+                                // console.log('res ' + res);
                                 if(number < res){
                                     $('div#status_btn').html('<input type="text" name="save" value="' + status + '" hidden>');
                                     console.log('aha');

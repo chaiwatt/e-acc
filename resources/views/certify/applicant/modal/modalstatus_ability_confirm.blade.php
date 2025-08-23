@@ -1,4 +1,5 @@
 <!-- Modal เลข 19 -->
+{{-- ApplicantController --}}
 @push('css')
     <!-- ===== Parsley js ===== -->
     <link href="{{asset('plugins/components/parsleyjs/parsley.css?20200630')}}" rel="stylesheet" />
@@ -262,7 +263,7 @@
                     id: app_id,
                 },
                 success: function(result) {
-                    console.log(result);
+                    // console.log(result);
                     $('#action19{{$id}}').modal('hide');
                     window.location.reload();
                     

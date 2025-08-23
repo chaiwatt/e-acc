@@ -253,7 +253,7 @@
     <div class="row">
         <!-- คอลัมน์ที่ 1 (ครึ่งหนึ่งของหน้าจอสำหรับขนาดกลางขึ้นไป) -->
         <div class="col-md-6">
-            <div class="form-group required {{ $errors->has('title') ? 'has-error' : ''}}">
+            {{-- <div class="form-group required {{ $errors->has('title') ? 'has-error' : ''}}">
                 <!-- Label ไม่มี col-md-X -->
                 <label for="title" class="control-label">
                     ชื่อเรื่อง : 
@@ -263,7 +263,16 @@
                     <input type="text" name="title" id="title" class="form-control" value="{{ old('title', $yourModelInstance->title ?? '') }}" required>
                     {!! $errors->first('title', '<p class="help-block">:message</p>') !!}
                 </div>
-            </div>
+            </div> --}}
+
+{{--             
+            <div class="form-group{{ $errors->has('title') ? ' has-error' : ''}}" hidden>
+                {!! Form::label('title', 'ชื่อเรื่อง (Eng)'.' : ', ['class' => 'control-label']) !!}
+                <div>
+                    {!! Form::text('title', 'temp name', ['class' => 'form-control']) !!}
+                    {!! $errors->first('title', '<p class="help-block">:message</p>') !!}
+                </div>
+            </div> --}}
 
             {{-- {!! Form::select('province_id', App\Models\Basic\Province::pluck('PROVINCE_NAME', 'PROVINCE_ID'), null, ['class' => 'form-control', 'placeholder'=>'- เลือกจังหวัด -', 'required' => 'required']) !!} --}}
 
@@ -347,14 +356,21 @@
 
 
 
-            <div class="form-group required{{ $errors->has('title_eng') ? 'has-error' : ''}}">
+            {{-- <div class="form-group required{{ $errors->has('title_eng') ? 'has-error' : ''}}">
                 {!! Form::label('title_eng', 'ชื่อเรื่อง (Eng)'.' : ', ['class' => 'control-label']) !!}
                 <div>
                     {!! Form::text('title_eng', null, ('required' == 'required') ? ['class' => 'form-control', 'required' => 'required'] : ['class' => 'form-control']) !!}
                     {!! $errors->first('title_eng', '<p class="help-block">:message</p>') !!}
                 </div>
-            </div>
+            </div> --}}
 
+            {{-- <div class="form-group{{ $errors->has('title_eng') ? ' has-error' : ''}}" hidden>
+                {!! Form::label('title_eng', 'ชื่อเรื่อง (Eng)'.' : ', ['class' => 'control-label']) !!}
+                <div>
+                    {!! Form::text('title_eng', 'temp name', ['class' => 'form-control']) !!}
+                    {!! $errors->first('title_eng', '<p class="help-block">:message</p>') !!}
+                </div>
+            </div> --}}
          </div>
 
 
@@ -400,7 +416,7 @@
             </div>
 
             <div class="form-group required{{ $errors->has('standard_name') ? 'has-error' : ''}}">
-                <label for="standard_name" class="control-label">ชื่อมาตรฐาน :</label>
+                <label for="standard_name" class="control-label">ชื่อมาตรฐาน (ไทย):</label>
                 <div>
                     <input class="form-control" placeholder="ชื่อมาตรฐาน" name="standard_name" type="text" id="standard_name" required>
                     @if ($errors->has('standard_name'))

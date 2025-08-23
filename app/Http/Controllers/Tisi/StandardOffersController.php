@@ -152,6 +152,7 @@ public function update(Request $request, $id)
     $requestData['standard_name'] = $request->standard_name;
     $requestData['national_strategy'] = $request->national_strategy;
     $requestData['reason'] = $request->reason;
+    $requestData['reason_detail'] = null;
     $requestData['state'] = 1;
 
     $offer->update($requestData);

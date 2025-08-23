@@ -264,6 +264,26 @@
                 @endif
         </div>
     </div>
+
+
+        <div class="form-group">
+            <div class="col-md-12">
+                <label class="col-md-3 text-right"> รายงานการตรวจประเมิน: </label>
+                <div class="col-md-6">
+                    @if(!is_null($find_notice) && !is_null($find_notice->file) )
+                        <p>
+                            <a href="{{url('certify/check/file_client/'.$find_notice->file.'/'.( !empty($find_notice->file_client_name) ? $find_notice->file_client_name : 'null' ))}}" 
+                                title=" {{ !empty($find_notice->file_client_name) ? $find_notice->file_client_name : basename($find_notice->file)}}"   target="_blank">
+                                {!! HP::FileExtension($find_notice->file)  ?? '' !!} 
+                            </a>
+                        </p>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+
+
     @endif
     @if(!is_null($item1->attachs))
     <div class="col-md-6">

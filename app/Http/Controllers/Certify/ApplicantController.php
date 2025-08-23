@@ -7,6 +7,7 @@ use App\User;
 use stdClass;
 use Mpdf\Mpdf;
 use Mpdf\Tag\Br;
+use App\RoleUser;
 use Carbon\Carbon;
 use App\AttachFile;
 use App\LabHtmlTemplate;
@@ -14,11 +15,11 @@ use Mpdf\HTMLParserMode;
 use App\CertificateExport;
 use App\Models\Basic\Staff;
 use App\Models\Basic\Amphur;
+
 use App\Models\Esurv\Trader;
-
 use FontLib\Table\Type\post;
-use Illuminate\Http\Request;
 
+use Illuminate\Http\Request;
 use Smalot\PdfParser\Parser;
 use App\Mail\Lab\CertifyCost;
 use App\Models\Basic\Zipcode;
@@ -46,19 +47,19 @@ use App\Models\Certify\BoardAuditor;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Mail;
+
 use App\Mail\Lab\CertifyBoardAuditor;
 
 use App\Models\Bcertify\LabCalRequest;
-
 use App\Models\Certify\Applicant\Cost;
 use App\Mail\Lab\CertifySaveAssessment;
 use App\Models\Bcertify\LabRequestType;
 use App\Models\Bcertify\LabTestRequest;
 use App\Models\Certify\Applicant\Check;
+
 use App\Models\Certify\SetStandardUser;
 
 use Illuminate\Support\Facades\Storage;
-
 use App\Mail\Lab\CertifyCostCertificate;
 use App\Models\Bcertify\BranchLabAdress;
 use App\Models\Bcertify\TestBranchParam;
@@ -75,8 +76,8 @@ use App\Models\Certify\Applicant\CertiLab;
 use App\Models\Certify\Applicant\CostFile;
 use App\Models\Certify\CertificateHistory;
 use App\Models\Certify\SetStandardUserSub;
-use App\Models\Bcertify\LabTestMeasurement;
 
+use App\Models\Bcertify\LabTestMeasurement;
 use App\Models\Bcertify\LabTestTransaction;
 use App\Models\Bcertify\TestBranchCategory;
 use App\Models\Certify\BoardAuditorHistory;
@@ -1386,7 +1387,7 @@ class ApplicantController extends Controller
 
 
                     if($certilab->status != 0){
-                        $this->exportScopePdf($certilab->id,$labHtmlTemplate);
+                        $this->exportScopePdf($certilab->id,$labHtmlTemplate,'draft');
                     }
                     
                     // $pdfService = new CreateLabScopePdf($certilab);
@@ -2053,7 +2054,7 @@ class ApplicantController extends Controller
                     // dd($certi_lab->status);
 
                        if($certi_lab->status != 0){
-                        $this->exportScopePdf($certi_lab->id,$labHtmlTemplate);
+                        $this->exportScopePdf($certi_lab->id,$labHtmlTemplate,'draft');
                     }
 
                     // $pdfService = new CreateLabScopePdf($certi_lab);
@@ -2539,7 +2540,7 @@ class ApplicantController extends Controller
 
 
                     //   if($certilab->status != 0){
-                        $this->exportScopePdf($certi_lab->id,$labHtmlTemplate);
+                        $this->exportScopePdf($certi_lab->id,$labHtmlTemplate,'draft');
                     // }
 
                         // $pdfService = new CreateLabScopePdf($certi_lab);
@@ -2998,6 +2999,7 @@ class ApplicantController extends Controller
 
         $certilab = CertiLab::find($request->id);
 
+
         if($certilab->purpose_type == 6)
         {
             if($certilab->transferer_export_id != null){
@@ -3070,8 +3072,29 @@ class ApplicantController extends Controller
 
         if($isExported !== null)
         {
-            $pdfService = new CreateLabScopePdf($certilab);
-            $pdfContent = $pdfService->generatePdf();
+            
+            // $pdfService = new CreateLabScopePdf($certilab);
+            // $pdfContent = $pdfService->generatePdf();
+
+            // dd("okdd");
+
+                  $template_ability = "";
+                    if($certilab->lab_type == 3){
+                        $template_ability = "test";
+                    }else if($certilab->lab_type == 4){
+                        $template_ability = "calibrate";
+                    }
+
+            $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+                ->where('according_formula',$certilab->standard_id)
+                ->where('purpose',$certilab->purpose_type)
+                ->where('lab_ability',$template_ability)
+                ->where('app_certi_lab_id',$certilab->id)
+                ->first();
+
+                // dd($labHtmlTemplate);
+
+            $this->exportScopePdf($certilab->id,$labHtmlTemplate,'release');
     
             $json = $this->copyScopeLabFromAttachement($certilab);
             $copiedScopes = json_decode($json, true);
@@ -6563,13 +6586,17 @@ private function FormatAddressEn($request){
 
       public function scopeEditor(Request $request)
     {
-
+    //   dd("ok");
         // Retrieve query parameters
         $accordingFormula = $request->input('according_formula');
         $labAbility = $request->input('lab_ability');
         $purpose = $request->input('purpose');
         $labName=  $request->input('lab_name');
         $labNameEn=  $request->input('lab_name_en');
+
+
+
+
 
         $templateType = "";
 
@@ -6633,12 +6660,12 @@ private function FormatAddressEn($request){
             $labTestDetails = [
                 'title' => [
                     'th' => "รายละเอียดสาขาและขอบข่ายใบรับรองห้องปฏิบัติการ",
-                    'en' => "Scope of Accreditation for Testing" // เปลี่ยนเป็น Testing
+                    'en' => "Scope of Accreditation for Calibration"
                 ],
                 'certificateNo' => Carbon::now()->format('y')."-LB0000",
                 'labName' => [
-                    'th' => "บริษัท เอ็นพีซีโซลูชั่นแอนด์เซอร์วิส จำกัด",
-                    'en' => "IRC Technologies Co.,Ltd."
+                    'th' => $labName,
+                    'en' => $labNameEn
                 ],
                 'accreditationNo' => [
                     'th' => "ทดสอบ 0000", // หมายเลขการรับรองอาจจะต่างกัน
@@ -6696,6 +6723,35 @@ private function FormatAddressEn($request){
         $purpose = $request->input('purpose');
 
         $labtems = $request->input('labItems'); 
+        
+        $check =  LabHtmlTemplate::where('user_id', $user->id)
+                ->where('according_formula',$accordingFormula)
+                ->where('lab_ability',$labAbility)
+                // ->where('purpose',$purpose)
+                ->where('template_type',$templateType)
+                ->first();
+
+        // dd($labtems, json_decode( $check->json_data, true));
+        if(count($labtems) == 0 ){
+            if($check != null){
+                $labtems = json_decode( $check->json_data, true);
+            }
+        }else{
+            if($check != null){
+                // $labtems_ext = json_decode( $check->json_data, true);
+                // dd($labtems ,$labtems_ext);
+                $labtems_ext = json_decode($check->json_data, true);
+                $labtems = array_merge($labtems, $labtems_ext);
+            }
+        }
+
+        $check =  LabHtmlTemplate::where('user_id', $user->id)
+                            ->where('according_formula',$accordingFormula)
+                            ->where('lab_ability',$labAbility)
+                            ->where('purpose',$purpose)
+                            ->where('template_type',$templateType)
+                            ->first();
+
 
         if (!is_array($htmlPages) || empty($htmlPages)) {
             return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
@@ -6729,7 +6785,7 @@ private function FormatAddressEn($request){
 
     public function downloadHtmlTemplate(Request $request)
     {
-
+       
         try {
 
             $user = auth()->user();
@@ -6738,6 +6794,17 @@ private function FormatAddressEn($request){
             ->where('purpose',$request->purpose)
             ->where('lab_ability',$request->labAbility)
             ->first();
+
+            if( $htmlTemplate == null && $request->purpose > 2)
+            {
+                $htmlTemplate = LabHtmlTemplate::where('user_id',$user->id)
+                ->where('according_formula',$request->accordingFormula)
+                ->where('purpose',1)
+                ->where('lab_ability',$request->labAbility)
+                ->first();
+            }
+
+            // dd($htmlTemplate);
 
             if (!$htmlTemplate) {
                 return response()->json(['message' => 'Template not found for the given type.'], 404);
@@ -6763,7 +6830,7 @@ private function FormatAddressEn($request){
     }
 
 
- public function exportScopePdf($id,$labHtmlTemplate)
+ public function exportScopePdf($id,$labHtmlTemplate,$isDraft)
     {
         $htmlPages = json_decode($labHtmlTemplate->html_pages);
 
@@ -6830,11 +6897,67 @@ private function FormatAddressEn($request){
         $mpdf->showWatermarkImage = true;
 
         // --- เพิ่ม Watermark Text "DRAFT" ตรงนี้ ---
-        $mpdf->SetWatermarkText('DRAFT');
-        $mpdf->showWatermarkText = true; // เปิดใช้งาน watermark text
-        $mpdf->watermark_font = 'thsarabunnew'; // กำหนด font (ควรใช้ font ที่โหลดไว้แล้ว)
-        $mpdf->watermarkTextAlpha = 0.1;
-$footerHtml = '
+
+
+        $footerHtml = '
+        <div width="100%" style="display:inline;line-height:12px">
+
+            <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+            <span style="font-size:20px;">กระทรวงอุตสาหกรรม สํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span><br>
+            <span style="font-size: 16px">(Ministry of Industry, Thai Industrial Standards Institute)</span>
+            </div>
+
+            <div style="display: inline-block; width: 15%;float:right;width:25%">
+        
+            </div>
+
+            <div width="100%" style="display:inline;text-align:center">
+            <span>หน้าที่ {PAGENO}/{nbpg}</span>
+            </div>
+        </div>';
+
+        if($isDraft == "draft")
+        {
+            $mpdf->SetWatermarkText('DRAFT');
+            $mpdf->showWatermarkText = true; // เปิดใช้งาน watermark text
+            $mpdf->watermark_font = 'thsarabunnew'; // กำหนด font (ควรใช้ font ที่โหลดไว้แล้ว)
+            $mpdf->watermarkTextAlpha = 0.1;
+        }else{
+            $app_certi_lab = CertiLab::find($id);
+            $attach1 = null;
+            
+                $targetRoleId = 22;
+                $userRunrecnos = RoleUser::where('role_id', $targetRoleId)->pluck('user_runrecno');
+                $groupAdminUsers = Staff::whereIn('runrecno', $userRunrecnos)->where('reg_subdepart',$app_certi_lab->subgroup)->get();
+
+                $firstSignerGroup = null;
+                if(count($groupAdminUsers) != 0){
+                    $allReg13Ids = [];
+                    foreach ($groupAdminUsers as $groupAdminUser) {
+                        $reg13Id = str_replace('-', '', $groupAdminUser->reg_13ID);
+                        $allReg13Ids[] = $reg13Id;
+                    }
+
+                    // $firstSignerGroups = Signer::whereIn('tax_number',$allReg13Ids)->get();
+
+                    $firstSignerGroup = DB::table('besurv_signers')
+                        ->whereIn('tax_number',$allReg13Ids)
+                        ->first();
+                        // dd($firstSignerGroup->id);
+                }
+
+                if($firstSignerGroup != null)
+                {
+                    $attach1 = AttachFile::where('ref_id',$firstSignerGroup->id)->where('ref_table','besurv_signers')
+                        ->where('section','attach')
+                        ->latest()
+                        ->first();
+
+                        $sign_url1 = $this->getSignature($attach1);
+
+                        // dd($sign_url1);
+
+                        $footerHtml = '
 <div width="100%" style="display:inline;line-height:12px">
 
     <div style="display:inline-block;line-height:16px;float:left;width:70%;">
@@ -6843,13 +6966,90 @@ $footerHtml = '
     </div>
 
     <div style="display: inline-block; width: 15%;float:right;width:25%">
-  
+            <img src="' . $sign_url1 . '" style="height:30px;">
     </div>
 
     <div width="100%" style="display:inline;text-align:center">
       <span>หน้าที่ {PAGENO}/{nbpg}</span>
     </div>
 </div>';
+
+                        // dd($sign_url1);
+
+                    // $attach1 = !empty($firstSignerGroups->first()->AttachFileAttachTo) ? $firstSignerGroups->first()->AttachFileAttachTo : null;
+                }
+
+                
+            
+
+        }
+
+
+
+
+//////////////////////
+
+//             $attach1 = null;
+//             if($selectedCertiLab->scope_view_signer_id == null )
+//             {
+//                 $targetRoleId = 22;
+//                 $userRunrecnos = RoleUser::where('role_id', $targetRoleId)->pluck('user_runrecno');
+//                 $groupAdminUsers = User::whereIn('runrecno', $userRunrecnos)->where('reg_subdepart',$selectedCertiLab->subgroup)->get();
+
+//                 $firstSignerGroups = [];
+//                 if(count($groupAdminUsers) != 0){
+//                     $allReg13Ids = [];
+//                     foreach ($groupAdminUsers as $groupAdminUser) {
+//                         $reg13Id = str_replace('-', '', $groupAdminUser->reg_13ID);
+//                         $allReg13Ids[] = $reg13Id;
+//                     }
+
+//                     $firstSignerGroups = Signer::whereIn('tax_number',$allReg13Ids)->get();
+//                 }
+
+//                 $attach1 = !empty($firstSignerGroups->first()->AttachFileAttachTo) ? $firstSignerGroups->first()->AttachFileAttachTo : null;
+//             }else{
+//                    $signer = Signer::find($selectedCertiLab->scope_view_signer_id);
+//                     $attach1 = !empty($signer->AttachFileAttachTo) ? $signer->AttachFileAttachTo : null;
+//             }
+
+   
+
+//   $sign_url1 = $this->getSignature($attach1);
+
+
+// $footerHtml = '
+// <div width="100%" style="display:inline;line-height:12px">
+
+//     <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+//       <span style="font-size:20px;">กระทรวงอุตสาหกรรม สํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span><br>
+//       <span style="font-size: 16px">(Ministry of Industry, Thai Industrial Standards Institute)</span>
+//     </div>
+
+//     <div style="display: inline-block; width: 15%;float:right;width:25%">
+//             <img src="' . $sign_url1 . '" style="height:30px;">
+//     </div>
+
+//     <div width="100%" style="display:inline;text-align:center">
+//       <span>หน้าที่ {PAGENO}/{nbpg}</span>
+//     </div>
+// </div>';
+
+
+
+/////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
 
 // แล้วนำไปกำหนดให้ mPDF เป็น Footer
 $mpdf->SetHTMLFooter($footerHtml);
@@ -6901,5 +7101,47 @@ $mpdf->SetHTMLFooter($footerHtml);
     }
 
 
+    public function getSignature($attach)
+    {
+        
+        $existingFilePath = $attach->url;//  'files/signers/3210100336046/tvE4QPMaEC-date_time20241211_011258.png'  ;
+
+        $attachPath = 'bcertify_attach/signer';
+        $fileName = basename($existingFilePath) ;// 'tvE4QPMaEC-date_time20241211_011258.png';
+        // dd($existingFilePath);
+
+        // ตรวจสอบไฟล์ใน disk uploads ก่อน
+        if (Storage::disk('uploads')->exists("{$attachPath}/{$fileName}")) {
+            // หากพบไฟล์ใน disk
+            $storagePath = Storage::disk('uploads')->path("{$attachPath}/{$fileName}");
+            $filePath = 'uploads/'.$attachPath .'/'.$fileName;
+            // dd('File already exists in uploads',  $filePath);
+            return $filePath;
+        } else {
+            // หากไม่พบไฟล์ใน disk ให้ไปตรวจสอบในเซิร์ฟเวอร์
+            if (HP::checkFileStorage($existingFilePath)) {
+                // ดึง path ของไฟล์ที่อยู่ในเซิร์ฟเวอร์
+                $localFilePath = HP::getFileStoragePath($existingFilePath);
+
+                // ตรวจสอบว่าไฟล์มีอยู่หรือไม่
+                if (file_exists($localFilePath)) {
+                    // บันทึกไฟล์ลง disk 'uploads' โดยใช้ subfolder ที่กำหนด
+                    $storagePath = Storage::disk('uploads')->putFileAs($attachPath, new \Illuminate\Http\File($localFilePath), $fileName);
+
+                    // ตอบกลับว่าพบไฟล์และบันทึกสำเร็จ
+                    $filePath = 'uploads/'.$attachPath .'/'.$fileName;
+                    return $filePath;
+                    // dd('File exists in server and saved to uploads', $storagePath);
+                } else {
+                    // กรณีไฟล์ไม่สามารถเข้าถึงได้ใน path เดิม
+                    return null;
+                }
+            } else {
+                // ตอบกลับกรณีไม่มีไฟล์ในเซิร์ฟเวอร์
+                return null;
+            }
+        }
+        
+    }
 
 }

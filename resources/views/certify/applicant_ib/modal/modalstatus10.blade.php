@@ -99,7 +99,7 @@
         <div class="btn-group  form-group">
           <div class="btn-group">
                 <button type="button" class="btn {{$assessment_btn}} btn-succesdropdown-toggle" data-toggle="dropdown" style="width:300px;">
-                    ผลการตรวจประเมิน <span class="caret"></span>
+                    ผลการตรวจประเมิน<span class="caret"></span>
                  </button>
                  <div class="dropdown-menu" role="menu" >
                    @foreach($certi->CertiIBSaveAssessments as $key2 => $assessment)
@@ -152,10 +152,11 @@
                             @endif
                          
                         {{-- @php
-                            dd($isAllFinalReportSigned);
+                            dd($isAllFinalReportSigned,$hasCarOrAllsigned);
                         @endphp --}}
 
-                             @if ($isAllFinalReportSigned && $hasCarOrAllsigned) 
+                             @if ($isAllFinalReportSigned || $hasCarOrAllsigned) 
+                             {{-- @if ( $hasCarOrAllsigned)  --}}
                                 <a  class="btn {{$assessment_btn}} " href="{{ url("$assessment_url")}}"  style="background-color:{{$assessment_btn}};width:750px;text-align: left">
                                     {{ $assessment->CertiIBAuditorsTo->auditor ?? '-'}}  
                                     {{ array_key_exists($assessment->bug_report,$bug_report) ?  '( '.$bug_report[$assessment->bug_report].' )' :'' }}

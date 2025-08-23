@@ -39,7 +39,7 @@
     <div class="row">
         <div class="col-sm-12">
             <div class="white-box">
-                <h3 class="box-title pull-left">ดูการเสนอความเห็นการกำหนดมาตรฐานการตรวจสอบและรับรอง #{{ $offer->id }}</h3>
+                <h3 class="box-title pull-left">การเสนอความเห็นการกำหนดมาตรฐานการตรวจสอบและรับรอง #{{ $offer->id }}</h3>
 
                 <div class="pull-right">
                     {{-- @if(HP::CheckPermission('edit-'.str_slug('applicantcbs')))
@@ -60,7 +60,14 @@
                     <div class="row">
                         <!-- Left Column -->
                         <div class="col-md-6">
-                            <div class="form-group"><label class="control-label">ชื่อหน่วยงาน</label><p>{{ $department->title ?? $offer->department ?? 'ไม่พบข้อมูล' }}</p></div>
+                           
+                            {{-- {{$offer->requetOwner()}} --}}
+                            @if ($offer->requetOwner() != null)
+                                    <div class="form-group"><label class="control-label">ชื่อหน่วยงาน</label><p>{{ $offer->requetOwner()->name }}</p></div>
+                                @else
+                                    <div class="form-group"><label class="control-label">ชื่อหน่วยงาน</label><p>-</p></div>
+                            @endif
+                           
                             <div class="form-group"><label class="control-label">ที่อยู่</label><p>{{ $addressInfo ?? 'ไม่พบข้อมูล' }}</p></div>
                             <div class="form-group"><label class="control-label">เบอร์โทร</label><p>{{ $offer->tel ?? $department->tel ?? 'ไม่พบข้อมูล' }}</p></div>
                             <div class="form-group"><label class="control-label">แฟกซ์</label><p>{{ $department->fax ?? 'ไม่พบข้อมูล' }}</p></div>
@@ -80,21 +87,23 @@
                     <div class="row">
                         <!-- Left Column -->
                         <div class="col-md-6">
-                            <div class="form-group"><label class="control-label">ชื่อเรื่อง</label><p>{{ $offer->title ?? 'ไม่พบข้อมูล' }}</p></div>
+                            {{-- <div class="form-group"><label class="control-label">ชื่อเรื่อง</label><p>{{ $offer->title ?? 'ไม่พบข้อมูล' }}</p></div> --}}
+                            <div class="form-group"><label class="control-label">ชื่อมาตรฐาน</label><p>{{ $offer->standard_name ?? 'ไม่พบข้อมูล' }}</p></div>
                             <div class="form-group"><label class="control-label">ประเภทมาตรฐาน</label><p>{{ App\Models\Bcertify\Standardtype::find($offer->std_type)->offertype ?? 'ไม่พบข้อมูล' }}</p></div>
                             <div class="form-group"><label class="control-label">ประเภทข้อเสนอ (Proposer)</label><p>{{ $offer->proposer_type ?? 'ไม่พบข้อมูล' }}</p></div>
                             <div class="form-group"><label class="control-label">จุดประสงค์และเหตุผลในการจัดทำ</label><p>{{ $offer->objectve ?? 'ไม่พบข้อมูล' }}</p></div>
                             <div class="form-group"><label class="control-label">ขอบข่าย</label><p>{{ $offer->scope ?? 'ไม่พบข้อมูล' }}</p></div>
                             <div class="form-group"><label class="control-label">เลขมาตรฐาน ISO</label><p>{{ $offer->iso_number ?? 'ไม่พบข้อมูล' }}</p></div>
-                            <div class="form-group"><label class="control-label">ชื่อมาตรฐาน (Eng)</label><p>{{ $offer->standard_name_en ?? 'ไม่พบข้อมูล' }}</p></div>
+                            
                         </div>
 
                         <!-- Right Column -->
                         <div class="col-md-6">
-                            <div class="form-group"><label class="control-label">ชื่อเรื่อง (Eng)</label><p>{{ $offer->title_eng ?? 'ไม่พบข้อมูล' }}</p></div>
-                            <div class="form-group"><label class="control-label">ผู้มีส่วนได้เสียที่เกี่ยวข้อง</label><p>{{ $offer->stakeholders ?? 'ไม่พบข้อมูล' }}</p></div>
+                            {{-- <div class="form-group"><label class="control-label">ชื่อเรื่อง (Eng)</label><p>{{ $offer->title_eng ?? 'ไม่พบข้อมูล' }}</p></div> --}}
+                            <div class="form-group"><label class="control-label">ชื่อมาตรฐาน (Eng)</label><p>{{ $offer->standard_name_en ?? 'ไม่พบข้อมูล' }}</p></div>
+                            <div class="form-group"><label class="control-label">ผู้มีส่วนได้เสียที่เกี่ยวข้อง</label><p>{!! $offer->stakeholders ?? 'ไม่พบข้อมูล' !!}</p></div>
                             <div class="form-group"><label class="control-label">จำนวนการประชุมเชิงปฏิบัติการฯ</label><p>{{ $offer->meeting_count ?? 'ไม่พบข้อมูล' }}</p></div>
-                            <div class="form-group"><label class="control-label">ชื่อมาตรฐาน</label><p>{{ $offer->standard_name ?? 'ไม่พบข้อมูล' }}</p></div>
+                            
                             <div class="form-group"><label class="control-label">แผนยุทธศาสตร์ชาติฯ</label><p>{{ $offer->national_strategy ?? 'ไม่พบข้อมูล' }}</p></div>
                         </div>
 

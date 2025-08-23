@@ -237,30 +237,38 @@
     <br> 
 
 
+{{-- {{count($assessment->LogCertiCBHistorys)}} --}}
+
 @if(count($assessment->LogCertiCBHistorys) > 0) 
 @foreach($assessment->LogCertiCBHistorys as $key1 => $item1)
 
 <div class="row form-group">
     <div class="col-md-12">
        <div class="white-box" style="border: 2px solid #e5ebec;">
-  {{-- <legend><h3> ครั้งที่ {{ $key1 +1}} </h3></legend> --}}
 
 <div class="container-fluid">
 
 <div class="row ">
         <div class="col-md-6">
-            <label class="col-md-6 text-right"> รายงานการตรวจประเมิน : </label>
+            <label class="col-md-6 text-right"> รายงานการตรวจประเมิน: </label>
             <div class="col-md-6">
                 @if(!is_null($item1->details_three))
                    <p>
-                        {{-- @if($item1->details_three!=''  && HP::checkFileStorage($attach_path.$item1->details_three) ) --}}
-                           <a href="{{url('certify/check/file_cb_client/'.$item1->details_three.'/'.( !empty($item1->file_client_name) ? $item1->file_client_name :  basename($item1->details_three) ))}}" 
-                                title="{{ !empty($item1->file_client_name) ? $item1->file_client_name :  basename($item1->details_three) }}" target="_blank">
-                                {!! HP::FileExtension($item1->details_three)  ?? '' !!}
-                            </a>
-                        {{-- @endif  --}}
+                        <a href="{{url('certify/check/file_cb_client/'.$item1->details_three.'/'.( !empty($item1->file_client_name) ? $item1->file_client_name :  basename($item1->details_three) ))}}" 
+                            title="{{ !empty($item1->file_client_name) ? $item1->file_client_name :  basename($item1->details_three) }}" target="_blank">
+                            {!! HP::FileExtension($item1->details_three)  ?? '' !!}
+                        </a>
                  </p>
-                @endif
+            @else
+
+                   @if(isset($assessment)  && !is_null($assessment->FileAttachAssessment1To)) 
+                            <a href="{{url('certify/check/file_cb_client/'.$assessment->FileAttachAssessment1To->file.'/'.( !empty($assessment->FileAttachAssessment1To->file_client_name) ? $assessment->FileAttachAssessment1To->file_client_name : 'null' ))}}" 
+                                title="{{ !empty($assessment->FileAttachAssessment1To->file_client_name) ? $assessment->FileAttachAssessment1To->file_client_name :  basename($assessment->FileAttachAssessment1To->file) }}" target="_blank">
+                                {!! HP::FileExtension($assessment->FileAttachAssessment1To->file)  ?? '' !!}
+                            </a> 
+                        </p>
+                    @endif
+            @endif
             </div>
         </div>
         <div class="col-md-6">
@@ -282,31 +290,32 @@
 
 <div class="row">
     @if(!is_null($item1->details_four))
-    <div class="col-md-6">
-        <label class="col-md-6 text-right">Scope : </label>
         <div class="col-md-6">
-                 @php
-                      $details_four = json_decode($item1->details_four);
-                @endphp
-                @if(!is_null($details_four))
-                @foreach ($details_four as $item2)
-                    {{-- <p> --}}
-                        {{-- @if($item2->file!=''  && HP::checkFileStorage($attach_path.$item2->file) ) --}}
-                        <a href="{{url('certify/check/file_cb_client/'.$item2->file.'/'.( !empty($item2->file_client_name) ? $item2->file_client_name :   basename($item2->file) ))}}" 
-                            title="{{ !empty($item2->file_client_name) ? $item2->file_client_name :  basename($item2->file) }}" target="_blank">
-                            {!! HP::FileExtension($item2->file)  ?? '' !!}
-                        </a>
-                       {{-- @endif  --}}
-                   
-                    {{-- </p> --}}
-                @endforeach
-                @endif
+            <label class="col-md-6 text-right">Scope : </label>
+            <div class="col-md-6">
+                    @php
+                        $details_four = json_decode($item1->details_four);
+                    @endphp
+                    @if(!is_null($details_four))
+                    @foreach ($details_four as $item2)
+                        {{-- <p> --}}
+                            {{-- @if($item2->file!=''  && HP::checkFileStorage($attach_path.$item2->file) ) --}}
+                            <a href="{{url('certify/check/file_cb_client/'.$item2->file.'/'.( !empty($item2->file_client_name) ? $item2->file_client_name :   basename($item2->file) ))}}" 
+                                title="{{ !empty($item2->file_client_name) ? $item2->file_client_name :  basename($item2->file) }}" target="_blank">
+                                {!! HP::FileExtension($item2->file)  ?? '' !!}
+                            </a>
+                        {{-- @endif  --}}
+                    
+                        {{-- </p> --}}
+                    @endforeach
+                    @endif
+            </div>
         </div>
-    </div>
     @endif
+    
     @if(!is_null($item1->attachs))
     <div class="col-md-6">
-        <label class="col-md-7 text-right"> สรุปรายงานการตรวจทุกครั้ง : </label>
+        {{-- <label class="col-md-7 text-right"> สรุปรายงานการตรวจทุกครั้ง : </label> --}}
         <div class="col-md-5">
                  {{-- @php
                       $attachs = json_decode($item1->attachs);
@@ -322,7 +331,7 @@
                 @endforeach
                 @endif --}}
 
-            @php
+            {{-- @php
                 $attachs = json_decode($item1->attachs);
                 $lastAttach = !is_null($attachs) ? collect($attachs)->last() : null;
             @endphp
@@ -331,7 +340,7 @@
                     title="{{ !empty($lastAttach->file_client_name) ? $lastAttach->file_client_name : basename($lastAttach->file) }}" target="_blank">
                     {!! HP::FileExtension($lastAttach->file) ?? '' !!}
                 </a>
-            @endif
+            @endif --}}
         </div>
     </div>
     @endif

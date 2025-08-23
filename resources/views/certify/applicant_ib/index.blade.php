@@ -1,3 +1,4 @@
+{{-- ApplicantIBController --}}
 @extends('layouts.master')
 
 @push('css')
@@ -64,7 +65,7 @@
         <div class="row">
             <div class="col-sm-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">คำขอรับบริการหน่วยตรวจ (IB)</h3>
+                    <h3 class="box-title pull-left">คำขอรับบริการหน่วยตรวจ (IB) check</h3>
 
                     <div class="pull-right">
  
@@ -300,7 +301,7 @@
 
                                             @elseif($item->status == 10 || $item->status == 11) 
                                                 <button style="border: none" data-toggle="modal"  data-target="#TakeAction{{$loop->iteration}}"  data-id="{{ $item->token }}"  >
-                                                    <i class="mdi mdi-magnify"></i> อยู่ระหว่างดำเนินการ
+                                                    <i class="mdi mdi-magnify"></i> อยู่ระหว่างดำเนินการ 
                                                 </button>
                                                 @include ('certify.applicant_ib.modal.modalstatus10',['id'=> $loop->iteration,
                                                                                                        'token'=> $item->token,

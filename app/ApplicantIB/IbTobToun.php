@@ -1,16 +1,15 @@
 <?php
 
-namespace App\Certify\ApplicantIB;
+namespace App\ApplicantIB;
 
-use App\Models\Certify\ApplicantIB\CertiIb;
 use Kyslik\ColumnSortable\Sortable;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Certify\ApplicantIB\CertiIBSaveAssessment;
+use App\Models\Certify\ApplicantIB\CertiIb;
 
-class IbDocReviewReport extends Model
+class IbTobToun extends Model
 {
     use Sortable;
-    protected $table = "ib_doc_review_reports";
+    protected $table = "ib_tob_touns";
     protected $primaryKey = 'id';
     protected $fillable = ['app_certi_ib_id','template','report_type','status' ,'signers' ];
 

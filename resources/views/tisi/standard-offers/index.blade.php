@@ -121,7 +121,7 @@
                             <thead>
                                 <tr>
                                     <th class="text-center" width="2%">#</th>
-                                    <th class="text-left" width="10%">ชื่อเรื่อง</th>
+                                    <th class="text-left" width="10%">มาตรฐาน</th>
                                     <th class="text-left" width="10%">วันที่รับคำขอ</th>
                                     <th class="text-left" width="10%">สถานะ</th>
                                     <th class="text-right"width="10%">จัดการ</th>
@@ -137,15 +137,29 @@
                                     
 
                                     <td> 
-                                           {{ $offer->title }} {{ $offer->title_eng }}
+                                           {{ $offer->standard_name }} ({{ $offer->standard_name_en }})
                                     </td>
 
                                     <td> 
 
                                      {{ HP::DateThai($offer->created_at) }}
                                  </td>
-                                    <td> 
-                                         ID:{{$offer->state}} {{ HP::StateEstandardOffers()[$offer->state] ?? 'ขอเอกสารเพิ่มเติม' }}
+                                <td> 
+                                    @php
+                                        $states = [
+                                            '1' => 'เสนอความเห็น',
+                                            '2' => 'รับคำขอ',
+                                            '3' => 'ไม่สมควรบรรจุในแผน',
+                                            '4' => 'จัดทำแผน',
+                                        ];
+                                    @endphp
+                                        ID:{{$offer->state}} {{ $states[$offer->state] ?? 'ขอเอกสารเพิ่มเติม' }}
+                                         @if ($offer->state == 0 && $offer->reason_detail != null )
+                                            @if(HP::CheckPermission('edit-'.str_slug('applicantcbs')))
+                                              <span class="text-warning">({{$offer->reason_detail}})</span> 
+                                       
+                                            @endif
+                                    @endif
                                  </td>
                                    
 {{-- 

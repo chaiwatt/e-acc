@@ -30,6 +30,7 @@ class MessageRecordTransaction extends Model
         'pos_y',
         'linesapce',
         'approval',
+        'job_type',
     ];
 
 

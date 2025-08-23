@@ -84,30 +84,16 @@
             <div class="clearfix"></div>
             
             @if ($urlType == 'create')
+
+
+            {{-- isset($certi_lab->desc_delete) --}}
+
+            {{-- @if (isset($certi_lab->id))
+                ahhhhhhhhhhhhhhhhh
+                {{$certi_lab->id}}
+            @endif --}}
             <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">เพิ่มขอบข่าย</a> 
-                {{-- <table class="table table-bordered" id="myTable_labScope">
-                    <thead class="bg-primary">
-                        <tr>
-                            <th class="text-center text-white "  width="10%">ลำดับ</th>
-                            <th class="text-center text-white "  width="50%">สาขา</th>
-                            <th class="text-center text-white "  width="20%">เพิ่มขอบข่าย</th>
-                        </tr>
-                    </thead>
-                    <tbody id="lab_address_with_scope_body">
-                        <tr>
-                            <td class="text-center" style="vertical-align:top">1</td>
-                            <td style="vertical-align:top">
-                                สำนักงานใหญ่
-                            </td>
-                            <td class="text-center" id="main-branch-container">
-                                
-                            </td>
-                        </tr>
-                    </tbody>
-                </table> 
 
-
-                <div id="scope_table_wrapper"></div> --}}
 
              
 

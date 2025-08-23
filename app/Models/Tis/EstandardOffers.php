@@ -3,6 +3,7 @@
 namespace App\Models\Tis;
 
 use App\AttachFile;
+use App\Models\Sso\User;
 use Kyslik\ColumnSortable\Sortable;
 use Illuminate\Database\Eloquent\Model;
 
@@ -29,7 +30,7 @@ class EstandardOffers extends Model
      *
      * @var array
      */
-    protected $fillable = ['proposer_type','meeting_count','iso_number','standard_name','standard_name_en','national_strategy','reason','reason_detail','title','owner', 'title_eng', 'std_type', 'scope', 'objectve', 'path','caption', 'attach_old', 'attach_new', 'attach_type', 'stakeholders', 'name', 'telephone','department_id', 'department', 'email', 'address', 'ip_address', 'user_agent', 'state', 'created_by', 'updated_by','request_owner'];
+    protected $fillable = ['proposer_type','meeting_count','iso_number','standard_name','standard_name_en','national_strategy','reason','reason_detail','title','owner', 'title_eng', 'std_type', 'scope', 'objectve', 'path','caption', 'attach_old', 'attach_new', 'attach_type', 'stakeholders', 'name', 'telephone','department_id', 'department', 'email', 'address', 'ip_address', 'user_agent', 'state', 'created_by', 'updated_by','request_owner','company'];
 
     /*
       Sorting
@@ -55,5 +56,11 @@ class EstandardOffers extends Model
   { 
      $tb = new EstandardOffers;
       return $this->belongsTo(AttachFile::class,'id','ref_id')->where('ref_table',$tb->getTable())->where('section','attach')->orderby('id','desc');
+  }
+
+  public function requetOwner()
+  { 
+     $user = User::where('username',$this->owner)->first();
+     return $user;
   }
 }

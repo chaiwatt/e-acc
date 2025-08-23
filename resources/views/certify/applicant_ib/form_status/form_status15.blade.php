@@ -8,7 +8,7 @@
      <div class="row">
         <div class="col-md-12">
            <div class="white-box">
-           <h3 class="box-title pull-left">ใบรับรองระบบงาน (IB)  mark</h3>
+           <h3 class="box-title pull-left">ใบรับรองระบบงาน (IB) check</h3>
 
                 <a class="btn btn-danger text-white pull-right" href="{{url('certify/applicant-ib')}}">
                         <i class="icon-arrow-left-circle"></i> กลับ
@@ -176,7 +176,7 @@
 
 <div class="row ">
         <div class="col-md-6">
-            <label class="col-md-6 text-right"> รายงานการตรวจประเมิน : </label>
+            <label class="col-md-6 text-right"> รายงานการตรวจประเมิน: </label>
             <div class="col-md-6">
                 {{-- @if(!is_null($item1->details_three))
                    <p>
@@ -236,7 +236,7 @@
     @endif
     @if(!is_null($item1->attachs))
     <div class="col-md-6">
-        <label class="col-md-7 text-right"> สรุปรายงานการตรวจทุกครั้ง : </label>
+        {{-- <label class="col-md-7 text-right"> รายงานการตรวจประเมิน ขั้นตอนที่1 : </label> --}}
         {{-- <div class="col-md-5">
             @php
                 $attachs = json_decode($item1->attachs);
@@ -251,7 +251,7 @@
             @endif
         </div> --}}
         <div class="col-md-5">
-            @php
+            {{-- @php
                 $attachs = json_decode($item1->attachs);
                 $lastAttach = !is_null($attachs) ? collect($attachs)->last() : null;
             @endphp
@@ -260,7 +260,7 @@
                     title="{{ !empty($lastAttach->file_client_name) ? $lastAttach->file_client_name : basename($lastAttach->file) }}" target="_blank">
                     {!! HP::FileExtension($lastAttach->file) ?? '' !!}
                 </a>
-            @endif
+            @endif --}}
         </div>
     </div>
     @endif
@@ -295,7 +295,7 @@
         <label class="col-md-3 text-right">  เห็นชอบกับ Scope : </label>
         <div class="col-md-7">
             <label>   <input type="radio" class="check check-readonly" data-radio="iradio_square-green" {{ ($item1->status == 1 ) ? 'checked' : ' '  }}>  &nbsp;ยืนยัน Scope &nbsp;</label>
-            <label>   <input type="radio" class="check check-readonly" data-radio="iradio_square-red" {{ ($item1->status == 2 ) ? 'checked' : ' '  }}>  &nbsp; แก้ไข Scope &nbsp;</label>
+            <label hidden>   <input type="radio" class="check check-readonly" data-radio="iradio_square-red" {{ ($item1->status == 2 ) ? 'checked' : ' '  }}>  &nbsp; แก้ไข Scope &nbsp;</label>
         </div>
     </div>
 </div>

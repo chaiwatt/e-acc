@@ -933,7 +933,7 @@
                 </div>
             </div>
 
-            <div hidden class="m-l-15 form-group {{ $errors->has('pl_2_5') ? 'has-error' : ''}}">
+            <div class="m-l-15 form-group {{ $errors->has('pl_2_5') ? 'has-error' : ''}}">
                 <div class="col-md-12 m-l-15">
                     {!! Form::checkbox('pl_2_5', '0', isset( $certi_lab_place->multi_site_facility ) && $certi_lab_place->multi_site_facility == '0' ?true:false, ['id'=>'pl_2_5','class'=>'check pl_2_5 check_main','data-checkbox'=>"icheckbox_flat-red",'data-id'=>"5"]) !!}
                     <label for="pl_2_5"> &nbsp;ประเภท5 สถานปฏิบัติการหลายสถานะที่ (Multi-site facilities) &nbsp; </label>

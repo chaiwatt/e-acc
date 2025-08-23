@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Docs</title>
+    <title>Scope Editor</title>
       <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -549,7 +549,7 @@
         
         <button class="menu-button" id="export-pdf-button" title="ส่งออกเป็น PDF"><i class="fas fa-file-pdf"></i></button>
         <button class="menu-button" id="save-template-button"><i class="fas fa-save"></i></button>
-        <button class="menu-button" id="load-template-button"><i class="fa fa-cloud-download" aria-hidden="true"></i></button>
+        {{-- <button class="menu-button" id="load-template-button"><i class="fa fa-cloud-download" aria-hidden="true"></i></button> --}}
 
         
     </div>
@@ -697,7 +697,7 @@
             <div class="modal-input-group" style="display: flex; gap: 20px;">
  
                 <div style="flex: 1;">
-                    <label for="lab-cal-param-details-editor">รายละเอียดพารามิเตอร์:</label>
+                    <label for="lab-cal-param-details-editor">ช่วงการวัด:</label>
                     <div id="lab-cal-param-details-editor" class="editable-div"  contenteditable="true"></div>
                 </div>
                 <div style="flex: 1;">
@@ -727,7 +727,7 @@
                     </select>
                 </div>
                 <div style="flex: 1;">
-                    <label for="lab-test-category">สาขาการทดสอบ:</label>
+                    <label for="lab-test-category">ผลิตภัณฑ์ที่ทดสอบ:</label>
                     <select id="lab-test-category" >
                     </select>
                 </div>
@@ -735,7 +735,7 @@
 
              <div class="modal-input-group" style="display: flex; gap: 20px;">
                 <div style="flex: 1;">
-                     <label for="lab-test-parameter">สาขาการทดสอบ:</label>
+                     <label for="lab-test-parameter">รายการทดสอบ:</label>
                     <select id="lab-test-parameter" >
                     </select>
                 </div>
@@ -748,7 +748,7 @@
 
             <div class="modal-input-group" style="display: flex; gap: 20px;">
                 <div style="flex: 1;">
-                     <label for="lab-test-param-details-editor">รายละเอียดพารามิเตอร์:</label>
+                     <label for="lab-test-param-details-editor">ช่วงการทดสอบ:</label>
                     <div id="lab-test-param-details-editor" class="editable-div"  contenteditable="true"></div>
                 </div>
                 <div style="flex: 1;">
@@ -1316,7 +1316,6 @@ const insertCbTemplate = () => {
 
         const insertLabCalTemplate = () => {
             const templateData = labCalDetailsFromBlade;
-
             if (!templateData) {
                 console.error("No labCalDetails data available to render.");
                 return;
@@ -1328,7 +1327,7 @@ const insertCbTemplate = () => {
                     <tr>
                         <td style="text-align: left;">${item.field.th}<br><span style="font-size: 15px;">${item.field.en}</span></td>
                         <td style="text-align: left;">${item.parameter}</td>
-                        <td style="text-align: left;">${item.capability}</td>
+                        <td style="text-align: center;">${item.capability}</td>
                         <td style="text-align: left;">${item.method}</td>
                     </tr>
                 `;
@@ -1410,10 +1409,10 @@ const insertCbTemplate = () => {
                 <table class="detail-table" style="width: 100%; margin-bottom: 1em; line-height: 1.1; ">
                     <thead>
                         <tr>
-                            <th style="width: 22%; text-align: center;">สาขาการสอบเทียบ<br><span style="font-size: 15px;">(Field of Calibration)</span></th>
-                            <th style="width: 26%; text-align: center;">รายการสอบเทียบ<br><span style="font-size: 15px;">(Parameter)</span></th>
-                            <th style="width: 26%; text-align: center;">ขีดความสามารถของ<br>การสอบเทียบและการวัด*<br><span style="font-size: 15px;">(Calibration and Measurement<br>Capability*)</span></th>
-                            <th style="width: 26%; text-align: center;">วิธีการสอบเทียบ<br><span style="font-size: 15px;">(Calibration Method)</span></th>
+                            <th style="width: 17%; text-align: center;">สาขาการสอบเทียบ<br><span style="font-size: 15px;">(Field of Calibration)</span></th>
+                            <th style="width: 28%; text-align: center;">รายการสอบเทียบ<br><span style="font-size: 15px;">(Parameter)</span></th>
+                            <th style="width: 28%; text-align: center;">ขีดความสามารถของ<br>การสอบเทียบและการวัด*<br><span style="font-size: 15px;">(Calibration and Measurement<br>Capability*)</span></th>
+                            <th style="width: 27%; text-align: center;">วิธีการสอบเทียบ<br><span style="font-size: 15px;">(Calibration Method)</span></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -2549,7 +2548,9 @@ const insertCbTemplate = () => {
             const paramDetails = paramDetailsLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
 
             const capabilityLines = labCalCapabilityEditorExtractor.getLines();
-            const capability = capabilityLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
+            // const capability = capabilityLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
+
+            const capability = capabilityLines.map(line => line ? '<div style="text-align: center;">' + line + '</div>' : '').join('');
             
             const methodLines = labCalMethodEditorExtractor.getLines();
             const method = methodLines.join('<br>');
@@ -2875,7 +2876,7 @@ const insertCbTemplate = () => {
         if (loadTemplateButton) {
             loadTemplateButton.addEventListener('click', () => {
                 downloadTemplate();
-               
+                //  alert('fk');
             });
         }
 

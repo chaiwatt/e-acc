@@ -375,6 +375,7 @@ class MyTestController extends Controller
    
     public function exportPdf(Request $request)
     {
+      
         $htmlPages = $request->input('html_pages');
 
        

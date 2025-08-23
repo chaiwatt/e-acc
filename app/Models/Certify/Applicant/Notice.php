@@ -2,10 +2,14 @@
 
 namespace App\Models\Certify\Applicant;
 
-use Illuminate\Database\Eloquent\Model;
 use Kyslik\ColumnSortable\Sortable;
 use  App\Models\Certify\BoardAuditor;
+use App\Models\Certify\LabReportInfo;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\Certify\CertificateHistory;
+use App\Models\Certificate\LabReportTwoInfo;
+use App\Models\Certify\SignAssessmentReportTransaction;
+
 class Notice extends Model
 {
     use Sortable;
@@ -82,4 +86,58 @@ class Notice extends Model
         }
         return implode("<br>",$groups);
       }
+
+    public function whatKindOfReport()
+    {
+        $report = LabReportInfo::where('app_certi_lab_notice_id',$this->id)->first();
+
+        if($report == null){
+            $report = LabReportTwoInfo::where('app_certi_lab_notice_id',$this->id)->first();
+        }
+
+        return  $report;
+    }
+
+    public function reportLabSigned($reportId)
+    {
+        $org = SignAssessmentReportTransaction::where('report_info_id', $reportId)
+            ->where(function ($query) {
+            $query->whereNotIn('template', ['ib_doc_review_template', 'cb_doc_review_template'])
+                ->orWhereNull('template');
+        })
+        ->where('certificate_type', 2)
+        ->where('app_id', CertiLab::find($this->app_certi_lab_id)->app_no)
+        ->whereNotNull('signer_id')
+        ->get();
+
+        $signed = SignAssessmentReportTransaction::where('report_info_id', $reportId)
+            ->where(function ($query) {
+            $query->whereNotIn('template', ['ib_doc_review_template', 'cb_doc_review_template'])
+                ->orWhereNull('template');
+        })
+        ->where('certificate_type', 2)
+        ->where('app_id', CertiLab::find($this->app_certi_lab_id)->app_no)
+        ->whereNotNull('signer_id')
+        ->where('approval', 1)
+        ->get();
+
+        // dd($org->count() , $signed->count());
+
+        if($org->count() != 0){
+            if($org->count() == $signed->count()){
+                return true;
+            }else{
+                return false;
+            }
+        }else
+        {
+            return false;
+        }
+
+
+
+                // dd( $remainingApprovals,$reportId,CertiLab::find($this->app_certi_lab_id)->app_no);
+
+        return $remainingApprovals ;
+    }
 }
