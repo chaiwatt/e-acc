@@ -2381,6 +2381,7 @@ class ApplicantCBController extends Controller
                   foreach ($detail['id'] as $key => $item) {
                           $bug = CertiCBSaveAssessmentBug::where('id',$item)->first();
                           $bug->details = $detail["details"][$key] ?? $bug->details;
+                          $bug->user_cause = $detail["user_cause"][$key] ?? $bug->user_cause;
                             $assessment->check_file = 'false';
                       if($request->attachs  && $request->hasFile('attachs')){
                            $bug->attachs            =  array_key_exists($key, $request->attachs) ?  $this->storeFile($request->attachs[$key],$certi_cb->app_no) : @$bug->attachs;

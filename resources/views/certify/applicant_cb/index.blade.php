@@ -214,14 +214,25 @@
                                             </a>
                                         @elseif($item->status == 9) <!-- ขอความเห็นผู้ตรวจประเมินเอกสาร  -->
                                       
-
+                   
                                         @if ($item->cbDocReviewAuditor != null)
-                                                    
+                                            @php
+                                                $isAllDocSigned = false;
+                                                // dd( $item->cbDocReviewAuditor);
+                                                $board_auditor_id = $item->cbDocReviewAuditor->app_certi_cb_id;
+                                                // $app_id = $item->app_no;
+                                                $job_type = "cb-doc-review-assessment";
+                                                $isAllDocSigned = $item->isAllDocReviewSign($board_auditor_id,$job_type);
+                                                // dd($board_auditor_id,$isAllDocSigned);
+                                            @endphp
                                             @if ($item->cbDocReviewAuditor->status == 0)
+                                                @if ($isAllDocSigned)
+                                                    <button type="button" style="border: none" data-cb_id="{{ $item->id }}"  data-id="{{ $item->token }}" id="show_cb_doc_review_auditor" >
+                                                        <i class="mdi mdi-magnify"></i>เห็นชอบการแต่งตั้งคณะผู้ตรวจประเมินเอกสาร
+                                                    </button>
+                                                @endif
                                                 {{-- <button style="border: none" data-toggle="modal"  data-target="#TakeAction{{$loop->iteration}}" data-id="{{ $item->token }}"  > --}}
-                                                <button type="button" style="border: none" data-cb_id="{{ $item->id }}"  data-id="{{ $item->token }}" id="show_cb_doc_review_auditor" >
-                                                    <i class="mdi mdi-magnify"></i>เห็นชอบการแต่งตั้งคณะผู้ตรวจประเมินเอกสาร
-                                                </button>
+                                            
 
 
                                                             <!-- Modal เลข 3 -->

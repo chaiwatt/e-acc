@@ -204,12 +204,26 @@
                                 
 
                                                 @if ($item->ibDocReviewAuditor != null)
+
+                                                @php
+                                                    $isAllDocSigned = false;
+                                                    // dd( $item->cbDocReviewAuditor);
+                                                    $board_auditor_id = $item->ibDocReviewAuditor->app_certi_ib_id;
+                                                    // $app_id = $item->app_no;
+                                                    $job_type = "ib-doc-review-assessment";
+                                                    $isAllDocSigned = $item->isAllDocReviewSign($board_auditor_id,$job_type);
+                                                    // dd($board_auditor_id,$isAllDocSigned);
+                                                @endphp
+
                                                             
                                                     @if ($item->ibDocReviewAuditor->status == 0)
                                                         {{-- <button style="border: none" data-toggle="modal"  data-target="#TakeAction{{$loop->iteration}}" data-id="{{ $item->token }}"  > --}}
-                                                        <button type="button" style="border: none" data-ib_id="{{ $item->id }}" data-id="{{ $item->token }}" id="show_ib_doc_review_auditor" >
-                                                            <i class="mdi mdi-magnify"></i>เห็นชอบการแต่งตั้งคณะผู้ตรวจประเมินเอกสาร
-                                                        </button>
+                                                            @if ($isAllDocSigned)
+                                                                <button type="button" style="border: none" data-ib_id="{{ $item->id }}" data-id="{{ $item->token }}" id="show_ib_doc_review_auditor" >
+                                                                    <i class="mdi mdi-magnify"></i>เห็นชอบการแต่งตั้งคณะผู้ตรวจประเมินเอกสาร
+                                                                </button>
+                                                            @endif
+                                                    
 
                                                         <div class="modal fade text-left" id="ib_doc_review_auditor_modal" tabindex="-1" role="dialog" >
                                                             <div class="modal-dialog " style="width:900px !important">

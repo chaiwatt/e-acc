@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\Bcertify\CertificationBranch;
 use App\Models\Certificate\CbDocReviewAuditor;
 use App\Models\Certify\CertiEmailLt;  //E-mail
+use App\Models\Certify\MessageRecordTransaction;
 use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantCB\CertiCBStatus;
 
@@ -654,5 +655,43 @@ public function purposeType()
         {
             return $this->hasOne(CertiCbExportMapreq::class, 'app_certi_cb_id');
         }
+
+                    // เช็คขอบข่ายใน mapreq
+        public function isAllDocReviewSign($board_auditor_id,$job_type)
+        {
+            $certiCb = CertiCb::find($this->id);
+
+            // dd($certiCb);
+
+
+             $all = MessageRecordTransaction::where('board_auditor_id', $board_auditor_id)
+                ->where('app_id', $certiCb->app_no)
+                ->where('certificate_type', 0)
+                ->where('job_type', $job_type)
+                ->get();
+
+            $signed = MessageRecordTransaction::where('board_auditor_id', $board_auditor_id)
+                ->where('app_id', $certiCb->app_no)
+                ->where('certificate_type', 0)
+                ->where('job_type', $job_type)
+                ->where('approval', 1)
+                ->get();
+
+                // dd($board_auditor_id,$certiCb->app_no,$job_type,$all->count() , $signed->count());
+
+            if($all->count() != 0)
+            {
+                if($all->count() == $signed->count())
+                {
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                return false;
+            }
+
+        }
+
 
 }

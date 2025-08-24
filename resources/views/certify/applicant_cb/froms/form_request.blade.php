@@ -60,7 +60,7 @@
 
         <input type="hidden" name="_token" value="{{ csrf_token() }}"/>
 
-
+{{-- asdd --}}
         @if (count($formulas) == 1)
             <div class="form-group {{ $errors->has('type_standard') ? 'has-error' : ''}}">
                 <label for="type_standard" class="col-md-3 control-label label-height">
@@ -70,6 +70,7 @@
                 <div class="col-md-6">
                     <select name="type_standard" id="type_standard" class="form-control" required>
                         @foreach($Formula_Arr as $key => $value)
+             /
                             <option value="{{ $key }}" 
                                 {{ (!empty($certi_cb->type_standard) && $certi_cb->type_standard == $key) || $formulas[0]->id == $key ? 'selected' : '' }}>
                                 {{ $value }} 
@@ -88,9 +89,15 @@
                     <br/><span class="font_size">(According to TIS)</span>
                 </label>
                 <div class="col-md-8">
+                    {{-- @php
+                        dd($Formula_Arr);
+                    @endphp --}}
                     <select name="type_standard" id="type_standard" class="form-control" required>
                         <option value="">- เลือกข้อกำหนดที่ใช้ในการรับรอง -</option>
                         @foreach($Formula_Arr as $key => $value)
+                        {{-- @php
+                            dd($value);
+                        @endphp --}}
                             <option value="{{ $key }}" 
                                 {{ !empty($certi_cb->type_standard) && $certi_cb->type_standard == $key ? 'selected' : '' }}>
                                 {{ $value }}

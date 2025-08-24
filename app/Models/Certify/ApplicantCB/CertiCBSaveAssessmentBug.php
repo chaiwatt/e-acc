@@ -34,7 +34,7 @@ class CertiCBSaveAssessmentBug extends Model
      *
      * @var array
      */
-    protected $fillable = ['assessment_id', 'report','remark','no','type','reporter_id','details','status','comment','file_status','file_comment','attachs','attach_client_name'];
+    protected $fillable = ['assessment_id', 'report','remark','no','type','reporter_id','details','status','comment','file_status','file_comment','attachs','attach_client_name','cause','user_cause'];
 
 
 }

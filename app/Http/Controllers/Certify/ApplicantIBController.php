@@ -382,7 +382,6 @@ class ApplicantIBController extends Controller
 
     public function store(Request $request)
     {
-        // dd($request->all());
         $user = auth()->user();
         $model = str_slug('applicantibs','-');
         $data_session     =    HP::CheckSession();
@@ -392,8 +391,6 @@ class ApplicantIBController extends Controller
                 // ->where('standard_change',$request->standard_change)
                 ->where('type_unit',$request->type_unit)
                 ->first();
-
-                // dd($ibHtmlTemplate);
 
         if(!empty($data_session)){
             if(HP::CheckPermission('add-'.$model)){
@@ -1777,6 +1774,8 @@ class ApplicantIBController extends Controller
                     foreach ($detail['id'] as $key => $item) {
                             $bug = CertiIBSaveAssessmentBug::where('id',$item)->first();
                             $bug->details = $detail["details"][$key] ?? $bug->details;
+                            $bug->user_cause = $detail["user_cause"][$key] ?? $bug->user_cause;
+                            // $notice_itme->user_cause =  $detail["user_cause"][$key] ?? $notice_itme->user_cause;
                             $assessment->check_file = 'false';  
                         if($request->attachs && $request->hasFile('attachs')){
                             $bug->attachs            =  array_key_exists($key, $request->attachs) ?  $this->storeFile($request->attachs[$key],$certi_ib->app_no) : @$bug->attachs;
