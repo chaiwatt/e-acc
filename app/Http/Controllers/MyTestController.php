@@ -9666,9 +9666,9 @@ $mpdf->SetHTMLFooter($footerHtml);
 
   public function deleteHistory()
   {
-  $certiLab = CertiLab::latest()->first();
-  dd("dfsdf");
-    CertificateHistory::where("app_no",$certiLab->app_no)->delete();
+  // $certiLab = CertiLab::latest()->first();
+  // dd("dfsdf");
+    CertificateHistory::where("app_no","RQ-LAB-68-041")->delete();
 
   }
 
