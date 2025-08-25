@@ -88,7 +88,7 @@ Route::get('/test-db','MyTestController@testDb');
 Route::get('/certi-cb-map-req','MyTestController@certiCbMapReq');
 
 
-
+Route::get('/delete-history','MyTestController@deleteHistory');
 
 
 

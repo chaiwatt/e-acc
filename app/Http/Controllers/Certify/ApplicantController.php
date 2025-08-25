@@ -1127,17 +1127,7 @@ class ApplicantController extends Controller
                     // add ceti lab
                     $certilab = $this->SaveCertiLab($request, $data_session , null, $branchLabInfos ,$mainLabInfo );
 
-                    // dd($certilab);
 
-                    $tmp ="";
-                    if($certilab->lab_type == 3){
-                        $tmp = str_replace("RQ-LAB","TEST",$certilab->app_no);
-                    }else if($certilab->lab_type == 4){
-                        $tmp = str_replace("RQ-LAB","CAL",$certilab->app_no);
-                    }
-
-                    // dd($tmp);
-                    CertificateHistory::where("app_no",$tmp)->delete();
 
                     if($labHtmlTemplate !== null)
                     {
@@ -1449,7 +1439,22 @@ class ApplicantController extends Controller
             
                     }
 
+                // $certilab->deleteAllRelatedData();
 
+                    CertificateHistory::where("app_no",$certilab->app_no)->delete();
+                    CertificateExport::where("request_number",$certilab->app_no)->delete();
+                    BoardAuditor::where("certi_no",$certilab->app_no)->delete();
+
+                    $tmp ="";
+                    if($certilab->lab_type == 3){
+                        $tmp = str_replace("RQ-LAB","TEST",$certilab->app_no);
+                    }else if($certilab->lab_type == 4){
+                        $tmp = str_replace("RQ-LAB","CAL",$certilab->app_no);
+                    }
+                    
+                    CertificateHistory::where("app_no",$tmp)->delete();
+                    CertificateExport::where("request_number",$tmp)->delete();
+                    BoardAuditor::where("certi_no",$tmp)->delete();
 
                     return redirect('certify/applicant')->with('message', 'เรียบร้อยแล้ว!');
 

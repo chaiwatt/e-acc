@@ -31,6 +31,7 @@ use Spatie\Permission\Models\Permission;
 use App\Models\Bcertify\CalibrationGroup;
 use App\Models\Bcertify\CalibrationBranch;
 use App\Models\Certify\Applicant\CertiLab;
+use App\Models\Certify\CertificateHistory;
 use App\Models\Certify\ApplicantCB\CertiCb;
 use App\Models\Certify\ApplicantIB\CertiIb;
 use App\Models\Certificate\TrackingAssessment;
@@ -9660,6 +9661,13 @@ $mpdf->SetHTMLFooter($footerHtml);
       ->get();
 
       dd($app_certi_cbs);
+
+  }
+
+  public function deleteHistory()
+  {
+  $certiLab = CertiLab::latest()->first();
+    CertificateHistory::where("app_no",$certiLab->app_no)->delete();
 
   }
 

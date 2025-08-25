@@ -976,5 +976,4 @@ public function fullyApprovedAuditors()
         return $this->belongsTo(Formula::class,'standard_id');
     }
 
-
 }
