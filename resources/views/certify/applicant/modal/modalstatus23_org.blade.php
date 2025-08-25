@@ -27,9 +27,9 @@
                     <div class="container-fluid">
                         <h3 class="text-center"><span >{{ HP::formatDateThai($certificate->notification_date) ?? '-' }}</span></h3>
                         <p>&nbsp;</p>
-                        <p>เรียน <span> {{ $applicant->information->name }}</span></p>
+                        <p>เรียน <span> {{ @$applicant->information->name }}</span></p>
                         <p>เรื่อง <span>การยืนยันความสามารถ และการขอรับใบรับรองระบบงาน</span></p>
-                        <p style="text-indent: 50px;">ตามที่  {{ $applicant->information->name }} ได้แจ้งขอรับบริการการตรวจประเมินความสามารถ 
+                        <p style="text-indent: 50px;">ตามที่  {{ @$applicant->information->name }} ได้แจ้งขอรับบริการการตรวจประเมินความสามารถ 
                             ตามมาตรฐาน มอก. {{ !is_null($formula)?$formula->title:'-' }}  ลงรับวันที่  {{ !empty($applicant->check->report_date) ?  HP::formatDateThai($applicant->check->report_date) : '-' }} </span>นั้น
                         </p>
                         <p style="text-indent: 50px;"> สำนักงานขอยืนยันว่าหน่วยงานของท่าน มีความสามารถครบถ้วนตามหลักเกณฑ์ที่สำนักงานกำหนด หากท่านประสงค์จะขอรับใบรับรอง โปรดชำระค่าธรรมเนียมตามรายละเอียดที่แจ้งมาพร้อมนี้ ภายใน 30 วัน นับจากวันที่ที่ระบุไว้ในหนังสือฉบับนี้</p>

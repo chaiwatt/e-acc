@@ -9672,4 +9672,9 @@ $mpdf->SetHTMLFooter($footerHtml);
 
   }
 
+  public function checkLabRecord()
+  {
+    dd(CertificateHistory::get()->count());
+  }
+
 }

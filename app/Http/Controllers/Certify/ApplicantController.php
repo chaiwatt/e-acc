@@ -4594,7 +4594,7 @@ class ApplicantController extends Controller
         ])
         ->where('app_certi_lab_id', $certi_lab->id)
         ->get();
-
+        // dd($find_certi_lab_cost);
         return view('certify/applicant/form_status.form_status11',[
                                                                     'certi_lab'=>$certi_lab,
                                                                     'find_certi_lab_cost'=>$find_certi_lab_cost,

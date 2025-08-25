@@ -25,7 +25,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">ยื่นคำขอรับใบรับรองระบบงาน</h3>
+                    <h3 class="box-title pull-left">ยื่นคำขอรับใบรับรองระบบงาน test</h3>
 
                     <a class="btn btn-danger text-white pull-right" href="{{url('certify/applicant')}}">
                         <i class="icon-arrow-left-circle"></i> กลับ
@@ -33,19 +33,21 @@
 
                     <div class="clearfix"></div>
                      <hr>
+
+                     {{-- {{$find_certi_lab_cost->count()}} --}}
 @if(count($find_certi_lab_cost) > 0) 
     @foreach($find_certi_lab_cost as $key => $cost)
         @if(count($cost->CertificateHistorys) > 0) 
-<div class="row">
+        <div class="row">
   
 
-<div class="col-md-12">
+    <div class="col-md-12">
          <div class="panel block4">
             <div class="panel-group" id="accordion{{ $key +1 }}">
                <div class="panel panel-info">
                 <div class="panel-heading">
                     <h4 class="panel-title">
-                         <a data-toggle="collapse" data-parent="#accordion{{ $key +1 }}" href="#collapse{{ $key +1 }}"> <dd> การประมาณค่าใช้จ่าย ครั้งที่ {{ $key +1}}</dd>  </a>
+                         <a data-toggle="collapse" data-parent="#accordion{{ $key +1 }}" href="#collapse{{ $key +1 }}"> <dd> การประมาณค่าใช้จ่าย ss ครั้งที่ {{ $key +1}}</dd>  </a>
                     </h4>
                 </div>
 
@@ -55,6 +57,11 @@
 
 <div id="collapse{{ $key +1 }}" class="panel-collapse collapse {{ (count($find_certi_lab_cost) == $key +1 ) ? 'in' : ' '  }}">
  <br>
+
+{{-- @php
+ dd($find_certi_lab_cost)
+@endphp --}}
+
  @foreach($cost->CertificateHistorys as $key1 => $item)
     <div class="row form-group">
         <div class="col-md-1"></div>

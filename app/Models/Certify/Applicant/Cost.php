@@ -48,7 +48,16 @@ class Cost extends Model
 
     public function CertificateHistorys() {
         $ao = new Cost;
-        return $this->hasMany(CertificateHistory::class,'ref_id', 'id')->where('table_name',$ao->getTable());
+        
+
+        $certiLab = CertiLab::find($this->app_certi_lab_id);
+
+        // dd($certiLab->app_no);
+
+
+        // $data = CertificateHistory::where('ref_id',$this->id)->where('table_name',$ao->getTable())->where('app_no',$certiLab->app_no)->count();
+        // dd($data );
+        return $this->hasMany(CertificateHistory::class,'ref_id', 'id')->where('table_name',$ao->getTable())->where('app_no',$certiLab->app_no);
     }
     public function getSumAmountTotalAttribute() {
         $amounts = CostItem::where('app_certi_cost_id', $this->id)->sum('amount');

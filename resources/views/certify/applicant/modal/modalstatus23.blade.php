@@ -22,14 +22,20 @@
                 $amount_fee  =  !empty($certificate->amount_fee) ?$certificate->amount_fee :  '0';
                 $sum =   ((string)$amount +   (string)$amount_fee);
                 // dd($certificate);
+
+              
               @endphp
                 <div class="modal-body">
                     <div class="container-fluid">
                         <h3 class="text-center"><span >{{ HP::formatDateThai($certificate->notification_date) ?? '-' }}</span></h3>
                         <p>&nbsp;</p>
-                        <p>เรียน <span> {{ $applicant->information->name }}</span></p>
+                        {{-- @php
+                              dd(@$applicant->information);
+                        @endphp --}}
+                        <p>เรียน <span> {{ @$applicant->information->name }}</span></p>
+                        
                         <p>เรื่อง <span>แจ้งรายละเอียดการชำระค่าใบรับรอง</span></p>
-                        <p style="text-indent: 50px;">ตามที่  {{ $applicant->information->name }} ได้แจ้งขอรับบริการการตรวจประเมินความสามารถ 
+                        <p style="text-indent: 50px;">ตามที่  {{ @$applicant->information->name }} ได้แจ้งขอรับบริการการตรวจประเมินความสามารถ 
                             ตามมาตรฐาน มอก. {{ !is_null($formula)?$formula->title:'-' }}  ลงรับวันที่  {{ !empty($applicant->check->report_date) ?  HP::formatDateThai($applicant->check->report_date) : '-' }} </span>นั้น
                         </p>
                         <p style="text-indent: 50px;"> สำนักงานขอให้ท่านชำระค่าใบรับรอง จึงเรียนมาเพื่อโปรดดำเนินการ </p>

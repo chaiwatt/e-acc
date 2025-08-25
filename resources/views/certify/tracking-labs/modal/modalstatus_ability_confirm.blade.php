@@ -29,9 +29,9 @@
                     <div class="container-fluid">
                         <h3 class="text-center"><span >{{ HP::formatDateThaiFull(\Carbon\Carbon::now()) ?? '-' }}</span></h3>
                         <p>&nbsp;</p>
-                        <p>เรียน <span> {{ $applicant->information->name }}</span></p>
+                        <p>เรียน <span> {{ @$applicant->information->name }}</span></p>
                         <p>เรื่อง <span>การยืนยันความสามารถ และการขอรับใบรับรองระบบงาน</span></p>
-                        <p style="text-indent: 50px;">ตามที่  {{ $applicant->information->name }} ได้แจ้งขอรับบริการการตรวจประเมินความสามารถ 
+                        <p style="text-indent: 50px;">ตามที่  {{ @$applicant->information->name }} ได้แจ้งขอรับบริการการตรวจประเมินความสามารถ 
                             ตามมาตรฐาน มอก. {{ !is_null($formula)?$formula->title:'-' }}  ลงรับวันที่  {{ HP::formatDateThaiFull($tracking->tracking_review_to->updated_at) ?? '-' }} </span>นั้น
                         </p>
                         <p style="text-indent: 50px;"> สำนักงานขอยืนยันว่าหน่วยงานของท่าน มีความสามารถครบถ้วนตามหลักเกณฑ์ที่สำนักงานกำหนด หากท่านประสงค์จะขอรับใบรับรอง โปรดยืนยันความสามารถตามรายละเอียดที่แจ้งมาพร้อมนี้ ภายใน 30 วัน นับจากวันที่ที่ระบุไว้ในหนังสือฉบับนี้</p>
@@ -74,11 +74,11 @@
                                     <!-- ชื่อผู้ขอรับการรับรอง -->
                                     <span>ชื่อผู้ขอรับการรับรอง</span>
                                     <span style="display: inline-block; width: 400px; border-bottom: 1px dotted #000; margin-left: 10px;">
-                                        <span style="opacity: 0.5;padding-left:20px">{{$applicant->BelongsInformation->name}}</span>
+                                        <span style="opacity: 0.5;padding-left:20px">{{@$applicant->BelongsInformation->name}}</span>
                                     </span>
                                     <span>เลขทะเบียนนิติบุคคล</span>
                                     <span style="display: inline-block; width: 188px; border-bottom: 1px dotted #000; margin-left: 10px">
-                                        <span style="opacity: 0.5;padding-left:10px">{{$applicant->BelongsInformation->tax_indentification_number}}</span>
+                                        <span style="opacity: 0.5;padding-left:10px">{{@$applicant->BelongsInformation->tax_indentification_number}}</span>
                                     </span>
                                 </div>
                                 
@@ -91,18 +91,18 @@
                                     <span>มีสำนักงานใหญ่ตั้งอยู่ที่</span>
                                     <span style="display: inline-block; width: 725px; border-bottom: 1px dotted #000; margin-left: 10px;">
                                         <span style="opacity: 0.5;">
-                                            เลขที่ {{$applicant->BelongsInformation->address_headquarters}}
-                                            @if ($applicant->BelongsInformation->headquarters_village_no != null)
+                                            เลขที่ {{@$applicant->BelongsInformation->address_headquarters}}
+                                            @if (@$applicant->BelongsInformation->headquarters_village_no != null)
                                                 หมู่ที่ {{$applicant->BelongsInformation->headquarters_village_no}}
                                             @endif
-                                            @if ($applicant->BelongsInformation->headquarters_road != null)
-                                                ถนน{{$applicant->BelongsInformation->headquarters_road}}
+                                            @if (@$applicant->BelongsInformation->headquarters_road != null)
+                                                ถนน{{@$applicant->BelongsInformation->headquarters_road}}
                                             @endif
                                     
-                                            @if ($applicant->BelongsInformation->headquarters_province == 'กรุงเทพมหานคร')
-                                                แขวง{{$applicant->BelongsInformation->headquarters_district}} เขต{{$applicant->BelongsInformation->headquarters_amphur}} {{$applicant->BelongsInformation->headquarters_province}}
+                                            @if (@$applicant->BelongsInformation->headquarters_province == 'กรุงเทพมหานคร')
+                                                แขวง{{@$applicant->BelongsInformation->headquarters_district}} เขต{{@$applicant->BelongsInformation->headquarters_amphur}} {{@$applicant->BelongsInformation->headquarters_province}}
                                             @else
-                                                ตำบล{{$applicant->BelongsInformation->headquarters_district}} อำเภอ{{$applicant->BelongsInformation->headquarters_amphur}} จังหวัด{{$applicant->BelongsInformation->headquarters_province}}
+                                                ตำบล{{@$applicant->BelongsInformation->headquarters_district}} อำเภอ{{@$applicant->BelongsInformation->headquarters_amphur}} จังหวัด{{@$applicant->BelongsInformation->headquarters_province}}
                                             @endif
 
                                             
