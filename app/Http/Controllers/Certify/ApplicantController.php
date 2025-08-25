@@ -1439,7 +1439,7 @@ class ApplicantController extends Controller
             
                     }
 
-                // $certilab->deleteAllRelatedData();
+                
 
                     CertificateHistory::where("app_no",$certilab->app_no)->delete();
                     CertificateExport::where("request_number",$certilab->app_no)->delete();
@@ -1455,6 +1455,8 @@ class ApplicantController extends Controller
                     CertificateHistory::where("app_no",$tmp)->delete();
                     CertificateExport::where("request_number",$tmp)->delete();
                     BoardAuditor::where("certi_no",$tmp)->delete();
+
+                    $certilab->deleteAllRelatedData();
 
                     return redirect('certify/applicant')->with('message', 'เรียบร้อยแล้ว!');
 

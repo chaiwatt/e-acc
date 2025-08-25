@@ -976,4 +976,50 @@ public function fullyApprovedAuditors()
         return $this->belongsTo(Formula::class,'standard_id');
     }
 
+public function deleteAllRelatedData()
+{
+    // ใช้ Transaction เพื่อให้แน่ใจว่าถ้ามีข้อผิดพลาดจะ Rollback ทั้งหมด
+    // ป้องกันข้อมูลถูกลบไปแค่บางส่วน
+    DB::transaction(function () {
+        
+        // --- ลบข้อมูลจากความสัมพันธ์แบบ HasMany และ HasOne ---
+        // แต่ละบรรทัดจะลบข้อมูลในตารางลูกที่ผูกกับ app_certi_lab_id นี้
+        $this->attach()->delete();
+        $this->CheckExaminers()->delete();
+        $this->checkbox()->delete();
+        $this->employee()->delete();
+        $this->info()->delete();
+        $this->material()->delete();
+        $this->place()->delete();
+        $this->program()->delete();
+        $this->information()->delete();
+        $this->check()->delete();
+        $this->assessment()->delete();
+        $this->notices()->delete();
+        $this->costs()->delete();
+        $this->cost_assessment()->delete();
+        $this->certi_test_scope()->delete();
+        $this->certi_lab_calibrate()->delete();
+        $this->certi_tools_test()->delete();
+        $this->certi_tools_calibrate()->delete();
+        $this->assessment_examiner()->delete();
+        $this->certiLab_delete_file()->delete();
+        $this->certificate_exports_to()->delete();
+        $this->certi_auditors()->delete();
+        $this->labCalRequests()->delete();
+        $this->labTestRequests()->delete();
+        $this->labRequestRejectTrackings()->delete();
+
+        // --- (ข้อควรระวัง) ลบข้อมูล History ที่ผูกด้วย app_no ---
+        // การลบส่วนนี้จะลบ CertificateHistory ทั้งหมดที่มี app_no เดียวกัน
+        // ซึ่งอาจส่งผลกระทบหาก app_no ถูกนำไปใช้ซ้ำในส่วนอื่น
+        $this->LogNotice()->delete();
+        $this->LogPassInspection()->delete();
+        $this->LogPayIN1()->delete();
+
+        // สุดท้าย, คุณสามารถเลือกว่าจะลบตัว CertiLab เองด้วยหรือไม่
+        // หากต้องการลบด้วย ให้ un-comment บรรทัดด้านล่าง
+        // $this->delete();
+    });
+}
 }
