@@ -4546,6 +4546,8 @@ class ApplicantController extends Controller
         
         $find_certi_lab_cost =Cost::where('app_certi_lab_id',$certi_lab->id)->get();
 
+        dd($find_certi_lab_cost);
+
         $labCalScopeUsageStatus = LabCalScopeUsageStatus::where('app_certi_lab_id', $certi_lab->id)
         ->where('status', 2)
         ->first();
