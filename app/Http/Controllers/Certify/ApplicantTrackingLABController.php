@@ -477,10 +477,12 @@ class ApplicantTrackingLABController extends Controller
   
      if(isset($requestData["detail"]) ){
         $detail = (array)$requestData["detail"];
+        // $user_cause = (array)$requestData["user_cause"];
         foreach ($detail['id'] as $key => $item) {
                 $bug = TrackingAssessmentBug::where('id',$item)->first();
                 if(!is_null($bug)){
                     $bug->details = $detail["details"][$key] ?? $bug->details;
+                    $bug->user_cause = $detail["user_cause"][$key] ?? $bug->user_cause;
                     $assessment->check_file = 'false';
                     if($request->attachs  && $request->hasFile('attachs')){
                         if(array_key_exists($key, $request->attachs)){

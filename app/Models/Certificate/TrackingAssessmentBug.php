@@ -15,7 +15,7 @@ class TrackingAssessmentBug extends Model
     use Sortable;
     protected $table = "app_certi_tracking_assessment_bug";
     protected $primaryKey = 'id';
-    protected $fillable = ['assessment_id', 'report', 'remark', 'no', 'type', 'status', 'details', 'comment', 'file_status', 'file_comment', 'reporter_id' , 'owner_id','cause'];
+    protected $fillable = ['assessment_id', 'report', 'remark', 'no', 'type', 'status', 'details', 'comment', 'file_status', 'file_comment', 'reporter_id' , 'owner_id','cause','user_cause'];
  
     public function tracking_assessment_to(){
         return $this->belongsTo(TrackingAssessment::class, 'assessment_id');
