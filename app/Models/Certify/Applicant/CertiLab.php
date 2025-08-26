@@ -948,6 +948,7 @@ public function fullyApprovedAuditors()
 
         $categories = [];
        $certifyLabCalibrates = CertifyLabCalibrate::where('app_certi_lab_id',$this->id)->get();
+    //    dd($this->id);
         foreach ($certifyLabCalibrates as $certifyLabCalibrate) {
             if($certifyLabCalibrate->TableCalibrationBranch != null){
                 $categories[] = $certifyLabCalibrate->TableCalibrationBranch->title;

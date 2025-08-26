@@ -547,7 +547,7 @@
             </div>
         </div>
         
-        <button class="menu-button" id="export-pdf-button" title="ส่งออกเป็น PDF"><i class="fas fa-file-pdf"></i></button>
+        {{-- <button class="menu-button" id="export-pdf-button" title="ส่งออกเป็น PDF"><i class="fas fa-file-pdf"></i></button> --}}
         <button class="menu-button" id="save-template-button"><i class="fas fa-save"></i></button>
         {{-- <button class="menu-button" id="load-template-button"><i class="fa fa-cloud-download" aria-hidden="true"></i></button> --}}
 
@@ -798,7 +798,7 @@
         const contextMenu = document.getElementById('context-menu');
         const templateDropdownButton = document.getElementById('template-dropdown-button');
         const templateDropdownContent = document.querySelector('.dropdown-content');
-        const exportPdfButton = document.getElementById('export-pdf-button');
+        // const exportPdfButton = document.getElementById('export-pdf-button');
         const fontSizeSelector = document.getElementById('font-size-selector');
         const saveTemplateButton = document.getElementById('save-template-button'); 
         const loadTemplateButton = document.getElementById('load-template-button');
@@ -2741,55 +2741,55 @@ const insertCbTemplate = () => {
             }
         }
 
-        exportPdfButton.addEventListener('click', () => {
-            const editorClone = editor.cloneNode(true);
-            const pagesContent = [];
+        // exportPdfButton.addEventListener('click', () => {
+        //     const editorClone = editor.cloneNode(true);
+        //     const pagesContent = [];
 
-            editorClone.querySelectorAll('.page').forEach(page => {
-                page.removeAttribute('contenteditable');
+        //     editorClone.querySelectorAll('.page').forEach(page => {
+        //         page.removeAttribute('contenteditable');
                 
-                page.querySelectorAll('.image-container').forEach(container => {
-                    const containerWidth = container.style.width;
-                    const img = container.querySelector('img');
-                    if (img && containerWidth) {
-                        img.style.width = containerWidth;
-                        img.style.height = 'auto';
-                    }
-                    container.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
-                    container.classList.remove('active');
-                    container.style.border = 'none';
-                });
+        //         page.querySelectorAll('.image-container').forEach(container => {
+        //             const containerWidth = container.style.width;
+        //             const img = container.querySelector('img');
+        //             if (img && containerWidth) {
+        //                 img.style.width = containerWidth;
+        //                 img.style.height = 'auto';
+        //             }
+        //             container.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
+        //             container.classList.remove('active');
+        //             container.style.border = 'none';
+        //         });
 
-                wrapSpecialCharactersInNode(page);
+        //         wrapSpecialCharactersInNode(page);
                 
-                pagesContent.push(page.innerHTML); 
-            });
+        //         pagesContent.push(page.innerHTML); 
+        //     });
 
-            fetch("{!! url('/export-pdf') !!}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ html_pages: pagesContent })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.message || 'Network response was not ok');
-                    });
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                window.open(url);
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-                alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + error.message);
-            });
-        });
+        //     fetch("{!! url('/export-pdf') !!}", {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        //         },
+        //         body: JSON.stringify({ html_pages: pagesContent })
+        //     })
+        //     .then(response => {
+        //         if (!response.ok) {
+        //             return response.json().then(errorData => {
+        //                 throw new Error(errorData.message || 'Network response was not ok');
+        //             });
+        //         }
+        //         return response.blob();
+        //     })
+        //     .then(blob => {
+        //         const url = window.URL.createObjectURL(blob);
+        //         window.open(url);
+        //     })
+        //     .catch(error => {
+        //         console.error('There was a problem with the fetch operation:', error);
+        //         alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + error.message);
+        //     });
+        // });
 
         if (saveTemplateButton) {
             saveTemplateButton.addEventListener('click', () => {

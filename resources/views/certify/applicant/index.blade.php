@@ -260,6 +260,8 @@
                                                 {{$applicant->allLabCalTransactionCategories()}}
                             
                                             @endif
+
+                                            
                                                 {{-- {{$applicant->allCategories()}} --}}
                                          
                                             

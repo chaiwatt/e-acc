@@ -1009,6 +1009,7 @@ class ApplicantController extends Controller
                 $input['branch_id'] = $itme;
                 $input['token'] = str_random(16);
                 CertifyLabCalibrate::create($input);
+                
             }
         // }
 
@@ -1101,13 +1102,9 @@ class ApplicantController extends Controller
     {
         $mainLabInfo = json_decode($request->input('main_lab_info'), true);
         $branchLabInfos = json_decode($request->input('branch_lab_infos'), true) ?? [];
-
-        // dd($mainLabInfo);
        
         $user = auth()->user();
         
- 
-
         $labHtmlTemplate = LabHtmlTemplate::where('user_id',$user->id)
             ->where('according_formula',$request->according_formula)
             ->where('purpose',$request->purpose)
@@ -1126,8 +1123,6 @@ class ApplicantController extends Controller
 
                     // add ceti lab
                     $certilab = $this->SaveCertiLab($request, $data_session , null, $branchLabInfos ,$mainLabInfo );
-
-
 
                     if($labHtmlTemplate !== null)
                     {
@@ -1166,7 +1161,7 @@ class ApplicantController extends Controller
 
                     
 
-                    // dd($branchCategories);
+                    // // dd($branchCategories);
                     // if($certilab->lab_type == 3){
                     //     //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
                     //     $requestData['test_scope'] = $branchCategories;
@@ -1181,6 +1176,7 @@ class ApplicantController extends Controller
                     //     }
                     // }
 
+                    
                          $template_ability = "";
                         if($certilab->lab_type == 4){
                             $template_ability = "calibrate";
@@ -1189,9 +1185,7 @@ class ApplicantController extends Controller
                             $template_ability = "test";
                         }
 
-
-                    
-                    $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+                        $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
                         ->where('according_formula',$request->according_formula)
                         ->where('purpose',$request->purpose)
                         ->where('lab_ability',$template_ability)
@@ -1204,6 +1198,7 @@ class ApplicantController extends Controller
 
                         $dataArray = json_decode($jsonDataString, true);
 
+                       
 
                         // 2. ดึงค่าจาก key 'field' ทั้งหมดออกมาเป็น array ใหม่
                         $fieldArray = array_column($dataArray, 'field');
@@ -1214,8 +1209,48 @@ class ApplicantController extends Controller
                             $this->save_certify_test_scope($certilab,$fieldArray);
                         }else if($certilab->lab_type == 4)
                         {
+                             
+
                             $this->save_certifyLab_calibrate($certilab,$fieldArray);
                         }
+
+                       
+
+                        //  $template_ability = "";
+                        // if($certilab->lab_type == 4){
+                        //     $template_ability = "calibrate";
+                        // }else if($certilab->lab_type == 3)
+                        // {
+                        //     $template_ability = "test";
+                        // }
+
+
+                    
+                    // $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+                    //     ->where('according_formula',$request->according_formula)
+                    //     ->where('purpose',$request->purpose)
+                    //     ->where('lab_ability',$template_ability)
+                    //     ->first();
+
+
+                    
+
+                    //     $jsonDataString = $labHtmlTemplate->json_data;
+
+                    //     $dataArray = json_decode($jsonDataString, true);
+
+
+                    //     // 2. ดึงค่าจาก key 'field' ทั้งหมดออกมาเป็น array ใหม่
+                    //     $fieldArray = array_column($dataArray, 'field');
+              
+                       
+                    //     if($certilab->lab_type == 3){
+
+                    //         $this->save_certify_test_scope($certilab,$fieldArray);
+                    //     }else if($certilab->lab_type == 4)
+                    //     {
+                    //         $this->save_certifyLab_calibrate($certilab,$fieldArray);
+                    //     }
 
                     
 
@@ -1439,24 +1474,7 @@ class ApplicantController extends Controller
             
                     }
 
-                
-
-                    CertificateHistory::where("app_no",$certilab->app_no)->delete();
-                    CertificateExport::where("request_number",$certilab->app_no)->delete();
-                    BoardAuditor::where("certi_no",$certilab->app_no)->delete();
-
-                    $tmp ="";
-                    if($certilab->lab_type == 3){
-                        $tmp = str_replace("RQ-LAB","TEST",$certilab->app_no);
-                    }else if($certilab->lab_type == 4){
-                        $tmp = str_replace("RQ-LAB","CAL",$certilab->app_no);
-                    }
-                    
-                    CertificateHistory::where("app_no",$tmp)->delete();
-                    CertificateExport::where("request_number",$tmp)->delete();
-                    BoardAuditor::where("certi_no",$tmp)->delete();
-
-                    $certilab->deleteAllRelatedData();
+            
 
                     return redirect('certify/applicant')->with('message', 'เรียบร้อยแล้ว!');
 
@@ -1930,27 +1948,7 @@ class ApplicantController extends Controller
                             $this->save_certifyLab_calibrate($certi_lab,$fieldArray);
                         }
 
-                        // 
-                        // if($certi_lab->lab_type == 3){
-                            //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (ทดสอบ)
-                            // $requestData['test_scope'] = $branchCategories;
-                            // // dd();
-                            // if(isset($requestData['test_scope'])){
-                            //     $this->save_certify_test_scope($certi_lab,$requestData);
-                            // }
-                        //     $this->save_certifyLab_calibrate($certi_lab,$fieldArray);
-                        // }else if($certi_lab->lab_type == 4){
-                            // dd("ok");
-                            //   6. ขอบข่ายที่ยื่นขอรับการรับรอง (สอบเทียบ)
-                            // $requestData['calibrate'] =$branchCategories;
-                            // if(isset($requestData['calibrate'])){
-                                // $this->save_certifyLab_calibrate($certi_lab,$fieldArray);
-                            // }
-                        // }
 
-                        // dd($fieldArray);
-
-                        //ไฟล์แนบ
 
                         if ( isset($requestData['repeater-section4'] ) ){
                             $this->SaveFileSection($request, 'repeater-section4', 'attachs_sec4', 4 , $certi_lab );
