@@ -1493,7 +1493,7 @@ class ApplicantController extends Controller
 
     public function show($token)
     {
-        
+        // dd('ok');
         // = CertiLab::findOrFail($token);
         $certi_lab = CertiLab::where('token',$token)->first();
         $certi_information = Information::where('app_certi_lab_id',$certi_lab->id)->first();
@@ -4291,6 +4291,7 @@ class ApplicantController extends Controller
 
     public function PassInspection($id,$token)
     {
+        // dd('ok');
         $certi_lab = CertiLab::where('token',$token)->first();
         $certi_lab->name = $certi_lab->name ?? null;
 

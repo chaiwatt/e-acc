@@ -1,3 +1,4 @@
+{{-- Certify\ApplicantController@inspection_update --}}
 @extends('layouts.master')
 @push('css')
 <link href="{{asset('plugins/components/icheck/skins/all.css')}}" rel="stylesheet" type="text/css" />
@@ -17,9 +18,14 @@
                 <div class="clearfix"></div>
                 <hr>  
   
-                
+               
+                {{-- @php
+                    dd($find_notice);
+                @endphp --}}
   
-@if(count($find_notice->CertificateHistorys) > 0)               
+@if(count($find_notice->CertificateHistorys) > 0)  
+
+{{-- getCertificateHistorys($certiLabId)              --}}
 <div class="row">
     <div class="col-md-12">
         <div class="white-box" style="border: 2px solid #e5ebec;">

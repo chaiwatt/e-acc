@@ -27,6 +27,7 @@ class CreateLtMeetingInvitationsTable extends Migration
             $table->unsignedInteger('signer_id')->nullable(); 
             $table->string('signer_position')->nullable(); // เก็บชื่อไฟล์ QR
             $table->char('status',1)->default(1);
+            $table->char('doc_type',1)->default(1);
             $table->longText('json_data')->nullable(); 
             $table->timestamps();
         });

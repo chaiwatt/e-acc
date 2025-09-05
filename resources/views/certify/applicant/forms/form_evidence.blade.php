@@ -110,7 +110,7 @@
             @if ($certi_lab->lab_type == 3)
                 @if ($certi_lab_attach_all61->count() > 0)
                     <div class="row">
-                        @foreach($certi_lab_attach_all61 as $data)
+                        @foreach($certi_lab_attach_all61->reverse() as $data)
                             @if ($data->file)
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -121,12 +121,12 @@
                                                 {{  !empty($data->file_client_name) ? $data->file_client_name :  basename($data->file)   }}
                                             </a>
                                         </div>
-                                        <div class="col-md-2 text-left">
+                                        {{-- <div class="col-md-2 text-left">
                                             <a href="{{url('certify/applicant/delete/file_certiLab').'/'.basename($data->file).'/'.$data->token}}" class="btn btn-danger btn-xs"
                                                 onclick="return confirm('ต้องการลบไฟล์นี้ใช่หรือไม่ ?')" >
                                                 <i class="fa fa-remove"></i>
                                             </a>
-                                        </div>
+                                        </div> --}}
                                     </div>
                                 </div>
                             @endif
@@ -137,7 +137,7 @@
                 {{-- {{$certi_lab_attach_all62->count()}} --}}
                 @if ($certi_lab_attach_all62->count() > 0)
                     <div class="row">
-                        @foreach($certi_lab_attach_all62 as $data)
+                        @foreach($certi_lab_attach_all62->reverse() as $data)
                             @if ($data->file)
                                 <div class="col-md-12">
                                     <div class="form-group">
@@ -148,12 +148,12 @@
                                                     {{  !empty($data->file_client_name) ? $data->file_client_name :  basename($data->file)   }}
                                             </a>
                                         </div>
-                                        <div class="col-md-2 text-left">
+                                        {{-- <div class="col-md-2 text-left">
                                             <a href="{{url('certify/applicant/delete/file_certiLab').'/'.basename($data->file).'/'.$data->token}}" class="btn btn-danger btn-xs"
                                                 onclick="return confirm('ต้องการลบไฟล์นี้ใช่หรือไม่ ?')" >
                                                 <i class="fa fa-remove"></i>
                                             </a>
-                                        </div>
+                                        </div> --}}
                                     </div>
                                 </div>
                             @endif

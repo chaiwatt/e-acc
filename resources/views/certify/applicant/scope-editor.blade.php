@@ -1976,12 +1976,12 @@ const insertCbTemplate = () => {
                     case 'lab_cal': 
                         const labCalField = $('#lab-cal-field');
                         const instrumentSelect = $('#lab-cal-instrument');
-                        const instrumentSelect2 = $('#lab-cal-instrument2');
+                       
                         const parameterOneSelect = $('#lab-cal-parameter-one');
                         const parameterTwoSelect = $('#lab-cal-parameter-two');
                         labCalField.empty().append('<option value="" disabled selected>- สาขาสอบเทียบ -</option>');
                         instrumentSelect.empty();
-                        instrumentSelect2.empty();
+                        
                         parameterOneSelect.empty(); // ล้างค่าเก่า
                         parameterTwoSelect.empty(); // ล้างค่าเก่า
                     
@@ -2135,8 +2135,11 @@ const insertCbTemplate = () => {
             if (fieldId) {
                 const parameterOneSelect = $('#lab-cal-parameter-one');
                 const parameterTwoSelect = $('#lab-cal-parameter-two');
+                const instrumentSelect2 = $('#lab-cal-instrument2');
                 parameterOneSelect.empty(); // ล้างค่าเก่า
                 parameterTwoSelect.empty(); // ล้างค่าเก่า
+                instrumentSelect2.empty();
+                
 
                 $.ajax({
                     url: "{!! url('/certify/applicant/api/instrument') !!}",
@@ -2146,7 +2149,15 @@ const insertCbTemplate = () => {
                     },
                     data: { calibration_branch_instrument_group_id: fieldId },
                     success: function(response) {
-                        console.log(response)
+                        // console.log(response)
+
+                        if (Array.isArray(response.instrument) && response.instrument.length > 0) {
+                            instrumentSelect2.append(`<option value="">==เลือกรายการ==</option>`);
+                            // วนลูปเพื่อสร้าง <option>
+                            $.each(response.instrument, function(index, value) {
+                                instrumentSelect2.append(`<option value="${value.id}">${value.name}</option>`);
+                            });
+                        }
                        
                         
                         if (Array.isArray(response.parameter_one) && response.parameter_one.length > 0) {
@@ -2531,12 +2542,14 @@ const insertCbTemplate = () => {
             const fieldValue = $('#lab-cal-field').val();
             const fieldValueEn = $('#lab-cal-field option:selected').data('en');
             const instrumentValue = $('#lab-cal-instrument').val();
+            const instrumentValueTwo = $('#lab-cal-instrument2').val();
             const parameterOneValue = $('#lab-cal-parameter-one').val();
             const parameterTwoValue = $('#lab-cal-parameter-two').val();
             // Get values from modal and trim them
             // const field = document.getElementById('lab-cal-field').value.trim();
             const field = $('#lab-cal-field option:selected').text();
             const instrument = $('#lab-cal-instrument option:selected').text();
+            const instrumentTwo = $('#lab-cal-instrument2 option:selected').text();
             // const instrument = document.getElementById('lab-cal-instrument').value.trim();
             const parameterOne = $('#lab-cal-parameter-one option:selected').text();
             const parameterTwo = $('#lab-cal-parameter-two option:selected').text();
@@ -2573,9 +2586,14 @@ const insertCbTemplate = () => {
 
             // --- Parameter Column (cells[1]) Logic ---
             const parameterParts = [];
+
             if (instrument && instrument != "==เลือกรายการ==") {
                 parameterParts.push(instrument);
             }
+            if (instrumentTwo && instrumentTwo != "==เลือกรายการ==") {
+                parameterParts.push(instrumentTwo);
+            }
+
             if (parameterOne && parameterOne != "==เลือกรายการ==") {
                 parameterParts.push('&nbsp;' + parameterOne);
             }

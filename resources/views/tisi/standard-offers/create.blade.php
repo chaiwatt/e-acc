@@ -106,8 +106,6 @@
                     <div class="clearfix"></div>
                     <hr>
 
-                  
-                    
                     {!! Form::open(['url' => '/tisi/standard-offers/store',  'method' => 'POST', 'class' => 'form-horizontal', 'files' => true]) !!}
                         {{-- @include ('tisi.standard-offers.form') --}}
                         <div class="container">
@@ -157,11 +155,16 @@
                 </div>
             </div>
 
-              <div class="form-group required {{ $errors->has('tel') ? 'has-error' : ''}}">
+              <div class="form-group  {{ $errors->has('tel') ? 'has-error' : ''}}">
                 {!! Form::label('tel', 'เบอร์โทร', ['class' => 'control-label']) !!}
-                <div>
-                    {{-- {!! Form::text('tel', null, ('required' == 'required') ?['class' => 'form-control']) !!} --}}
+                {{-- <div>
+                    
                     {!! Form::text('tel', null, ('required' == 'required') ? ['class' => 'form-control', 'required' => 'required'] : ['class' => 'form-control']) !!}
+                    {!! $errors->first('tel', '<p class="help-block">:message</p>') !!}
+                </div> --}}
+
+                <div>
+                    {!! Form::text('tel', null, ['class' => 'form-control']) !!}
                     {!! $errors->first('tel', '<p class="help-block">:message</p>') !!}
                 </div>
             </div>
@@ -404,10 +407,10 @@
                 </div>
             </div>
 
-            <div class="form-group required{{ $errors->has('meeting_count') ? ' has-error' : '' }}">
+            <div class="form-group {{ $errors->has('meeting_count') ? ' has-error' : '' }}">
                 <label for="meeting_count" class="control-label" style="text-align: left">จำนวนการประชุมเชิงปฏิบัติการที่คาดว่าจะจัดและช่วงเวลาที่คาดว่าจะจัดการประชุมเชิงปฏิบัติการ (เฉพาะกรณีจัดทำข้อตกลงร่วม) :</label>
                 <div>
-                    <input class="form-control" name="meeting_count" type="text" id="meeting_count" required>
+                    <input class="form-control" name="meeting_count" type="text" id="meeting_count" >
                 </div>
                 
                 @if ($errors->has('meeting_count'))

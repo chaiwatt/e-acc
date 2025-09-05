@@ -13,7 +13,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                   <h3 class="box-title pull-left">คำขอรับบริการห้องปฏิบัติการ (LAB)
+                   <h3 class="box-title pull-left">คำขอรับบริการห้องปฏิบัติการ (LAB) 
                   
                     @if ($labCalRequest->count() == 0 && $labTestRequest->count() ==0)
                         <span class="text-warning">(คำขอระบบเก่า)</span>

@@ -48,8 +48,26 @@ class Notice extends Model
     //ประวัติ
     public function CertificateHistorys() {
         $ao = new Notice;
+        // dd($ao->getTable());
         return $this->hasMany(CertificateHistory::class,'ref_id', 'id')->where('system',4)->where('table_name',$ao->getTable());
      }
+
+
+    public function getCertificateHistorys($certiLabId) {
+        $ao = new Notice;
+        // dd($ao->getTable());
+        return CertificateHistory::where('ref_id', $this->id)
+        ->where('system',4)
+        ->where('table_name',$ao->getTable())
+        ->where('app_certi_lab_id',$certiLabId)
+        ->get();
+     }
+
+
+
+
+
+
           //ประวัติ
     public function LogNotice() {
         $ao = new Notice;
