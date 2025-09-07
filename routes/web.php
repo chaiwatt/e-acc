@@ -92,6 +92,8 @@ Route::get('/delete-history','MyTestController@deleteHistory');
 
 Route::get('/check-lab-record','MyTestController@checkLabRecord');
 
+Route::get('/export-labscope-pdf','MyTestController@exportLabScopePdf');
+
 
 
 //

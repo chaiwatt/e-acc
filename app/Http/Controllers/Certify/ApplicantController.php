@@ -6837,6 +6837,10 @@ private function FormatAddressEn($request){
         $labtems = ""; 
         $user =auth()->user();
         $htmlPages = $request->input('html_pages');
+
+
+        // dd($htmlPages);
+
         $templateType = $request->input('template_type');
         $accordingFormula = $request->input('accordingFormula');
         $labAbility = $request->input('labAbility');

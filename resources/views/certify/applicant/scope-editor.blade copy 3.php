@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" xintegrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     {{-- <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" /> --}}
-    
+   
     <style>
 
         @font-face {
@@ -536,13 +536,13 @@
             <button class="menu-button" id="template-dropdown-button" title="แทรกเทมเพลต"><i class="fas fa-file-alt"></i></button>
             <div class="dropdown-content">
                 @if ($templateType == "cb")
-                        <a href="#" data-template="cb-template" >CB template</a>
+                       <a href="#" data-template="cb-template" >CB template</a>
                 @elseif($templateType == "ib")
-                         <a href="#" data-template="ib-template" >IB template</a>
+                        <a href="#" data-template="ib-template" >IB template</a>
                 @elseif($templateType == "lab_cal")
-                         <a href="#" data-template="lab-cal-template" >Cal Lab template</a>
+                        <a href="#" data-template="lab-cal-template" >Cal Lab template</a>
                 @elseif($templateType == "lab_test")
-                         <a href="#" data-template="lab-test-template" >Test Lab template</a>
+                        <a href="#" data-template="lab-test-template" >Test Lab template</a>
                 @endif
             </div>
         </div>
@@ -667,7 +667,7 @@
                     </select>
                 </div>
             </div>
-              <div class="modal-input-group" style="display: flex; gap: 20px;">
+               <div class="modal-input-group" style="display: flex; gap: 20px;">
 
                 <div style="flex: 1;">
                     <label for="lab-cal-instrument2">เครื่องมือ2:</label>
@@ -693,9 +693,9 @@
                 <label for="lab-cal-condition">เงื่อนไขการวัด:</label>
                 <input type="text" id="lab-cal-condition" >
             </div>
-            
+              
             <div class="modal-input-group" style="display: flex; gap: 20px;">
-
+ 
                 <div style="flex: 1;">
                     <label for="lab-cal-param-details-editor">ช่วงการวัด:</label>
                     <div id="lab-cal-param-details-editor" class="editable-div"  contenteditable="true"></div>
@@ -735,11 +735,11 @@
 
              <div class="modal-input-group" style="display: flex; gap: 20px;">
                 <div style="flex: 1;">
-                    <label for="lab-test-parameter">รายการทดสอบ:</label>
+                     <label for="lab-test-parameter">รายการทดสอบ:</label>
                     <select id="lab-test-parameter" >
                     </select>
                 </div>
-                 <div style="flex: 1;">
+                  <div style="flex: 1;">
                     <label for="lab-test-description-editor">คำอธิบาย:</label>
                 
                     <input type="text" id="lab-test-description-editor" >
@@ -748,7 +748,7 @@
 
             <div class="modal-input-group" style="display: flex; gap: 20px;">
                 <div style="flex: 1;">
-                    <label for="lab-test-param-details-editor">ช่วงการทดสอบ:</label>
+                     <label for="lab-test-param-details-editor">ช่วงการทดสอบ:</label>
                     <div id="lab-test-param-details-editor" class="editable-div"  contenteditable="true"></div>
                 </div>
                 <div style="flex: 1;">
@@ -826,7 +826,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             downloadTemplate();
-        });                                 
+        });                                
 
 
         let savedRange = null; // Used for image insertion
@@ -903,29 +903,29 @@
                 // Use innerText to respect user-entered newlines
                 let text = this.editableDiv.innerText;
                 document.body.appendChild(tempDiv);
-                
+            
                 const lines = [];
                 const range = document.createRange();
                 let lastTop = null;
-                
+            
                 // Split text by newlines first to handle manual line breaks
                 const textLines = text.split('\n');
-                
+            
                 for (let line of textLines) {
                     if (line.trim() === '') {
                         // Add empty lines from newlines
                         lines.push('');
                         continue;
                     }
-                
+            
                     // Put the text of this line into tempDiv to check for wrapping
                     tempDiv.textContent = line;
-                
+            
                     let subCurrentLine = '';
                     let tempNode = tempDiv.firstChild;
                     if (!tempNode || tempNode.nodeType !== Node.TEXT_NODE) {
-                          if (line) lines.push(line);
-                          continue;
+                         if (line) lines.push(line);
+                         continue;
                     }
 
                     for (let i = 0; i < line.length; i++) {
@@ -944,7 +944,7 @@
                             }
                             lastTop = rect.top;
                         }
-                    
+            
                         // Push the last part of the line
                         if (i === line.length - 1) {
                             lines.push(subCurrentLine.trim());
@@ -952,9 +952,9 @@
                     }
                     lastTop = null; // Reset for the next line from text.split('\n')
                 }
-                
+            
                 document.body.removeChild(tempDiv);
-                
+            
                 return lines;
             }
         }
@@ -1033,8 +1033,8 @@
             }
             
             if(command !== 'insertTable' && command !== 'insertImage') {
-              const lastActivePage = editor.querySelector('.page:focus') || editor.querySelector('.page');
-              lastActivePage?.focus();
+               const lastActivePage = editor.querySelector('.page:focus') || editor.querySelector('.page');
+               lastActivePage?.focus();
             }
         });
 
@@ -1237,7 +1237,7 @@ const insertCbTemplate = () => {
             insertTemplateAtCurrentOrLastPage(templateHTML);
         };
 
-    const insertIbTemplate = () => {
+   const insertIbTemplate = () => {
             const templateData = ibDetailsFromBlade;
 
             if (!templateData) {
@@ -1530,26 +1530,26 @@ const insertCbTemplate = () => {
                  const button = menubar.querySelector(`[data-command="${command}"]`);
                  if (button) {
                      if (document.queryCommandState(command)) {
-                         button.classList.add('active');
+                        button.classList.add('active');
                      } else {
-                         button.classList.remove('active');
+                        button.classList.remove('active');
                      }
                  }
              });
 
              const selection = window.getSelection();
              if (selection.rangeCount > 0 && selection.anchorNode) {
-                 let element = selection.anchorNode;
-                 if (element.nodeType !== Node.ELEMENT_NODE) {
-                     element = element.parentNode;
-                 }
-                 if (element && element.closest('.page')) {
-                     const size = window.getComputedStyle(element).getPropertyValue('font-size');
-                     const sizeInPx = Math.round(parseFloat(size));
-                     
-                     const optionExists = [...fontSizeSelector.options].some(option => option.value == sizeInPx);
-                     fontSizeSelector.value = optionExists ? sizeInPx : '';
-                 }
+                let element = selection.anchorNode;
+                if (element.nodeType !== Node.ELEMENT_NODE) {
+                    element = element.parentNode;
+                }
+                if (element && element.closest('.page')) {
+                    const size = window.getComputedStyle(element).getPropertyValue('font-size');
+                    const sizeInPx = Math.round(parseFloat(size));
+                    
+                    const optionExists = [...fontSizeSelector.options].some(option => option.value == sizeInPx);
+                    fontSizeSelector.value = optionExists ? sizeInPx : '';
+                }
              }
         };
         
@@ -1971,12 +1971,12 @@ const insertCbTemplate = () => {
                 activeModalTargetRow = contextMenuTargetRow; // Persist the row for the modal
                 contextMenu.style.display = 'none'; // Hide menu visually, but keep state
                 switch (templateType) {
-                    case 'cb':    cbItemModal.style.display = 'flex'; break;
-                    case 'ib':    ibItemModal.style.display = 'flex'; break;
+                    case 'cb':      cbItemModal.style.display = 'flex'; break;
+                    case 'ib':      ibItemModal.style.display = 'flex'; break;
                     case 'lab_cal': 
                         const labCalField = $('#lab-cal-field');
                         const instrumentSelect = $('#lab-cal-instrument');
-                        
+                       
                         const parameterOneSelect = $('#lab-cal-parameter-one');
                         const parameterTwoSelect = $('#lab-cal-parameter-two');
                         labCalField.empty().append('<option value="" disabled selected>- สาขาสอบเทียบ -</option>');
@@ -1992,7 +1992,7 @@ const insertCbTemplate = () => {
                                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                                 },
                                 success: function(response) {
-                        
+                          
                                     if (Array.isArray(response)) {
                                         $.each(response, function (index, value) {
                                             labCalField.append(`<option value="${value.id}" data-en="${value.title_en}">${value.title}</option>`);
@@ -2001,7 +2001,7 @@ const insertCbTemplate = () => {
                                     labCalItemModal.style.display = 'flex';
                                 }
                             });
-                        labCalItemModal.style.display = 'flex'; 
+                            labCalItemModal.style.display = 'flex'; 
                     
                     break;
                     case 'lab_test':
@@ -2022,7 +2022,7 @@ const insertCbTemplate = () => {
                             success: function(response) {
                                 console.log(response);
                                 // ไม่ต้องมี return; ตรงนี้ เพราะจะทำให้โค้ดที่เหลือไม่ทำงาน
-                                
+                               
                                 if (Array.isArray(response)) {
                                     $.each(response, function (index, value) {
                                         labTestField.append(`<option value="${value.id}" data-en="${value.title_en}">${value.title}</option>`);
@@ -2158,7 +2158,7 @@ const insertCbTemplate = () => {
                                 instrumentSelect2.append(`<option value="${value.id}">${value.name}</option>`);
                             });
                         }
-                        
+                       
                         
                         if (Array.isArray(response.parameter_one) && response.parameter_one.length > 0) {
                             parameterOneSelect.append(`<option value="">==เลือกรายการ==</option>`);
@@ -2207,7 +2207,7 @@ const insertCbTemplate = () => {
                     },
                     success: function(response) {
                         console.log(response); // ตรวจสอบข้อมูลที่ได้จาก API
-                        
+                       
 
                         if (Array.isArray(response)) {
                             $.each(response, function(index, value) {
@@ -2337,8 +2337,8 @@ const insertCbTemplate = () => {
                             insertTableRow(table, rowIndex, false, true);
                             break;
                     }
-                       const activePage = table?.closest('.page');
-                       activePage?.focus();
+                     const activePage = table?.closest('.page');
+                     activePage?.focus();
                 }
             }
         });
@@ -2560,16 +2560,10 @@ const insertCbTemplate = () => {
             const paramDetailsLines = labCalParamDetailsEditorExtractor.getLines();
             const paramDetails = paramDetailsLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
 
-            // ========================= START: FIX FOR MPDF =========================
             const capabilityLines = labCalCapabilityEditorExtractor.getLines();
-            // OLD (Problematic) CODE:
-            // const capability = capabilityLines.map(line => line ? '<div style="text-align: center;">' + line + '</div>' : '').join('');
-            
-            // NEW (Corrected) CODE:
-            // Just join the lines with <br>, don't wrap in a <div>
-            const capability = capabilityLines.join('<br>');
-            // We will apply the style to the cell (<td>) directly later.
-            // ========================== END: FIX FOR MPDF ==========================
+            // const capability = capabilityLines.map(line => line ? '&nbsp;&nbsp;&nbsp;' + line : '').join('<br>');
+
+            const capability = capabilityLines.map(line => line ? '<div style="text-align: center;">' + line + '</div>' : '').join('');
             
             const methodLines = labCalMethodEditorExtractor.getLines();
             const method = methodLines.join('<br>');
@@ -2582,7 +2576,7 @@ const insertCbTemplate = () => {
                     return;
                 }
             }
-   
+      
             // --- Field (cells[0]) Logic ---
             if (field && !cells[0].textContent.trim()) {
                 cells[0].innerHTML = field + "<br>(" + fieldValueEn + ")";
@@ -2618,10 +2612,6 @@ const insertCbTemplate = () => {
             // --- Capability (cells[2]) Logic ---
             if (capability) {
                 appendToCell(cells[2], capability);
-                // ========================= START: FIX FOR MPDF =========================
-                // Apply the center alignment directly to the <td> element.
-                cells[2].style.textAlign = 'center';
-                // ========================== END: FIX FOR MPDF ==========================
             }
 
             // --- Method (cells[3]) Logic ---
@@ -2680,16 +2670,16 @@ const insertCbTemplate = () => {
             const methodLines = labTestMethodEditorExtractor.getLines();
             const method = methodLines.join('<br>');
 
-   
+     
 
             // 
             
             if (field && cells[0].textContent.trim()) {
                 let cleanedCell0 = cells[0].textContent.trim().replace(/\(.*$/, '')   // ลบตั้งแต่ ( จนจบ
-                                        .replace('สาขา', '')   // ลบคำว่า สาขา
-                                        .trim();           // ลบช่องว่างหน้า-หลัง
-                     console.log(field , cleanedCell0);
-               if (field != cleanedCell0) {
+                          .replace('สาขา', '')   // ลบคำว่า สาขา
+                          .trim();               // ลบช่องว่างหน้า-หลัง
+                    console.log(field , cleanedCell0);
+                 if (field != cleanedCell0) {
                     alert("ให้เพิ่มแถวใหม่สำหนับสาขาใหม่");
                     return;
                 }

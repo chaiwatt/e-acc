@@ -7,9 +7,11 @@ use Storage;
 use Mpdf\Mpdf;
 // use App\Models\Bcertify\Signer;
 use Mpdf\Tag\P;
+use App\RoleUser;
 use Carbon\Carbon;
 use App\AttachFile;
 use App\HtmlTemplate;
+use App\LabHtmlTemplate;
 use Mpdf\HTMLParserMode;
 use App\CertificateExport;
 use App\Models\Basic\Staff;
@@ -9677,4 +9679,241 @@ $mpdf->SetHTMLFooter($footerHtml);
     dd(CertificateHistory::get()->count());
   }
 
+    public function exportLabScopePdf()
+  {
+    $certilab = CertiLab::latest()->first();
+
+               $template_ability = "";
+                    if($certilab->lab_type == 3){
+                        $template_ability = "test";
+                    }else if($certilab->lab_type == 4){
+                        $template_ability = "calibrate";
+                    }
+// dd(auth()->user());
+              $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+                ->where('according_formula',$certilab->standard_id)
+                ->where('purpose',$certilab->purpose_type)
+                ->where('lab_ability',$template_ability)
+                ->where('app_certi_lab_id',$certilab->id)
+                ->first();
+// dd($labHtmlTemplate->html_pages);
+                
+                
+     $this->exportScopePdf($certilab->id,$labHtmlTemplate,'release');
+  }
+
+   public function exportScopePdf($id,$labHtmlTemplate,$isDraft)
+    {
+        $htmlPages = json_decode($labHtmlTemplate->html_pages);
+
+        if (!is_array($htmlPages)) {
+          
+            return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+        }
+        // กรองหน้าเปล่าออก (โค้ดเดิมที่เพิ่มไป)
+        $filteredHtmlPages = [];
+        foreach ($htmlPages as $pageHtml) {
+            $trimmedPageHtml = trim(strip_tags($pageHtml, '<img>'));
+            if (!empty($trimmedPageHtml)) {
+                $filteredHtmlPages[] = $pageHtml;
+            }
+        }
+  
+        if (empty($filteredHtmlPages)) {
+            return response()->json(['message' => 'No valid HTML content to export after filtering empty pages.'], 400);
+        }
+        $htmlPages = $filteredHtmlPages;
+
+        $type = 'I';
+        $fontDirs = [public_path('pdf_fonts/')];
+
+        $fontData = [
+            'thsarabunnew' => [
+                'R' => "THSarabunNew.ttf",
+                'B' => "THSarabunNew-Bold.ttf",
+                'I' => "THSarabunNew-Italic.ttf",
+                'BI' => "THSarabunNew-BoldItalic.ttf",
+            ],
+            'dejavusans' => [
+                'R' => "DejaVuSans.ttf",
+                'B' => "DejaVuSans-Bold.ttf",
+                'I' => "DejaVuSerif-Italic.ttf",
+                'BI' => "DejaVuSerif-BoldItalic.ttf",
+            ],
+        ];
+
+        $mpdf = new Mpdf([
+            'PDFA'              => $type == 'F' ? true : false,
+            'PDFAauto'          => $type == 'F' ? true : false,
+            'format'            => 'A4',
+            'mode'              => 'utf-8',
+            'default_font_size' => 15,
+            'fontDir'           => array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], $fontDirs),
+            'fontdata'          => array_merge((new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'], $fontData),
+            'default_font'      => 'thsarabunnew',
+            'fontdata_fallback' => ['dejavusans', 'freesans', 'arial'],
+            'margin_left'       => 13,
+            'margin_right'      => 13,
+            'margin_top'        => 10,
+            'margin_bottom'     => 0,
+            // 'tempDir'           => sys_get_temp_dir(),
+        ]);
+
+    
+        // Log::info('MPDF Temp Dir: ' . $tempDirPath);
+
+        $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
+        $mpdf->WriteHTML($stylesheet, 1);
+
+        $mpdf->SetWatermarkImage(public_path('images/nc_hq.png'), 1, [23, 23], [170, 12]);
+        $mpdf->showWatermarkImage = true;
+
+        // --- เพิ่ม Watermark Text "DRAFT" ตรงนี้ ---
+
+
+        $footerHtml = '
+        <div width="100%" style="display:inline;line-height:12px">
+
+            <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+            <span style="font-size:20px;">กระทรวงอุตสาหกรรม สํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span><br>
+            <span style="font-size: 16px">(Ministry of Industry, Thai Industrial Standards Institute)</span>
+            </div>
+
+            <div style="display: inline-block; width: 15%;float:right;width:25%">
+        
+            </div>
+
+            <div width="100%" style="display:inline;text-align:center">
+            <span>หน้าที่ {PAGENO}/{nbpg}</span>
+            </div>
+        </div>';
+
+        if($isDraft == "draft")
+        {
+            $mpdf->SetWatermarkText('DRAFT');
+            $mpdf->showWatermarkText = true; // เปิดใช้งาน watermark text
+            $mpdf->watermark_font = 'thsarabunnew'; // กำหนด font (ควรใช้ font ที่โหลดไว้แล้ว)
+            $mpdf->watermarkTextAlpha = 0.1;
+        }else{
+            $app_certi_lab = CertiLab::find($id);
+            $attach1 = null;
+            
+                $targetRoleId = 22;
+                $userRunrecnos = RoleUser::where('role_id', $targetRoleId)->pluck('user_runrecno');
+                $groupAdminUsers = Staff::whereIn('runrecno', $userRunrecnos)->where('reg_subdepart',$app_certi_lab->subgroup)->get();
+
+                $firstSignerGroup = null;
+                if(count($groupAdminUsers) != 0){
+                    $allReg13Ids = [];
+                    foreach ($groupAdminUsers as $groupAdminUser) {
+                        $reg13Id = str_replace('-', '', $groupAdminUser->reg_13ID);
+                        $allReg13Ids[] = $reg13Id;
+                    }
+
+                    // $firstSignerGroups = Signer::whereIn('tax_number',$allReg13Ids)->get();
+
+                    $firstSignerGroup = DB::table('besurv_signers')
+                        ->whereIn('tax_number',$allReg13Ids)
+                        ->first();
+                        // dd($firstSignerGroup->id);
+                }
+
+                if($firstSignerGroup != null)
+                {
+                    $attach1 = AttachFile::where('ref_id',$firstSignerGroup->id)->where('ref_table','besurv_signers')
+                        ->where('section','attach')
+                        ->latest()
+                        ->first();
+
+                        $sign_url1 = $this->getSignature($attach1);
+
+                        // dd($sign_url1);
+
+                        $footerHtml = '
+<div width="100%" style="display:inline;line-height:12px">
+
+    <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+      <span style="font-size:20px;">กระทรวงอุตสาหกรรม สํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span><br>
+      <span style="font-size: 16px">(Ministry of Industry, Thai Industrial Standards Institute)</span>
+    </div>
+
+    <div style="display: inline-block; width: 15%;float:right;width:25%">
+            <img src="' . $sign_url1 . '" style="height:30px;">
+    </div>
+
+    <div width="100%" style="display:inline;text-align:center">
+      <span>หน้าที่ {PAGENO}/{nbpg}</span>
+    </div>
+</div>';
+
+                        // dd($sign_url1);
+
+                    // $attach1 = !empty($firstSignerGroups->first()->AttachFileAttachTo) ? $firstSignerGroups->first()->AttachFileAttachTo : null;
+                }
+
+                
+            
+
+        }
+
+// แล้วนำไปกำหนดให้ mPDF เป็น Footer
+$mpdf->SetHTMLFooter($footerHtml);
+
+        foreach ($htmlPages as $index => $pageHtml) {
+            if ($index > 0) {
+                $mpdf->AddPage();
+            }
+            $mpdf->WriteHTML($pageHtml,HTMLParserMode::HTML_BODY);
+        }
+
+    //  $mpdf->Output('', 'S');
+     $title = "mypdf.pdf";
+     $mpdf->Output($title, "I");  
+
+
+
+    }
+
+    public function getSignature($attach)
+    {
+        
+        $existingFilePath = $attach->url;//  'files/signers/3210100336046/tvE4QPMaEC-date_time20241211_011258.png'  ;
+
+        $attachPath = 'bcertify_attach/signer';
+        $fileName = basename($existingFilePath) ;// 'tvE4QPMaEC-date_time20241211_011258.png';
+        // dd($existingFilePath);
+
+        // ตรวจสอบไฟล์ใน disk uploads ก่อน
+        if (Storage::disk('uploads')->exists("{$attachPath}/{$fileName}")) {
+            // หากพบไฟล์ใน disk
+            $storagePath = Storage::disk('uploads')->path("{$attachPath}/{$fileName}");
+            $filePath = 'uploads/'.$attachPath .'/'.$fileName;
+            // dd('File already exists in uploads',  $filePath);
+            return $filePath;
+        } else {
+            // หากไม่พบไฟล์ใน disk ให้ไปตรวจสอบในเซิร์ฟเวอร์
+            if (HP::checkFileStorage($existingFilePath)) {
+                // ดึง path ของไฟล์ที่อยู่ในเซิร์ฟเวอร์
+                $localFilePath = HP::getFileStoragePath($existingFilePath);
+
+                // ตรวจสอบว่าไฟล์มีอยู่หรือไม่
+                if (file_exists($localFilePath)) {
+                    // บันทึกไฟล์ลง disk 'uploads' โดยใช้ subfolder ที่กำหนด
+                    $storagePath = Storage::disk('uploads')->putFileAs($attachPath, new \Illuminate\Http\File($localFilePath), $fileName);
+
+                    // ตอบกลับว่าพบไฟล์และบันทึกสำเร็จ
+                    $filePath = 'uploads/'.$attachPath .'/'.$fileName;
+                    return $filePath;
+                    // dd('File exists in server and saved to uploads', $storagePath);
+                } else {
+                    // กรณีไฟล์ไม่สามารถเข้าถึงได้ใน path เดิม
+                    return null;
+                }
+            } else {
+                // ตอบกลับกรณีไม่มีไฟล์ในเซิร์ฟเวอร์
+                return null;
+            }
+        }
+        
+    }
 }
