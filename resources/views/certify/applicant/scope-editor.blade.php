@@ -1369,7 +1369,7 @@ const insertCbTemplate = () => {
                         </tr>
 
                         <tr>
-                            <td class="vertical-align-top"><b>ฉบับที่</b><span class="issue_no"> ${templateData.issueNo}</span><br><span style="font-size: 15px;">(Issue No.)</span></td>
+                            <td class="vertical-align-top"><b>ฉบับที่</b><span class="issue_no"> ${templateData.issueNo}</span><br><span style="font-size: 15px;">(Issue No. <span class="issue_no_en">${templateData.issueNo}</span>)</span></td>
                             <td class="vertical-align-top" colspan="2"><span class="issue_from_date_th">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}</span><br><span style="font-size: 15px;" class="issue_from_date_en">(Valid from ${templateData.validFrom.en})</span></td>
                             <td class="vertical-align-top" colspan="2"><span class="issue_to_date_th">ถึงวันที่ ${templateData.until.th}</span><br><span style="font-size: 15px;" class="issue_to_date_en">(Until ${templateData.until.en})</span></td>
                         </tr>
@@ -1469,7 +1469,7 @@ const insertCbTemplate = () => {
                         </tr>
 
                         <tr>
-                            <td class="vertical-align-top"><b>ฉบับที่</b><span class="issue_no"> ${templateData.issueNo}</span><br><span style="font-size: 15px;">(Issue No.)</span></td>
+                            <td class="vertical-align-top"><b>ฉบับที่</b><span class="issue_no"> ${templateData.issueNo}</span><br><span style="font-size: 15px;">(Issue No. <span class="issue_no_en">${templateData.issueNo}</span>)</span></td>
                             <td class="vertical-align-top" colspan="2"><span class="issue_from_date_th">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}</span><br><span style="font-size: 15px;" class="issue_from_date_en">(Valid from ${templateData.validFrom.en})</span></td>
                             <td class="vertical-align-top" colspan="2"><span class="issue_to_date_th">ถึงวันที่ ${templateData.until.th}</span><br><span style="font-size: 15px;" class="issue_to_date_en">(Until ${templateData.until.en})</span></td>
                         </tr>

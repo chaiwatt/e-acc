@@ -783,5 +783,5 @@ $attachs = json_decode($item->attachs);
         }
         </script>
 
-<script src="{{asset('assets/js/lab/applicant.js?v=1.12')}}"></script>
+<script src="{{asset('assets/js/lab/applicant.js?v=1.13')}}"></script>
   @endpush

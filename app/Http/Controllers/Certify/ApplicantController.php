@@ -1112,6 +1112,8 @@ class ApplicantController extends Controller
             ->first();
 
     //   dd($user->id,$request->all(),$template_type,$labHtmlTemplate );
+$province = Province::find($request->address_city);
+    // dd($request->all(),$province);
         $model = str_slug('applicant','-');
         $data_session     =    HP::CheckSession();
         
@@ -1309,22 +1311,22 @@ class ApplicantController extends Controller
                     $labScopeTransaction->app_certi_lab_id = $certilab->id;
                     $labScopeTransaction->lab_type = $mainLabInfo['lab_type'] ?? 'main';
                     $labScopeTransaction->request_type = $request_type;
-                    $labScopeTransaction->address_number = $mainLabInfo['address_number_add'] ?? '';
-                    $labScopeTransaction->village_no = $mainLabInfo['village_no_add'] ?? ''; // แก้จาก address_moo_add
-                    $labScopeTransaction->address_city = $mainLabInfo['address_city_add'] ?? '';
-                    $labScopeTransaction->address_city_text = $mainLabInfo['address_city_text_add'] ?? '';
-                    $labScopeTransaction->address_district = $mainLabInfo['address_district_add'] ?? '';
-                    $labScopeTransaction->sub_district = $mainLabInfo['sub_district_add'] ?? '';
-                    $labScopeTransaction->postcode = $mainLabInfo['postcode_add'] ?? '';
-                    $labScopeTransaction->address_soi = $mainLabInfo['address_soi_add'] ?? '';
-                    $labScopeTransaction->address_street = $mainLabInfo['address_street_add'] ?? '';
-                    $labScopeTransaction->labress_no_eng = $mainLabInfo['lab_address_no_eng_add'] ?? ''; // แก้จาก labress_no_eng
-                    $labScopeTransaction->lab_moo_eng = $mainLabInfo['lab_moo_eng_add'] ?? '';
-                    $labScopeTransaction->lab_soi_eng = $mainLabInfo['lab_soi_eng_add'] ?? '';
-                    $labScopeTransaction->lab_street_eng = $mainLabInfo['lab_street_eng_add'] ?? '';
-                    $labScopeTransaction->lab_province_text_eng = $mainLabInfo['lab_province_text_eng_add'] ?? '';
-                    $labScopeTransaction->lab_amphur_eng = $mainLabInfo['lab_amphur_eng_add'] ?? '';
-                    $labScopeTransaction->lab_district_eng = $mainLabInfo['lab_district_eng_add'] ?? '';
+                    $labScopeTransaction->address_number = $request->address_number ?? '';
+                    $labScopeTransaction->village_no = $request->village_no ?? ''; // แก้จาก address_moo_add
+                    $labScopeTransaction->address_city = $request->address_city ?? '';
+                    $labScopeTransaction->address_city_text = trim($province->PROVINCE_NAME) ?? '';
+                    $labScopeTransaction->address_district = $request->address_district ?? '';
+                    $labScopeTransaction->sub_district = $request->sub_district ?? '';
+                    $labScopeTransaction->postcode = $request->postcode  ?? '';
+                    $labScopeTransaction->address_soi = $request->address_soi  ?? '';
+                    $labScopeTransaction->address_street = $request->address_street  ?? '';
+                    $labScopeTransaction->labress_no_eng = $request->lab_address_no_eng  ?? ''; // แก้จาก labress_no_eng
+                    $labScopeTransaction->lab_moo_eng = $request->lab_moo_eng   ?? '';
+                    $labScopeTransaction->lab_soi_eng = $request->lab_soi_eng   ?? '';
+                    $labScopeTransaction->lab_street_eng = $request->lab_street_eng  ?? '';
+                    $labScopeTransaction->lab_province_text_eng =  trim($province->PROVINCE_NAME_EN) ?? '';
+                    $labScopeTransaction->lab_amphur_eng =$request->lab_amphur_eng   ?? '';
+                    $labScopeTransaction->lab_district_eng = $request->lab_district_eng   ?? '';
                     $labScopeTransaction->lab_types = json_encode($mainLabInfo['lab_types'] ?? []); // แปลงเป็น JSON
 
                     $labScopeTransaction->save();
@@ -3002,6 +3004,7 @@ class ApplicantController extends Controller
     public function abilityConfirm(Request $request)
     {
 
+        // dd($request->all());
         $certilab = CertiLab::find($request->id);
 
 
@@ -3075,138 +3078,6 @@ class ApplicantController extends Controller
 
         $report = Report::where('app_certi_lab_id',$request->id)->first();
 
-        // dd($report);
-
-        if($isExported !== null)
-        {
-            
-            // $pdfService = new CreateLabScopePdf($certilab);
-            // $pdfContent = $pdfService->generatePdf();
-
-            // dd("okdd");
-
-                  $template_ability = "";
-                    if($certilab->lab_type == 3){
-                        $template_ability = "test";
-                    }else if($certilab->lab_type == 4){
-                        $template_ability = "calibrate";
-                    }
-
-            // $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
-            //     ->where('according_formula',$certilab->standard_id)
-            //     ->where('purpose',$certilab->purpose_type)
-            //     ->where('lab_ability',$template_ability)
-            //     ->where('app_certi_lab_id',$certilab->id)
-            //     ->first();
-
-
-             $lab_ability = "test";
-            if($certilab->lab_type == "4")
-            {
-                $lab_ability = "calibrate";
-            }
-
-            // $ssoUser = DB::table('sso_users')->where('username', $certilab->tax_id)->first();  
-
-           $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
-                ->where('according_formula',$certilab->standard_id)
-                ->where('purpose',$certilab->purpose_type)
-                ->where('lab_ability',$template_ability)
-                ->where('app_certi_lab_id',$certilab->id)
-                ->first();
-
-                       
-
-           
-             
-                        $certiLab = CertiLab::find($labHtmlTemplate->app_certi_lab_id);
-                    
-
-                        $report = Report::where('app_certi_lab_id', $labHtmlTemplate->app_certi_lab_id)->first();
-                    
-
-                        // 2. เตรียมข้อความ "ใหม่"
-
-                        $newStartDateStrings = $this->formatDateStrings($report->start_date, 'start');
-                        $newEndDateStrings   = $this->formatDateStrings($report->end_date, 'end');
- 
-                        // 3. เตรียม DOM และ XPath (สำหรับวันที่และหมายเลขการรับรอง)
-                        $htmlContent = json_decode($labHtmlTemplate->html_pages)[0];
-                        $dom = new \DOMDocument();
-                        @$dom->loadHTML('<?xml encoding="utf-8" ?>' . $htmlContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
-                        $xpath = new \DOMXPath($dom);
-
-                        // 4. ดึงข้อความ "เก่า" (เฉพาะส่วนของวันที่ และ หมายเลขการรับรอง)
-                        // ... (โค้ดดึงข้อความเก่าของวันที่และหมายเลขการรับรองเหมือนเดิม) ...
-                        $oldValidFromThText = ''; $oldUntilThText = ''; $oldValidFromEnText = ''; $oldUntilEnText = '';
-                        $validFromNodes = $xpath->query("//td[contains(., 'ออกให้ตั้งแต่วันที่')]");
-                        if ($validFromNodes->length > 0) {
-                            $fullText = trim($validFromNodes[0]->nodeValue);
-                            $enNodes = $validFromNodes[0]->getElementsByTagName('span');
-                            if ($enNodes->length > 0) {
-                                $oldValidFromEnText = trim($enNodes[0]->nodeValue);
-                                $oldValidFromThText = trim(str_replace($oldValidFromEnText, '', $fullText));
-                            }
-                        }
-                        $untilNodes = $xpath->query("//td[contains(., 'ถึงวันที่')]");
-                        if ($untilNodes->length > 0) {
-                            $fullText = trim($untilNodes[0]->nodeValue);
-                            $enNodes = $untilNodes[0]->getElementsByTagName('span');
-                            if ($enNodes->length > 0) {
-                                $oldUntilEnText = trim($enNodes[0]->nodeValue);
-                                $oldUntilThText = trim(str_replace($oldUntilEnText, '', $fullText));
-                            }
-                        }
-              
-                        // 5. แทนที่ส่วนแรกด้วย str_replace
-                        $searchFor = [
-                            $oldValidFromThText, $oldUntilThText,
-                            $oldValidFromEnText, $oldUntilEnText
-                        ];
-                        $replaceWith = [
-                            $newStartDateStrings['th'], $newEndDateStrings['th'],
-                            $newStartDateStrings['en'], $newEndDateStrings['en'],
-                        ];
-                        $updatedHtmlContent = str_replace($searchFor, $replaceWith, $htmlContent);
-
-      
-                        // 7. บันทึกกลับฐานข้อมูล
-                        $labHtmlTemplate->html_pages = json_encode([$updatedHtmlContent], JSON_UNESCAPED_UNICODE);
-                        $labHtmlTemplate->save();
-
-
-
-                // dd($labHtmlTemplate);
-
-            $this->exportScopePdf($certilab->id,$labHtmlTemplate,'release');
-    
-            $json = $this->copyScopeLabFromAttachement($certilab);
-            $copiedScopes = json_decode($json, true);
-    
-            Report::where('app_certi_lab_id',$certilab->id)->update([
-                'file_loa' =>  $copiedScopes[0]['attachs'],
-                'file_loa_client_name' =>  $copiedScopes[0]['file_client_name']
-            ]);
-
-            $exportMapreqs = $certilab->certi_lab_export_mapreq_to->certilab_export_mapreq_group_many;
-            if($exportMapreqs->count() !=0 )
-            {
-                $certiLabIds = $exportMapreqs->pluck('app_certi_lab_id')->toArray();
-                CertLabsFileAll::whereIn('app_certi_lab_id',$certiLabIds)
-                ->whereNotNull('attach_pdf')
-                ->update([
-                    'state' => 0
-                ]);
-            }
-    
-            CertiLabFileAll::where('app_certi_lab_id', $certilab->id)
-                ->orderBy('id', 'desc') // เรียงตาม id ล่าสุด
-                ->first()->update([
-                    'attach_pdf' => $copiedScopes[0]['attachs'],
-                    'attach_pdf_client_name' => $copiedScopes[0]['file_client_name'],
-                    'state' => 1
-                ]);
-        }
 
 
         $config = HP::getConfig();
