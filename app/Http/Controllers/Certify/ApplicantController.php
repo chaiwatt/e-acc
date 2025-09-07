@@ -628,6 +628,7 @@ class ApplicantController extends Controller
         $requestLab['hq_telephone']            = !empty($request->head_tel)?$request->head_tel:null;
         $requestLab['hq_fax']                  = !empty($request->head_fax)?$request->head_fax:null;
 
+        
         // โอนใบรับรอง
         if(!empty($request->transferer_id_number) && !empty($request->transferee_certificate_number))
         {
@@ -710,11 +711,11 @@ class ApplicantController extends Controller
             }
         }
 
- 
+
 
         $categories = $this->getCategories($request);
 
-       
+        // dd( $categories);
 // dd($categories,$requestLab['lab_type'] );
 
         // กลุ่มงานตามมาตรฐานและสาขา
@@ -810,16 +811,44 @@ class ApplicantController extends Controller
         {
             $_labAblity = "calibrate";
         }
-
+//  dd("oo");
         $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
             ->where('according_formula',$request->according_formula)
             ->where('purpose',$request->purpose)
             ->where('lab_ability',$_labAblity)
             ->first();
 
-        // dd($labHtmlTemplate);
+        $jsondata = null;
+        if($labHtmlTemplate == null){
+             
 
-        $labCalItemsCollection = collect($labHtmlTemplate->json_data);
+             if($request->purpose != 1)
+             {
+
+
+             $check = LabHtmlTemplate::where('user_id',auth()->user()->id)
+                ->where('according_formula',$request->according_formula)
+                // ->where('purpose',$request->purpose)
+                ->where('lab_ability',$_labAblity)
+                ->latest()->first();
+
+                }
+
+                $jsondata = $check->json_data;
+
+
+             
+
+
+
+            //  dd($labHtmlTemplate);
+
+        }else{
+            $jsondata = $labHtmlTemplate->json_data;
+        }
+
+        // dd($jsondata);
+        $labCalItemsCollection = collect($jsondata);
 
         $categories = $labCalItemsCollection->map(function ($item) {
             // Decode the JSON string into an array
@@ -1100,48 +1129,91 @@ class ApplicantController extends Controller
 
     public function store(Request $request)
     {
+
+        // dd($request->all());
+        $newLabAbility = $request->lab_ability;
         $mainLabInfo = json_decode($request->input('main_lab_info'), true);
         $branchLabInfos = json_decode($request->input('branch_lab_infos'), true) ?? [];
        
         $user = auth()->user();
-        
+       
+
         $labHtmlTemplate = LabHtmlTemplate::where('user_id',$user->id)
             ->where('according_formula',$request->according_formula)
             ->where('purpose',$request->purpose)
-            ->where('lab_ability',$request->lab_ability)
+            ->where('lab_ability',$newLabAbility)
             ->first();
+
+            // dd($labHtmlTemplate);
+        $checkLabHtmlTemplate = null;
+        if($labHtmlTemplate == null){
+           
+            if($request->purpose != 1){
+                $checkLabHtmlTemplate = LabHtmlTemplate::where('user_id',$user->id)
+                    ->where('according_formula',$request->according_formula)
+                    ->where('lab_ability',$newLabAbility)
+                    ->latest()->first();
+                // dd($checkLabHtmlTemplate,$request->all());
+            }
+      
+        }
+            
 
     //   dd($user->id,$request->all(),$template_type,$labHtmlTemplate );
 $province = Province::find($request->address_city);
     // dd($request->all(),$province);
         $model = str_slug('applicant','-');
         $data_session     =    HP::CheckSession();
-        
+       
         if(!empty($data_session)){
 
             if(HP::CheckPermission('add-'.$model)){
                 // try {
                     $requestData = $request->all();
-
+ 
                     // add ceti lab
                     $certilab = $this->SaveCertiLab($request, $data_session , null, $branchLabInfos ,$mainLabInfo );
-
+// dd("ok");
                     if($labHtmlTemplate !== null)
                     {
-                        // dd($certilab->id);
                          $labHtmlTemplate->update([
                             'app_certi_lab_id' => $certilab->id
                          ]);
                     }else{
-                        LabHtmlTemplate::create([
-                            'user_id' => $user->id,
-                            'according_formula' => $request->according_formula,
-                            'purpose' => $request->purpose,
-                            'lab_ability' => $request->lab_ability,
-                            'app_certi_lab_id' => $certilab->id
-                        ]);
+                      
+                        if($request->purpose == 1){
+                            LabHtmlTemplate::create([
+                                'user_id' => $user->id,
+                                'according_formula' => $request->according_formula,
+                                'purpose' => $request->purpose,
+                                'lab_ability' => $newLabAbility,
+                                'app_certi_lab_id' => $certilab->id
+                            ]);
+                        }else{
+                            //   dd("ddd",$request->according_formula,$request->lab_ability);
+                            if($checkLabHtmlTemplate != null){
+
+                               $labHtmlTemplate = LabHtmlTemplate::create([
+                                    'user_id' => $user->id,
+                                    'according_formula' => $request->according_formula,
+                                    'purpose' => $request->purpose,
+                                    'lab_ability' => $newLabAbility,
+                                    'app_certi_lab_id' => $certilab->id,
+                                    'json_data' => $checkLabHtmlTemplate->json_data,
+                                    'html_pages' => $checkLabHtmlTemplate->html_pages,
+                                    'template_type' => $checkLabHtmlTemplate->template_type,
+                                ]);
+
+                                // ,'html_pages', 'template_type','json_data'
+
+                                // dd($labHtmlTemplate);
+                                //  dd($checkLabHtmlTemplate,$labHtmlTemplate,$request->all(),$request->lab_ability,$request->purpose,$newLabAbility);
+                            }
+                            
+                        }
+                       
                     }
-                    
+                    // dd("o");
                     // Save information
                     $this->SaveInformation($request, $certilab);
                    
@@ -1157,9 +1229,9 @@ $province = Province::find($request->address_city);
                     $check->save();
 
        
-                    $branchCategories = [
-                        'branch_id' => $this->getCategories($request)
-                    ];
+                    // $branchCategories = [
+                    //     'branch_id' => $this->getCategories($request)
+                    // ];
 
                     
 
@@ -1412,7 +1484,7 @@ $province = Province::find($request->address_city);
                     // }
 
 
-
+                    // dd($labHtmlTemplate);
                     if($certilab->status != 0){
                         $this->exportScopePdf($certilab->id,$labHtmlTemplate,'draft');
                     }
@@ -1920,9 +1992,9 @@ $province = Province::find($request->address_city);
                         //Save lab info
                         $this->SaveCertiLabInfo($request, $certi_lab);
 
-                         $branchCategories = [
-                            'branch_id' => $this->getCategories($request)
-                        ];
+                        //  $branchCategories = [
+                        //     'branch_id' => $this->getCategories($request)
+                        // ];
 
                         
 
