@@ -1197,9 +1197,9 @@ const insertCbTemplate = () => {
                     <b style="font-size: 1.17em;">${templateData.scopeOfAccreditation.th}</b><br>
                     <span style="font-size: 15px;">(${templateData.scopeOfAccreditation.en})</span><br>
                     ${templateData.attachmentToCertificate.th}<br>
-                    <span style="font-size: 15px;">(${templateData.attachmentToCertificate.en})</span><br>
-                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
-                    <span style="font-size: 15px;">(Certification No. ${templateData.certificateNo})</span>
+                    <span style="font-size: 15px;" class="certificate_no_th">(${templateData.attachmentToCertificate.en})</span><br>
+                    <span class="certificate_no_th">ใบรับรองเลขที่ ${templateData.certificateNo}</span><br>
+                    <span style="font-size: 15px;" class="certificate_no_en">(Certification No. ${templateData.certificateNo})</span>
                 </div>
                 <table class="borderless" style="width: 100%; margin-bottom: 1em;">
                     <tbody>
@@ -1258,8 +1258,8 @@ const insertCbTemplate = () => {
 
             const templateHTML = `
                 <div style="text-align: center; line-height: 1.1; margin-bottom: 1em;">
-                    <b style="font-size: 20px;">${templateData.title}</b><br>
-                    <b>ใบรับรองเลขที่ ${templateData.certificateNo}</b>
+                    <span ><b style="font-size: 20px;">${templateData.title}</b></span><br>
+                    <span class="certificate_no_th"><b>ใบรับรองเลขที่ ${templateData.certificateNo}</b><span>
                 </div>
                 <table class="borderless" style="width: 100%; margin-bottom: 1em;">
                     <tbody>
@@ -1353,9 +1353,9 @@ const insertCbTemplate = () => {
             const templateHTML = `
                 <div style="text-align: center; line-height: 1.1; position: relative;  margin-bottom: 0em;">
                     <b style="font-size: 20px;">${templateData.title.th}</b><br>
-                    <span style="font-size: 15px;">(${templateData.title.en})</span><br>
-                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
-                    <span style="font-size: 15px;">(Certification no. ${templateData.certificateNo})</span>
+                    <span style="font-size: 15px;" >(${templateData.title.en})</span><br>
+                    <span class="certificate_no_th">ใบรับรองเลขที่ ${templateData.certificateNo}</span><br>
+                    <span style="font-size: 15px;" class="certificate_no_en">(Certification no. ${templateData.certificateNo})</span>
                 </div>
                 <table class="borderless" style="width: 100%; ">
                     <tbody>
@@ -1365,13 +1365,13 @@ const insertCbTemplate = () => {
                         </tr>
                         <tr>
                             <td class="vertical-align-top"><b>หมายเลขการรับรองที่</b><br><span style="font-size: 15px;">(Accreditation No.)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.accreditationNo.th}<br><span style="font-size: 15px;">(${templateData.accreditationNo.en})</span></td>
+                            <td class="vertical-align-top" colspan="3"><span class="accreditation_no_th">${templateData.accreditationNo.th}</span><br><span style="font-size: 15px;" class="accreditation_no_en">(${templateData.accreditationNo.en})</span></td>
                         </tr>
 
                         <tr>
-                            <td class="vertical-align-top"><b>ฉบับที่</b> ${templateData.issueNo}<br><span style="font-size: 15px;">(Issue No.)</span></td>
-                            <td class="vertical-align-top" colspan="2">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}<br><span style="font-size: 15px;">(Valid from ${templateData.validFrom.en})</span></td>
-                            <td class="vertical-align-top" colspan="2">ถึงวันที่ ${templateData.until.th}<br><span style="font-size: 15px;">(Until ${templateData.until.en})</span></td>
+                            <td class="vertical-align-top"><b>ฉบับที่</b><span class="issue_no"> ${templateData.issueNo}</span><br><span style="font-size: 15px;">(Issue No.)</span></td>
+                            <td class="vertical-align-top" colspan="2"><span class="issue_from_date_th">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}</span><br><span style="font-size: 15px;" class="issue_from_date_en">(Valid from ${templateData.validFrom.en})</span></td>
+                            <td class="vertical-align-top" colspan="2"><span class="issue_to_date_th">ถึงวันที่ ${templateData.until.th}</span><br><span style="font-size: 15px;" class="issue_to_date_en">(Until ${templateData.until.en})</span></td>
                         </tr>
                         <tr>
                             <td class="vertical-align-top"><b>สถานภาพห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory status)</span></td>
@@ -1454,8 +1454,8 @@ const insertCbTemplate = () => {
                 <div style="text-align: center; line-height: 1.1; position: relative; margin-bottom: 0em;">
                     <b style="font-size: 20px;">${templateData.title.th}</b><br>
                     <span style="font-size: 15px;">(${templateData.title.en})</span><br>
-                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
-                    <span style="font-size: 15px;">(Certification no. ${templateData.certificateNo})</span>
+                    <span class="certificate_no_th">ใบรับรองเลขที่ ${templateData.certificateNo}</span><br>
+                    <span style="font-size: 15px;" class="certificate_no_en">(Certification no. ${templateData.certificateNo})</span>
                 </div>
                 <table class="borderless" style="width: 100%; ">
                     <tbody>
@@ -1465,13 +1465,13 @@ const insertCbTemplate = () => {
                         </tr>
                         <tr>
                             <td class="vertical-align-top"><b>หมายเลขการรับรองที่</b><br><span style="font-size: 15px;">(Accreditation No.)</span></td>
-                            <td class="vertical-align-top" colspan="3">${templateData.accreditationNo.th}<br><span style="font-size: 15px;">(${templateData.accreditationNo.en})</span></td>
+                            <td class="vertical-align-top" colspan="3"><span class="accreditation_no_th">${templateData.accreditationNo.th}</span><br><span style="font-size: 15px;" class="accreditation_no_en">(${templateData.accreditationNo.en})</span></td>
                         </tr>
 
                         <tr>
-                            <td class="vertical-align-top"><b>ฉบับที่</b> ${templateData.issueNo}<br><span style="font-size: 15px;">(Issue No.)</span></td>
-                            <td class="vertical-align-top" colspan="2">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}<br><span style="font-size: 15px;">(Valid from ${templateData.validFrom.en})</span></td>
-                            <td class="vertical-align-top" colspan="2">ถึงวันที่ ${templateData.until.th}<br><span style="font-size: 15px;">(Until ${templateData.until.en})</span></td>
+                            <td class="vertical-align-top"><b>ฉบับที่</b><span class="issue_no"> ${templateData.issueNo}</span><br><span style="font-size: 15px;">(Issue No.)</span></td>
+                            <td class="vertical-align-top" colspan="2"><span class="issue_from_date_th">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}</span><br><span style="font-size: 15px;" class="issue_from_date_en">(Valid from ${templateData.validFrom.en})</span></td>
+                            <td class="vertical-align-top" colspan="2"><span class="issue_to_date_th">ถึงวันที่ ${templateData.until.th}</span><br><span style="font-size: 15px;" class="issue_to_date_en">(Until ${templateData.until.en})</span></td>
                         </tr>
                         <tr>
                             <td class="vertical-align-top"><b>สถานภาพห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory status)</span></td>
@@ -2900,6 +2900,7 @@ const insertCbTemplate = () => {
 
         function downloadTemplate()
         {
+            console.log(accordingFormula,labAbility,purpose);
             fetch("{!! route('certify.applicant.download-html-template') !!}" , {
                 method: 'POST',
                 headers: {

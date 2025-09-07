@@ -3075,6 +3075,8 @@ class ApplicantController extends Controller
 
         $report = Report::where('app_certi_lab_id',$request->id)->first();
 
+        // dd($report);
+
         if($isExported !== null)
         {
             
@@ -3090,12 +3092,89 @@ class ApplicantController extends Controller
                         $template_ability = "calibrate";
                     }
 
-            $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+            // $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
+            //     ->where('according_formula',$certilab->standard_id)
+            //     ->where('purpose',$certilab->purpose_type)
+            //     ->where('lab_ability',$template_ability)
+            //     ->where('app_certi_lab_id',$certilab->id)
+            //     ->first();
+
+
+             $lab_ability = "test";
+            if($certilab->lab_type == "4")
+            {
+                $lab_ability = "calibrate";
+            }
+
+            // $ssoUser = DB::table('sso_users')->where('username', $certilab->tax_id)->first();  
+
+           $labHtmlTemplate = LabHtmlTemplate::where('user_id',auth()->user()->id)
                 ->where('according_formula',$certilab->standard_id)
                 ->where('purpose',$certilab->purpose_type)
                 ->where('lab_ability',$template_ability)
                 ->where('app_certi_lab_id',$certilab->id)
                 ->first();
+
+                       
+
+           
+             
+                        $certiLab = CertiLab::find($labHtmlTemplate->app_certi_lab_id);
+                    
+
+                        $report = Report::where('app_certi_lab_id', $labHtmlTemplate->app_certi_lab_id)->first();
+                    
+
+                        // 2. เตรียมข้อความ "ใหม่"
+
+                        $newStartDateStrings = $this->formatDateStrings($report->start_date, 'start');
+                        $newEndDateStrings   = $this->formatDateStrings($report->end_date, 'end');
+ 
+                        // 3. เตรียม DOM และ XPath (สำหรับวันที่และหมายเลขการรับรอง)
+                        $htmlContent = json_decode($labHtmlTemplate->html_pages)[0];
+                        $dom = new \DOMDocument();
+                        @$dom->loadHTML('<?xml encoding="utf-8" ?>' . $htmlContent, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+                        $xpath = new \DOMXPath($dom);
+
+                        // 4. ดึงข้อความ "เก่า" (เฉพาะส่วนของวันที่ และ หมายเลขการรับรอง)
+                        // ... (โค้ดดึงข้อความเก่าของวันที่และหมายเลขการรับรองเหมือนเดิม) ...
+                        $oldValidFromThText = ''; $oldUntilThText = ''; $oldValidFromEnText = ''; $oldUntilEnText = '';
+                        $validFromNodes = $xpath->query("//td[contains(., 'ออกให้ตั้งแต่วันที่')]");
+                        if ($validFromNodes->length > 0) {
+                            $fullText = trim($validFromNodes[0]->nodeValue);
+                            $enNodes = $validFromNodes[0]->getElementsByTagName('span');
+                            if ($enNodes->length > 0) {
+                                $oldValidFromEnText = trim($enNodes[0]->nodeValue);
+                                $oldValidFromThText = trim(str_replace($oldValidFromEnText, '', $fullText));
+                            }
+                        }
+                        $untilNodes = $xpath->query("//td[contains(., 'ถึงวันที่')]");
+                        if ($untilNodes->length > 0) {
+                            $fullText = trim($untilNodes[0]->nodeValue);
+                            $enNodes = $untilNodes[0]->getElementsByTagName('span');
+                            if ($enNodes->length > 0) {
+                                $oldUntilEnText = trim($enNodes[0]->nodeValue);
+                                $oldUntilThText = trim(str_replace($oldUntilEnText, '', $fullText));
+                            }
+                        }
+              
+                        // 5. แทนที่ส่วนแรกด้วย str_replace
+                        $searchFor = [
+                            $oldValidFromThText, $oldUntilThText,
+                            $oldValidFromEnText, $oldUntilEnText
+                        ];
+                        $replaceWith = [
+                            $newStartDateStrings['th'], $newEndDateStrings['th'],
+                            $newStartDateStrings['en'], $newEndDateStrings['en'],
+                        ];
+                        $updatedHtmlContent = str_replace($searchFor, $replaceWith, $htmlContent);
+
+      
+                        // 7. บันทึกกลับฐานข้อมูล
+                        $labHtmlTemplate->html_pages = json_encode([$updatedHtmlContent], JSON_UNESCAPED_UNICODE);
+                        $labHtmlTemplate->save();
+
+
 
                 // dd($labHtmlTemplate);
 
@@ -3295,6 +3374,38 @@ class ApplicantController extends Controller
         ]);
     }
 
+
+        
+private function formatDateStrings(string $dateString, string $type): array
+{
+    // 1. สร้าง Array สำหรับเดือนภาษาไทยไว้ใช้เอง ง่ายและแน่นอนที่สุด
+    $thaiMonths = [
+        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
+    ];
+
+    $date = Carbon::parse($dateString);
+
+    // 2. แยกส่วนประกอบวันที่ออกมา
+    $day = $date->day; // เช่น 7
+    $monthIndex = $date->month - 1; // Carbon นับเดือน 1-12, Array นับ 0-11
+    $buddhistYear = $date->year + 543; // เช่น 2568
+
+    // 3. นำมาประกอบร่างใหม่เป็นข้อความภาษาไทย
+    $prefixTh = ($type === 'start') ? 'ออกให้ตั้งแต่วันที่ ' : 'ถึงวันที่ ';
+    $thaiText = $prefixTh . $day . ' ' . $thaiMonths[$monthIndex] . ' พ.ศ. ' . $buddhistYear;
+
+    // 4. ส่วนของภาษาอังกฤษ (ยังคงรูปแบบเดิมที่ใช้งานได้ดี)
+    $prefixEn = ($type === 'start') ? '(Valid from ' : '(Until ';
+    $englishText = $prefixEn . $date->format('F j, Y') . ')';
+
+    // dd($thaiText);
+
+    return [
+        'th' => $thaiText,
+        'en' => $englishText,
+    ];
+}
 
     public function GetPayInOne($id = null,$token = null)
     {
@@ -6611,6 +6722,8 @@ private function FormatAddressEn($request){
 
         if($labAbility == "calibrate")
         {
+
+            // dd("cal");
                 $templateType = "lab_cal";
                 $labCalDetails = [
                 'title' => [
@@ -6802,7 +6915,7 @@ private function FormatAddressEn($request){
             ->where('lab_ability',$request->labAbility)
             ->first();
 
-            if( $htmlTemplate == null && $request->purpose > 2)
+            if( $htmlTemplate == null && $request->purpose >= 2)
             {
                 $htmlTemplate = LabHtmlTemplate::where('user_id',$user->id)
                 ->where('according_formula',$request->accordingFormula)
@@ -6811,7 +6924,6 @@ private function FormatAddressEn($request){
                 ->first();
             }
 
-            // dd($htmlTemplate);
 
             if (!$htmlTemplate) {
                 return response()->json(['message' => 'Template not found for the given type.'], 404);

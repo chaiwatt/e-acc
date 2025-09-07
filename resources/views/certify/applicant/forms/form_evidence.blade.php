@@ -92,6 +92,7 @@
                 ahhhhhhhhhhhhhhhhh
                 {{$certi_lab->id}}
             @endif --}}
+            
             <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">เพิ่มขอบข่าย</a> 
 
 
@@ -163,6 +164,7 @@
             @endif
 
         @elseif($urlType == 'edit')
+        
         <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">เพิ่มขอบข่าย</a> 
             {{-- <table class="table table-bordered" id="myTable_labScope">
                 <thead class="bg-primary">

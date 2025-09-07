@@ -215,7 +215,11 @@
 
 
 @if(count($find_notice->LogNotice) > 0) 
-@foreach($find_notice->LogNotice as $key1 => $item1)
+{{-- @php
+    dd($find_notice->LogNotice->last());
+@endphp --}}
+{{-- @foreach($find_notice->LogNotice as $key1 => $item1) --}}
+@foreach($find_notice->LogNotice->slice(-1) as $key1 => $item1)
 
 <div class="row form-group">
     <div class="col-md-12">
@@ -225,7 +229,7 @@
 <div class="container-fluid">
 
 <div class="row ">
-    @if(!is_null($item1->file))
+    {{-- @if(!is_null($item1->file))
         <div class="col-md-6">
             <label class="col-md-6 text-right"> รายงานการตรวจประเมิน : </label>
             <div class="col-md-6">
@@ -237,7 +241,7 @@
                 </p>
             </div>
         </div>
-     @endif
+     @endif --}}
      @if(!is_null($item1->details_date))
       <div class="col-md-6">
             <label class="col-md-6 text-right"> รายงานปิด Car : </label>
