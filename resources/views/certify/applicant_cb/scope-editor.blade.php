@@ -1654,8 +1654,8 @@
                     <span style="font-size: 15px;">(${templateData.scopeOfAccreditation.en})</span><br>
                     ${templateData.attachmentToCertificate.th}<br>
                     <span style="font-size: 15px;">(${templateData.attachmentToCertificate.en})</span><br>
-                    <b>ใบรับรองเลขที่ ${templateData.certificateNo}</b><br>
-                    <span style="font-size: 15px;">(Certification No. ${templateData.certificateNo})</span>
+                    <b>ใบรับรองเลขที่ <span class="certificate_no">${templateData.certificateNo}</span></b><br>
+                    <span style="font-size: 15px;">(Certification No. <span class="certificate_no">${templateData.certificateNo}</span>)</span>
                 </div>
                 <table class="borderless" style="width: 100%; margin-bottom: 1em;">
                     <tbody>

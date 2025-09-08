@@ -1293,7 +1293,7 @@ const insertCbTemplate = () => {
             const templateHTML = `
                 <div style="text-align: center; line-height: 1.1; margin-bottom: 1em;">
                     <b style="font-size: 20px;">${templateData.title}</b><br>
-                    <b>ใบรับรองเลขที่ ${templateData.certificateNo}</b>
+                    <b>ใบรับรองเลขที่ <span class="certificate_no">${templateData.certificateNo}</span></b>
                 </div>
                 <table class="borderless" style="width: 100%; margin-bottom: 1em; table-layout: fixed;">
                     <tbody>
@@ -1321,7 +1321,7 @@ const insertCbTemplate = () => {
                         </tr>
                         <tr>
                             <td class="vertical-align-top"><b>หมายเลขการรับรอง</b></td>
-                            <td class="vertical-align-top">: ${templateData.accreditationNo}</td>
+                            <td class="vertical-align-top">: <span class="accreditation_no">${templateData.accreditationNo}</span></td>
                         </tr>
                         <tr>
                             <td class="vertical-align-top"><b>ประเภทของหน่วยตรวจ</b></td>
