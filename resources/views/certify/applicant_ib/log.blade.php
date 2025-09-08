@@ -39,6 +39,9 @@
                             </thead>
                             <tbody>
                                 @foreach($history as $key => $item)
+                                {{-- @php
+                                    dd($item);
+                                @endphp --}}
                                     <tr>
                                         <td class="text-center">{{ $key +1 }}</td>
                                         <td> {{HP::DateTimeThai($item->created_at) ?? '-'}} </td>

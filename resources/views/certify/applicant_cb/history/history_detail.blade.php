@@ -31,6 +31,8 @@
                 @include ('certify/applicant_cb/history.system10')
             @elseif( $history->system == 11)
                  @include ('certify/applicant_cb/history.system11')
+            @elseif( $history->system == 50)
+                @include ('certify/applicant_cb/history.doc_review')
             @endif
         @else 
         @endif

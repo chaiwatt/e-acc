@@ -110,7 +110,8 @@ class CertiCbHistory extends Model
                     '8'=> 'บันทึกผลการตรวจประเมิน',
                     '9'=> 'สรุปรายงานและเสนอกรรมการฯ',
                     '10'=> 'Pay-in ครั้งที่ 2',
-                    '11'=> 'ทบทวนฯ'
+                    '11'=> 'ทบทวนฯ',
+                    '50'=> 'แต่งตั้งคณะทบทวนเอกสาร'
                   ];
         return  array_key_exists($this->system,$details) ?  $details[$this->system] : '-';
     }
