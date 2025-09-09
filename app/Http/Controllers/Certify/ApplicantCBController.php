@@ -52,6 +52,7 @@ use App\Models\Bcertify\CbScopeIsicIsic;
 use App\Models\Certificate\CbScopeOhsms;
 use App\Models\Certificate\CbScopeCorsia;
 
+use App\ApplicantCB\CbDocReviewAssessment;
 use App\Models\Certify\ApplicantCB\CertiCb;
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -60,6 +61,7 @@ use App\Models\Certify\SendCertificateLists;
 use App\Models\Certificate\CbDocReviewAuditor;
 use App\Models\Certificate\TrackingInspection;
 use App\Models\Certify\ApplicantCB\CertiCBCost;
+use App\Models\Certify\MessageRecordTransaction;
 use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantCB\CertiCBReport;
 use App\Models\Certify\ApplicantCB\CertiCBReview;
@@ -447,7 +449,7 @@ class ApplicantCBController extends Controller
                 ->where('trust_mark',$request->trust_mark)
                 ->first();
 
-        // dd($request->all(),$cbHtmlTemplate);
+        // dd($request->all());
 
         // $selectedModel = $request->selectedModel;
         
@@ -505,6 +507,14 @@ class ApplicantCBController extends Controller
                 }
 
                 if($certi_cb->status != 0){
+
+                    $tbName = new CertiCb;
+                    CertiCBAttachAll::where('app_certi_cb_id',$cercbId)        
+                            ->where('table_name',$tbName->getTable())
+                            ->where('file_section',3)
+                            ->delete();
+
+
                     $this->exportScopePdf($cercbId,$cbHtmlTemplate);
                   
                 }
@@ -964,8 +974,22 @@ class ApplicantCBController extends Controller
                         'doc_review_reject' => null
                     ]);
                 }else{
+
+                    if($certi_cb->status != 0){
+
+                        $tbName = new CertiCb;
+                        CertiCBAttachAll::where('app_certi_cb_id',$certi_cb->id)        
+                                ->where('table_name',$tbName->getTable())
+                                ->where('file_section',3)
+                                ->delete();
+
+
+                        $this->exportScopePdf($certi_cb->id,$cbHtmlTemplate);
+                    
+                    }
+
         
-                    $this->exportScopePdf( $certi_cb->id,$cbHtmlTemplate);
+                    // $this->exportScopePdf( $certi_cb->id,$cbHtmlTemplate);
         
                     $this->normalUpdate($request, $token);
                 }
@@ -1675,8 +1699,19 @@ class ApplicantCBController extends Controller
 
         public function updateDocReviewTeam(Request $request)
         {
-            // dd($request->all());
             $certiCbId = $request->certiCbId;
+
+            if($request->agreeValue == 2){
+
+                CbDocReviewAssessment::where('app_certi_cb_id', $certiCbId)
+                    ->where('report_type','cb-doc-review-assessment')
+                    ->delete();
+                MessageRecordTransaction::where('board_auditor_id',$certiCbId)
+                    ->where('job_type',"cb-doc-review-assessment")
+                    ->delete();
+
+            }
+           
             $cbDocReviewAuditor = CbDocReviewAuditor::where('app_certi_cb_id', $certiCbId)->first();
             $cbDocReviewAuditor->update([
                 'status' => $request->agreeValue,

@@ -21,9 +21,9 @@
                 <div class="white-box">
                     <h3 class="box-title pull-left">
                         @if ($methodType == "edit")
-                        แก้ไขคำขอรับบริการหน่วยรับรอง (CB)
+                        แก้ไขคำขอรับบริการหน่วยรับรอง (CB) 
                             @elseif($methodType == "show")
-                            คำขอรับบริการหน่วยรับรอง (CB)
+                            คำขอรับบริการหน่วยรับรอง (CB) 
                         @endif
                        
                     </h3>

@@ -47,16 +47,19 @@ use App\Mail\IB\IBConFirmAuditorsMail;
 use App\Mail\IB\IBRequestDocumentsMail; 
 use App\Models\Certificate\IbScopeTopic;
 use App\Models\Certificate\IbScopeDetail;
+use App\ApplicantCB\CbDocReviewAssessment;
+use App\ApplicantIB\IbDocReviewAssessment;
 use niklasravnsborg\LaravelPdf\Facades\Pdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+
 use App\Models\Certify\ApplicantIB\CertiIb; 
 use App\Models\Certify\SendCertificateLists;
-
 use App\Models\Certificate\IbDocReviewAuditor;
 use App\Models\Certificate\IbScopeTransaction;
 use App\Models\Certificate\IbSubCategoryScope;
 use App\Models\Certificate\IbMainCategoryScope;
 use App\Models\Certify\ApplicantIB\CertiIBCost; 
+use App\Models\Certify\MessageRecordTransaction;
 use App\Models\Certify\ApplicantCB\CertiCBExport;
 use App\Models\Certify\ApplicantIB\CertiIBExport;
 use App\Models\Certify\ApplicantIB\CertiIBReview;
@@ -455,9 +458,15 @@ class ApplicantIBController extends Controller
                     $this->SaveFileSection($request, 'repeater-section8', 'attachs_sec8', 8 , $certi_ib );
                 }
 
+                // dd("ok");
                 
                 if($certi_ib->status != 0){
-                    $this->exportScopePdf($certi_ib->id,$ibHtmlTemplate);
+                    $tbName = new CertiIb;
+                    CertiIBAttachAll::where('app_certi_ib_id',$certi_ib->id)
+                        ->where('table_name',$tbName->getTable())
+                        ->where('file_section','3')
+                        ->delete();
+                    $this->exportScopePdf($certi_ib->id,$ibHtmlTemplate);     
                 }
 
                 // $pdfService = new CreateIbScopePdf($certi_ib);
@@ -774,8 +783,17 @@ class ApplicantIBController extends Controller
                                 // $pdfService = new CreateIbScopePdf($certi_ib);
                                 // $pdfContent = $pdfService->generatePdf();
 
-                                $this->exportScopePdf($certi_ib->id,$ibHtmlTemplate);
-            
+                                // $this->exportScopePdf($certi_ib->id,$ibHtmlTemplate);
+
+                                if($certi_ib->status != 0){
+                                    $tbName = new CertiIb;
+                                    CertiIBAttachAll::where('app_certi_ib_id',$certi_ib->id)
+                                        ->where('table_name',$tbName->getTable())
+                                        ->where('file_section','3')
+                                        ->delete();
+                                    $this->exportScopePdf($certi_ib->id,$ibHtmlTemplate);     
+                                }
+                            
             
                                 $status = $certi_ib->status ?? 1;
             
@@ -2803,6 +2821,19 @@ class ApplicantIBController extends Controller
    {
     //    dd($request->all());
        $certiIbId = $request->certiIbId;
+
+
+        if($request->agreeValue == 2){
+
+            IbDocReviewAssessment::where('app_certi_ib_id', $certiIbId)
+                ->where('report_type','ib-doc-review-assessment')
+                ->delete();
+            MessageRecordTransaction::where('board_auditor_id',$certiIbId)
+                ->where('job_type',"ib-doc-review-assessment")
+                ->delete();
+
+        }
+
        $ibDocReviewAuditor = IbDocReviewAuditor::where('app_certi_ib_id', $certiIbId)->first();
        $ibDocReviewAuditor->update([
            'status' => $request->agreeValue,

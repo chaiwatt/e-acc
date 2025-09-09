@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="white-box">
-                    <h3 class="box-title pull-left">คำขอรับบริการหน่วยรับรอง (CB) </h3>
+                    <h3 class="box-title pull-left">คำขอรับบริการหน่วยรับรอง (CB)</h3>
                     @if( HP::CheckPermission('view-'.str_slug('applicantcbs')))
                         <a class="btn btn-success pull-right" href="{{ url("certify/applicant-cb") }}" >
                             <i class="icon-arrow-left-circle"></i> กลับ

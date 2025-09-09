@@ -192,10 +192,10 @@
                     &nbsp;ยื่นขอครั้งแรก <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <span class="font_size">(initial assessment)</span>
                 </label>
-
+            {{-- @else --}}
                 <label class="col-md-2 label-height">
                     <input type="radio" name="standard_change" value="6" id="standard_change6" class="check" data-radio="iradio_square-green" 
-                        {{ $selectedStandard == 1 ? 'checked' : '' }}>
+                        {{ $selectedStandard == 6 ? 'checked' : '' }}>
                     &nbsp;โอนใบรับรอง <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     <span class="font_size">(transfer accreditation)</span>
                 </label>

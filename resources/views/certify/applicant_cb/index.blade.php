@@ -241,7 +241,7 @@
                                                                 <div class="modal-dialog " role="document" style="width:800px">
                                                                     <div class="modal-content">
                                                                         <div class="modal-header">
-                                                                            <h4 class="modal-title" id="exampleModalLabel1"> เห็นชอบการแต่งตั้งคณะผู้ตรวจเอกสาร
+                                                                            <h4 class="modal-title" id="exampleModalLabel1"> เห็นชอบการแต่งตั้งคณะผู้ตรวจเอกสาร 
                                                                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
                                                                             </h4>
                                                                         </div>
@@ -654,7 +654,7 @@
                 _token: _token
             },
             success: function(result) {
-                location.reload();
+               location.reload();
 
             }
         });
