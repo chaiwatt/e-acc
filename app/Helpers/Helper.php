@@ -24,6 +24,7 @@ use App\Models\Agents\AgentSystem;
 use Illuminate\Support\Facades\DB;
 use App\Models\Setting\SettingSystem;
 use Illuminate\Support\Facades\File; 
+use App\Models\Bcertify\StatusAuditor;
 use App\Models\Basic\TisiLicenseDetail;
 use App\Models\Certify\CertifyLogEmail;
 use Illuminate\Support\Facades\Storage;
@@ -1774,6 +1775,11 @@ class HP_WS
         $user->save();
     }
 
+    public static function cbDocAuditorStatus($id)
+    {
+        return StatusAuditor::find($id);
+    }
 
+    
 
 }

@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 use HP;
 use Storage;
 
-use Mpdf\Mpdf;
+use DOMXPath;
 // use App\Models\Bcertify\Signer;
+use Mpdf\Mpdf;
 use Mpdf\Tag\P;
+use DOMDocument;
 use App\RoleUser;
 use Carbon\Carbon;
 use App\AttachFile;
 use App\HtmlTemplate;
+use App\CbHtmlTemplate;
 use App\LabHtmlTemplate;
 use Mpdf\HTMLParserMode;
 use App\CertificateExport;
@@ -26,18 +29,25 @@ use App\Services\CreateLabScopePdf;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Models\Bcertify\LabCalRequest;
+use App\Models\Bcertify\StatusAuditor;
 use App\Services\CreateCbScopeBcmsPdf;
 use App\Services\CreateCbScopeIsicPdf;
 use Illuminate\Support\Facades\Response;
 use Spatie\Permission\Models\Permission;
 use App\Models\Bcertify\CalibrationGroup;
+use App\ApplicantCB\CbDocReviewAssessment;
+use App\ApplicantIB\IbDocReviewAssessment;
 use App\Models\Bcertify\CalibrationBranch;
 use App\Models\Certify\Applicant\CertiLab;
 use App\Models\Certify\CertificateHistory;
 use App\Models\Certify\ApplicantCB\CertiCb;
 use App\Models\Certify\ApplicantIB\CertiIb;
+use App\Certify\ApplicantIB\CbDocReviewReport;
+use App\Models\Certificate\CbDocReviewAuditor;
+use App\Models\Certificate\IbDocReviewAuditor;
 use App\Models\Certificate\TrackingAssessment;
 use App\Models\Certificate\TrackingInspection;
+use App\Models\Certify\MessageRecordTransaction;
 use App\Models\Basic\ConfigRoles as config_roles;
 use App\Models\Certificate\CbScopeIsicTransaction;
 use App\Models\Bcertify\CalibrationBranchInstrument;
@@ -9916,4 +9926,979 @@ $mpdf->SetHTMLFooter($footerHtml);
         }
         
     }
+
+  public function showEditorDocReviewAssessment()
+  {
+      //  dd(CbDocReviewAssessment::latest()->first());
+       $certiCb = CertiCb::latest()->first();
+       $cbId = $certiCb->id;
+       return view('certify.applicant_cb.doc-review.editor-doc-review-assessment', [
+            'templateType' => "cb-doc-review-assessment",
+            'cbId' => $cbId,
+            'status' => 'draft' // คุณสามารถส่งค่าเริ่มต้นของ
+        ]);
+  }
+
+    public function downloadCbAssessmentReviewHtml(Request $request)
+    {
+      // dd($request->all());
+       $cbId = CertiCb::latest()->first()->id;
+       $templateType ="cb-doc-review-assessment";
+       $cbDocReviewAssessment=  CbDocReviewAssessment::where('app_certi_cb_id', $cbId)
+                                ->where('report_type', $templateType)
+                                ->first();
+
+        $certiCb = CertiCb::find($cbId);
+        if($cbDocReviewAssessment !== null)
+        {
+            // ดึงข้อมูลผู้ลงนามที่อนุมัติแล้ว
+            $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id', $certiCb->id)
+                ->where('app_id', $certiCb->app_no)
+                ->where('certificate_type', 0)
+                ->where('job_type', $templateType)
+                ->where('approval', 1)
+                ->get();
+
+                // ดึง HTML content เริ่มต้น
+                $htmlContent = $cbDocReviewAssessment->template;
+
+               
+
+                // 1. สร้าง DOMDocument เพื่อจัดการ HTML
+                $dom = new DOMDocument();
+                // เพิ่ม meta tag เพื่อบังคับ UTF-8 ป้องกันภาษาเพี้ยน
+                @$dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . $htmlContent);
+                $xpath = new DOMXPath($dom);
+
+                //  dd( $dom);
+
+                // --- เพิ่มส่วนนี้เพื่อซ่อนปุ่ม ---
+                // ค้นหาทุก element ที่มี class 'select-signer-btn'
+                $signerButtons = $xpath->query("//*[contains(@class, 'select-signer-btn')]");
+                foreach ($signerButtons as $button) {
+                    // เพิ่ม style="display: none;" เพื่อซ่อนปุ่ม
+                    $button->setAttribute('style', 'display: none;');
+                }
+                // --- สิ้นสุดส่วนที่เพิ่มเข้ามา ---
+                
+                // --- ส่วนที่เพิ่มเข้ามา ---
+                // นับจำนวนช่องลายเซ็นทั้งหมดที่มีใน Template จาก attribute 'data-signer-id'
+                $totalSignerSlots = $xpath->query("//div[@data-signer-id]")->length;
+
+                // นับจำนวนผู้ที่อนุมัติแล้ว
+                $approvedSignerCount = $messageRecordTransactions->count();
+                // --- สิ้นสุดส่วนที่เพิ่มเข้ามา ---
+
+
+                // 2. วนลูปเฉพาะผู้ลงนามที่อนุมัติแล้ว
+                foreach ($messageRecordTransactions as $transaction) {
+                    $signerId = $transaction->signer_id;
+
+                    // 3. ค้นหา Signer และดึง Path ของลายเซ็น
+                    $signer = Signer::find($signerId);
+                    
+                    // ตรวจสอบให้แน่ใจว่าพบ signer และมีไฟล์แนบ
+                    if ($signer && $signer->AttachFileAttachTo) {
+                        // สมมติว่า $this->getSignature() คืนค่า path ที่ถูกต้อง
+                        $signaturePath = $this->getSignature($signer->AttachFileAttachTo);
+                        
+                        // สร้าง URL ที่สมบูรณ์สำหรับรูปภาพ
+                        $fullSignatureUrl = asset($signaturePath);
+
+                        // 4. (แก้ไข) ค้นหา div ของผู้ลงนามใน HTML ทั้งหมด (ไม่ใช่แค่ตัวแรก)
+                        $signerDivNodes = $xpath->query("//div[@data-signer-id='{$signerId}']");
+
+                        // 5. (แก้ไข) วนลูป div ทั้งหมดที่เจอสำหรับ signerId นี้
+                        foreach ($signerDivNodes as $signerDivNode) {
+                            if ($signerDivNode) {
+                                // 6. ค้นหา <img> ที่อยู่ภายใน td แม่ของ div นั้น
+                                $tdNode = $signerDivNode->parentNode;
+                                $imgNode = $xpath->query('.//img', $tdNode)->item(0);
+
+                                if ($imgNode) {
+                                    // 7. อัปเดต src ของ <img> ด้วย URL ของลายเซ็น
+                                    $imgNode->setAttribute('src', $fullSignatureUrl);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 8. บันทึก HTML ที่แก้ไขแล้วกลับเป็น String
+                $bodyNode = $dom->getElementsByTagName('body')->item(0);
+                $updatedHtmlContent = '';
+                foreach ($bodyNode->childNodes as $child) {
+                    $updatedHtmlContent .= $dom->saveHTML($child);
+                }
+
+                // ตรวจสอบว่าจำนวนช่องลายเซ็น > 0 และจำนวนที่อนุมัติเท่ากับจำนวนช่องทั้งหมด
+                if ($totalSignerSlots > 0 && $totalSignerSlots === $approvedSignerCount) {
+                    // ถ้าเท่ากัน ให้เพิ่ม 'all_signed' => true เข้าไปใน response
+                    return response()->json([
+                                'html' => $updatedHtmlContent, 
+                                'status' => $cbDocReviewAssessment->status,
+                                'all_signed' => true
+                            ]);
+                    $response['all_signed'] = true;
+                }else{
+                        return response()->json([
+                                'html' => $updatedHtmlContent, 
+                                'status' => $cbDocReviewAssessment->status,
+                                'all_signed' => false
+                            ]);
+                }
+
+      
+
+            // return response()->json([
+            //     'html' => $updatedHtmlContent, 
+            //     'status' => $cbDocReviewAssessment->status
+            // ]);
+        }   
+
+        $cbDocReviewAuditor = CbDocReviewAuditor::where('app_certi_cb_id',$cbId)->first();
+      
+        // 1. สร้างตัวแปรเริ่มต้น
+        $auditorsHtmlString = '';
+        $count = 1;
+
+        // 2. แปลงข้อมูล JSON ให้เป็น PHP Array
+        $auditorGroups = json_decode($cbDocReviewAuditor->auditors, true);
+
+
+        // 3. ตรวจสอบว่าการแปลงสำเร็จและข้อมูลเป็น Array
+        if (is_array($auditorGroups)) {
+
+            // 4. วนลูปหลัก (เหมือน @foreach แรก)
+            foreach ($auditorGroups as $group) {
+                // ตรวจสอบว่ามี key ที่ต้องการครบถ้วน
+                if (isset($group['temp_users']) && is_array($group['temp_users']) && isset($group['status'])) {
+                    
+                    // 5. ดึงชื่อสถานะ/ตำแหน่ง จาก Helper (เหมือนใน Blade)
+                    $statusTitle = '';
+                    $statusObject = $this->cbDocAuditorStatus($group['status']);
+                    if ($statusObject && isset($statusObject->title)) {
+                        $statusTitle = $statusObject->title;
+                    }
+
+                    // 6. วนลูปใน temp_users (เหมือน @foreach ที่สอง)
+                    foreach ($group['temp_users'] as $userName) {
+                        // 7. นำข้อมูลมาต่อกันเป็น HTML string
+                        $auditorsHtmlString .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$count}) {$userName}  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$statusTitle}<br>";
+                        
+                        // 8. เพิ่มค่าตัวนับ
+                        $count++;
+                    }
+                }
+            }
+        }
+
+
+        $krut = url('') . '/images/krut.jpg';
+                $pages = ['
+                        <div style="display: flex; align-items: center; margin-bottom: 0; font-size: 18px;">
+                            
+                            <div style="width: 250px; flex-shrink: 0;"> 
+                                <img src="'.$krut.'" alt="Logo" style="width: 130px; display: block;">
+                            </div>
+
+                            <div style="text-align: left; font-size: 34px; font-weight: bold; padding-left: 10px; padding-bottom: 5px;">
+                                บันทึกข้อความ
+                            </div>
+                        </div>
+
+
+                        <table style="width: 100%; border-collapse: collapse; font-size: 18px;  border-spacing: 0;margin-top:20px">
+                            <tr>
+                                <td style="font-size: 22px; padding: 5px 0;">
+                                    <div style="display: flex; align-items: baseline;">
+                                        <div style="display: flex; align-items: baseline; width: 60%;">
+                                            <span style="font-weight: bold; white-space: nowrap; margin-right: 10px;">ส่วนราชการ</span>
+                                            <span style="border-bottom: 1px dotted #000; flex-grow: 1;">&nbsp;สก. รร.</span>
+                                        </div>
+                                        <div style="display: flex; align-items: baseline; width: 40%; margin-left: 20px;">
+                                            <span style="font-weight: bold; white-space: nowrap; margin-right: 10px;">โทร</span>
+                                            <span style="border-bottom: 1px dotted #000; flex-grow: 1;">&nbsp;1430</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 22px; padding: 5px 0;">
+                                    <div style="display: flex; align-items: baseline;">
+                                        <div style="display: flex; align-items: baseline; width: 50%;">
+                                            <span style="font-weight: bold; white-space: nowrap; margin-right: 10px;">ที่</span>
+                                            <span style="border-bottom: 1px dotted #000; flex-grow: 1;">&nbsp;</span>
+                                        </div>
+                                        <div style="display: flex; align-items: baseline; width: 50%; margin-left: 20px;">
+                                            <span style="font-weight: bold; white-space: nowrap; margin-right: 10px;">วันที่</span>
+                                            <span style="border-bottom: 1px dotted #000; flex-grow: 1;">&nbsp;'.HP::formatDateThaiFullNumThai($certiCb->created_at).'</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 22px; display: flex; align-items: baseline; padding: 5px 0;">
+                                    <span style="font-weight: bold; white-space: nowrap; margin-right: 10px;">เรื่อง</span>
+                                    <span style="border-bottom: 1px dotted #000; flex-grow: 1;">&nbsp;การแต่งตั้งคณะผู้ตรวจประเมินเอกสาร เพื่อการรับรองระบบงาน'.$certiCb->purposeType->name.'ของหน่วยรับรอง'.$certiCb->name.' (คำขอเลขที่ '.$certiCb->app_no.')</span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div stye="line-height:5px;font-size:8px">&nbsp;</div>
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">เรียน ผอ.สก. ผ่าน ผก.รร.</span><br><br>
+                        
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">1. เรื่องเดิม</span><br>
+                        <span style="line-height:20px;font-size:22px"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$certiCb->name.' ได้ยื่นคำขอการรับรองระบบงานหน่วยรับรอง ตามมาตรฐานเลขที่ มอก. 17020-2556  ต่อ สก. ผ่านระบบ e-Accreditation ตามคำขอเลขที่ '.$certiCb->app_no.' เมื่อวันที่ '.HP::formatDateThaiFullNumThai(Carbon::now()).'<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1.1)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1.2)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1.3)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1.4)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1.5)</span>
+
+                        <br>
+
+                        <span style="line-height:20px;font-size:22px;margin:top:20px;font-weight: bold;">2. ข้อกฎหมาย/กฎระเบียบที่เกี่ยวข้อง</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 พระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ (ประกาศในราชกิจจานุเบกษา วันที่ 4 มีนาคม 2551) มาตรา 28 วรรค 2 บัญญัติว่า “การขอใบรับรอง การตรวจสอบและการออกใบรับรอง ให้เป็นไปตามหลักเกณฑ์ วิธีการ และเงื่อนไขที่คณะกรรมการประกาศกำหนด”</span> <br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 หลักเกณฑ์ วิธีการ และเงื่อนไขการตรวจประเมินหน่วยรับรอง พ.ศ. 2564 ข้อ 6.1.2.1 (1) ระบุว่า “การแต่งตั้งคณะผู้ตรวจประเมิน ประกอบด้วย หัวหน้าผู้ตรวจประเมิน ผู้ตรวจประเมินด้านวิชาการ และผู้ตรวจประเมิน ซึ่งอาจมีผู้เชี่ยวชาญร่วมด้วยตามความเหมาะสม” และข้อ 6.1.2.1 (2) ระบุว่า “คณะผู้ตรวจประเมินจะทบทวนและประเมินเอกสารต่าง ๆ ของหน่วยรับรอง ตรวจประเมิน ความสามารถและประสิทธิผลของการดำเนินงานของหน่วยรับรอง รวมทั้งสังเกตการปฏิบัติงานตามมาตรฐานการตรวจสอบและรับรองที่เกี่ยวข้อง ณ สถานประกอบการของผู้ยื่นคำขอ และสถานที่ทำการอื่นในสาขาที่ขอรับการรับรอง”</span> <br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.3 คำสั่งสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม ที่ ๓๔๒/๒๕๖๖ เรื่อง มอบอำนาจให้ข้าราชการสั่งและปฏิบัติราชการแทน เลขาธิการสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม (สั่ง ณ วันที่ ๑๓ พฤศจิกายน ๒๕๖๖) ข้อ ๓ ระบุให้ผู้อำนวยการสำนักงานคณะกรรมการการมาตรฐานแห่งชาติ เป็นผู้มีอำนาจพิจารณาแต่งตั้งคณะผู้ตรวจประเมินตามพระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑</span> <br>
+                    ','
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">3. สาระสำคัญและข้อเท็จจริง</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ตามประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไขการตรวจประเมินหน่วยรับรอง สำนักงานจะตรวจประเมินเอกสารเพื่อพิจารณาถึงความครบถ้วนและความสอดคล้องของระบบการบริหารงานตามมาตรฐานด้านการตรวจสอบและรับรอง และหลักเกณฑ์ วิธีการและเงื่อนไขที่เกี่ยวข้อง</span> <br>
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">4. การดำเนินการ</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;รร. ได้สรรหาคณะผู้ตรวจประเมินประกอบด้วย หัวหน้าผู้ตรวจประเมิน เพื่อดำเนินการตรวจประเมินเอกสารของหน่วยรับรอง '.$certiCb->name.' ดังนี้
+	                        <br>'. $auditorsHtmlString .'
+                        </span> <br>
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">5. ข้อปัญหาอุปสรรค</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ตามประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไขการตรวจประเมินหน่วยรับรอง สำนักงานจะตรวจประเมินเอกสารเพื่อพิจารณาถึงความครบถ้วนและความสอดคล้องของระบบการบริหารงานตามมาตรฐานด้านการตรวจสอบและรับรอง และหลักเกณฑ์ วิธีการและเงื่อนไขที่เกี่ยวข้อง</span> <br>
+
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">6. ข้อพิจารณา</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;เพื่อโปรดนำเรียน ลมอ. พิจารณาลงนามอนุมัติการแต่งตั้งคณะผู้ตรวจประเมินเอกสาร เพื่อขอการรับรองระบบงานของหน่วยรับรองของ '.$certiCb->name.'</span> <br>
+
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">7. ข้อเสนอ</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;จึงเรียนมาเพื่อโปรดพิจารณา หากเห็นเป็นการสมควร ขอได้โปรดนำเรียน ลมอ. เพื่ออนุมัติการแต่งตั้งคณะผู้ตรวจประเมินเอกสารเพื่อขอการรับรองระบบงานของหน่วยรับรองของ '.$certiCb->name.' รายละเอียดดังกล่าวข้างต้น</span> <br>
+
+                        <br>
+                        <br>
+                     
+                        <span style="line-height:20px;font-size:22px;">เรียน  ลมอ.</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;สก. ได้ตรวจสอบรายละเอียดการดำเนินการสำหรับการแต่งตั้งคณะผู้ตรวจประเมินดังกล่าวแล้ว สรุปว่าเป็นไปตามหลักเกณฑ์ที่กำหนด
+	                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;จึงเรียนมาเพื่อโปรดอนุมัติการแต่งตั้งคณะผู้ตรวจประเมินเอกสาร เพื่อการรับรองระบบงานครั้งแรกของหน่วยรับรอง '.$certiCb->name.' ดังกล่าวข้างต้น</span> <br>
+
+                        <br>
+                        <br>
+                            
+                        <table style="width: 100%; border-collapse: collapse; font-size: 20px; border: none; margin-top: 40px;">
+                            <tbody>
+                                <tr>
+                                    <!-- Column 1 -->
+                                    <td style="width: 25%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                                        <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                            <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                        </div>
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                            <p style="margin: 0;">(xxx)</p>
+                                            <p style="margin: 0;">xxxx</p>
+                                            <p style="margin: 0;">วันที่ ssss</p>
+                                        </div>
+                                    </td>
+                                    <td style="width: 25%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                                        <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                            <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                        </div>
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                            <p style="margin: 0;">(xxx)</p>
+                                            <p style="margin: 0;">xxxx</p>
+                                            <p style="margin: 0;">วันที่ ssss</p>
+                                        </div>
+                                    </td>
+                                    <!-- Column 2 -->
+                                    <td style="width: 25%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                                          <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                            <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                        </div>
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                            <p style="margin: 0;">(xxx)</p>
+                                            <p style="margin: 0;">xxxx</p>
+                                            <p style="margin: 0;">วันที่ ssss</p>
+                                        </div>
+                                    </td>
+                                    <!-- Column 3 -->
+                                    <td style="width: 25%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                                        <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                            <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                        </div>
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                            <p style="margin: 0;">(xxx)</p>
+                                            <p style="margin: 0;">xxxx</p>
+                                            <p style="margin: 0;">วันที่ ssss</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table> 
+                '];
+  
+        return response()->json([
+            'pages' => $pages, 
+            'status' => null
+        ]);
+    }
+
+
+    public function showEditorIbDocReviewAssessment()
+    {
+       
+      $certiIb = CertiIb::latest()->first();
+       $ibId = $certiIb->id;
+        return view('certify.applicant_ib.doc_review.editor-doc-review-assessment', [
+            'templateType' => "ib-doc-review-assessment",
+            'ibId' => $ibId,
+            'status' => 'draft' // คุณสามารถส่งค่าเริ่มต้นของ
+        ]);
+    
+    }
+
+      public function downloadIbAssessmentReviewHtml(Request $request)
+    {
+        // dd("ok");
+
+      $ibId = CertiIb::latest()->first()->id;
+      $templateType ="ib-doc-review-assessment";
+    
+       $ibDocReviewAssessment=  IbDocReviewAssessment::where('app_certi_ib_id', $ibId)
+                                ->where('report_type', $templateType)
+                                ->first();
+
+        $certiIb = CertiIb::find($ibId);
+        if($ibDocReviewAssessment !== null)
+        {
+            // ดึงข้อมูลผู้ลงนามที่อนุมัติแล้ว
+            $messageRecordTransactions = MessageRecordTransaction::where('board_auditor_id', $certiIb->id)
+                ->where('app_id', $certiIb->app_no)
+                ->where('certificate_type', 1)
+                ->where('job_type', $templateType)
+                ->where('approval', 1)
+                ->get();
+
+            // ดึง HTML content เริ่มต้น
+            // ดึง HTML content เริ่มต้น
+            $htmlContent = $ibDocReviewAssessment->template;
+
+            // 1. สร้าง DOMDocument เพื่อจัดการ HTML
+            $dom = new DOMDocument();
+            // เพิ่ม meta tag เพื่อบังคับ UTF-8 ป้องกันภาษาเพี้ยน
+            @$dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . $htmlContent);
+            $xpath = new DOMXPath($dom);
+
+                        // --- ส่วนที่เพิ่มเข้ามา ---
+                // นับจำนวนช่องลายเซ็นทั้งหมดที่มีใน Template จาก attribute 'data-signer-id'
+                $totalSignerSlots = $xpath->query("//div[@data-signer-id]")->length;
+
+                // นับจำนวนผู้ที่อนุมัติแล้ว
+                $approvedSignerCount = $messageRecordTransactions->count();
+                // --- สิ้นสุดส่วนที่เพิ่มเข้ามา ---
+
+            // 2. วนลูปเฉพาะผู้ลงนามที่อนุมัติแล้ว
+            foreach ($messageRecordTransactions as $transaction) {
+                $signerId = $transaction->signer_id;
+
+                // 3. ค้นหา Signer และดึง Path ของลายเซ็น
+                $signer = Signer::find($signerId);
+                
+                // ตรวจสอบให้แน่ใจว่าพบ signer และมีไฟล์แนบ
+                if ($signer && $signer->AttachFileAttachTo) {
+                    // สมมติว่า $this->getSignature() คืนค่า path ที่ถูกต้อง
+                    $signaturePath = $this->getSignature($signer->AttachFileAttachTo);
+                    
+                    // สร้าง URL ที่สมบูรณ์สำหรับรูปภาพ
+                    $fullSignatureUrl = asset($signaturePath);
+
+                    // 4. (แก้ไข) ค้นหา div ของผู้ลงนามใน HTML ทั้งหมด (ไม่ใช่แค่ตัวแรก)
+                    $signerDivNodes = $xpath->query("//div[@data-signer-id='{$signerId}']");
+
+                    // 5. (แก้ไข) วนลูป div ทั้งหมดที่เจอสำหรับ signerId นี้
+                    foreach ($signerDivNodes as $signerDivNode) {
+                        if ($signerDivNode) {
+                            // 6. ค้นหา <img> ที่อยู่ภายใน td แม่ของ div นั้น
+                            $tdNode = $signerDivNode->parentNode;
+                            $imgNode = $xpath->query('.//img', $tdNode)->item(0);
+
+                            if ($imgNode) {
+                                // 7. อัปเดต src ของ <img> ด้วย URL ของลายเซ็น
+                                $imgNode->setAttribute('src', $fullSignatureUrl);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 8. บันทึก HTML ที่แก้ไขแล้วกลับเป็น String
+            $bodyNode = $dom->getElementsByTagName('body')->item(0);
+            $updatedHtmlContent = '';
+            foreach ($bodyNode->childNodes as $child) {
+                $updatedHtmlContent .= $dom->saveHTML($child);
+            }
+
+            
+                // ตรวจสอบว่าจำนวนช่องลายเซ็น > 0 และจำนวนที่อนุมัติเท่ากับจำนวนช่องทั้งหมด
+                if ($totalSignerSlots > 0 && $totalSignerSlots === $approvedSignerCount) {
+                    // ถ้าเท่ากัน ให้เพิ่ม 'all_signed' => true เข้าไปใน response
+                    return response()->json([
+                                'html' => $updatedHtmlContent, 
+                                'status' => $ibDocReviewAssessment->status,
+                                'all_signed' => true
+                            ]);
+                    $response['all_signed'] = true;
+                }else{
+                        return response()->json([
+                                'html' => $updatedHtmlContent, 
+                                'status' => $ibDocReviewAssessment->status,
+                                'all_signed' => false
+                            ]);
+                }
+
+            // return response()->json([
+            //     'html' => $updatedHtmlContent, 
+            //     'status' => $ibDocReviewAssessment->status
+            // ]);
+        }   
+
+        $ibDocReviewAuditor = IbDocReviewAuditor::where('app_certi_ib_id',$request->ibId)->first();
+      
+        // 1. สร้างตัวแปรเริ่มต้น
+        $auditorsHtmlString = '';
+        $count = 1;
+
+        // 2. แปลงข้อมูล JSON ให้เป็น PHP Array
+        $auditorGroups = json_decode($ibDocReviewAuditor->auditors, true);
+
+
+        // 3. ตรวจสอบว่าการแปลงสำเร็จและข้อมูลเป็น Array
+        if (is_array($auditorGroups)) {
+            // เพิ่ม <br> เริ่มต้นถ้ามีข้อมูล
+            // if (!empty($auditorGroups)) {
+            //     $auditorsHtmlString .= '<br>';
+            // }
+
+            // 4. วนลูปหลัก (เหมือน @foreach แรก)
+            foreach ($auditorGroups as $group) {
+                // ตรวจสอบว่ามี key ที่ต้องการครบถ้วน
+                if (isset($group['temp_users']) && is_array($group['temp_users']) && isset($group['status'])) {
+                    
+                    // 5. ดึงชื่อสถานะ/ตำแหน่ง จาก Helper (เหมือนใน Blade)
+                    $statusTitle = '';
+                    $statusObject = HP::ibDocAuditorStatus($group['status']);
+                    if ($statusObject && isset($statusObject->title)) {
+                        $statusTitle = $statusObject->title;
+                    }
+
+                    // 6. วนลูปใน temp_users (เหมือน @foreach ที่สอง)
+                    foreach ($group['temp_users'] as $userName) {
+                        // 7. นำข้อมูลมาต่อกันเป็น HTML string
+                        $auditorsHtmlString .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$count}) {$userName}  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$statusTitle}<br>";
+                        
+                        // 8. เพิ่มค่าตัวนับ
+                        $count++;
+                    }
+                }
+            }
+        }
+
+
+        $krut = url('') . '/images/krut.jpg';
+                $pages = ['
+                        <div style="display: flex; align-items: center; margin-bottom: 0; font-size: 18px;">
+                            
+                            <div style="width: 250px; flex-shrink: 0;"> 
+                                <img src="'.$krut.'" alt="Logo" style="width: 130px; display: block;">
+                            </div>
+
+                            <div style="text-align: left; font-size: 34px; font-weight: bold; padding-left: 10px; padding-bottom: 5px;">
+                                บันทึกข้อความ
+                            </div>
+                        </div>
+
+
+                        <table style="width: 100%; border-collapse: collapse; font-size: 18px;  border-spacing: 0;margin-top:20px">
+                            <tr>
+                                <td style="font-size: 22px; padding: 5px 0;">
+                                    <div style="display: flex; align-items: baseline;">
+                                        <div style="display: flex; align-items: baseline; width: 60%;">
+                                            <span style="font-weight: bold; white-space: nowrap; margin-right: 10px;">ส่วนราชการ</span>
+                                            <span style="border-bottom: 1px dotted #000; flex-grow: 1;">&nbsp;สก. รต.</span>
+                                        </div>
+                                        <div style="display: flex; align-items: baseline; width: 40%; margin-left: 20px;">
+                                            <span style="font-weight: bold; white-space: nowrap; margin-right: 10px;">โทร</span>
+                                            <span style="border-bottom: 1px dotted #000; flex-grow: 1;">&nbsp;1430</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 22px; padding: 5px 0;">
+                                    <div style="display: flex; align-items: baseline;">
+                                        <div style="display: flex; align-items: baseline; width: 50%;">
+                                            <span style="font-weight: bold; white-space: nowrap; margin-right: 10px;">ที่</span>
+                                            <span style="border-bottom: 1px dotted #000; flex-grow: 1;">&nbsp;</span>
+                                        </div>
+                                        <div style="display: flex; align-items: baseline; width: 50%; margin-left: 20px;">
+                                            <span style="font-weight: bold; white-space: nowrap; margin-right: 10px;">วันที่</span>
+                                            <span style="border-bottom: 1px dotted #000; flex-grow: 1;">&nbsp;'.HP::formatDateThaiFullNumThai($certiIb->created_at).'</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size: 22px; display: flex; align-items: baseline; padding: 5px 0;">
+                                    <span style="font-weight: bold; white-space: nowrap; margin-right: 10px;">เรื่อง</span>
+                                    <span style="border-bottom: 1px dotted #000; flex-grow: 1;">&nbsp;การแต่งตั้งคณะผู้ตรวจประเมินเอกสาร เพื่อการรับรองระบบงาน'.$certiIb->purposeType->name.'ของหน่วยตรวจ'.$certiIb->name.' (คำขอเลขที่ '.$certiIb->app_no.')</span>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <div stye="line-height:5px;font-size:8px">&nbsp;</div>
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">เรียน ผอ.สก. ผ่าน ผก.รต.</span><br><br>
+
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">1. เรื่องเดิม</span><br>
+                        <span style="line-height:20px;font-size:22px"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'.$certiIb->name.' ได้ยื่นคำขอการรับรองระบบงานหน่วยตรวจ ตามมาตรฐานเลขที่ มอก. 17020-2556  ต่อ สก. ผ่านระบบ e-Accreditation ตามคำขอเลขที่ '.$certiIb->app_no.' เมื่อวันที่ '.HP::formatDateThaiFullNumThai(Carbon::now()).'<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1.1)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1.2)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1.3)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1.4)<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(1.5)</span>
+
+                        <br>
+
+                        <span style="line-height:20px;font-size:22px;margin:top:20px;font-weight: bold;">2. ข้อกฎหมาย/กฎระเบียบที่เกี่ยวข้อง</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.1 พระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑ (ประกาศในราชกิจจานุเบกษา วันที่ 4 มีนาคม 2551) มาตรา 28 วรรค 2 บัญญัติว่า “การขอใบรับรอง การตรวจสอบและการออกใบรับรอง ให้เป็นไปตามหลักเกณฑ์ วิธีการ และเงื่อนไขที่คณะกรรมการประกาศกำหนด”</span> <br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.2 หลักเกณฑ์ วิธีการ และเงื่อนไขการตรวจประเมินหน่วยตรวจ พ.ศ. 2564 ข้อ 6.1.2.1 (1) ระบุว่า “การแต่งตั้งคณะผู้ตรวจประเมิน ประกอบด้วย หัวหน้าผู้ตรวจประเมิน ผู้ตรวจประเมินด้านวิชาการ และผู้ตรวจประเมิน ซึ่งอาจมีผู้เชี่ยวชาญร่วมด้วยตามความเหมาะสม” และข้อ 6.1.2.1 (2) ระบุว่า “คณะผู้ตรวจประเมินจะทบทวนและประเมินเอกสารต่าง ๆ ของหน่วยตรวจ ตรวจประเมิน ความสามารถและประสิทธิผลของการดำเนินงานของหน่วยตรวจ รวมทั้งสังเกตการปฏิบัติงานตามมาตรฐานการตรวจสอบและรับรองที่เกี่ยวข้อง ณ สถานประกอบการของผู้ยื่นคำขอ และสถานที่ทำการอื่นในสาขาที่ขอรับการรับรอง”</span> <br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2.3 คำสั่งสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม ที่ ๓๔๒/๒๕๖๖ เรื่อง มอบอำนาจให้ข้าราชการสั่งและปฏิบัติราชการแทน เลขาธิการสำนักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม (สั่ง ณ วันที่ ๑๓ พฤศจิกายน ๒๕๖๖) ข้อ ๓ ระบุให้ผู้อำนวยการสำนักงานคณะกรรมการการมาตรฐานแห่งชาติ เป็นผู้มีอำนาจพิจารณาแต่งตั้งคณะผู้ตรวจประเมินตามพระราชบัญญัติการมาตรฐานแห่งชาติ พ.ศ. ๒๕๕๑</span> <br>
+                    ','
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">3. สาระสำคัญและข้อเท็จจริง</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ตามประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไขการตรวจประเมินหน่วยตรวจ สำนักงานจะตรวจประเมินเอกสารเพื่อพิจารณาถึงความครบถ้วนและความสอดคล้องของระบบการบริหารงานตามมาตรฐานด้านการตรวจสอบและรับรอง และหลักเกณฑ์ วิธีการและเงื่อนไขที่เกี่ยวข้อง</span> <br>
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">4. การดำเนินการ</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;รต. ได้สรรหาคณะผู้ตรวจประเมินประกอบด้วย หัวหน้าผู้ตรวจประเมิน เพื่อดำเนินการตรวจประเมินเอกสารของหน่วยตรวจ '.$certiIb->name.' ดังนี้
+	                        <br>'. $auditorsHtmlString .'
+                        </span> <br>
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">5. ข้อปัญหาอุปสรรค</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ตามประกาศคณะกรรมการการมาตรฐานแห่งชาติ เรื่อง หลักเกณฑ์ วิธีการ และเงื่อนไขการตรวจประเมินหน่วยตรวจ สำนักงานจะตรวจประเมินเอกสารเพื่อพิจารณาถึงความครบถ้วนและความสอดคล้องของระบบการบริหารงานตามมาตรฐานด้านการตรวจสอบและรับรอง และหลักเกณฑ์ วิธีการและเงื่อนไขที่เกี่ยวข้อง</span> <br>
+
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">6. ข้อพิจารณา</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;เพื่อโปรดนำเรียน ลมอ. พิจารณาลงนามอนุมัติการแต่งตั้งคณะผู้ตรวจประเมินเอกสาร เพื่อขอการรับรองระบบงานของหน่วยตรวจของ '.$certiIb->name.'</span> <br>
+
+                        <span style="line-height:20px;font-size:22px;font-weight: bold;">7. ข้อเสนอ</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;จึงเรียนมาเพื่อโปรดพิจารณา หากเห็นเป็นการสมควร ขอได้โปรดนำเรียน ลมอ. เพื่ออนุมัติการแต่งตั้งคณะผู้ตรวจประเมินเอกสารเพื่อขอการรับรองระบบงานของหน่วยตรวจของ '.$certiIb->name.' รายละเอียดดังกล่าวข้างต้น</span> <br>
+
+                        <br>
+                        <br>
+                     
+                        <span style="line-height:20px;font-size:22px;">เรียน  ลมอ.</span><br>
+                        <span style="line-height:20px;font-size:22px">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;สก. ได้ตรวจสอบรายละเอียดการดำเนินการสำหรับการแต่งตั้งคณะผู้ตรวจประเมินดังกล่าวแล้ว สรุปว่าเป็นไปตามหลักเกณฑ์ที่กำหนด
+	                    <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;จึงเรียนมาเพื่อโปรดอนุมัติการแต่งตั้งคณะผู้ตรวจประเมินเอกสาร เพื่อการรับรองระบบงานครั้งแรกของหน่วยตรวจ '.$certiIb->name.' ดังกล่าวข้างต้น</span> <br>
+
+                        <br>
+                        <br>
+                            
+                        <table style="width: 100%; border-collapse: collapse; font-size: 20px; border: none; margin-top: 40px;">
+                            <tbody>
+                                <tr>
+                                    <!-- Column 1 -->
+                                    <td style="width: 25%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                                        <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                            <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                        </div>
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                            <p style="margin: 0;">(xxx)</p>
+                                            <p style="margin: 0;">xxxx</p>
+                                            <p style="margin: 0;">วันที่ ssss</p>
+                                        </div>
+                                    </td>
+                                    <td style="width: 25%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                                        <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                            <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                        </div>
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                            <p style="margin: 0;">(xxx)</p>
+                                            <p style="margin: 0;">xxxx</p>
+                                            <p style="margin: 0;">วันที่ ssss</p>
+                                        </div>
+                                    </td>
+                                    <!-- Column 2 -->
+                                    <td style="width: 25%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                                          <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                            <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                        </div>
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                            <p style="margin: 0;">(xxx)</p>
+                                            <p style="margin: 0;">xxxx</p>
+                                            <p style="margin: 0;">วันที่ ssss</p>
+                                        </div>
+                                    </td>
+                                    <!-- Column 3 -->
+                                    <td style="width: 25%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                                        <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                            <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                        </div>
+                                        <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                            <p style="margin: 0;">(xxx)</p>
+                                            <p style="margin: 0;">xxxx</p>
+                                            <p style="margin: 0;">วันที่ ssss</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table> 
+                '];
+ 
+        return response()->json([
+            'pages' => $pages, 
+            'status' => null
+        ]);
+    }
+
+
+    public function showEditorDocReviewAssessmentReport()
+    {
+      // dd(CbDocReviewReport::latest()->first());
+        $certiCb = CertiCb::latest()->first();
+        return view('certify.applicant_cb.doc-review.editor-doc-review-assessment-report',[
+                    'templateType' => "cb_doc_review_template",
+                    'certiCbId' => $certiCb->id,
+                ]);  
+    }
+
+    
+    public function downloadCbAssessmentReviewHtmlReport(Request $request)
+    {
+        
+       $certiCb = CertiCb::latest()->first();
+       $certiCbId =  $certiCb->id;
+       $templateType = "cb_doc_review_templat";
+       $cbDocReviewReport=  CbDocReviewReport::where('app_certi_cb_id', $certiCbId)
+                                ->where('report_type', $templateType)
+                                ->first();
+
+        // $certiCb = CertiCb::find($request->certiCbId);
+        if($cbDocReviewReport !== null)
+        {
+            return response()->json([
+                'html' => $cbDocReviewReport->template, 
+                'status' => $cbDocReviewReport->status
+            ]);
+        }   
+
+        $certi_cb = CertiCb::find($certiCbId);
+        $cbName = $certi_cb->name_standard;
+        $cbAppNo = $certi_cb->app_no;
+        $cbHqAddress = $this->formatAddress($certi_cb);
+        $telephone = !empty($certi_cb->hq_telephone) ? $certi_cb->hq_telephone : '-';
+        $fax = !empty($certi_cb->hq_fax) ? $certi_cb->hq_fax : '-';
+
+        $cbLocalAddress = $this->formatLocationAddress($certi_cb);
+        $localTelephone = !empty($certi_cb->tel) ? $certi_cb->tel : '-';
+        $localFax = !empty($certi_cb->tel_fax) ? $certi_cb->tel_fax : '-';
+
+
+        $cbHtmlTemplate = CbHtmlTemplate::where('app_certi_cb_id',$certi_cb->id)->first();
+        $htmlPages = json_decode($cbHtmlTemplate->html_pages);
+
+        $filteredHtmlPages = [];
+        foreach ($htmlPages as $pageHtml) {
+            $trimmedPageHtml = trim(strip_tags($pageHtml, '<img>'));
+            if (!empty($trimmedPageHtml)) {
+                $filteredHtmlPages[] = $pageHtml;
+            }
+        }
+  
+        if (empty($filteredHtmlPages)) {
+            return response()->json(['message' => 'No valid HTML content to export after filtering empty pages.'], 400);
+        }
+        $htmlPages = $filteredHtmlPages;
+
+        // dd($htmlPages);
+
+        // สมมติว่า $htmlPages คือ array ที่คุณ dd ออกมา
+
+        // 1. สร้างตัวแปรว่างสำหรับเก็บ HTML ของตารางทั้งหมด
+        $allDetailTable = '';
+
+        // 2. วนลูปในแต่ละหน้าของ HTML ที่มี
+        foreach ($htmlPages as $pageHtml) {
+            // 3. สร้าง DOMDocument เพื่อจัดการ HTML ของหน้านั้นๆ
+            $dom = new DOMDocument();
+            
+            // เพิ่ม meta tag เพื่อบังคับให้ DOMDocument อ่านเป็น UTF-8 (สำคัญมากสำหรับภาษาไทย)
+            @$dom->loadHTML('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . $pageHtml);
+            
+            $xpath = new DOMXPath($dom);
+
+            // 4. ค้นหา <table> ทั้งหมดที่มี class "detail-table"
+            $detailTables = $xpath->query('//table[contains(@class, "detail-table")]');
+
+            // 5. วนลูปตารางที่เจอในหน้านั้นๆ
+            foreach ($detailTables as $table) {
+                // 6. แปลง Node ของตารางกลับเป็น HTML String แล้วนำมาต่อท้ายตัวแปรหลัก
+                $allDetailTable .= $dom->saveHTML($table);
+            }
+        }
+
+
+
+                // 1. ดึงข้อมูลตามที่คุณระบุ
+        $cbDocReviewAuditor = CbDocReviewAuditor::where('app_certi_cb_id', $certi_cb->id)->first();
+        $formattedReviewDate = ''; // กำหนดค่าเริ่มต้น
+
+        // 2. ตรวจสอบว่ามีข้อมูลหรือไม่ก่อนดำเนินการต่อ
+        if ($cbDocReviewAuditor) {
+            $startDate = Carbon::parse($cbDocReviewAuditor->from_date);
+            $endDate = Carbon::parse($cbDocReviewAuditor->to_date);
+
+            // ฟังก์ชันแปลงเดือนเป็นภาษาไทย
+            $getThaiMonth = function($month) {
+                $months = [
+                    'January' => 'มกราคม', 'February' => 'กุมภาพันธ์', 'March' => 'มีนาคม',
+                    'April' => 'เมษายน', 'May' => 'พฤษภาคม', 'June' => 'มิถุนายน',
+                    'July' => 'กรกฎาคม', 'August' => 'สิงหาคม', 'September' => 'กันยายน',
+                    'October' => 'ตุลาคม', 'November' => 'พฤศจิกายน', 'December' => 'ธันวาคม'
+                ];
+                return $months[$month] ?? $month;
+            };
+
+            // ดึงวัน เดือน และปี
+            $startDay = $startDate->day;
+            $startMonth = $getThaiMonth($startDate->format('F'));
+            $startYear = $startDate->year + 543;
+
+            $endDay = $endDate->day;
+            $endMonth = $getThaiMonth($endDate->format('F'));
+            $endYear = $endDate->year + 543;
+
+            // ตรวจสอบและจัดรูปแบบวันที่
+            if ($startDate->equalTo($endDate)) {
+                $formattedReviewDate = "{$startDay} {$startMonth} {$startYear}";
+            } elseif ($startMonth === $endMonth && $startYear === $endYear) {
+                $formattedReviewDate = "{$startDay}-{$endDay} {$startMonth} {$startYear}";
+            } else {
+                $formattedReviewDate = "{$startDay} {$startMonth} {$startYear} - {$endDay} {$endMonth} {$endYear}";
+            }
+        } else {
+            // กรณีไม่พบข้อมูล
+            $formattedReviewDate = '-';
+        }
+
+
+
+        $cbDocReviewAuditor = CbDocReviewAuditor::where('app_certi_cb_id',$certi_cb->id)->first();
+      
+        // 1. สร้างตัวแปรเริ่มต้น
+        $auditorsHtmlString = '';
+        $count = 1;
+
+        // 2. แปลงข้อมูล JSON ให้เป็น PHP Array
+        $auditorGroups = json_decode($cbDocReviewAuditor->auditors, true);
+
+        if (is_array($auditorGroups)) {
+            foreach ($auditorGroups as $group) {
+                // ตรวจสอบว่ามี key ที่ต้องการครบถ้วน
+                if (isset($group['temp_users']) && is_array($group['temp_users']) && isset($group['status'])) {
+                    
+                    // 5. ดึงชื่อสถานะ/ตำแหน่ง จาก Helper (เหมือนใน Blade)
+                    $statusTitle = '';
+                    $statusObject = $this->cbDocAuditorStatus($group['status']);
+                    if ($statusObject && isset($statusObject->title)) {
+                        $statusTitle = $statusObject->title;
+                    }
+
+                    // 6. วนลูปใน temp_users (เหมือน @foreach ที่สอง)
+                    foreach ($group['temp_users'] as $userName) {
+                        // 7. นำข้อมูลมาต่อกันเป็น HTML string
+                        $auditorsHtmlString .= "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {$count}) {$userName}  &nbsp;&nbsp;&nbsp;&nbsp;{$statusTitle}<br>";
+                        
+                        // 8. เพิ่มค่าตัวนับ
+                        $count++;
+                    }
+                }
+            }
+        }
+
+        
+        $html = 
+                '
+                <table style="width: 100%; border-collapse: collapse; table-layout: auto; font-size: 22px">
+                    <tr>
+                        <td  style="padding: 10px 0; text-align: left; font-size: 22px; font-weight: bold;">
+                            เลขที่คำขอ: '.$certi_cb->app_no.'
+                        </td>
+                    </tr>
+                </table>
+                <table style="width: 100%; border-collapse: collapse; table-layout: auto; font-size: 22px;margin-top:-20px">
+                    <tr>
+                        <td  style="padding: 10px 0; text-align: center; font-size: 26px; font-weight: bold;">
+                            รายงานการประเมินเอกสาร
+                        </td>
+                    </tr>
+                </table>
+                <table style="width: 100%; border-collapse: collapse; table-layout: auto; font-size: 22px;margin-left:-7px">
+                    <tr>
+                        <td style=" padding: 5px 8px; vertical-align: top;"><b>1. ผู้ยื่นคำขอ</b> :  '.$certi_cb->name.'</td>
+                    </tr>
+                </table>
+                <table style="width: 100%; border-collapse: collapse; table-layout: auto; font-size: 22px;margin-left:-7px">
+                    <tr>
+                        <td style="padding: 5px 8px; vertical-align: top;width: 25%;"><b>2. ที่ตั้งสำนักงานใหญ่</b> :</td>
+                        <td style="padding: 5px 8px; vertical-align: top;">
+                            '.$cbHqAddress.'<br>
+                            <table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
+                                <tr>
+                                    <td style="width: 50%;">โทรศัพท์ : '.$telephone.'</td>
+                                    <td style="width: 50%;">โทรสาร : '.$fax.'</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                        <tr >
+                            <td style="padding: 5px 8px 5px 22px; vertical-align: top; width: 25%;"><b>ที่ตั้งสำนักงานสาขา</b>:</td>
+                            <td style="padding: 5px 8px; vertical-align: top;">
+                                '.$cbLocalAddress.'<br>
+                                <table style="width: 100%; border-collapse: collapse; margin-top: 5px;">
+                                    <tr>
+                                        <td style="width: 50%;">โทรศัพท์ : '.$localTelephone.'</td>
+                                        <td style="width: 50%;">โทรสาร : '.$localFax.'</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                </table>
+                
+                <table style="width: 100%; border-collapse: collapse; table-layout: auto; font-size: 22px;margin-left:-7px">
+                    <tr>
+                        <td style="padding: 5px 8px; vertical-align: top;width:180px"><b>3. สาขาและขอบข่ายการรับรอง</b> :</td>
+                    </tr>
+                </table>
+                '.$allDetailTable.'
+
+                <b style="font-size: 22px">4. เกณฑ์การตรวจประเมิน</b><br>
+                &nbsp;&nbsp;&nbsp;(1) ...<br>
+                &nbsp;&nbsp;&nbsp;(2) ...<br>
+                &nbsp;&nbsp;&nbsp;(3) ...<br>
+                
+                <b style="font-size: 22px">5. วันที่ตรวจประเมิน</b> : &nbsp;&nbsp;&nbsp; '. $formattedReviewDate .'<br>
+                <b style="font-size: 22px">6. คณะผู้ตรวจประเมิน</b><br>
+                '.$auditorsHtmlString.'
+                <b style="font-size: 22px">7. เอกสารอ้างอิงที่ใช้ในการประเมิน</b>: xxx<br>
+
+                <b style="font-size: 22px">8. สรุปผลการประเมิน</b> : &nbsp;&nbsp;&nbsp;<br>
+
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;N คือ ไม่สอดคล้องตาม มอก.17020-2556 (ISO/IEC 17020: 2012) และ/หรือเอกสาร ILAC-P15 หรือขาดความชัดเจนในประเด็นที่สำคัญ และหน่วยรับรองต้องแก้ไขและแจ้งผลการแก้ไขให้กับ
+คณะผู้ตรวจประเมินทราบก่อนตรวจประเมิน ณ สถานประกอบการของหน่วยรับรอง<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I  คือ	ต้องจัดส่งข้อมูลหรือเอกสารเพิ่มเติม <br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;O คือ ข้อสังเกตซึ่งหน่วยรับรองควรแก้ไข/ปรับปรุง<br><br>
+
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;คณะผู้ตรวจประเมินได้ประเมินเอกสารคู่มือคุณภาพ เอกสารขั้นตอนการดำเนินงาน และเอกสารสนับสนุนอื่นๆ ของหน่วยรับรอง โดยอ้างอิงตามข้อกำหนดตามมาตรฐาน มอก.17020-2556 และเอกสาร ILAC-P15 แล้วมีความเห็นว่าเอกสารระบบคุณภาพการให้บริการงานตรวจ ยังมีประเด็นที่ต้องแก้ไข หรือจัดส่งข้อมูล/เอกสารเพิ่มเติม รายละเอียดดังแนบ
+
+
+
+
+                <table style="width: 100%; border-collapse: collapse; font-size: 20px; border: none; margin-top: 40px;">
+                    <tbody>
+                        <tr>
+                            <!-- Column 1 -->
+                            <td style="width: 33.33%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                            
+                                    <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                        <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                    </div>
+                                    <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                        <p style="margin: 0;">(xxxx)</p>
+                                        <p style="margin: 0;">xxxx</p>
+                                        <p style="margin: 0;">วันที่ xxx</p>
+                                    </div>
+                            </td>
+                            <!-- Column 2 -->
+                            <td style="width: 33.33%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                                    <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                        <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                    </div>
+                                    <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                        <p style="margin: 0;">(xxxx)</p>
+                                        <p style="margin: 0;">xxxx</p>
+                                        <p style="margin: 0;">วันที่ xxx</p>
+                                    </div>
+                            </td>
+                            <!-- Column 3 -->
+                            <td style="width: 33.33%; text-align: center; vertical-align: top; padding: 5px; border: none;">
+                                    <div style="height: 35px; margin-bottom: 5px; display: flex; justify-content: center; align-items: center;">
+                                        <img src="https://placehold.co/200x50/FFFFFF/000000.png?text=Signature&font=parisienne" style="height: 35px; object-fit: contain;">
+                                    </div>
+                                    <div style="border-top: 1px solid #000; padding-top: 5px; display: inline-block; width: 90%;">
+                                        <p style="margin: 0;">(xxx)</p>
+                                        <p style="margin: 0;">xxxx</p>
+                                        <p style="margin: 0;">วันที่ ssss</p>
+                                    </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table> 
+            ';
+        return response()->json([
+            'html' => $html, 
+            'status' => null
+        ]);
+    }
+
+        public function formatAddress(object $data): string
+    {
+        $addressParts = [];
+
+        if (!empty($data->hq_address)) { $addressParts[] = 'เลขที่ ' . $data->hq_address; }
+        if (!empty($data->hq_moo)) { $addressParts[] = 'หมู่' . $data->hq_moo; }
+        if (!empty($data->hq_soi)) { $addressParts[] = 'ซอย' . $data->hq_soi; }
+        if (!empty($data->hq_road)) { $addressParts[] = 'ถนน' . $data->hq_road; }
+
+        if (!empty($data->HqProvinceName)) {
+            if (str_contains($data->HqProvinceName, 'กรุงเทพ')) {
+                if (!empty($data->HqSubdistrictName)) { $addressParts[] = 'แขวง' . $data->HqSubdistrictName; }
+                if (!empty($data->HqDistrictName)) { $addressParts[] = 'เขต' . $data->HqDistrictName; }
+            } else {
+                if (!empty($data->HqSubdistrictName)) { $addressParts[] = 'ตำบล' . $data->HqSubdistrictName; }
+                if (!empty($data->HqDistrictName)) { $addressParts[] = 'อำเภอ' . $data->HqDistrictName; }
+            }
+            $addressParts[] = $data->HqProvinceName;
+        }
+
+        if (!empty($data->hq_zipcode)) {
+            $addressParts[] = $data->hq_zipcode;
+        }
+
+        return implode(' ', $addressParts);
+    }
+
+    function formatLocationAddress(object $data): string
+    {
+        $addressParts = [];
+
+        // เพิ่ม เลขที่, หมู่, ซอย, ถนน
+        if (!empty($data->address_number)) { $addressParts[] = 'เลขที่ ' . $data->address_number; }
+        if (!empty($data->allay)) { $addressParts[] = 'หมู่' . $data->allay; }
+        if (!empty($data->address_soi)) { $addressParts[] = 'ซอย' . $data->address_soi; }
+        if (!empty($data->address_street)) { $addressParts[] = 'ถนน' . $data->address_street; }
+
+        // เพิ่ม ตำบล/แขวง, อำเภอ/เขต, จังหวัด
+        if (!empty($data->basic_province->PROVINCE_NAME)) {
+            if (str_contains($data->basic_province->PROVINCE_NAME, 'กรุงเทพ')) {
+                if (!empty($data->district_id)) { $addressParts[] = 'แขวง' . $data->district_id; }
+                if (!empty($data->amphur_id)) { $addressParts[] = 'เขต' . $data->amphur_id; }
+            } else {
+                if (!empty($data->district_id)) { $addressParts[] = 'ตำบล' . $data->district_id; }
+                if (!empty($data->amphur_id)) { $addressParts[] = 'อำเภอ' . $data->amphur_id; }
+            }
+            $addressParts[] = $data->basic_province->PROVINCE_NAME;
+        }
+
+        // เพิ่มรหัสไปรษณีย์
+        if (!empty($data->postcode)) {
+            $addressParts[] = $data->postcode;
+        }
+
+        return implode(' ', $addressParts);
+    }
+
+
+     public function cbDocAuditorStatus($id)
+    {
+        return StatusAuditor::find($id);
+    }
 }
+
+

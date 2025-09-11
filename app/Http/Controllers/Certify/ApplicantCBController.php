@@ -835,12 +835,16 @@ class ApplicantCBController extends Controller
             // $certifieds = CertiCBExport::whereIn('app_no',$app_certi_cb->get()->pluck('app_no')->toArray())->get();
             // dd($certifieds);
             // $Formula_Arr = Formula::where('applicant_type',1)->where('state',1)->orderbyRaw('CONVERT(title USING tis620)')->pluck('title','id');
+            // $Formula_Arr = Formula::where('applicant_type', 1)
+            //     ->where('state', 1)
+            //     ->whereHas('certificationBranchs', function ($query) {
+            //         $query->whereNotNull('model_name');
+            //     })
+            //     ->pluck('title', 'id');
+
             $Formula_Arr = Formula::where('applicant_type', 1)
-                ->where('state', 1)
-                ->whereHas('certificationBranchs', function ($query) {
-                    $query->whereNotNull('model_name');
-                })
-                ->pluck('title', 'id');
+            ->where('state', 1)
+            ->pluck('title', 'id');
             
             $cbTrustmarks = CbTrustMark::where('bcertify_certification_branche_id',$certi_cb->petitioner_id)->get();
             // dd($cbTrustmarks);

@@ -95,6 +95,19 @@ Route::get('/check-lab-record','MyTestController@checkLabRecord');
 Route::get('/export-labscope-pdf','MyTestController@exportLabScopePdf');
 
 
+Route::get('/show-editor-doc-review-assessment','MyTestController@showEditorDocReviewAssessment');
+Route::post('/download-editor-cb-doc-review-assessment','MyTestController@downloadCbAssessmentReviewHtml')->name('download.editor.cb-doc.review.assessment');
+
+Route::get('/show-editor-doc-review-assessment-report','MyTestController@showEditorDocReviewAssessmentReport');
+Route::post('/download-editor-cb-doc-review-assessment-report','MyTestController@downloadCbAssessmentReviewHtmlReport')->name('download.editor.cb-doc.review.assessment-report');
+
+Route::get('/show-editor-ib-doc-review-assessment','MyTestController@showEditorIbDocReviewAssessment');
+Route::post('/download-editor-ib-doc-review-assessment','MyTestController@downloadIbAssessmentReviewHtml')->name('download.editor.ib-doc.review.assessment');
+
+Route::get('/show-editor-ib-doc-review-assessment-report','MyTestController@showEditorIbDocReviewAssessmentReport');
+Route::post('/download-editor-ib-doc-review-assessment-report','MyTestController@downloadIbAssessmentReviewHtmlReport')->name('download.editor.ib-doc.review.assessment-report');
+
+
 
 //
 
