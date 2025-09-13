@@ -15,9 +15,9 @@
                 <div class="white-box">
                    <h3 class="box-title pull-left">คำขอรับบริการห้องปฏิบัติการ (LAB) 
                   
-                    @if ($labCalRequest->count() == 0 && $labTestRequest->count() ==0)
+                    {{-- @if ($labCalRequest->count() == 0 && $labTestRequest->count() ==0)
                         <span class="text-warning">(คำขอระบบเก่า)</span>
-                    @endif
+                    @endif --}}
 
 
                    </h3>
