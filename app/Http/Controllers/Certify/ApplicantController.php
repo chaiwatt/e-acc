@@ -1962,6 +1962,8 @@ $province = Province::find($request->address_city);
 
                     $certi_lab = CertiLab::where('token',$token)->first();
 
+                    // dd($certi_lab->status);
+
 
 
                     if (!is_null($certi_lab)){
@@ -2133,9 +2135,9 @@ $province = Province::find($request->address_city);
 
                     // dd($certi_lab->status);
 
-                       if($certi_lab->status != 0){
-                        $this->exportScopePdf($certi_lab->id,$labHtmlTemplate,'draft');
-                    }
+                    // if($certi_lab->status != 0){
+                    //     $this->exportScopePdf($certi_lab->id,$labHtmlTemplate,'draft');
+                    // }
 
                     // $pdfService = new CreateLabScopePdf($certi_lab);
                     // $pdfContent = $pdfService->generatePdf();
@@ -6904,6 +6906,7 @@ private function FormatAddressEn($request){
  public function exportScopePdf($id,$labHtmlTemplate,$isDraft)
     {
         $htmlPages = json_decode($labHtmlTemplate->html_pages);
+        
 
         if (!is_array($htmlPages)) {
           
