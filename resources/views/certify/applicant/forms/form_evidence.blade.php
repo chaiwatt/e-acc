@@ -79,7 +79,7 @@
     {{-- {{$labTestRequest->count()}}
     {{$labCalRequest->count()}} --}}
     <div class="clearfix"></div>
-    <legend><h4><span class="text-danger">*</span> 5. ขอบข่ายที่ยื่นขอรับการรับรอง
+    <legend><h4><span class="text-danger">*</span> 5. ขอบข่ายที่ยื่นขอรับการรับรอง 
         (<span class="text-warning">ห้องปฏิบัติการสอบเทียบ</span>) (Scope of Accreditation Sought (<span class="text-warning">For calibration laboratory</span>)) </h4></legend>
             <div class="clearfix"></div>
             
@@ -164,8 +164,14 @@
             @endif
 
         @elseif($urlType == 'edit')
+
+            @if ($certi_lab->status == 3)
+                <button class="view-attach btn btn-info btn-sm" disabled>เพิ่มขอบข่าย</button>   
+            @else
+                <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">เพิ่มขอบข่าย</a>   
+            @endif
         
-        <a href="{{route('certify.applicant.lab-scope-editor')}}" id="scope-editor" target="_blank" class="view-attach btn btn-info btn-sm">เพิ่มขอบข่าย</a> 
+        
             {{-- <table class="table table-bordered" id="myTable_labScope">
                 <thead class="bg-primary">
                     <tr>

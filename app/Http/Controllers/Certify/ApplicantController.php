@@ -153,6 +153,7 @@ class ApplicantController extends Controller
         // dd('ok');
         $model = str_slug('view-applicant','-');
         $data_session     =    HP::CheckSession();
+        // dd($data_session);
         if(!empty($data_session)){
         if(HP::CheckPermission($model)){
 
@@ -4221,7 +4222,8 @@ private function formatDateStrings(string $dateString, string $type): array
     }
 
     private function save_certilab_export_mapreq($certi_lab)
-    {
+    { 
+            // ตรวจสอบว่าบริษัทมีคำขอที่ใบรับรองจากมาตรฐาน standard_id และประเภทแลบ (สอบเทียบ / ทดสอบหรือไม่)
           $app_certi_lab  = CertiLab::with([
                                     'certificate_exports_to' => function($q){
                                         $q->whereIn('status',['0','1','2','3','4']);
@@ -4233,9 +4235,12 @@ private function formatDateStrings(string $dateString, string $type): array
                                 ->where('lab_type', $certi_lab->lab_type)
                                 ->first();
         //  if(!Is_null($app_certi_lab)){
+        // ถ้าพบว่ามีคำขอที่ได้รับใบรับรอง ในมาตรฐาน standard_id และประเภทแลบ (สอบเทียบ / ทดสอบหรือไม่)
         if($app_certi_lab !== null){
+            // ให้ดึง id ของตารางใบรับรองนั้นออกมา 
              $certificate_exports_id = !empty($app_certi_lab->certificate_exports_to->id) ? $app_certi_lab->certificate_exports_to->id : null;
               if(!Is_null($certificate_exports_id)){
+                  // จากนั้นนำไปเพิ่มในตาราง certificate_export_mapreq 
                   $mapreq =  CertiLabExportMapreq::where('app_certi_lab_id',$certi_lab->id)->where('certificate_exports_id', $certificate_exports_id)->first();
                   if(Is_null($mapreq)){
                       $mapreq = new  CertiLabExportMapreq;
