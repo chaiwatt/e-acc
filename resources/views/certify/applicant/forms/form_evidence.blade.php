@@ -719,6 +719,14 @@
                     var purpose = $('input[name="purpose"]:checked').val();
                     var labName = $('#lab_name').val();
                     var labNameEn = $('#lab_name_en').val();
+
+                    var is_permanent = $('#pl_2_1').is(':checked') ? true : false;
+                    var is_site = $('#pl_2_2').is(':checked') ? true : false;
+                    var is_temporary = $('#pl_2_3').is(':checked') ? true : false;
+                    var is_mobile = $('#pl_2_4').is(':checked') ? true : false;
+                    var is_multisite = $('#pl_2_5').is(':checked') ? true : false;
+
+
                     
                     // Check if any value is undefined or empty
                     if (!accordingFormula || !labAbility || !purpose || !labName || !labNameEn) {
@@ -726,13 +734,19 @@
                         return;
                     }
                     
+                    
                     // Build the URL with query parameters
                     var url = $(this).attr('href') + '?according_formula=' + encodeURIComponent(accordingFormula) +
                             '&lab_ability=' + encodeURIComponent(labAbility) +
                             '&purpose=' + encodeURIComponent(purpose) +
                             '&lab_name=' + encodeURIComponent(labName) +
-                            '&lab_name_en=' + encodeURIComponent(labNameEn);
-                    
+                            '&lab_name_en=' + encodeURIComponent(labNameEn) +
+                            '&is_permanent=' + is_permanent +
+                            '&is_site=' + is_site +
+                            '&is_temporary=' + is_temporary +
+                            '&is_mobile=' + is_mobile +
+                            '&is_multisite=' + is_multisite;
+                                    
                     // Open the URL in a new tab
                     window.open(url, '_blank');
             });

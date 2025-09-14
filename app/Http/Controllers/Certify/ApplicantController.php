@@ -2131,14 +2131,6 @@ $province = Province::find($request->address_city);
 
                         // dd($request->lab_ability ,$request->according_formula, $request->purpose,$request->lab_ability, $labHtmlTemplate);
 
-                    // $this->exportScopePdf($certi_lab->id,$labHtmlTemplate);
-
-                    // dd($certi_lab->status);
-
-                    // if($certi_lab->status != 0){
-                    //     $this->exportScopePdf($certi_lab->id,$labHtmlTemplate,'draft');
-                    // }
-
                     // $pdfService = new CreateLabScopePdf($certi_lab);
                     // $pdfContent = $pdfService->generatePdf();
 
@@ -2392,7 +2384,7 @@ $province = Province::find($request->address_city);
 
     public function editScope($token)
     {
-
+        // dd("ok");
         $model = str_slug('applicant','-');
         $data_session     =    HP::CheckSession();
         if(!empty($data_session)){
@@ -2620,14 +2612,11 @@ $province = Province::find($request->address_city);
 
                         // dd($labHtmlTemplate);
 
+                
+                        $this->exportScopePdf2($certi_lab->id,$labHtmlTemplate,'draft');
 
-                    //   if($certilab->status != 0){
-                        $this->exportScopePdf($certi_lab->id,$labHtmlTemplate,'draft');
-                    // }
-
-                        // $pdfService = new CreateLabScopePdf($certi_lab);
-                        // $pdfContent = $pdfService->generatePdf();
-
+                        // dd("break");
+             
                         $babCalScopeUsageStatus = new LabCalScopeUsageStatus();
                         $babCalScopeUsageStatus->app_certi_lab_id = $certi_lab->id;
                         $babCalScopeUsageStatus->group = 1;
@@ -6654,16 +6643,13 @@ private function FormatAddressEn($request){
 
       public function scopeEditor(Request $request)
     {
-    //   dd("ok");
+    //   dd($request->input('is_permanent'),$request->input('is_site'),$request->input('is_temporary'));
         // Retrieve query parameters
         $accordingFormula = $request->input('according_formula');
         $labAbility = $request->input('lab_ability');
         $purpose = $request->input('purpose');
         $labName=  $request->input('lab_name');
         $labNameEn=  $request->input('lab_name_en');
-
-
-
 
 
         $templateType = "";
@@ -6700,11 +6686,11 @@ private function FormatAddressEn($request){
                 ],
 
                 'laboratory_status' => [
-                    'is_permanent' => true,
-                    'is_site' => false,
-                    'is_temporary' => false,
-                    'is_mobile' => false,
-                    'is_multisite' => false,
+                    'is_permanent' => $request->input('is_permanent') === 'true',
+                    'is_site'      => $request->input('is_site') === 'true',
+                    'is_temporary' => $request->input('is_temporary') === 'true',
+                    'is_mobile'    => $request->input('is_mobile') === 'true',
+                    'is_multisite' => $request->input('is_multisite') === 'true',
                 ],
                 'calibrationData' => [ 
                     [
@@ -6715,6 +6701,8 @@ private function FormatAddressEn($request){
                     ]
                 ]
             ];
+
+            // dd()
         
             return view('certify.applicant.scope-editor', [
                 'templateType' => $templateType,
@@ -6751,11 +6739,11 @@ private function FormatAddressEn($request){
                     'en' => $date['until']['en']
                 ],
                 'laboratory_status' => [
-                    'is_permanent' => true,
-                    'is_site' => false,
-                    'is_temporary' => false,
-                    'is_mobile' => false,
-                    'is_multisite' => false,
+                    'is_permanent' => $request->input('is_permanent') === 'true',
+                    'is_site'      => $request->input('is_site') === 'true',
+                    'is_temporary' => $request->input('is_temporary') === 'true',
+                    'is_mobile'    => $request->input('is_mobile') === 'true',
+                    'is_multisite' => $request->input('is_multisite') === 'true',
                 ],
                 'testLabData' => [
                     [
@@ -6905,6 +6893,7 @@ private function FormatAddressEn($request){
 
  public function exportScopePdf($id,$labHtmlTemplate,$isDraft)
     {
+
         $htmlPages = json_decode($labHtmlTemplate->html_pages);
         
 
@@ -7171,6 +7160,282 @@ $mpdf->SetHTMLFooter($footerHtml);
       $certi_lab_attach->token            = str_random(16);
       $certi_lab_attach->default_disk = config('filesystems.default');
       $certi_lab_attach->save();
+
+    }
+
+     public function exportScopePdf2($id,$labHtmlTemplate,$isDraft)
+    {
+        $htmlPages = json_decode($labHtmlTemplate->html_pages);
+        
+
+        if (!is_array($htmlPages)) {
+          
+            return response()->json(['message' => 'Invalid or empty HTML content received.'], 400);
+        }
+        // กรองหน้าเปล่าออก (โค้ดเดิมที่เพิ่มไป)
+        $filteredHtmlPages = [];
+        foreach ($htmlPages as $pageHtml) {
+            $trimmedPageHtml = trim(strip_tags($pageHtml, '<img>'));
+            if (!empty($trimmedPageHtml)) {
+                $filteredHtmlPages[] = $pageHtml;
+            }
+        }
+  
+        if (empty($filteredHtmlPages)) {
+            return response()->json(['message' => 'No valid HTML content to export after filtering empty pages.'], 400);
+        }
+        $htmlPages = $filteredHtmlPages;
+
+        $type = 'I';
+        $fontDirs = [public_path('pdf_fonts/')];
+
+        $fontData = [
+            'thsarabunnew' => [
+                'R' => "THSarabunNew.ttf",
+                'B' => "THSarabunNew-Bold.ttf",
+                'I' => "THSarabunNew-Italic.ttf",
+                'BI' => "THSarabunNew-BoldItalic.ttf",
+            ],
+            'dejavusans' => [
+                'R' => "DejaVuSans.ttf",
+                'B' => "DejaVuSans-Bold.ttf",
+                'I' => "DejaVuSerif-Italic.ttf",
+                'BI' => "DejaVuSerif-BoldItalic.ttf",
+            ],
+        ];
+
+        $mpdf = new Mpdf([
+            'PDFA'              => $type == 'F' ? true : false,
+            'PDFAauto'          => $type == 'F' ? true : false,
+            'format'            => 'A4',
+            'mode'              => 'utf-8',
+            'default_font_size' => 15,
+            'fontDir'           => array_merge((new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'], $fontDirs),
+            'fontdata'          => array_merge((new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'], $fontData),
+            'default_font'      => 'thsarabunnew',
+            'fontdata_fallback' => ['dejavusans', 'freesans', 'arial'],
+            'margin_left'       => 13,
+            'margin_right'      => 13,
+            'margin_top'        => 10,
+            'margin_bottom'     => 0,
+            // 'tempDir'           => sys_get_temp_dir(),
+        ]);
+
+    
+        // Log::info('MPDF Temp Dir: ' . $tempDirPath);
+
+        $stylesheet = file_get_contents(public_path('css/pdf-css/cb.css'));
+        $mpdf->WriteHTML($stylesheet, 1);
+
+        $mpdf->SetWatermarkImage(public_path('images/nc_hq.png'), 1, [23, 23], [170, 12]);
+        $mpdf->showWatermarkImage = true;
+
+        // --- เพิ่ม Watermark Text "DRAFT" ตรงนี้ ---
+
+
+        $footerHtml = '
+        <div width="100%" style="display:inline;line-height:12px">
+
+            <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+            <span style="font-size:20px;">กระทรวงอุตสาหกรรม สํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span><br>
+            <span style="font-size: 16px">(Ministry of Industry, Thai Industrial Standards Institute)</span>
+            </div>
+
+            <div style="display: inline-block; width: 15%;float:right;width:25%">
+        
+            </div>
+
+            <div width="100%" style="display:inline;text-align:center">
+            <span>หน้าที่ {PAGENO}/{nbpg}</span>
+            </div>
+        </div>';
+
+        if($isDraft == "draft")
+        {
+            $mpdf->SetWatermarkText('DRAFT');
+            $mpdf->showWatermarkText = true; // เปิดใช้งาน watermark text
+            $mpdf->watermark_font = 'thsarabunnew'; // กำหนด font (ควรใช้ font ที่โหลดไว้แล้ว)
+            $mpdf->watermarkTextAlpha = 0.1;
+        }else{
+            $app_certi_lab = CertiLab::find($id);
+            $attach1 = null;
+            
+                $targetRoleId = 22;
+                $userRunrecnos = RoleUser::where('role_id', $targetRoleId)->pluck('user_runrecno');
+                $groupAdminUsers = Staff::whereIn('runrecno', $userRunrecnos)->where('reg_subdepart',$app_certi_lab->subgroup)->get();
+
+                $firstSignerGroup = null;
+                if(count($groupAdminUsers) != 0){
+                    $allReg13Ids = [];
+                    foreach ($groupAdminUsers as $groupAdminUser) {
+                        $reg13Id = str_replace('-', '', $groupAdminUser->reg_13ID);
+                        $allReg13Ids[] = $reg13Id;
+                    }
+
+                    // $firstSignerGroups = Signer::whereIn('tax_number',$allReg13Ids)->get();
+
+                    $firstSignerGroup = DB::table('besurv_signers')
+                        ->whereIn('tax_number',$allReg13Ids)
+                        ->first();
+                        // dd($firstSignerGroup->id);
+                }
+
+                if($firstSignerGroup != null)
+                {
+                    $attach1 = AttachFile::where('ref_id',$firstSignerGroup->id)->where('ref_table','besurv_signers')
+                        ->where('section','attach')
+                        ->latest()
+                        ->first();
+
+                        $sign_url1 = $this->getSignature($attach1);
+
+                        // dd($sign_url1);
+
+                        $footerHtml = '
+<div width="100%" style="display:inline;line-height:12px">
+
+    <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+      <span style="font-size:20px;">กระทรวงอุตสาหกรรม สํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span><br>
+      <span style="font-size: 16px">(Ministry of Industry, Thai Industrial Standards Institute)</span>
+    </div>
+
+    <div style="display: inline-block; width: 15%;float:right;width:25%">
+            <img src="' . $sign_url1 . '" style="height:30px;">
+    </div>
+
+    <div width="100%" style="display:inline;text-align:center">
+      <span>หน้าที่ {PAGENO}/{nbpg}</span>
+    </div>
+</div>';
+
+                        // dd($sign_url1);
+
+                    // $attach1 = !empty($firstSignerGroups->first()->AttachFileAttachTo) ? $firstSignerGroups->first()->AttachFileAttachTo : null;
+                }
+
+                
+            
+
+        }
+
+
+
+
+//////////////////////
+
+//             $attach1 = null;
+//             if($selectedCertiLab->scope_view_signer_id == null )
+//             {
+//                 $targetRoleId = 22;
+//                 $userRunrecnos = RoleUser::where('role_id', $targetRoleId)->pluck('user_runrecno');
+//                 $groupAdminUsers = User::whereIn('runrecno', $userRunrecnos)->where('reg_subdepart',$selectedCertiLab->subgroup)->get();
+
+//                 $firstSignerGroups = [];
+//                 if(count($groupAdminUsers) != 0){
+//                     $allReg13Ids = [];
+//                     foreach ($groupAdminUsers as $groupAdminUser) {
+//                         $reg13Id = str_replace('-', '', $groupAdminUser->reg_13ID);
+//                         $allReg13Ids[] = $reg13Id;
+//                     }
+
+//                     $firstSignerGroups = Signer::whereIn('tax_number',$allReg13Ids)->get();
+//                 }
+
+//                 $attach1 = !empty($firstSignerGroups->first()->AttachFileAttachTo) ? $firstSignerGroups->first()->AttachFileAttachTo : null;
+//             }else{
+//                    $signer = Signer::find($selectedCertiLab->scope_view_signer_id);
+//                     $attach1 = !empty($signer->AttachFileAttachTo) ? $signer->AttachFileAttachTo : null;
+//             }
+
+   
+
+//   $sign_url1 = $this->getSignature($attach1);
+
+
+// $footerHtml = '
+// <div width="100%" style="display:inline;line-height:12px">
+
+//     <div style="display:inline-block;line-height:16px;float:left;width:70%;">
+//       <span style="font-size:20px;">กระทรวงอุตสาหกรรม สํานักงานมาตรฐานผลิตภัณฑ์อุตสาหกรรม</span><br>
+//       <span style="font-size: 16px">(Ministry of Industry, Thai Industrial Standards Institute)</span>
+//     </div>
+
+//     <div style="display: inline-block; width: 15%;float:right;width:25%">
+//             <img src="' . $sign_url1 . '" style="height:30px;">
+//     </div>
+
+//     <div width="100%" style="display:inline;text-align:center">
+//       <span>หน้าที่ {PAGENO}/{nbpg}</span>
+//     </div>
+// </div>';
+
+
+
+/////////////////////
+
+
+
+
+
+
+
+
+
+
+
+
+
+// แล้วนำไปกำหนดให้ mPDF เป็น Footer
+$mpdf->SetHTMLFooter($footerHtml);
+
+        foreach ($htmlPages as $index => $pageHtml) {
+            if ($index > 0) {
+                $mpdf->AddPage();
+            }
+            $mpdf->WriteHTML($pageHtml,HTMLParserMode::HTML_BODY);
+        }
+
+    //  $mpdf->Output('', 'S');
+    //  $title = "mypdf.pdf";
+    //  $mpdf->Output($title, "I");  
+
+      $app_certi_lab = CertiLab::find($id);
+      $no = str_replace("RQ-", "", $app_certi_lab->app_no);
+      $no = str_replace("-", "_", $no);
+  
+      $attachPath = '/files/applicants/check_files/' . $no . '/';
+      $fullFileName = uniqid() . '_' . now()->format('Ymd_His') . '.pdf';
+  
+      // สร้างไฟล์ชั่วคราว
+      $tempFilePath = tempnam(sys_get_temp_dir(), 'pdf_') . '.pdf';
+  
+      // บันทึก PDF ไปยังไฟล์ชั่วคราว
+      $mpdf->Output($tempFilePath, \Mpdf\Output\Destination::FILE);
+  
+      // ใช้ Storage::putFileAs เพื่อย้ายไฟล์
+      Storage::putFileAs($attachPath, new \Illuminate\Http\File($tempFilePath), $fullFileName);
+
+    
+  
+      $storePath = $no  . '/' . $fullFileName;
+        $fileSection = "61";
+        if($app_certi_lab->lab_type == 3){
+           $fileSection = "61";
+        }else if($app_certi_lab->lab_type == 4){
+           $fileSection = "62";
+        }
+
+      $certi_lab_attach = new CertiLabAttachAll();
+      $certi_lab_attach->app_certi_lab_id = $id;
+      $certi_lab_attach->file_section     = $fileSection;
+      $certi_lab_attach->file             = $storePath;
+      $certi_lab_attach->file_client_name = $no . '_scope_'.now()->format('Ymd_His').'.pdf';
+      $certi_lab_attach->token            = str_random(16);
+      $certi_lab_attach->default_disk = null;
+      $certi_lab_attach->save();
+
+    //   $certi_lab_attach->delete();
+    //   dd("aaa");
 
     }
 

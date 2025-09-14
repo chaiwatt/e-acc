@@ -1350,6 +1350,8 @@ const insertCbTemplate = () => {
             const isMultisiteChecked = templateData.laboratory_status.is_multisite ? 'checked="checked"' : '';
 
 
+            // dd(isPermanentChecked);
+
             const templateHTML = `
                 <div style="text-align: center; line-height: 1.1; position: relative;  margin-bottom: 0em;">
                     <b style="font-size: 20px;">${templateData.title.th}</b><br>
@@ -1450,6 +1452,8 @@ const insertCbTemplate = () => {
             const isMobileChecked = templateData.laboratory_status.is_mobile ? 'checked="checked"' : '';
             const isMultisiteChecked = templateData.laboratory_status.is_multisite ? 'checked="checked"' : '';
 
+
+            // console.log(isPermanentChecked);
             const templateHTML = `
                 <div style="text-align: center; line-height: 1.1; position: relative; margin-bottom: 0em;">
                     <b style="font-size: 20px;">${templateData.title.th}</b><br>
@@ -2904,13 +2908,12 @@ const insertCbTemplate = () => {
         if (loadTemplateButton) {
             loadTemplateButton.addEventListener('click', () => {
                 downloadTemplate();
-                //  alert('fk');
             });
         }
 
         function downloadTemplate()
         {
-            console.log(accordingFormula,labAbility,purpose);
+            // console.log(accordingFormula,labAbility,purpose);
             fetch("{!! route('certify.applicant.download-html-template') !!}" , {
                 method: 'POST',
                 headers: {
