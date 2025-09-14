@@ -49,7 +49,11 @@ class Notice extends Model
     public function CertificateHistorys() {
         $ao = new Notice;
         // dd($ao->getTable());
-        return $this->hasMany(CertificateHistory::class,'ref_id', 'id')->where('system',4)->where('table_name',$ao->getTable());
+          $certiLab = CertiLab::find($this->app_certi_lab_id);
+        return $this->hasMany(CertificateHistory::class,'ref_id', 'id')
+        ->where('system',4)
+        ->where('app_no', $certiLab->app_no)
+        ->where('table_name',$ao->getTable());
      }
 
 

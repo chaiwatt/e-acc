@@ -6686,11 +6686,16 @@ private function FormatAddressEn($request){
                 ],
 
                 'laboratory_status' => [
-                    'is_permanent' => $request->input('is_permanent') === 'true',
-                    'is_site'      => $request->input('is_site') === 'true',
-                    'is_temporary' => $request->input('is_temporary') === 'true',
-                    'is_mobile'    => $request->input('is_mobile') === 'true',
-                    'is_multisite' => $request->input('is_multisite') === 'true',
+                    // 'is_permanent' => $request->input('is_permanent') === 'true',
+                    // 'is_site'      => $request->input('is_site') === 'true',
+                    // 'is_temporary' => $request->input('is_temporary') === 'true',
+                    // 'is_mobile'    => $request->input('is_mobile') === 'true',
+                    // 'is_multisite' => $request->input('is_multisite') === 'true',
+                    'is_permanent' => false,
+                    'is_site'      => false,
+                    'is_temporary' => false,
+                    'is_mobile'    => false,
+                    'is_multisite' => false,
                 ],
                 'calibrationData' => [ 
                     [
@@ -6739,11 +6744,16 @@ private function FormatAddressEn($request){
                     'en' => $date['until']['en']
                 ],
                 'laboratory_status' => [
-                    'is_permanent' => $request->input('is_permanent') === 'true',
-                    'is_site'      => $request->input('is_site') === 'true',
-                    'is_temporary' => $request->input('is_temporary') === 'true',
-                    'is_mobile'    => $request->input('is_mobile') === 'true',
-                    'is_multisite' => $request->input('is_multisite') === 'true',
+                    // 'is_permanent' => $request->input('is_permanent') === 'true',
+                    // 'is_site'      => $request->input('is_site') === 'true',
+                    // 'is_temporary' => $request->input('is_temporary') === 'true',
+                    // 'is_mobile'    => $request->input('is_mobile') === 'true',
+                    // 'is_multisite' => $request->input('is_multisite') === 'true',
+                    'is_permanent' => false,
+                    'is_site'      => false,
+                    'is_temporary' => false,
+                    'is_mobile'    => false,
+                    'is_multisite' => false,
                 ],
                 'testLabData' => [
                     [

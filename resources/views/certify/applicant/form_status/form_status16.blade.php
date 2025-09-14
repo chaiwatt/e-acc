@@ -74,8 +74,10 @@
     <br>
  <div class="container-fluid">
     
-
-    
+{{-- @php
+    dd($assessment);
+@endphp
+     --}}
 @foreach($assessment->CertificateHistorys as $key1 => $item1)
 {{-- {{$item1->details_table}} --}}
 <div class="row form-group">
