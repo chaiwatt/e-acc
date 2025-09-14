@@ -6777,7 +6777,7 @@ private function FormatAddressEn($request){
         $htmlPages = $request->input('html_pages');
 
 
-        // dd($htmlPages);
+
 
         $templateType = $request->input('template_type');
         $accordingFormula = $request->input('accordingFormula');
@@ -6806,6 +6806,8 @@ private function FormatAddressEn($request){
                 $labtems = array_merge($labtems, $labtems_ext);
             }
         }
+
+        // dd($labtems);
 
         $check =  LabHtmlTemplate::where('user_id', $user->id)
                             ->where('according_formula',$accordingFormula)
@@ -6837,6 +6839,35 @@ private function FormatAddressEn($request){
                     'json_data' => json_encode($labtems)
                 ]
             );
+
+             $labHtmlTemplate = LabHtmlTemplate::where('user_id', $user->id)
+                            ->where('according_formula', $accordingFormula)
+                            ->where('lab_ability', $labAbility)
+                            ->where('purpose', $purpose)
+                            ->where('template_type', $templateType)
+                            ->first();
+
+            $certilab = CertiLab::find($labHtmlTemplate->app_certi_lab_id);
+            
+            $jsonDataString = $labHtmlTemplate->json_data;
+
+            $dataArray = json_decode($jsonDataString, true);
+
+            
+
+            // 2. ดึงค่าจาก key 'field' ทั้งหมดออกมาเป็น array ใหม่
+            $fieldArray = array_column($dataArray, 'field');
+    
+            
+            if($certilab->lab_type == 3){
+
+                $this->save_certify_test_scope($certilab,$fieldArray);
+            }else if($certilab->lab_type == 4)
+            {
+                    
+
+                $this->save_certifyLab_calibrate($certilab,$fieldArray);
+            }
 
 
             return response()->json(['message' => 'Template saved successfully!'], 200);
