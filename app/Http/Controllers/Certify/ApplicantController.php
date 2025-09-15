@@ -6872,7 +6872,7 @@ private function FormatAddressEn($request){
             // 2. ดึงค่าจาก key 'field' ทั้งหมดออกมาเป็น array ใหม่
             $fieldArray = array_column($dataArray, 'field');
     
-            
+            dd($certilab,$fieldArray);
             if($certilab->lab_type == 3){
 
                 $this->save_certify_test_scope($certilab,$fieldArray);
