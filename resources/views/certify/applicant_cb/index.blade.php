@@ -187,7 +187,12 @@
                                     </td>
                                     <td>{{ !empty($item->FormulaTo->title) ? $item->FormulaTo->title  : null   }}</td>
                                     <td>{{ $item->CertificationBranchName }}</td>
-                                    <td>{{ $item->AcceptDateShow }}</td>
+                                    <td>
+                                        @if ($item->status != 3)
+                                            {{ $item->AcceptDateShow }}
+                                        @endif
+
+                                    </td>
                                     <td>
                                         @php
                                             $data_status =$item->TitleStatus->title ?? '-' ;

@@ -159,7 +159,10 @@
                                             
                                         </td>
                                         <td>
-                                            {{ $item->AcceptDateShow }}
+                                            
+                                            @if ($item->status != 3)
+                                                {{ $item->AcceptDateShow }}
+                                            @endif
                                         </td>
                                         <td>
                                             {{-- (ID:{{$item->status}}) --}}
