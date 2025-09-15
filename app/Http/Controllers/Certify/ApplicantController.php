@@ -741,6 +741,8 @@ class ApplicantController extends Controller
                 ->whereIn('test_branch_id',$categories)
                 ->first() ;
 
+                dd($set_standard);
+
                 // dd("cal",$set_standard,$set_standard,$set_standard->set_standard_user->sub_department_id);
                 if(!is_null($set_standard)){
                     // $requestLab['subgroup'] =  $set_standard->set_standard_user->sub_department_id ?? 1806;
@@ -6781,6 +6783,7 @@ private function FormatAddressEn($request){
     // เมธอดใหม่สำหรับบันทึก HTML template
     public function saveHtmlTemplate(Request $request)
     {
+        dd($request->all());
         // $labCalItems = $request->input('labCalItems'); 
         $labtems = ""; 
         $user =auth()->user();

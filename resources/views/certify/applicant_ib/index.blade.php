@@ -404,7 +404,10 @@
                                                         {{ $data_status ?? '-' }} 
                                                     @endif
                                                 @endif
-                                                (ID:{{$item->status}})
+                                                {{-- @if ($data_status != "")
+                                                      (ID:{{$item->status}})
+                                                @endif --}}
+                                              
                                         </td>
                                         <td>
                                           
