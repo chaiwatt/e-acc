@@ -6873,7 +6873,7 @@ private function FormatAddressEn($request){
             $fieldArray = array_column($dataArray, 'field');
             $uniqueArray = array_unique($fieldArray);
 
-            dd($fieldArray,$uniqueArray);
+            // dd($fieldArray,$uniqueArray);
 
             if($certilab != null)
             {
