@@ -2900,7 +2900,7 @@ const insertCbTemplate = () => {
                 })
                 .catch(error => {
                     console.error('There was a problem with the save operation:', error);
-                    // alert('เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
+                    alert('done');
                 });
             });
         }
