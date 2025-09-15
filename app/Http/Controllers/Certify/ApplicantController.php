@@ -6873,15 +6873,15 @@ private function FormatAddressEn($request){
             $fieldArray = array_column($dataArray, 'field');
     
             
-            // if($certilab->lab_type == 3){
+            if($certilab->lab_type == 3){
 
-            //     $this->save_certify_test_scope($certilab,$fieldArray);
-            // }else if($certilab->lab_type == 4)
-            // {
+                $this->save_certify_test_scope($certilab,$fieldArray);
+            }else if($certilab->lab_type == 4)
+            {
                     
 
-            //     $this->save_certifyLab_calibrate($certilab,$fieldArray);
-            // }
+                $this->save_certifyLab_calibrate($certilab,$fieldArray);
+            }
 
 
             return response()->json(['message' => 'Template saved successfully!'], 200);
