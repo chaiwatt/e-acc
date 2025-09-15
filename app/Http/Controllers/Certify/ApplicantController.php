@@ -736,18 +736,19 @@ class ApplicantController extends Controller
                 // $set_standard  =  SetStandardUserSub::select('standard_user_id')
                 //                                     ->whereIn('items_id',(array)$requestData['calibrate']['branch_id'][0])
                 //                                     ->first() ;
-
+                // dd($categories);
                 $set_standard  =  SetStandardUserSub::select('standard_user_id')
                 ->whereIn('test_branch_id',$categories)
                 ->first() ;
 
-                dd($set_standard);
+                // dd($set_standard,$set_standard->set_standard_user->sub_department_id);
 
                 // dd("cal",$set_standard,$set_standard,$set_standard->set_standard_user->sub_department_id);
-                if(!is_null($set_standard)){
+                // if(!is_null($set_standard)){
+                    // dd($set_standard->set_standard_user->sub_department_id);
                     // $requestLab['subgroup'] =  $set_standard->set_standard_user->sub_department_id ?? 1806;
                     $requestLab['subgroup'] =  1806;
-                }
+                // }
         }
 
         // dd($categories);
@@ -1280,15 +1281,15 @@ $province = Province::find($request->address_city);
                         // 2. ดึงค่าจาก key 'field' ทั้งหมดออกมาเป็น array ใหม่
                         $fieldArray = array_column($dataArray, 'field');
               
-                       
+                       $uniqueArray = array_unique($fieldArray);
                         if($certilab->lab_type == 3){
 
-                            $this->save_certify_test_scope($certilab,$fieldArray);
+                            $this->save_certify_test_scope($certilab,$uniqueArray);
                         }else if($certilab->lab_type == 4)
                         {
                              
 
-                            $this->save_certifyLab_calibrate($certilab,$fieldArray);
+                            $this->save_certifyLab_calibrate($certilab,$uniqueArray);
                         }
 
                        
