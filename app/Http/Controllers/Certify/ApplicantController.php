@@ -1552,7 +1552,7 @@ $province = Province::find($request->address_city);
             
                     }
 
-            dd($request->all());
+            // dd($request->all());
 
                     return redirect('certify/applicant')->with('message', 'เรียบร้อยแล้ว!');
 
