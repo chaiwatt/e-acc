@@ -6779,94 +6779,10 @@ private function FormatAddressEn($request){
  
     }
 
-    // ใน Controller ของคุณ
-
-    public function saveHtmlTemplate(Request $request)
-    {
-        // 1. ตรวจสอบ Input พื้นฐาน
-        $request->validate([
-            'html_pages'      => 'required|array|min:1',
-            'template_type'   => 'required|string',
-            'accordingFormula'=> 'required',
-            'labAbility'      => 'required|string',
-            'purpose'         => 'required',
-        ]);
-
-        try {
-            $user = auth()->user();
-            $accordingFormula = $request->input('accordingFormula');
-            $labAbility = $request->input('labAbility');
-            $purpose = $request->input('purpose');
-            $templateType = $request->input('template_type');
-
-            // 2. ค้นหา CertiLab ที่เกี่ยวข้องเป็นอันดับแรก (สำคัญที่สุด)
-            //    คุณต้องปรับเงื่อนไขการค้นหาให้ถูกต้องตาม business logic ของคุณ
-            //    ตัวอย่างนี้เดาว่าหาจาก user_id และ standard_id
-            $certilab = CertiLab::where('created_by', $user->id)
-                                ->where('standard_id', $accordingFormula)
-                                // ->where(...) // เพิ่มเติมเงื่อนไขอื่นๆ เพื่อให้ได้ CertiLab ที่ถูกต้องเพียง record เดียว
-                                ->first();
-
-            // ถ้าหา CertiLab ไม่เจอ ให้หยุดทำงานและแจ้ง Error
-            if (!$certilab) {
-                return response()->json(['message' => 'Error: Corresponding CertiLab application not found.'], 404);
-            }
-
-            // 3. จัดการข้อมูล JSON (labItems)
-            $newLabItems = $request->input('labItems', []);
-            $existingTemplate = LabHtmlTemplate::where('user_id', $user->id)
-                ->where('app_certi_lab_id', $certilab->id) // ใช้ ID ที่หาเจอมาเป็นเงื่อนไข
-                ->where('template_type', $templateType)
-                ->first();
-
-            $finalLabItems = $newLabItems;
-            if ($existingTemplate && !empty($existingTemplate->json_data)) {
-                $existingLabItems = json_decode($existingTemplate->json_data, true);
-                // รวมข้อมูลเก่าและใหม่เข้าด้วยกัน (ถ้ามีข้อมูลใหม่ส่งมา)
-                if (!empty($newLabItems)) {
-                    $finalLabItems = array_merge($newLabItems, $existingLabItems);
-                } else {
-                    $finalLabItems = $existingLabItems;
-                }
-            }
-
-            // 4. บันทึกข้อมูลด้วย updateOrCreate และส่ง app_certi_lab_id เข้าไปด้วย
-            $labHtmlTemplate = LabHtmlTemplate::updateOrCreate(
-                [
-                    // เงื่อนไขในการค้นหา
-                    'user_id'           => $user->id,
-                    'app_certi_lab_id'  => $certilab->id, // ใช้ ID ที่หาเจอ
-                    'template_type'     => $templateType,
-                    'according_formula' => $accordingFormula, // เพิ่มตาม schema ของคุณ
-                    'lab_ability'       => $labAbility,     // เพิ่มตาม schema ของคุณ
-                    'purpose'           => $purpose,        // เพิ่มตาม schema ของคุณ
-                ],
-                [
-                    // ข้อมูลที่จะบันทึก/อัปเดต
-                    'html_pages' => json_encode($request->input('html_pages')),
-                    'json_data'  => json_encode($finalLabItems)
-                ]
-            );
-
-            // 5. เรียกใช้ Method ต่อไปโดยใช้ $certilab ที่เราหาไว้แล้ว
-            $fieldArray = array_column($finalLabItems, 'field');
-
-            if ($certilab->lab_type == 3) {
-                $this->save_certify_test_scope($certilab, $fieldArray);
-            } elseif ($certilab->lab_type == 4) {
-                $this->save_certifyLab_calibrate($certilab, $fieldArray);
-            }
-
-            return response()->json(['message' => 'Template saved successfully!'], 200);
-
-        } catch (\Exception $e) {
-            // Log::error('Error saving template: ' . $e->getMessage()); // แนะนำให้ Log error ไว้ด้วย
-            return response()->json(['message' => 'Error saving template: ' . $e->getMessage()], 500);
-        }
-    }
+    
 
     // เมธอดใหม่สำหรับบันทึก HTML template
-    public function saveHtmlTemplate_org(Request $request)
+    public function saveHtmlTemplate(Request $request)
     {
         // dd($request->all());
         // $labCalItems = $request->input('labCalItems'); 
