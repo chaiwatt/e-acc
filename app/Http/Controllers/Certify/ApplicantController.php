@@ -6871,18 +6871,27 @@ private function FormatAddressEn($request){
 
             // 2. ดึงค่าจาก key 'field' ทั้งหมดออกมาเป็น array ใหม่
             $fieldArray = array_column($dataArray, 'field');
-    
-            dd($certilab,$fieldArray);
-            if($certilab->lab_type == 3){
+            $uniqueArray = array_unique($fieldArray);
 
-                $this->save_certify_test_scope($certilab,$fieldArray);
-            }else if($certilab->lab_type == 4)
+            dd($fieldArray,$uniqueArray);
+
+            if($certilab != null)
             {
-                    
+                // $uniqueArray = array_unique($fieldArray);
+                if($certilab->lab_type == 3){
 
-                $this->save_certifyLab_calibrate($certilab,$fieldArray);
+                    $this->save_certify_test_scope($certilab,$uniqueArray);
+                }else if($certilab->lab_type == 4)
+                {
+                        
+
+                    $this->save_certifyLab_calibrate($certilab,$uniqueArray);
+                }
+
             }
-
+    
+            // dd($certilab,$fieldArray);
+ 
 
             return response()->json(['message' => 'Template saved successfully!'], 200);
         } catch (\Exception $e) {
