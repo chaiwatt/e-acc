@@ -1134,7 +1134,7 @@ class ApplicantController extends Controller
     public function store(Request $request)
     {
 
-        // dd($request->all());
+       
         $newLabAbility = $request->lab_ability;
         $mainLabInfo = json_decode($request->input('main_lab_info'), true);
         $branchLabInfos = json_decode($request->input('branch_lab_infos'), true) ?? [];
@@ -1371,7 +1371,7 @@ $province = Province::find($request->address_city);
                     if ( isset($requestData['repeater-section-other'] ) ){
                         $this->SaveFileMore($request, $certilab );
                     }
-                  
+                   
                     // dd($request->all());
                     // เงื่อนไขเช็คมีใบรับรอง
                     $this->save_certilab_export_mapreq( $certilab );
@@ -1433,7 +1433,7 @@ $province = Province::find($request->address_city);
     
                     //     $labScopeTransaction->save();
                     // }
-   
+
 
                     // if($certilab->lab_type == 4){
                     //     $labCalRequest = new LabCalRequest();
@@ -1507,7 +1507,7 @@ $province = Province::find($request->address_city);
                     $labRequestType->request_type = $request->purpose;
                     $labRequestType->certificate_id = $request->select_certified_temp;
                     $labRequestType->save();
-
+   
                     // ส่ง Email
                     if($certilab->status == 1){
                         $this->SET_EMAIL($certilab,1);
@@ -1552,7 +1552,7 @@ $province = Province::find($request->address_city);
             
                     }
 
-            
+            dd($request->all());
 
                     return redirect('certify/applicant')->with('message', 'เรียบร้อยแล้ว!');
 
