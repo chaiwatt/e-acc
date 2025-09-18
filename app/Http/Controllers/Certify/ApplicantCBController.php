@@ -3154,13 +3154,19 @@ class ApplicantCBController extends Controller
         $transfererIdNumber = $request->input('transferer_id_number');
         $certificateNumber = $request->input('transferee_certificate_number');
 
+       
+
         $certificateExport = CertiCBExport::where('certificate',$certificateNumber)->first();
        
         if($certificateExport != null){
+            
             $certiCb = CertiCb::find($certificateExport->app_certi_cb_id);
+            // dd($certiCb->id);
             if($certiCb != null)
             {
+               
                 $taxId = $certiCb->tax_id;
+                //   dd($transfererIdNumber,$certificateNumber,$certificateExport, $taxId,  $transfererIdNumber );
                 if(trim($taxId) == trim($transfererIdNumber)) 
                 {
                     $user = User::where('username',$transfererIdNumber)->first();

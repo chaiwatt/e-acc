@@ -628,31 +628,67 @@ class ExpertsController extends Controller
         }
     }
 
-    public function  ($id , $requestData)
-    {
-        $data = (array)$requestData;
+    // public function  ($id , $requestData)
+    // {
+    //     $data = (array)$requestData;
   
-        //ลบที่ถูกกดลบ
-        $data_id = array_diff($data['id'], [null]);
-        RegisterExpertsHistorys::when($data_id, function ($query, $data_id){
-                        return $query->whereNotIn('id', $data_id);
-                    })->delete();
-        foreach($data['operation_at'] as $key => $item) {
-            if($item != ''){
-                    $experience = RegisterExpertsHistorys::where('id', $data['id'][$key])->first();
-                if(is_null($experience)){
-                    $experience = new RegisterExpertsHistorys;
-                }
-                    $experience->expert_id        =   $id;
-                    $experience->operation_at     =  HP::convertDate($item,true);
-                    $experience->department_id    =  $data['department_id'][$key] ?? null;
-                    $experience->committee_no     =  $data['committee_no'][$key] ?? null;
-                    $experience->expert_group_id  =  $data['expert_group_id'][$key] ?? null;
-                    $experience->position_id      =  $data['position_id'][$key] ?? null;
-                    $experience->save();
-            }
+    //     //ลบที่ถูกกดลบ
+    //     $data_id = array_diff($data['id'], [null]);
+    //     RegisterExpertsHistorys::when($data_id, function ($query, $data_id){
+    //                     return $query->whereNotIn('id', $data_id);
+    //                 })->delete();
+    //     foreach($data['operation_at'] as $key => $item) {
+    //         if($item != ''){
+    //                 $experience = RegisterExpertsHistorys::where('id', $data['id'][$key])->first();
+    //             if(is_null($experience)){
+    //                 $experience = new RegisterExpertsHistorys;
+    //             }
+    //                 $experience->expert_id        =   $id;
+    //                 $experience->operation_at     =  HP::convertDate($item,true);
+    //                 $experience->department_id    =  $data['department_id'][$key] ?? null;
+    //                 $experience->committee_no     =  $data['committee_no'][$key] ?? null;
+    //                 $experience->expert_group_id  =  $data['expert_group_id'][$key] ?? null;
+    //                 $experience->position_id      =  $data['position_id'][$key] ?? null;
+    //                 $experience->save();
+    //         }
+    //     }
+    // }
+
+    public function ttt ($id , $requestData)
+{
+    $data = (array)$requestData;
+
+    // --- ส่วนที่แก้ไข ---
+
+    // 1. ดึง ID ทั้งหมดที่ถูกส่งมา (กรองค่า null ออก)
+    $submitted_ids = array_filter($data['id']); 
+
+    // 2. ลบเฉพาะประวัติของ expert คนนี้ (id) ที่ไม่มี id อยู่ในลิสต์ที่ส่งมา
+    RegisterExpertsHistorys::where('expert_id', $id) // <-- เพิ่มเงื่อนไขนี้ สำคัญมาก!
+                         ->whereNotIn('id', $submitted_ids)
+                         ->delete();
+
+    // --- จบส่วนแก้ไข ---
+
+    foreach($data['operation_at'] as $key => $item) {
+        if($item != ''){
+            // ใช้ updateOrCreate เพื่อให้โค้ดสั้นลงและจัดการได้ดีขึ้น
+            RegisterExpertsHistorys::updateOrCreate(
+                [
+                    'id' => $data['id'][$key] ?? null // เงื่อนไขในการค้นหา (ถ้า id เป็น null จะเป็นการสร้างใหม่)
+                ],
+                [
+                    'expert_id'         => $id, // ข้อมูลที่จะอัปเดตหรือสร้างใหม่
+                    'operation_at'      => HP::convertDate($item, true),
+                    'department_id'     => $data['department_id'][$key] ?? null,
+                    'committee_no'      => $data['committee_no'][$key] ?? null,
+                    'expert_group_id'   => $data['expert_group_id'][$key] ?? null,
+                    'position_id'       => $data['position_id'][$key] ?? null,
+                ]
+            );
         }
     }
+}
 
 
 
