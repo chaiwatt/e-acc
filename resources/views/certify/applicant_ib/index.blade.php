@@ -160,7 +160,7 @@
                                         </td>
                                         <td>
                                             
-                                            @if ($item->status != 3)
+                                            @if ($item->status != 3 && $item->status != 1)
                                                 {{ $item->AcceptDateShow }}
                                             @endif
                                         </td>

@@ -195,6 +195,7 @@ class ExpertsController extends Controller
      */
     public function store(Request $request)
     {
+        // dd( $request->all());
         $data_session     =    HP::CheckSession();
         if(!empty($data_session)){
               $model = str_slug('experts','-');
@@ -654,7 +655,7 @@ class ExpertsController extends Controller
     //     }
     // }
 
-    public function ttt ($id , $requestData)
+    public function get_history ($id , $requestData)
 {
     $data = (array)$requestData;
 

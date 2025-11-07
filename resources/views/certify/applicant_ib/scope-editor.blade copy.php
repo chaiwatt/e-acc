@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scope template | IB</title>
+    <title>Google Docs IB</title>
       <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -548,7 +548,7 @@
             </div>
         </div>
         
-        {{-- <button class="menu-button" id="export-pdf-button" title="ส่งออกเป็น PDF"><i class="fas fa-file-pdf"></i></button> --}}
+        <button class="menu-button" id="export-pdf-button" title="ส่งออกเป็น PDF"><i class="fas fa-file-pdf"></i></button>
         <button class="menu-button" id="save-template-button"><i class="fas fa-save"></i></button>
         <button class="menu-button" id="load-template-button"><i class="fa fa-cloud-download" aria-hidden="true"></i></button>
 
@@ -835,7 +835,7 @@
         const contextMenu = document.getElementById('context-menu');
         const templateDropdownButton = document.getElementById('template-dropdown-button');
         const templateDropdownContent = document.querySelector('.dropdown-content');
-        // const exportPdfButton = document.getElementById('export-pdf-button');
+        const exportPdfButton = document.getElementById('export-pdf-button');
         const fontSizeSelector = document.getElementById('font-size-selector');
         const saveTemplateButton = document.getElementById('save-template-button'); 
         const loadTemplateButton = document.getElementById('load-template-button');
@@ -1095,8 +1095,14 @@
             if (templateItem) {
                 event.preventDefault();
                 const templateId = templateItem.dataset.template;
-                if (templateId === 'ib-template') {
+                if (templateId === 'cb-template') {
+                    insertCbTemplate();
+                } else if (templateId === 'ib-template') {
                     insertIbTemplate();
+                } else if (templateId === 'lab-cal-template') {
+                    insertLabCalTemplate();
+                } else if (templateId === 'lab-test-template') {
+                    insertLabTestTemplate();
                 }
                 templateDropdownContent.parentElement.classList.remove('show');
             }
@@ -1194,6 +1200,77 @@
             setTimeout(managePages, 10);
         };
         
+const insertCbTemplate = () => {
+            const templateData = cbDetailsFromBlade;
+
+            if (!templateData) {
+                console.error("No cbDetails data available to render.");
+                return;
+            }
+
+            let accreditationCriteriaHTML = '';
+            if (templateData.accreditationCriteria && Array.isArray(templateData.accreditationCriteria)) {
+                accreditationCriteriaHTML = templateData.accreditationCriteria.map(item =>
+                    `${item.th}<br><span style="font-size: 15px;">${item.en}</span>`
+                ).join('<br>');
+            }
+
+            let isicTableRows = '';
+            if (templateData.isicCodes && Array.isArray(templateData.isicCodes)) {
+                templateData.isicCodes.forEach(item => {
+                    isicTableRows += `
+                        <tr>
+                            <td style="width: 20%;">${item.code}</td>
+                            <td >${item.description_th}<br><span style="font-size: 15px;">(${item.description_en})</span></td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const templateHTML = `
+                <div style="text-align: center;line-height: 1.0">
+                    <b style="font-size: 1.17em;">${templateData.scopeOfAccreditation.th}</b><br>
+                    <span style="font-size: 15px;">(${templateData.scopeOfAccreditation.en})</span><br>
+                    ${templateData.attachmentToCertificate.th}<br>
+                    <span style="font-size: 15px;">(${templateData.attachmentToCertificate.en})</span><br>
+                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
+                    <span style="font-size: 15px;">(Certification No. ${templateData.certificateNo})</span>
+                </div>
+                <table class="borderless" style="width: 100%; margin-bottom: 1em;">
+                    <tbody>
+                        <tr>
+                            <td class="vertical-align-top" style="width: 25%;"><b>หน่วยรับรอง</b><br><span style="font-size: 15px;">(Certification Body)</span></td>
+                            <td class="vertical-align-top">${templateData.certificationBody.th}<br><span style="font-size: 15px;">(${templateData.certificationBody.en})</span></td>
+                        </tr>
+                        <tr>
+                            <td class="vertical-align-top"><b>ที่ตั้งสถานประกอบการ</b><br><span style="font-size: 15px;">(Premise)</span></td>
+                            <td class="vertical-align-top">${templateData.premise.th}<br><span style="font-size: 15px;">(${templateData.premise.en})</span></td>
+                        </tr>
+                        <tr>
+                            <td class="vertical-align-top"><b>ข้อกำหนดที่ใช้ในการรับรอง</b><br><span style="font-size: 15px;">(Accreditation criteria)</span></td>
+                            <td class="vertical-align-top">${accreditationCriteriaHTML}</td>
+                        </tr>
+                        <tr>
+                            <td class="vertical-align-top"><b>กิจกรรมที่ได้รับการรับรอง</b><br><span style="font-size: 15px;">(Certification Mark)</span></td>
+                            <td class="vertical-align-top">${templateData.certificationMark.th}<br><span style="font-size: 15px;">(${templateData.certificationMark.en})</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="detail-table" style="width: 100%; margin-bottom: 1em;">
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">รหัส ISIC<br><span style="font-size: 15px">(ISIC Codes)</span></th>
+                            <th>กิจกรรม<br><span style="font-size: 15px;">(Description)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${isicTableRows}
+                    </tbody>
+                </table>
+                <p><br></p>
+            `;
+            insertTemplateAtCurrentOrLastPage(templateHTML);
+        };
 
    const insertIbTemplate = () => {
             const templateData = ibDetailsFromBlade;
@@ -1271,6 +1348,217 @@
             insertTemplateAtCurrentOrLastPage(templateHTML);
         };
         
+
+        const insertLabCalTemplate = () => {
+            const templateData = labCalDetailsFromBlade;
+
+            if (!templateData) {
+                console.error("No labCalDetails data available to render.");
+                return;
+            }
+
+            let calibrationTableRows = '';
+            templateData.calibrationData.forEach(item => {
+                calibrationTableRows += `
+                    <tr>
+                        <td style="text-align: left;">${item.field.th}<br><span style="font-size: 15px;">(${item.field.en})</span></td>
+                        <td style="text-align: left;">${item.parameter}</td>
+                        <td style="text-align: left;">${item.capability}</td>
+                        <td style="text-align: left;">${item.method}</td>
+                    </tr>
+                `;
+            });
+            calibrationTableRows +=`
+            <tr>
+                <td style="text-align: center; line-height: 1; padding: 5px 0 0 0;" colspan="4">
+                    <span>* ค่าความไม่แน่นอน (±) ที่ระดับความเชื่อมั่นประมาณ 95 %</span><br>
+                    <span>และมีความหมายเป็นไปตามเอกสารวิชาการเรื่อง ขีดความสามารถของการสอบเทียบและการวัด (TLA-03)</span><br>
+                    <span style="font-size:16px">(* Expressed as an uncertainty (±) providing a level of confidence of approximately 95%</span><br>
+                    <span style="font-size:16px">and the term “CMCs” has been expressed in the technical document (TLA-03))</span><br>
+                </td>
+            </tr>
+            `;
+
+            const isPermanentChecked = templateData.laboratory_status.is_permanent ? 'checked="checked"' : '';
+            const isSiteChecked = templateData.laboratory_status.is_site ? 'checked="checked"' : '';
+            const isTemporaryChecked = templateData.laboratory_status.is_temporary ? 'checked="checked"' : '';
+            const isMobileChecked = templateData.laboratory_status.is_mobile ? 'checked="checked"' : '';
+            const isMultisiteChecked = templateData.laboratory_status.is_multisite ? 'checked="checked"' : '';
+
+
+            const templateHTML = `
+                <div style="text-align: center; line-height: 1.1; position: relative;  margin-bottom: 0em;">
+                    <b style="font-size: 20px;">${templateData.title.th}</b><br>
+                    <span style="font-size: 15px;">(${templateData.title.en})</span><br>
+                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
+                    <span style="font-size: 15px;">(Certification no. ${templateData.certificateNo})</span>
+                </div>
+                <table class="borderless" style="width: 100%; ">
+                    <tbody>
+                        <tr>
+                            <td class="vertical-align-top" style="width: 22%;"><b>ชื่อห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory Name)</span></td>
+                            <td class="vertical-align-top" colspan="3">${templateData.labName.th}<br><span style="font-size: 15px;">(${templateData.labName.en})</span></td>
+                        </tr>
+                        <tr>
+                            <td class="vertical-align-top"><b>หมายเลขการรับรองที่</b><br><span style="font-size: 15px;">(Accreditation No.)</span></td>
+                            <td class="vertical-align-top" colspan="3">${templateData.accreditationNo.th}<br><span style="font-size: 15px;">(${templateData.accreditationNo.en})</span></td>
+                        </tr>
+
+                        <tr>
+                            <td class="vertical-align-top"><b>ฉบับที่</b> ${templateData.issueNo}<br><span style="font-size: 15px;">(Issue No.)</span></td>
+                            <td class="vertical-align-top" colspan="2">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}<br><span style="font-size: 15px;">(Valid from ${templateData.validFrom.en})</span></td>
+                            <td class="vertical-align-top" colspan="2">ถึงวันที่ ${templateData.until.th}<br><span style="font-size: 15px;">(Until ${templateData.until.en})</span></td>
+                        </tr>
+                        <tr>
+                            <td class="vertical-align-top"><b>สถานภาพห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory status)</span></td>
+                            <td class="vertical-align-top" colspan="4">
+                                <table class="borderless" style="width: 100%; margin: 0; font-size: 18px; table-layout: fixed;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
+                                                <input type="checkbox" ${isPermanentChecked} style="vertical-align: middle;">
+                                                <span style="line-height: 1.2;font-size:20px">ถาวร<br><span style="font-size: 15px;">(Permanent)</span></span>
+                                            </td>
+                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
+                                                <input type="checkbox" ${isSiteChecked} style="vertical-align: middle; ">
+                                                <span style="line-height: 1.2;font-size:20px">นอกสถานที่<br><span style="font-size: 15px;">(Site)</span></span>
+                                            </td>
+                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
+                                                <input type="checkbox" ${isTemporaryChecked} style="vertical-align: middle; ">
+                                                <span style="line-height: 1.2;font-size:20px">ชั่วคราว<br><span style="font-size: 15px;">(Temporary)</span></span>
+                                            </td>
+                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
+                                                <input type="checkbox" ${isMobileChecked} style="vertical-align: middle; ">
+                                                <span style="line-height: 1.2;font-size:20px">เคลื่อนที่<br><span style="font-size: 15px;">(Mobile)</span></span>
+                                            </td>
+                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
+                                                <input type="checkbox" ${isMultisiteChecked} style="vertical-align: middle; ">
+                                                <span style="line-height: 1.2;font-size:20px">หลายสาขา<br><span style="font-size: 15px;">(Multisite)</span></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="detail-table" style="width: 100%; margin-bottom: 1em; line-height: 1.1; ">
+                    <thead>
+                        <tr>
+                            <th style="width: 22%; text-align: center;">สาขาการสอบเทียบ<br><span style="font-size: 15px;">(Field of Calibration)</span></th>
+                            <th style="width: 26%; text-align: center;">รายการสอบเทียบ<br><span style="font-size: 15px;">(Parameter)</span></th>
+                            <th style="width: 26%; text-align: center;">ขีดความสามารถของ<br>การสอบเทียบและการวัด*<br><span style="font-size: 15px;">(Calibration and Measurement<br>Capability*)</span></th>
+                            <th style="width: 26%; text-align: center;">วิธีการสอบเทียบ<br><span style="font-size: 15px;">(Calibration Method)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${calibrationTableRows}
+                    </tbody>
+                </table>
+                <p><br></p>
+            `;
+
+            insertTemplateAtCurrentOrLastPage(templateHTML);
+        };
+
+        const insertLabTestTemplate = () => {
+            const templateData = labTestDetailsFromBlade;
+
+            if (!templateData) {
+                console.error("No labTestDetails data available to render.");
+                return;
+            }
+
+            let testTableRows = '';
+            templateData.testLabData.forEach(item => {
+                testTableRows += `
+                    <tr>
+                        <td style="text-align: left;">${item.field.th}<br><span style="font-size: 15px;">(${item.field.en})</span></td>
+                        <td style="text-align: left;">${item.parameter}</td>
+                        <td style="text-align: left;">${item.method}</td>
+                    </tr>
+                `;
+            });
+
+            const isPermanentChecked = templateData.laboratory_status.is_permanent ? 'checked="checked"' : '';
+            const isSiteChecked = templateData.laboratory_status.is_site ? 'checked="checked"' : '';
+            const isTemporaryChecked = templateData.laboratory_status.is_temporary ? 'checked="checked"' : '';
+            const isMobileChecked = templateData.laboratory_status.is_mobile ? 'checked="checked"' : '';
+            const isMultisiteChecked = templateData.laboratory_status.is_multisite ? 'checked="checked"' : '';
+
+            const templateHTML = `
+                <div style="text-align: center; line-height: 1.1; position: relative; margin-bottom: 0em;">
+                    <b style="font-size: 20px;">${templateData.title.th}</b><br>
+                    <span style="font-size: 15px;">(${templateData.title.en})</span><br>
+                    ใบรับรองเลขที่ ${templateData.certificateNo}<br>
+                    <span style="font-size: 15px;">(Certification no. ${templateData.certificateNo})</span>
+                </div>
+                <table class="borderless" style="width: 100%; ">
+                    <tbody>
+                        <tr>
+                            <td class="vertical-align-top" style="width: 25%;"><b>ชื่อห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory Name)</span></td>
+                            <td class="vertical-align-top" colspan="3">${templateData.labName.th}<br><span style="font-size: 15px;">(${templateData.labName.en})</span></td>
+                        </tr>
+                        <tr>
+                            <td class="vertical-align-top"><b>หมายเลขการรับรองที่</b><br><span style="font-size: 15px;">(Accreditation No.)</span></td>
+                            <td class="vertical-align-top" colspan="3">${templateData.accreditationNo.th}<br><span style="font-size: 15px;">(${templateData.accreditationNo.en})</span></td>
+                        </tr>
+
+                        <tr>
+                            <td class="vertical-align-top"><b>ฉบับที่</b> ${templateData.issueNo}<br><span style="font-size: 15px;">(Issue No.)</span></td>
+                            <td class="vertical-align-top" colspan="2">ออกให้ตั้งแต่วันที่ ${templateData.validFrom.th}<br><span style="font-size: 15px;">(Valid from ${templateData.validFrom.en})</span></td>
+                            <td class="vertical-align-top" colspan="2">ถึงวันที่ ${templateData.until.th}<br><span style="font-size: 15px;">(Until ${templateData.until.en})</span></td>
+                        </tr>
+                        <tr>
+                            <td class="vertical-align-top"><b>สถานภาพห้องปฏิบัติการ</b><br><span style="font-size: 15px;">(Laboratory status)</span></td>
+                            <td class="vertical-align-top" colspan="4">
+                                <table class="borderless" style="width: 100%; margin: 0; font-size: 18px; table-layout: fixed;">
+                                    <tbody>
+                                        <tr>
+                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
+                                                <input type="checkbox" ${isPermanentChecked} style="vertical-align: middle; margin-right: 5px;">
+                                                <span style="line-height: 1.2;font-size:20px">ถาวร<br><span style="font-size: 15px;">(Permanent)</span></span>
+                                            </td>
+                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
+                                                <input type="checkbox" ${isSiteChecked} style="vertical-align: middle; margin-right: 5px;">
+                                                <span style="line-height: 1.2;font-size:20px">นอกสถานที่<br><span style="font-size: 15px;">(Site)</span></span>
+                                            </td>
+                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
+                                                <input type="checkbox" ${isTemporaryChecked} style="vertical-align: middle; margin-right: 5px;">
+                                                <span style="line-height: 1.2;font-size:20px">ชั่วคราว<br><span style="font-size: 15px;">(Temporary)</span></span>
+                                            </td>
+                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
+                                                <input type="checkbox" ${isMobileChecked} style="vertical-align: middle; margin-right: 5px;">
+                                                <span style="line-height: 1.2;font-size:20px">เคลื่อนที่<br><span style="font-size: 15px;">(Mobile)</span></span>
+                                            </td>
+                                            <td style="padding: 0; vertical-align: top; white-space: nowrap;">
+                                                <input type="checkbox" ${isMultisiteChecked} style="vertical-align: middle; margin-right: 5px;">
+                                                <span style="line-height: 1.2;font-size:20px">หลายสาขา<br><span style="font-size: 15px;">(Multisite)</span></span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="detail-table" style="width: 100%; margin-bottom: 1em; line-height: 1.1;">
+                    <thead>
+                        <tr>
+                            <th style="width: 30%; text-align: center;">สาขาการทดสอบ<br><span style="font-size: 15px;">(Field of Testing)</span></th>
+                            <th style="width: 35%; text-align: center;">รายการทดสอบ<br><span style="font-size: 15px;">(Parameter)</span></th>
+                            <th style="width: 35%; text-align: center;">วิธีทดสอบ<br><span style="font-size: 15px;">(Test Method)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${testTableRows}
+                    </tbody>
+                </table>
+                <p><br></p>
+            `;
+
+            insertTemplateAtCurrentOrLastPage(templateHTML);
+        };
 
         const updateMenubarState = () => {
              const commands = ['bold', 'italic', 'superscript', 'subscript', 'justifyLeft', 'justifyCenter', 'justifyRight'];
@@ -2486,55 +2774,55 @@
             }
         }
 
-        // exportPdfButton.addEventListener('click', () => {
-        //     const editorClone = editor.cloneNode(true);
-        //     const pagesContent = [];
+        exportPdfButton.addEventListener('click', () => {
+            const editorClone = editor.cloneNode(true);
+            const pagesContent = [];
 
-        //     editorClone.querySelectorAll('.page').forEach(page => {
-        //         page.removeAttribute('contenteditable');
+            editorClone.querySelectorAll('.page').forEach(page => {
+                page.removeAttribute('contenteditable');
                 
-        //         page.querySelectorAll('.image-container').forEach(container => {
-        //             const containerWidth = container.style.width;
-        //             const img = container.querySelector('img');
-        //             if (img && containerWidth) {
-        //                 img.style.width = containerWidth;
-        //                 img.style.height = 'auto';
-        //             }
-        //             container.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
-        //             container.classList.remove('active');
-        //             container.style.border = 'none';
-        //         });
+                page.querySelectorAll('.image-container').forEach(container => {
+                    const containerWidth = container.style.width;
+                    const img = container.querySelector('img');
+                    if (img && containerWidth) {
+                        img.style.width = containerWidth;
+                        img.style.height = 'auto';
+                    }
+                    container.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
+                    container.classList.remove('active');
+                    container.style.border = 'none';
+                });
 
-        //         wrapSpecialCharactersInNode(page);
+                wrapSpecialCharactersInNode(page);
                 
-        //         pagesContent.push(page.innerHTML); 
-        //     });
+                pagesContent.push(page.innerHTML); 
+            });
 
-        //     fetch("{!! url('/export-pdf') !!}", {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        //         },
-        //         body: JSON.stringify({ html_pages: pagesContent })
-        //     })
-        //     .then(response => {
-        //         if (!response.ok) {
-        //             return response.json().then(errorData => {
-        //                 throw new Error(errorData.message || 'Network response was not ok');
-        //             });
-        //         }
-        //         return response.blob();
-        //     })
-        //     .then(blob => {
-        //         const url = window.URL.createObjectURL(blob);
-        //         window.open(url);
-        //     })
-        //     .catch(error => {
-        //         console.error('There was a problem with the fetch operation:', error);
-        //         alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + error.message);
-        //     });
-        // });
+            fetch("{!! url('/export-pdf') !!}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ html_pages: pagesContent })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || 'Network response was not ok');
+                    });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                window.open(url);
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + error.message);
+            });
+        });
 
         if (saveTemplateButton) {
             saveTemplateButton.addEventListener('click', () => {

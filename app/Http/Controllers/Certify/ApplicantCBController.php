@@ -3919,6 +3919,36 @@ class ApplicantCBController extends Controller
                     
                 ]
             ];
+        }else{
+           $cbDetails = [
+                'scopeOfAccreditation' => [
+                    'th' => "สาขาและขอบข่ายการรับรองระบบงาน",
+                    'en' => "Scope of Accreditation"
+                ],
+                'attachmentToCertificate' => [
+                    'th' => "<b>แนบท้ายใบรับรองระบบงาน</b> : แบบฟอร์มมาตรฐาน",
+                    'en' => "Attachment to Certificate of (generic template) Certification Body Accreditation"
+                ],
+                'certificateNo' => Carbon::now()->format('y')."-CB0000",
+                'certificationBody' => [
+                    'th' => $nameStandard,
+                    'en' =>  $nameEnStandard
+                ],
+                'premise' => [
+                    'th' => $address,
+                    'en' => $addressEn
+                ],
+                'accreditationCriteria' => [
+                    [ 
+                        'th' => "ISO/IEC 17024:2012 (มอก.17024 - 2556)", 
+                        'en' => "" 
+                    ],
+                ],
+                'personel' => [
+                    [ 'text1' => "<br>",'text2' => ""],
+                    
+                ]
+            ]; 
         }
 
 // dd($trustMark);
@@ -4028,6 +4058,7 @@ class ApplicantCBController extends Controller
 
     public function downloadHtmlTemplate(Request $request)
     {
+       
         try {
             $user = auth()->user();
             $htmlTemplate = CbHtmlTemplate::where('user_id',$user->id)
@@ -4046,7 +4077,7 @@ class ApplicantCBController extends Controller
             if (json_last_error() !== JSON_ERROR_NONE) {
                 return response()->json(['message' => 'Error decoding HTML pages from database.'], 500);
             }
-
+            
             return response()->json([
                 'message' => 'Template loaded successfully!',
                 'html_pages' => $htmlPages,

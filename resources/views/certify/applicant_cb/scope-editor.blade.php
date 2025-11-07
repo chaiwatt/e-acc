@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Docs</title>
+    <title>Scope template | CB</title>
       <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -787,30 +787,32 @@
                 {{-- {{$certificateInitial}} --}}
                 @if ($templateType == "cb")
                     
-                @if ($certificateInitial == "QMS" || $certificateInitial == "EMS" || $certificateInitial == "TLS")
-                    <a href="#" data-template="cb-isic-template" >CB template ({{$certificateInitial}})</a>
-                @elseif($certificateInitial == "BCMS" || $certificateInitial == "ISMS")
-                    <a href="#" data-template="cb-bcms-template" >CB template ({{$certificateInitial}})</a>
-                @elseif($certificateInitial == "OHSMS")
-                    <a href="#" data-template="cb-ohsms-template" >CB template ({{$certificateInitial}})</a>
-                @elseif($certificateInitial == "EnMS")
-                    <a href="#" data-template="cb-enms-template" >CB template ({{$certificateInitial}})</a>
-                @elseif($certificateInitial == "SFMS")
-                    <a href="#" data-template="cb-sfms-template" >CB template ({{$certificateInitial}})</a>
-                @elseif($certificateInitial == "ICAO CORSIA")
-                    <a href="#" data-template="cb-corsia-template" >CB template ({{$certificateInitial}})</a>
-                @elseif($certificateInitial == "MDMS")
-                    <a href="#" data-template="cb-mdms-template" >CB template ({{$certificateInitial}})</a>
-                @elseif($certificateInitial == "PRODUCT")
-                    <a href="#" data-template="cb-product-template" >CB template ({{$certificateInitial}})</a>
-                @elseif($certificateInitial == "PERSONEL")
-                    <a href="#" data-template="cb-personel-template" >CB template ({{$certificateInitial}})</a>
-                @endif
+                    @if ($certificateInitial == "QMS" || $certificateInitial == "EMS" || $certificateInitial == "TLS")
+                        <a href="#" data-template="cb-isic-template" >CB template ({{$certificateInitial}})</a>
+                    @elseif($certificateInitial == "BCMS" || $certificateInitial == "ISMS")
+                        <a href="#" data-template="cb-bcms-template" >CB template ({{$certificateInitial}})</a>
+                    @elseif($certificateInitial == "OHSMS")
+                        <a href="#" data-template="cb-ohsms-template" >CB template ({{$certificateInitial}})</a>
+                    @elseif($certificateInitial == "EnMS")
+                        <a href="#" data-template="cb-enms-template" >CB template ({{$certificateInitial}})</a>
+                    @elseif($certificateInitial == "SFMS")
+                        <a href="#" data-template="cb-sfms-template" >CB template ({{$certificateInitial}})</a>
+                    @elseif($certificateInitial == "ICAO CORSIA")
+                        <a href="#" data-template="cb-corsia-template" >CB template ({{$certificateInitial}})</a>
+                    @elseif($certificateInitial == "MDMS")
+                        <a href="#" data-template="cb-mdms-template" >CB template ({{$certificateInitial}})</a>
+                    @elseif($certificateInitial == "PRODUCT")
+                        <a href="#" data-template="cb-product-template" >CB template ({{$certificateInitial}})</a>
+                    @elseif($certificateInitial == "PERSONEL")
+                        <a href="#" data-template="cb-personel-template" >CB template ({{$certificateInitial}})</a>
+                    @else 
+                        <a href="#" data-template="cb-generic-template" >CB Generic template</a>
+                    @endif
                 
                        {{-- <a href="#" data-template="cb-template" >CB template</a> --}}
                 @elseif($templateType == "ib")
                         <a href="#" data-template="ib-template" >IB template</a>
-                @elseif($templateType == "lab_cal")
+                @elseif($templateType == "else")
                         <a href="#" data-template="lab-cal-template" >Cal Lab template</a>
                 @elseif($templateType == "lab_test")
                         <a href="#" data-template="lab-test-template" >Test Lab template</a>
@@ -818,7 +820,7 @@
             </div>
         </div>
         
-        <button class="menu-button" id="export-pdf-button" title="ส่งออกเป็น PDF"><i class="fas fa-file-pdf"></i></button>
+        {{-- <button class="menu-button" id="export-pdf-button" title="ส่งออกเป็น PDF"><i class="fas fa-file-pdf"></i></button> --}}
         <button class="menu-button" id="save-template-button"><i class="fas fa-save"></i></button>
         <button class="menu-button" id="load-template-button"><i class="fa fa-cloud-download" aria-hidden="true"></i></button>
 
@@ -1226,7 +1228,7 @@
         const contextMenu = document.getElementById('context-menu');
         const templateDropdownButton = document.getElementById('template-dropdown-button');
         const templateDropdownContent = document.querySelector('.dropdown-content');
-        const exportPdfButton = document.getElementById('export-pdf-button');
+        // const exportPdfButton = document.getElementById('export-pdf-button');
         const fontSizeSelector = document.getElementById('font-size-selector');
         const saveTemplateButton = document.getElementById('save-template-button'); 
         const loadTemplateButton = document.getElementById('load-template-button');
@@ -1523,6 +1525,8 @@
                     insertCbProductTemplate();
                 }else if (templateId === 'cb-personel-template') {
                     insertCbPersonelTemplate();
+                }else if (templateId === 'cb-generic-template') {
+                    insertCbGenericTemplate();
                 }
                 templateDropdownContent.parentElement.classList.remove('show');
             }
@@ -2205,6 +2209,81 @@
 
         const insertCbPersonelTemplate = () => {
             const templateData = cbDetailsFromBlade;
+
+            // console.log("ddd")
+
+            if (!templateData) {
+                console.error("No cbDetails data available to render.");
+                return;
+            }
+
+            let accreditationCriteriaHTML = '';
+            if (templateData.accreditationCriteria && Array.isArray(templateData.accreditationCriteria)) {
+                accreditationCriteriaHTML = templateData.accreditationCriteria.map(item =>
+                    `${item.th}<br><span style="font-size: 15px;">${item.en}</span>`
+                ).join('<br>');
+            }
+
+            let personelTableRows = '';
+            if (templateData.personel && Array.isArray(templateData.personel)) {
+                templateData.personel.forEach(item => {
+                    personelTableRows += `
+                        <tr>
+                            <td style="width: 20%;">${item.text1}</td>
+                            <td >${item.text2}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            const templateHTML = `
+                <div style="text-align: center;line-height: 1.0">
+                    <b style="font-size: 1.17em;">${templateData.scopeOfAccreditation.th}</b><br>
+                    <span style="font-size: 15px;">(${templateData.scopeOfAccreditation.en})</span><br>
+                    ${templateData.attachmentToCertificate.th}<br>
+                    <span style="font-size: 15px;">(${templateData.attachmentToCertificate.en})</span><br>
+                    <b>ใบรับรองเลขที่ ${templateData.certificateNo}</b><br>
+                    <span style="font-size: 15px;">(Certification No. ${templateData.certificateNo})</span>
+                </div>
+                <table class="borderless" style="width: 100%; margin-bottom: 1em;">
+                    <tbody>
+                        <tr>
+                            <td class="vertical-align-top" style="width: 25%;"><b>หน่วยรับรอง</b><br><span style="font-size: 15px;">(Certification Body)</span></td>
+                            <td class="vertical-align-top">${templateData.certificationBody.th}<br><span style="font-size: 15px;">(${templateData.certificationBody.en})</span></td>
+                        </tr>
+                        <tr>
+                            <td class="vertical-align-top"><b>ที่ตั้งสถานประกอบการ</b><br><span style="font-size: 15px;">(Premise)</span></td>
+                            <td class="vertical-align-top">${templateData.premise.th}<br><span style="font-size: 15px;">(${templateData.premise.en})</span></td>
+                        </tr>
+                        <tr>
+                            <td class="vertical-align-top"><b>ข้อกำหนดที่ใช้ในการรับรอง</b><br><span style="font-size: 15px;">(Accreditation criteria)</span></td>
+                            <td class="vertical-align-top">${accreditationCriteriaHTML}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="detail-table" style="width: 100%; margin-bottom: 1em;">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%;">สาขาและขอบข่าย<br><span style="font-size: 15px">(Sector)</span></th>
+                            <th>สาขาและขอบข่าย<br><span style="font-size: 15px;">(Verification Criteria)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${personelTableRows}
+                    </tbody>
+                </table>
+                <p><br></p>
+            `;
+            insertTemplateAtCurrentOrLastPage(templateHTML);
+        };
+
+
+        // 
+
+        const insertCbGenericTemplate = () => {
+            const templateData = cbDetailsFromBlade;
+
+            // console.log(templateData)
 
             if (!templateData) {
                 console.error("No cbDetails data available to render.");
@@ -2962,7 +3041,10 @@
                             cbOhsmsScopeModal.style.display = 'flex'; break;
                         }else if(certificateInitial == "PRODUCT" || certificateInitial == "PERSONEL")
                         {
-                            alert("พิมพ์รายการด้วยตนเอง")
+                            alert("เทมเพลตนี้ พิมพ์รายการด้วยตนเอง")
+                            return;
+                        }else{
+                            alert("เทมเพลตนี้ พิมพ์รายการด้วยตนเอง")
                             return;
                         }
                     
@@ -3906,55 +3988,55 @@
             }
         }
 
-        exportPdfButton.addEventListener('click', () => {
-            const editorClone = editor.cloneNode(true);
-            const pagesContent = [];
+        // exportPdfButton.addEventListener('click', () => {
+        //     const editorClone = editor.cloneNode(true);
+        //     const pagesContent = [];
 
-            editorClone.querySelectorAll('.page').forEach(page => {
-                page.removeAttribute('contenteditable');
+        //     editorClone.querySelectorAll('.page').forEach(page => {
+        //         page.removeAttribute('contenteditable');
                 
-                page.querySelectorAll('.image-container').forEach(container => {
-                    const containerWidth = container.style.width;
-                    const img = container.querySelector('img');
-                    if (img && containerWidth) {
-                        img.style.width = containerWidth;
-                        img.style.height = 'auto';
-                    }
-                    container.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
-                    container.classList.remove('active');
-                    container.style.border = 'none';
-                });
+        //         page.querySelectorAll('.image-container').forEach(container => {
+        //             const containerWidth = container.style.width;
+        //             const img = container.querySelector('img');
+        //             if (img && containerWidth) {
+        //                 img.style.width = containerWidth;
+        //                 img.style.height = 'auto';
+        //             }
+        //             container.querySelectorAll('.resize-handle').forEach(handle => handle.remove());
+        //             container.classList.remove('active');
+        //             container.style.border = 'none';
+        //         });
 
-                wrapSpecialCharactersInNode(page);
+        //         wrapSpecialCharactersInNode(page);
                 
-                pagesContent.push(page.innerHTML); 
-            });
+        //         pagesContent.push(page.innerHTML); 
+        //     });
 
-            fetch("{!! url('/export-pdf') !!}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ html_pages: pagesContent })
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.message || 'Network response was not ok');
-                    });
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                window.open(url);
-            })
-            .catch(error => {
-                console.error('There was a problem with the fetch operation:', error);
-                alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + error.message);
-            });
-        });
+        //     fetch("{!! url('/export-pdf') !!}", {
+        //         method: 'POST',
+        //         headers: {
+        //             'Content-Type': 'application/json',
+        //             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        //         },
+        //         body: JSON.stringify({ html_pages: pagesContent })
+        //     })
+        //     .then(response => {
+        //         if (!response.ok) {
+        //             return response.json().then(errorData => {
+        //                 throw new Error(errorData.message || 'Network response was not ok');
+        //             });
+        //         }
+        //         return response.blob();
+        //     })
+        //     .then(blob => {
+        //         const url = window.URL.createObjectURL(blob);
+        //         window.open(url);
+        //     })
+        //     .catch(error => {
+        //         console.error('There was a problem with the fetch operation:', error);
+        //         alert('เกิดข้อผิดพลาดในการสร้าง PDF: ' + error.message);
+        //     });
+        // });
 
         if (saveTemplateButton) {
             saveTemplateButton.addEventListener('click', () => {

@@ -188,7 +188,8 @@
                                     <td>{{ !empty($item->FormulaTo->title) ? $item->FormulaTo->title  : null   }}</td>
                                     <td>{{ $item->CertificationBranchName }}</td>
                                     <td>
-                                        @if ($item->status != 3)
+                                        {{-- {{$item->status}} --}}
+                                        @if ($item->status != 3 && $item->status != 1)
                                             {{ $item->AcceptDateShow }}
                                         @endif
 

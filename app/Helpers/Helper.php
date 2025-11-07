@@ -1,6 +1,7 @@
 <?php
 
 use App\User;
+use App\Staff;
 use App\Expert;
 use App\Address;
 use App\RoleUser;
@@ -12,12 +13,12 @@ use App\Models\Basic\Tis;
 use App\Models\Agents\Agent;
 use App\Models\Basic\Amphur;
 use App\Models\Basic\Config;
-use App\Models\Basic\Zipcode;
 
+use App\Models\Basic\Zipcode;
 use App\Models\Basic\District;
 use App\Models\Basic\Province;
-use App\Models\Basic\Inspector;
 
+use App\Models\Basic\Inspector;
 use App\Models\Setting\Sessions;
 use App\Models\Basic\TisiLicense;
 use App\Models\Agents\AgentSystem;
@@ -1780,6 +1781,12 @@ class HP_WS
         return StatusAuditor::find($id);
     }
 
+
+    static function UserTitle($id)
+    {
+        $user =  Staff::where('runrecno', $id)->first();
+        return $user;
+    }
     
 
 }
