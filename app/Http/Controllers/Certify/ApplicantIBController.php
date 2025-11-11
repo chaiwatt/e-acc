@@ -2286,8 +2286,9 @@ class ApplicantIBController extends Controller
 
     public function abilityConfirm(Request $request)
     {
+       
         $certilIb = CertiIb::find($request->id);
-        // dd($certilIb->token);
+        // dd($request->all());
         if($certilIb->standard_change == 6)
         {
             if($certilIb->transferer_export_id != null){
@@ -2348,10 +2349,11 @@ class ApplicantIBController extends Controller
         }
 
         $this->updateCertiIBFileAll($certilIb->token);
-        CertiIBReport::where('app_certi_ib_id',$request->id)->first()->update([
+        $certiIBReport = CertiIBReport::where('app_certi_ib_id',$request->id)->update([
             'ability_confirm' => 1
         ]);
         // dd(CertiIBReport::where('app_certi_ib_id',$request->id)->first());
+        // dd(CertiIBReport::where('app_certi_ib_id',$request->id)->get());
     }
 
         //log
