@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use App\AttachFile;
 use App\HtmlTemplate;
 use App\CbHtmlTemplate;
+use App\IbHtmlTemplate;
 use App\LabHtmlTemplate;
 use Mpdf\HTMLParserMode;
 use App\CertificateExport;
@@ -47,6 +48,7 @@ use App\Models\Certificate\CbDocReviewAuditor;
 use App\Models\Certificate\IbDocReviewAuditor;
 use App\Models\Certificate\TrackingAssessment;
 use App\Models\Certificate\TrackingInspection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\Certify\MessageRecordTransaction;
 use App\Models\Basic\ConfigRoles as config_roles;
 use App\Models\Certificate\CbScopeIsicTransaction;
@@ -55,6 +57,8 @@ use App\Models\Bcertify\LabCalInstrumentTransaction;
 use App\Models\Bcertify\LabCalParameterOneTransaction;
 use App\Models\Certify\Applicant\CertiLabExportMapreq;
 use App\Models\Bcertify\CalibrationBranchInstrumentGroup;
+
+
 
 class MyTestController extends Controller
 {
@@ -10899,6 +10903,198 @@ $mpdf->SetHTMLFooter($footerHtml);
     {
         return StatusAuditor::find($id);
     }
+
+    /**
+     * Private Helper: ค้นหา Keyword ใน HTML Template (ใช้ร่วมกันทั้ง LAB และ IB)
+     * * @param string $modelClass ชื่อ Class ของ Model (เช่น LabHtmlTemplate::class)
+     * @param string $keyword คำค้นหา
+     * @return array ID ของ Record ที่พบ
+     */
+    private function searchHtmlTemplates($modelClass, string $keyword): array
+    {
+        $foundIds = [];
+        $searchKey = mb_strtolower($keyword);
+
+        // วนลูปผ่าน Cursor ของ Model ที่ส่งเข้ามา
+        foreach ($modelClass::cursor() as $record) {
+            $htmlData = $record->html_pages;
+            $htmlPages = [];
+
+            // แปลงข้อมูล JSON หรือ Array
+            if (is_string($htmlData)) {
+                $decoded = json_decode($htmlData, true);
+                if (is_array($decoded)) {
+                    $htmlPages = $decoded;
+                }
+            } elseif (is_array($htmlData)) {
+                $htmlPages = $htmlData;
+            }
+
+            // ค้นหาในแต่ละหน้า HTML
+            foreach ($htmlPages as $htmlContent) {
+                if (empty($htmlContent)) continue;
+                
+                $dom = new DOMDocument();
+                $htmlWithCharset = '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' . $htmlContent;
+                @$dom->loadHTML($htmlWithCharset);
+
+                $xpath = new DOMXPath($dom);
+                $tables = $xpath->query("//table[contains(@class, 'detail-table')]");
+
+                foreach ($tables as $tableNode) {
+                    $rows = $xpath->query("tbody/tr", $tableNode);
+                    foreach ($rows as $rowNode) {
+                        $cols = $xpath->query("td", $rowNode);
+                        $col1Text = '';
+                        $col2Text = '';
+
+                        if ($cols->length > 0) $col1Text = trim($cols->item(0)->textContent);
+                        if ($cols->length > 1) $col2Text = trim($cols->item(1)->textContent);
+                        
+                        $fullTextToSearch = mb_strtolower($col1Text . ' ' . $col2Text);
+
+                        if (mb_strpos($fullTextToSearch, $searchKey) !== false) {
+                            $foundIds[] = $record->id;
+                            // เจอแล้ว break ออกทันที (3 levels: rows, tables, htmlPages)
+                            break 3; 
+                        }
+                    }
+                }
+            }
+        }
+        return array_unique($foundIds);
+    }
+
+    /**
+     * เมธอดหลักสำหรับเรียกหน้าเว็บและค้นหา
+     */
+    public function scopeSearch(Request $request){
+        $filter_search = $request->input('filter_search');
+        $filter_type = $request->input('filter_type'); // รับค่า Type (LAB, IB, CB)
+        
+        // เตรียมตัวแปร items เป็น Paginator ว่างๆ ไว้ก่อน
+        $items = new LengthAwarePaginator([], 0, 10);
+
+        // ถ้าไม่ได้เลือกประเภท ให้ return กลับไปเลย
+        if (empty($filter_type)) {
+            return view('lab_search.index', compact('items', 'filter_search', 'filter_type'));
+        }
+
+        // ==========================================
+        // 1. Logic สำหรับ LAB
+        // ==========================================
+        if ($filter_type === 'LAB') {
+            $query = CertiLab::query();
+            $query->where('status', '>=', 25);
+
+            if (!empty($filter_search)) {
+                $templateIds = $this->searchHtmlTemplates(LabHtmlTemplate::class, $filter_search);
+                
+                if (!empty($templateIds)) {
+                    $certiIds = LabHtmlTemplate::select('app_certi_lab_id')
+                        ->whereIn('id', $templateIds)
+                        ->pluck('app_certi_lab_id')
+                        ->filter()
+                        ->unique()
+                        ->toArray();
+                    $query->whereIn('id', $certiIds);
+                } else {
+                    $query->where('id', 0);
+                }
+            }
+
+            $items = $query->orderBy('id', 'desc')->paginate(10);
+
+            // Transform Data (LAB)
+            $items->getCollection()->transform(function ($item) {
+                return (object) [
+                    'id' => $item->id,
+                    'name' => $item->lab_name ?? '-',  
+                    'app_no' => $item->app_no ?? '-', 
+                    'date' => $item->created_at,      
+                    'type' => 'LAB'
+                ];
+            });
+
+        // ==========================================
+        // 2. Logic สำหรับ IB
+        // ==========================================
+        } elseif ($filter_type === 'IB') {
+            $query = CertiIb::query();
+            $query->where('status', '>=', 20); 
+
+            if (!empty($filter_search)) {
+                $templateIds = $this->searchHtmlTemplates(IbHtmlTemplate::class, $filter_search);
+
+                if (!empty($templateIds)) {
+                    $certiIds = IbHtmlTemplate::select('app_certi_ib_id')
+                        ->whereIn('id', $templateIds)
+                        ->pluck('app_certi_ib_id')
+                        ->filter()
+                        ->unique()
+                        ->toArray();
+                    $query->whereIn('id', $certiIds);
+                } else {
+                    $query->where('id', 0);
+                }
+            }
+
+            $items = $query->orderBy('id', 'desc')->paginate(10);
+
+            // Transform Data (IB)
+            $items->getCollection()->transform(function ($item) {
+                return (object) [
+                    'id' => $item->id,
+                    'name' => $item->name_unit ?? '-',
+                    'app_no' => $item->app_no ?? '-',
+                    'date' => $item->created_at,
+                    'type' => 'IB'
+                ];
+            });
+
+        // ==========================================
+        // 3. Logic สำหรับ CB (เพิ่มใหม่)
+        // ==========================================
+        } elseif ($filter_type === 'CB') {
+            $query = CertiCb::query();
+            $query->where('status', '>=', 20); // เงื่อนไข CB status >= 20
+
+            if (!empty($filter_search)) {
+                // ค้นหาใน CbHtmlTemplate
+                $templateIds = $this->searchHtmlTemplates(CbHtmlTemplate::class, $filter_search);
+
+                if (!empty($templateIds)) {
+                    // เชื่อมด้วย app_certi_cb_id
+                    $certiIds = CbHtmlTemplate::select('app_certi_cb_id')
+                        ->whereIn('id', $templateIds)
+                        ->pluck('app_certi_cb_id')
+                        ->filter()
+                        ->unique()
+                        ->toArray();
+                    $query->whereIn('id', $certiIds);
+                } else {
+                    $query->where('id', 0);
+                }
+            }
+
+            $items = $query->orderBy('id', 'desc')->paginate(10);
+
+            // Transform Data (CB)
+            $items->getCollection()->transform(function ($item) {
+                return (object) [
+                    'id' => $item->id,
+                    'name' => $item->name_standard ?? '-', // ใช้ name_standard สำหรับ CB
+                    'app_no' => $item->app_no ?? '-',
+                    'date' => $item->created_at,
+                    'type' => 'CB'
+                ];
+            });
+        }
+
+        return view('lab_search.index', compact('items', 'filter_search', 'filter_type'));
+    }
+  
+
 }
 
 

@@ -107,6 +107,7 @@ Route::post('/download-editor-ib-doc-review-assessment','MyTestController@downlo
 Route::get('/show-editor-ib-doc-review-assessment-report','MyTestController@showEditorIbDocReviewAssessmentReport');
 Route::post('/download-editor-ib-doc-review-assessment-report','MyTestController@downloadIbAssessmentReviewHtmlReport')->name('download.editor.ib-doc.review.assessment-report');
 
+Route::get('/scope-search','MyTestController@scopeSearch');
 
 
 //
